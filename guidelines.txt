@@ -1,0 +1,50 @@
+# Project Code Guidelines
+
+Before writing a single runable line of code, you first must define the project code’s structure 
+including all needed files, classes and functions and write accompanying descriptions using 
+multiline docstrings and predefine input types (and default values). 
+
+To make your code as readable as possible, we advise you to follow the PEP 8 guidelines (https://realpython.com/python-pep8/). 
+Your coding style, your project's strucutre, and your Readme and documentation (wiki) will be part of your grade.
+
+When implementing your project, please follow the requirements below:
+
+- Your code must be well structured (functions, classes, subfolders) 
+
+- A project must only have ONE MAIN FUNCTION in one designated file (e.g., run.py, main.py) 
+ —> must be directly executable (check requirements beforehand) 
+
+- Every function & class must start with a description (multiline docstring) defining the purpose of this function,
+  the input types, the default input values, the purpose of the input values, resulting output value(s)
+ -> https://peps.python.org/pep-0257/  
+ -> Hint: Try to install an auto formatter to enforce consistent formatting (if your IDE allows you to)
+
+- Every file must start with a descriptive statement 
+ -> who wrote the file and when, what is the purpose of this file, what is happening in this file 
+
+- Make access across files independent of the machine 
+ -> use relative paths, not absolute paths (https://towardsthecloud.com/get-relative-path-python) 
+
+- Every project must have a requirements file (requirements.txt) 
+ -> https://note.nkmk.me/en/python-pip-install-requirements/#how-to-write-configuration-file-requirementstxt  
+
+- Every project must have a detailed readme file 
+ -> Start with a short project description 
+ -> Followed by a “Getting Started” stating the requirements and how to run the code 
+ -> Explain workflow and code structure 
+
+- A detailed description of the project should be stored in the Wiki, NOT in the Readme file 
+
+- Sources must be properly referenced in the documentation (Wiki), integrated code must be marked as such and stated in the Readme file 
+
+- Every project should have a .gitignore file 
+ -> don’t store unnecessary files! 
+ -> don’t upload experimental data on GitLab, store locally only 
+ -> https://gist.github.com/GhostofGoes/94580e76cd251972b15b4821c8a06f59  
+     (extend to your needs) 
+
+- If possible, write unit tests to verify your code 
+ -> https://realpython.com/python-testing/  
+
+- Furthermore, use git version control to keep track of your progress and your changes. 
+  This includes writing meaningful commit messanges, linking issues and milestones to the issues, and only commiting files needed later.
