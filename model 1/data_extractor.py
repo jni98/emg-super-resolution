@@ -32,7 +32,7 @@ def open_all_files_for_one_patient_and_movement(folder_path, movement_name, pick
     return emg_data, MU_data, ref_data
 
 
-def open_emg_data(folder_path, movement_name, pickle_file_name):
+def open_emg_data_Michael(folder_path, movement_name, pickle_file_name):
     """
     opens all files (EMG, MU, ref) for one patient and one movement and returns the data as a dictionary
     :param folder_path: path to the folder that contains data pkl and the 12 csv files for kinematics
@@ -45,11 +45,8 @@ def open_emg_data(folder_path, movement_name, pickle_file_name):
     with open(file_path, 'rb') as f:
         data = pickle.load(f)
 
-    # Dominiks data:
-    emg_data = data['_input_signal']
-
     # Michaels Data
-    # emg_data = data[movement_name]["SIG"]
+    emg_data = data[movement_name]["SIG"]
 
     return emg_data
 
@@ -162,7 +159,25 @@ def dataset_creator_michi(emg_data, dataset_path):
             writer.writerow([lr_filename, hr_filename])
 
 
-def dataset_creator_dominik(emg_data, dataset_path):
+def open_emg_data_Dominik(file_path):
+    """
+    opens all files (EMG, MU, ref) for one patient and one movement and returns the data as a dictionary
+    :param folder_path: path to the folder that contains data pkl and the 12 csv files for kinematics
+    :param movement_name: which movement you want to open all the files for
+    :param pickle_file_name:
+    :return: dictionarys for emg_data
+    """
+
+    with open(file_path, 'rb') as f:
+        data = pickle.load(f)
+
+    # Dominiks data:
+    emg_data = data['_input_signal']
+
+    return emg_data
+
+
+def dataset_creator_dominik(data_paths):
     """
     Creates the dataset including a csv file from the emg_data. Used for the data provided by Michi
     Parameters
@@ -170,38 +185,50 @@ def dataset_creator_dominik(emg_data, dataset_path):
     :param data_path: path to the folder that contains data pkl and the 12 csv files for kinematics
     :param dataset_path
     """
-
-    # Create the folder if it doesn't exist
-    os.makedirs(dataset_path, exist_ok=True)
-
     # List of LR and HR filenames (replace this with your filenames)
     lr_filenames = []
     hr_filenames = []
 
-    lr_mode = 0
+    for i in range(len(data_paths)):
 
-    # window the signal to 512 samples
-    for window in range(1, 75):
-        emg_windowed = emg_data[:, window * 512:(window + 1) * 512]
+        # extract data path and pickle file name from list of paths
+        data_path = data_paths[i]
+        pickle_file_name = os.path.basename(data_path)
 
-        # To keep different electrodes in lr version
-        if lr_mode == 4:
-            lr_mode = 0
+        # create folder for the results
+        base_directory = data_path.replace("../data/", "").rsplit("/", 1)[0]
+        dataset_path = 'dataset' + '/' + base_directory + '/'
 
-        # Create low resolution of windowed data, by using only every second row and column
-        emg_windowed_lr = emg_windowed[lr_mode::4, :]
-        lr_mode += 1
+        # get the emg data of that pickle file
+        emg_data = open_emg_data_Dominik(data_path)
 
-        emg_windowed = emg_windowed.transpose()
-        emg_windowed_lr = emg_windowed_lr.transpose()
+        # Create the folder if it doesn't exist
+        os.makedirs(dataset_path, exist_ok=True)
 
-        # save high resolution data and add file name to list
-        np.save(dataset_path + f'window{window}-hr.npy', emg_windowed)
-        hr_filenames.append(dataset_path + f'window{window}-hr.npy')
+        lr_mode = 0
 
-        # save low resolution data and add file name to list
-        np.save(dataset_path + f'window{window}-lr.npy', emg_windowed_lr)
-        lr_filenames.append(dataset_path + f'window{window}-lr.npy')
+        # window the signal to 512 samples
+        for window in range(1, 75):
+            emg_windowed = emg_data[:, window * 512:(window + 1) * 512]
+
+            # To keep different electrodes in lr version
+            if lr_mode == 4:
+                lr_mode = 0
+
+            # Create low resolution of windowed data, by using only every second row and column
+            emg_windowed_lr = emg_windowed[lr_mode::4, :]
+            lr_mode += 1
+
+            emg_windowed = emg_windowed.transpose()
+            emg_windowed_lr = emg_windowed_lr.transpose()
+
+            # save high resolution data and add file name to list
+            np.save(dataset_path + f'window{window}-hr.npy', emg_windowed)
+            hr_filenames.append(dataset_path + f'window{window}-hr.npy')
+
+            # save low resolution data and add file name to list
+            np.save(dataset_path + f'window{window}-lr.npy', emg_windowed_lr)
+            lr_filenames.append(dataset_path + f'window{window}-lr.npy')
 
     # Combine LR and HR filenames row-wise
     data = zip(lr_filenames, hr_filenames)
@@ -210,7 +237,7 @@ def dataset_creator_dominik(emg_data, dataset_path):
     csv_file = 'data.csv'
 
     # Open the CSV file in append mode and write the data
-    with open(dataset_path + csv_file, mode='a', newline='') as file:
+    with open('dataset' + '/' + csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
 
         # Add a header if the file is empty
@@ -223,17 +250,9 @@ def dataset_creator_dominik(emg_data, dataset_path):
 
 
 if __name__ == '__main__':
-    #TODO: Adjust to multiple inputs
-    data_path = ['../data/Dominik/offline/20230720-085154', '../data/Dominik/offline/20230720-090835',
-                 '../data/Dominik/offline/20230720-091107', '../data/Dominik/offline/20230720-091659']
-    data_name = ['data/Dominik/offline/20230720-085154', 'data/Dominik/offline/20230720-090835',
-                 'data/Dominik/offline/20230720-091107', 'data/Dominik/offline/20230720-091659']
+    data_paths = ['../data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
+                  '../data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl']
+
     movement_name = 'thumb_slow'
-    pickle_file_name = 'Ambra_20230720-090835_Follow Trajectory.pkl'
-    # dataset_path_michi = 'dataset' + '/' + data_path + '/' + movement_name + '/'
-    dataset_path_dominik = 'dataset' + '/' + data_name + '/'
 
-    emg_data = open_emg_data(data_path, movement_name, pickle_file_name)
-    dataset_creator_dominik(emg_data, data_name)
-
-    # dataset_creator_michi(emg_data, dataset_path_michi)
+    dataset_creator_dominik(data_paths)
