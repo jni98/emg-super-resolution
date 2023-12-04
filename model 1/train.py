@@ -17,13 +17,13 @@ from data import Dataset
 class Trainer:
     def __init__(self):
         # self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.num_epochs = 20
+        self.num_epochs = 50
         self.batch_size = 8
-        self.lr = 0.001
+        self.lr = 0.0001
         self.betas = (0.9, 0.999)
 
     def prepare_data(self):
-        data = pd.read_csv('dataset/data/Dominik/offline/20230720-085154/data.csv', sep=";")
+        data = pd.read_csv('dataset/data.csv', sep=";")
         train, test = train_test_split(data, train_size=0.75, test_size=0.25, random_state=42)
         self.training = torch.utils.data.DataLoader(Dataset(train, "train"), batch_size=self.batch_size)
         self.validation = torch.utils.data.DataLoader(Dataset(test, "val"), batch_size=self.batch_size)
@@ -48,8 +48,8 @@ class Trainer:
             epoch_loss_G, epoch_loss_D = self._train_epoch(epoch)
             avg_val_loss = self._validate(epoch)
 
-            train_G_loss.append(epoch_loss_G.item())
-            train_D_loss.append(epoch_loss_D.item())
+            train_G_loss.append(epoch_loss_G)
+            train_D_loss.append(epoch_loss_D)
             val_loss.append(avg_val_loss)
 
             # Save best model based on validation loss or other metrics
@@ -68,9 +68,10 @@ class Trainer:
     def _train_epoch(self, epoch):
         self.generator.train()
         self.discriminator.train()
+        total_loss_G = 0.0
+        total_loss_D = 0.0
 
         for batch_idx, (lr_images, hr_images) in enumerate(self.training):
-
             ### Train Discriminator ###
             self.optimizer_D.zero_grad()
 
@@ -106,12 +107,16 @@ class Trainer:
             loss_generator.backward()
             self.optimizer_G.step()
 
-            # Print progress
-            if batch_idx % 100 == 0:
-                print(
-                    f"Epoch [{epoch}/{self.num_epochs}] Loss D: {loss_discriminator.item()}, Loss G: {loss_generator.item()}")
+            total_loss_G += loss_generator.item()
+            total_loss_D += loss_discriminator.item()
 
-            return loss_generator / len(self.training), loss_discriminator / len(self.training)
+        avg_loss_G = total_loss_G / len(self.training)
+        avg_loss_D = total_loss_D / len(self.training)
+
+        # Print progress per epoch
+        print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_D}, Average Loss G: {avg_loss_G}")
+
+        return avg_loss_G, avg_loss_D
 
     def _validate(self, epoch):
         self.generator.eval()  # Set the generator to evaluation mode

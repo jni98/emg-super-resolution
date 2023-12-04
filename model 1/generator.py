@@ -52,7 +52,6 @@ class Generator(nn.Module):
         self.conv_output = nn.Conv2d(64, 1, kernel_size=(9, 3), stride=1, padding=(4, 1))
 
     def forward(self, x):
-        print("input shape Generator", x.shape)
         out = self.conv1(x)
         out = self.prelu(out)
 
@@ -66,7 +65,5 @@ class Generator(nn.Module):
 
         out = self.upsample(out)
         out = self.conv_output(out)
-
-        print("output shape Generator", out.shape)
 
         return out
