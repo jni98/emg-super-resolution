@@ -2,7 +2,15 @@ import torch.nn as nn
 
 
 class Discriminator(nn.Module):
-    def __init__(self, in_channels):
+    def __init__(self, in_channels=1):
+        """
+        Constructs all the necessary attributes for the Discriminator object.
+        Parameters
+        ----------
+        in_channels: int
+                     Number of channels the emg data has. On default set to 1.
+        """
+
         super(Discriminator, self).__init__()
 
         self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1)
@@ -46,6 +54,19 @@ class Discriminator(nn.Module):
         self.activation = nn.Sigmoid()
 
     def forward(self, x):
+        """
+        Forwards the input tensor through all the layers.
+
+        Parameters
+        ----------
+        x: torch.tensor
+           Tensor that is given to the network.
+
+        Returns
+        -------
+        out: torch.tensor
+             Output tensor of the network.
+        """
         out = self.conv1(x)
         out = self.leaky_relu1(out)
 

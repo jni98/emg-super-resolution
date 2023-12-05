@@ -34,11 +34,20 @@ def open_all_files_for_one_patient_and_movement(folder_path, movement_name, pick
 
 def open_emg_data_Michael(folder_path, movement_name, pickle_file_name):
     """
-    opens all files (EMG, MU, ref) for one patient and one movement and returns the data as a dictionary
-    :param folder_path: path to the folder that contains data pkl and the 12 csv files for kinematics
-    :param movement_name: which movement you want to open all the files for
-    :param pickle_file_name:
-    :return: dictionarys for emg_data
+    Opens the emg signal of a defined movement
+    Parameters
+    ----------
+    folder_path: str
+                 directory of the pickle file
+    movement_name : str
+                 the movement you want to open the emg for
+    pickle_file_name : str
+                 name of the pickle file to restore emg signal
+
+    Returns
+    -------
+    emg_data: ndarray
+              EMG signal of electrode Grids 1-5
     """
 
     file_path = os.path.join(folder_path, pickle_file_name)
@@ -53,8 +62,15 @@ def open_emg_data_Michael(folder_path, movement_name, pickle_file_name):
 
 def plot_emg_data(emg_data):
     """
-        plots all channels by a offset of 500
-        :param emg_data: extracted emg_data
+
+    Parameters
+    ----------
+    emg_data: ndarray
+              emg signal as an array
+
+    Returns
+    -------
+    None
     """
 
     print("emg_data shape", emg_data.shape)
@@ -82,14 +98,16 @@ def plot_emg_data(emg_data):
 
 def flatten_array_test(array):
     """
-
+    Flattens the array of a electrode grid, to gather a 2D array from a 3D array.
     Parameters
     ----------
-    array: given array
+    array: ndarray
+           3D array (width, height, samples)
 
-    Returns: array that is flattend in column-major bottom up
+    Returns:
     -------
-
+    flattened array: ndarray
+                     array that is flattend in column-major bottom up
     """
 
     flattened_array = np.flip(array, axis=0).flatten('F')  # Reverse the flattened array
@@ -101,10 +119,18 @@ def dataset_creator_michi(emg_data, dataset_path):
     """
     Creates the dataset including a csv file from the emg_data. Used for the data provided by Michi
     Parameters
-    :param emg_data
-    :param data_path: path to the folder that contains data pkl and the 12 csv files for kinematics
-    :param dataset_path
+    ----------
+    emg_data: ndarray
+              emg signal as a 3D array
+    dataset_path: str
+                  path where the results should be saved
+
+    Returns
+    -------
+    None
     """
+
+    # TODO: adapt to other method where multiple paths are given as input
 
     # Create the folder if it doesn't exist
     os.makedirs(dataset_path, exist_ok=True)
@@ -161,11 +187,15 @@ def dataset_creator_michi(emg_data, dataset_path):
 
 def open_emg_data_Dominik(file_path):
     """
-    opens all files (EMG, MU, ref) for one patient and one movement and returns the data as a dictionary
-    :param folder_path: path to the folder that contains data pkl and the 12 csv files for kinematics
-    :param movement_name: which movement you want to open all the files for
-    :param pickle_file_name:
-    :return: dictionarys for emg_data
+    Opens the emg signal of from a pickle file in a given directory
+    Parameters
+    ----------
+    file_path: str
+                 directory of the pickle file
+    Returns
+    -------
+    emg_data: ndarray
+              EMG signal of 128 electrodes
     """
 
     with open(file_path, 'rb') as f:
@@ -179,12 +209,17 @@ def open_emg_data_Dominik(file_path):
 
 def dataset_creator_dominik(data_paths):
     """
-    Creates the dataset including a csv file from the emg_data. Used for the data provided by Michi
+    Creates sets of low-resolution and high-resolution data as well as a csv file with their directories.
     Parameters
-    :param emg_data
-    :param data_path: path to the folder that contains data pkl and the 12 csv files for kinematics
-    :param dataset_path
+    ----------
+    data_paths: list of str
+                A list of multiple directories, each containing a pickle file
+
+    Returns
+    -------
+    None
     """
+
     # List of LR and HR filenames (replace this with your filenames)
     lr_filenames = []
     hr_filenames = []

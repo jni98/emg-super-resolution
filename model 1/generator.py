@@ -3,6 +3,13 @@ import torch.nn as nn
 
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels):
+        """
+         Constructs all the necessary attributes for the residual block object.
+        Parameters
+        ----------
+        in_channels: int
+                     Number of channels of the input tensor.
+        """
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1)
         self.bn1 = nn.BatchNorm2d(64)
@@ -12,6 +19,19 @@ class ResidualBlock(nn.Module):
         self.bn2 = nn.BatchNorm2d(64)
 
     def forward(self, x):
+        """
+        Forwards the input tensor through all the layers.
+
+        Parameters
+        ----------
+        x: torch.tensor
+           Tensor that is given to the network.
+
+        Returns
+        -------
+        out: torch.tensor
+             Output tensor of the network.
+        """
         residual = x
         out = self.conv1(x)
         out = self.bn1(out)
@@ -24,7 +44,14 @@ class ResidualBlock(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, in_channels):
+    def __init__(self, in_channels=1):
+        """
+        Constructs all the necessary attributes for the generator object.
+        Parameters
+        ----------
+        in_channels: int
+                     Number of channels the emg data has. On default set to 1.
+        """
         super(Generator, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=(9, 3), stride=(4, 1),
                                padding=(4, 1))  # padding changed for correct shapes
@@ -52,6 +79,19 @@ class Generator(nn.Module):
         self.conv_output = nn.Conv2d(64, 1, kernel_size=(9, 3), stride=1, padding=(4, 1))
 
     def forward(self, x):
+        """
+        Forwards the input tensor through all the layers.
+
+        Parameters
+        ----------
+        x: torch.tensor
+           Tensor that is given to the network.
+
+        Returns
+        -------
+        out: torch.tensor
+             Output tensor of the network.
+        """
         out = self.conv1(x)
         out = self.prelu(out)
 

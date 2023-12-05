@@ -2,7 +2,10 @@
 beautifulsoup4
 
 ###### Requirements with Version Specifiers ######
-numpy==1.18.0          # Version Matching. Must be version 1.18.0
+numpy~=1.26.2
 keyring >= 4.1.1            # Minimum version 4.1.1
 coverage != 3.5             # Version Exclusion. Anything except version 3.5
 Mopidy-Dirble ~= 1.1        # Compatible release. Same as >= 1.1, == 1.*
+matplotlib~=3.8.0
+pandas~=2.1.1
+scikit-learn~=1.2.2
