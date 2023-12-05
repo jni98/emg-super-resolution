@@ -48,7 +48,9 @@ class Discriminator(nn.Module):
         self.leaky_relu8 = nn.LeakyReLU(0.2, inplace=True)
 
         self.flatten = nn.Flatten()
-        self.dense1 = nn.Linear(512 * 32 * 8, 1024)
+
+        #TODO: Input size nicht flexibel
+        self.dense1 = nn.Linear(512 * 128, 1024)
         self.leaky_relu9 = nn.LeakyReLU(0.2, inplace=True)
         self.dense2 = nn.Linear(1024, 1)
         self.activation = nn.Sigmoid()
@@ -99,7 +101,7 @@ class Discriminator(nn.Module):
         out = self.leaky_relu8(out)
 
         out = self.flatten(out)
-
+        print(out.shape)
         out = self.dense1(out)
         out = self.leaky_relu9(out)
         out = self.dense2(out)

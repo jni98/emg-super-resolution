@@ -235,7 +235,9 @@ def dataset_creator_dominik(data_paths):
         dataset_path = 'dataset' + '/' + base_directory + '/'
 
         # get the emg data of that pickle file
-        emg_data = open_emg_data_Dominik(data_path)
+        emg_data_complete = open_emg_data_Dominik(data_path)
+
+        emg_data = emg_data_complete[:64, :]
 
         # Create the folder if it doesn't exist
         os.makedirs(dataset_path, exist_ok=True)
@@ -247,12 +249,12 @@ def dataset_creator_dominik(data_paths):
             emg_windowed = emg_data[:, window * 512:(window + 1) * 512]
 
             # To keep different electrodes in lr version
-            if lr_mode == 4:
-                lr_mode = 0
+            #if lr_mode == 4:
+            #    lr_mode = 0
 
             # Create low resolution of windowed data, by using only every second row and column
             emg_windowed_lr = emg_windowed[lr_mode::4, :]
-            lr_mode += 1
+            #lr_mode += 1
 
             emg_windowed = emg_windowed.transpose()
             emg_windowed_lr = emg_windowed_lr.transpose()
@@ -286,7 +288,8 @@ def dataset_creator_dominik(data_paths):
 
 if __name__ == '__main__':
     data_paths = ['../data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
-                  '../data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl']
+                   '../data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl']
+     #data_paths = ['../data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl']
 
     movement_name = 'thumb_slow'
 
