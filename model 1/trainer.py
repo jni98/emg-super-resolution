@@ -73,15 +73,11 @@ class Trainer:
             os.makedirs(self.run_folder)
 
         # Create a dictionary for the hyperparameters
-        hyperparameter = {
+        self.hyperparameter = {
             "num_epochs": self.num_epochs,
             "batch_size": self.batch_size,
             "learning_rate": self.lr
         }
-
-        # Save the dictionary to a file
-        with open(self.run_folder + '/hyperparameter.json', 'w') as file:
-            json.dump(hyperparameter, file)
 
         print("init done")
 
@@ -96,6 +92,11 @@ class Trainer:
         train, test = train_test_split(data, train_size=0.75, test_size=0.25, random_state=42)
         self.training = torch.utils.data.DataLoader(Dataset(train, "train"), batch_size=self.batch_size)
         self.validation = torch.utils.data.DataLoader(Dataset(test, "val"), batch_size=self.batch_size)
+
+        self.hyperparameter["num_samples"] = data.shape[0]
+        # Save the dictionary to a file
+        with open(self.run_folder + '/hyperparameter.json', 'w') as file:
+            json.dump(self.hyperparameter, file)
 
     def initialize_models(self):
         """
@@ -128,7 +129,7 @@ class Trainer:
         psnr = []
         best_val_loss = float('inf')
 
-        for epoch in range(self.num_epochs):
+        for epoch in range(1,self.num_epochs+1):
             print("epoch",epoch)
             epoch_loss_g, epoch_loss_d = self._train_epoch(epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
@@ -141,8 +142,6 @@ class Trainer:
             # Save best model based on validation loss or other metrics
             if avg_val_loss < best_val_loss:
                 best_val_loss = avg_val_loss
-                torch.save(self.generator.state_dict(), self.run_folder + '/best_generator.pt')
-                torch.save(self.discriminator.state_dict(), self.run_folder + '/best_discriminator.pt')
 
                 # Save the final models when a new best model is found
                 self._save_final_models()
@@ -171,22 +170,22 @@ class Trainer:
         total_loss_g = 0.0
         total_loss_d = 0.0
 
-        for batch_idx, (lr_images, hr_images) in enumerate(self.training):
+        for batch_idx, (lr_emg, hr_emg,lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
             # Train Discriminator
             self.optimizer_D.zero_grad()
 
-            # Generate super-resolved images (SR) from LR images
-            sr_images = self.generator(lr_images).detach()
+            # Generate super-resolved data (SR) from LR data
+            sr_emg = self.generator(lr_emg).detach()
 
-            # Train discriminator with HR images
-            real_labels = torch.ones(hr_images.size(0), 1)
-            fake_labels = torch.zeros(hr_images.size(0), 1)
+            # Train discriminator with HR data
+            real_labels = torch.ones(hr_emg.size(0), 1)
+            fake_labels = torch.zeros(hr_emg.size(0), 1)
 
-            output_discriminator_real = self.discriminator(hr_images)
+            output_discriminator_real = self.discriminator(hr_emg)
             loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
 
-            output_discriminator_fake = self.discriminator(sr_images)
+            output_discriminator_fake = self.discriminator(sr_emg)
             loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
             loss_discriminator = (loss_discriminator_real + loss_discriminator_fake) * 0.5
@@ -196,15 +195,15 @@ class Trainer:
             # Train Generator
             self.optimizer_G.zero_grad()
 
-            # Generate SR images from LR images
-            sr_images = self.generator(lr_images)
+            # Generate SR data from LR data
+            sr_emg = self.generator(lr_emg)
 
-            output = self.discriminator(sr_images)
+            output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            loss_generator_content = self.content_loss(sr_images, hr_images)  # Content loss
+            loss_generator_content = self.content_loss(sr_emg, hr_emg)  # Content loss
 
-            loss_generator = loss_generator_adv + 0.01 * loss_generator_content  # Weighted sum
+            loss_generator = loss_generator_adv + 0.01 * loss_generator_content
             loss_generator.backward()
             self.optimizer_G.step()
 
@@ -239,12 +238,12 @@ class Trainer:
         total_psnr = 0.0
 
         with torch.no_grad():
-            for val_batch_idx, (val_lr, val_hr) in enumerate(self.validation):
-                # Generate SR images from LR images using the generator
-                val_sr_images = self.generator(val_lr)
+            for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
+                # Generate SR data from LR data using the generator
+                val_sr_emg = self.generator(val_lr)
 
                 # Calculate validation loss
-                val_loss = self.content_loss(val_sr_images, val_hr)
+                val_loss = self.content_loss(val_sr_emg, val_hr)
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
@@ -304,6 +303,8 @@ class Trainer:
                       Averaged losses per epoch for the discriminator.
         val_loss: list
                   Averaged validation losses.
+        psnr: list
+              PSNR values per epoch.
 
         Returns
         -------
@@ -316,28 +317,68 @@ class Trainer:
         val_loss_np = np.array(val_loss)
         psnr_np = np.array(psnr)
 
-        # Plot losses and PSNR in subplots
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+        # Plot Training losses in a separate figure
+        fig_train_losses, ax_train_losses = plt.subplots()
+        ax_train_losses.plot(np.arange(len(train_g_loss_np)), train_g_loss_np, label='Train Generator loss')
+        ax_train_losses.plot(np.arange(len(train_d_loss_np)), train_d_loss_np, label='Train Discriminator loss')
+        ax_train_losses.set_yscale('log')
+        ax_train_losses.set_xlabel('Epoch')
+        ax_train_losses.set_ylabel('Loss')
+        ax_train_losses.set_title('Losses over Epochs')
+        ax_train_losses.legend()
+        fig_train_losses.savefig(self.run_folder + '/training_losses.png')
+        plt.show(fig_train_losses)
 
-        # Plot losses
-        ax1.plot(np.arange(len(train_g_loss_np)), train_g_loss_np, label='Train Generator loss')
-        ax1.plot(np.arange(len(train_d_loss_np)), train_d_loss_np, label='Train Discriminator loss')
-        ax1.plot(np.arange(len(val_loss_np)), val_loss_np, label='Validation loss')
-        #ax1.set_yscale('log')
-        ax1.set_xlabel('Epoch')
-        ax1.set_ylabel('Loss')
-        ax1.set_title('Losses over Epochs')
-        ax1.legend()
+        # Plot Validation loss, PSNR in a combined figure
+        fig_val_psnr, (ax_val_loss, ax_psnr) = plt.subplots(nrows=2, ncols=1)
+
+        # Plot Validation loss
+        ax_val_loss.plot(np.arange(len(val_loss_np)), val_loss_np, label='Validation loss')
+        ax_val_loss.set_xlabel('Epoch')
+        ax_val_loss.set_ylabel('Loss')
+        ax_val_loss.set_title('Validation Loss over Epochs')
+        ax_val_loss.legend()
 
         # Plot PSNR
-        ax2.plot(np.arange(len(psnr_np)), psnr_np, label='PSNR')
-        ax2.set_xlabel('Epoch')
-        ax2.set_ylabel('PSNR')
-        ax2.set_title('PSNR over Epochs')
-        ax2.legend()
+        ax_psnr.plot(np.arange(len(psnr_np)), psnr_np, label='PSNR')
+        ax_psnr.set_xlabel('Epoch')
+        ax_psnr.set_ylabel('PSNR')
+        ax_psnr.set_title('PSNR over Epochs')
+        ax_psnr.legend()
 
-        # Adjust layout and save the combined plot
-        plt.tight_layout()
-        plt.savefig(self.run_folder + '/losses_and_psnr.png')
-        plt.show()
+        fig_val_psnr.tight_layout()
+        fig_val_psnr.savefig(self.run_folder + '/validation_loss_psnr.png')
+        plt.show(fig_val_psnr)
 
+    def generate_sr_data(self):
+        """
+        Generates super-resolved (SR) data for the test set.
+
+        Parameters
+        ----------
+        test_set_csv: str
+            Path to the CSV file containing information about the test set.
+
+        Returns
+        -------
+        None
+        """
+        # load the final generator
+        self.generator.load_state_dict(torch.load('runs/20231206115019/final_generator.pt'))
+        self.generator.eval()  # Set the generator to evaluation mode
+
+        data = pd.read_csv('testset/data.csv', sep=";")
+        self.testing = torch.utils.data.DataLoader(Dataset(data, "test"))
+
+        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+            # Generate super-resolved data (SR) from LR data
+            sr_emg = self.generator(lr_emg).detach()
+            sr_emg = sr_emg.squeeze().numpy()
+            lr_sr_path = lr_emg_paths[0].replace('-lr.npy', '-lr-sr.npy')
+            np.save(lr_sr_path, sr_emg)
+
+            # Generate super-resolved data (SR) from LR data
+            sr_emg = self.generator(hr_emg).detach()
+            sr_emg = sr_emg.squeeze().numpy()
+            hr_sr_path = hr_emg_paths[0].replace('-hr.npy', '-hr-sr.npy')
+            np.save(hr_sr_path, sr_emg)
