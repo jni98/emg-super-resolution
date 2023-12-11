@@ -14,8 +14,8 @@ class Dataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        if torch.is_tensor(index):
-            index = index.tolist()
+        lr_emg_path = self.data.iloc[index]['lr_filename']
+        hr_emg_path = self.data.iloc[index]['hr_filename']
 
         lr_emg = np.load(self.data.iloc[index, 0])
 
@@ -27,4 +27,4 @@ class Dataset(Dataset):
         # unsqueeze to add a one channel dimension at the beginning
         hr_emg = torch.tensor(hr_emg).unsqueeze(0).to(torch.float32)
 
-        return (lr_emg, hr_emg)
+        return lr_emg, hr_emg, lr_emg_path, hr_emg_path
