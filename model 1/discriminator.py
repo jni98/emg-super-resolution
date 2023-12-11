@@ -16,9 +16,6 @@ class Discriminator(nn.Module):
         self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1)
         self.leaky_relu1 = nn.LeakyReLU(0.2, inplace=True)
 
-        self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1)
-        self.leaky_relu1 = nn.LeakyReLU(0.2, inplace=True)
-
         self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1)
         self.batch_norm2 = nn.BatchNorm2d(64)
         self.leaky_relu2 = nn.LeakyReLU(0.2, inplace=True)
@@ -49,7 +46,7 @@ class Discriminator(nn.Module):
 
         self.flatten = nn.Flatten()
 
-        #TODO: Input size nicht flexibel
+        # Adapt dense layer to output size of flatten()
         self.dense1 = nn.Linear(512 * 128, 1024)
         self.leaky_relu9 = nn.LeakyReLU(0.2, inplace=True)
         self.dense2 = nn.Linear(1024, 1)
@@ -101,7 +98,8 @@ class Discriminator(nn.Module):
         out = self.leaky_relu8(out)
 
         out = self.flatten(out)
-        print(out.shape)
+        print("shape 10", out.shape)
+
         out = self.dense1(out)
         out = self.leaky_relu9(out)
         out = self.dense2(out)
