@@ -125,6 +125,8 @@ venv.bak/
 dmypy.json
 
 # add personal files
-
-/model 1/dataset/
 /model 1/runs/
+/testset/
+/Visualization/plot_channels/
+/data/
+/dataset/
