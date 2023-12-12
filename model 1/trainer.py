@@ -88,7 +88,7 @@ class Trainer:
         -------
         None
         """
-        data = pd.read_csv('dataset/data.csv', sep=";")
+        data = pd.read_csv('../dataset/data.csv', sep=";")
         train, test = train_test_split(data, train_size=0.75, test_size=0.25, random_state=42)
         self.training = torch.utils.data.DataLoader(Dataset(train, "train"), batch_size=self.batch_size)
         self.validation = torch.utils.data.DataLoader(Dataset(test, "val"), batch_size=self.batch_size)
@@ -367,18 +367,26 @@ class Trainer:
         self.generator.load_state_dict(torch.load('runs/20231206115019/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
-        data = pd.read_csv('testset/data.csv', sep=";")
+        data = pd.read_csv('../testset/data.csv', sep=";")
         self.testing = torch.utils.data.DataLoader(Dataset(data, "test"))
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
             # Generate super-resolved data (SR) from LR data
-            sr_emg = self.generator(lr_emg).detach()
-            sr_emg = sr_emg.squeeze().numpy()
-            lr_sr_path = lr_emg_paths[0].replace('-lr.npy', '-lr-sr.npy')
-            np.save(lr_sr_path, sr_emg)
+            lr_sr_emg = self.generator(lr_emg).detach()
+            lr_sr_emg = lr_sr_emg.squeeze().numpy()
 
             # Generate super-resolved data (SR) from LR data
-            sr_emg = self.generator(hr_emg).detach()
-            sr_emg = sr_emg.squeeze().numpy()
-            hr_sr_path = hr_emg_paths[0].replace('-hr.npy', '-hr-sr.npy')
-            np.save(hr_sr_path, sr_emg)
+            hr_sr_emg = self.generator(hr_emg).detach()
+            hr_sr_emg = hr_sr_emg.squeeze().numpy()
+
+            # Save signal from lr to hr
+            last_slash_index_lr = lr_emg_paths[0].rfind("/")
+            model1_path = lr_emg_paths[0][:last_slash_index_lr] + '/model1'
+            os.makedirs(model1_path, exist_ok=True)
+            np.save(model1_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'), lr_sr_emg
+                    )
+
+            # Save B-Spline interpolated signal from hr to sr
+            last_slash_index_hr = hr_emg_paths[0].rfind("/")
+            np.save(model1_path + (hr_emg_paths[0][last_slash_index_hr:]).replace('-hr.npy', '-hr-sr.npy'),
+                    hr_sr_emg)
