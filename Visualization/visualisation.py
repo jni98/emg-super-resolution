@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib
 
-matplotlib.use('TkAgg')  # Set the backend before importing pyplot
-from matplotlib import pyplot as plt
+matplotlib.use('Agg')  # Use the 'Agg' backend
+import matplotlib.pyplot as plt
 
 
 class Visualizer:
@@ -28,12 +28,12 @@ class Visualizer:
     def plot_emg_channels(self):
         time_axis = np.arange(512)  # Assuming the time axis runs along axis 2
 
-        i = 1
+        figure = 1
 
         for title, emg_data in self.emg_data_dict.items():
             # Plot Training losses in a separate figure
-            plt.figure(i)
-            i += 1
+            plt.figure(figure)
+            figure += 1
 
             offset = 0
             # Use only few channels here
@@ -49,20 +49,53 @@ class Visualizer:
             plt.savefig(f'plot_channels/{title}.png')
         plt.show()
 
-    def plot_heat_maps(self, emg_data):
-        pass
+    def plot_heat_maps(self):
+        grids = (
+            self.emg_data_dict['Origin HR'],
+            self.emg_data_dict['Interpolation LR to SR'],
+            self.emg_data_dict['Model 1 LR to SR']
+        )
+
+        keys_list = ('Origin HR', 'Interpolation LR to SR', 'Model 1 LR to SR')
+
+        time_points = [200, 300, 400]
+
+        fig, axs = plt.subplots(len(grids), len(time_points))
+
+        for g in range(len(grids)):
+            emg_data = grids[g]
+            emg_data = emg_data.transpose()
+            emg_data_reshaped = emg_data.reshape(8, 8, 512)
+            emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
+            emg_data_grid = np.flipud(emg_data_transposed)
+
+            for i, time_point in enumerate(time_points):
+                emg_heatmap = emg_data_grid[:, :, time_point]
+                im = axs[g][i].imshow(emg_heatmap, cmap='hot')
+
+                # Set ticks and tick labels to start from 1 but position them at 0 to match the data
+                axs[g][i].set_xticks(range(8))
+                axs[g][i].set_yticks(range(8))
+                axs[g][i].set_xticklabels(range(1, 9))
+                axs[g][i].set_yticklabels(range(1, 9))
+
+                axs[g][i].invert_yaxis()  # Invert the y-axis direction
+                fig.colorbar(im, ax=axs[g][i])
+
+        plt.tight_layout()  # Adjust layouts to avoid overlapping
+        plt.savefig(f'plot_heatmaps/Heatmaps.png')
 
     def plot_correlations(self):
-        grids = (self.emg_data_dict['Origin HR'],  self.emg_data_dict['Interpolation LR to SR'], self.emg_data_dict['Model 1 LR to SR'])
+        grids = (self.emg_data_dict['Origin HR'], self.emg_data_dict['Interpolation LR to SR'],
+                 self.emg_data_dict['Model 1 LR to SR'])
         # Accessing keys by index
-        keys_list = list(self.emg_data_dict.keys())
+        keys_list = ('Origin HR', 'Interpolation LR to SR', 'Model 1 LR to SR')
 
-        # Create a list of line styles, colors, and markers
+        # Create a list of line styles, colors
         colors = ['blue', 'green', 'red', 'black']  # Add more colors if required
         line_styles = ['-', '--']  # You can extend this list as needed
-        markers = [',', 'x']  # Include additional markers for variety
 
-        for g in range(1,len(grids)):
+        for g in range(1, len(grids)):
             grid_1 = grids[0]
             grid_2 = grids[g]
 
@@ -72,72 +105,38 @@ class Visualizer:
                 correlation = np.correlate(grid_1[i], grid_2[i], mode='same')
                 correlations.append(correlation)
 
+            # Find the maximum and minimum values of correlations across all electrodes
+            max_corr = max([max(corr) for corr in correlations])
+            min_corr = min([min(corr) for corr in correlations])
+
             # Plot the correlations
-            fig, axes = plt.subplots(nrows=2, ncols=4, sharey=True)
+            plt.figure()
             color = 0
             style = 0
-            marker = 0
+            number = 1
             for i, corr in enumerate(correlations):
-                if i == 0:
-                    ax = axes[0][0]
-                    color = 0
-                    style = 0
-                    marker = 0
-                elif i ==8:
-                    ax = axes[0][1]
-                    color = 0
-                    style = 0
-                    marker = 0
-                elif i == 16:
-                    ax = axes[0][2]
-                    color = 0
-                    style = 0
-                    marker = 0
-                elif i == 24:
-                    ax = axes[0][3]
-                    color = 0
-                    style = 0
-                    marker = 0
-                elif i == 32:
-                    ax = axes[1][0]
-                    color = 0
-                    style = 0
-                    marker = 0
-                elif i ==40:
-                    ax = axes[1][1]
-                    color = 0
-                    style = 0
-                    marker = 0
-                elif i == 48:
-                    ax = axes[1][2]
-                    color = 0
-                    style = 0
-                    marker = 0
-                elif i == 56:
-                    ax = axes[1][3]
-                    color = 0
-                    style = 0
-                    marker = 0
+                plt.plot(corr, label=f'Ch {i + 1}', linestyle=line_styles[style % len(line_styles)],
+                         color=colors[color % len(colors)])  #
+                plt.xlabel('Shift')
+                plt.ylabel('Correlation')
+                plt.legend(loc='best', bbox_to_anchor=(1, 1))
+                plt.title(f'Cross-correlation of {keys_list[g]} with Origin HR')
 
+                # Set the y-axis limits to the maximum and minimum values across all electrodes
+                plt.ylim(min_corr, max_corr)
 
-                ax.plot(corr, label=f'Ch {i + 1}', linestyle=line_styles[style % len(line_styles)],
-                             color=colors[color % len(colors)], marker=markers[marker % len(markers)]) #
-                color +=1
+                color += 1
                 if color == 4:
                     color = 0
                     style += 1
 
-                if style == 3:
+                if ((i + 1) % 8) == 0:
+                    plt.savefig(f'plot_correlations/{keys_list[g]} with Origin HR - {number}.png')
+                    number += 1
+                    plt.close()
+                    plt.figure()
                     color = 0
                     style = 0
-                    marker += 1
-
-                ax.set_xlabel('Shift')
-                ax.set_ylabel('Correlation')
-                ax.legend(loc='best', bbox_to_anchor=(1, 1))
-            fig.suptitle(f'Cross-correlation of {keys_list[g]} with Origin HR')
-            fig.savefig(f'plot_correlations/{keys_list[g]}_with_Origin_HR.png')
-        plt.show()
 
 
 if __name__ == '__main__':
@@ -146,4 +145,4 @@ if __name__ == '__main__':
 
     visualize.plot_emg_channels()
     visualize.plot_correlations()
-    input("Press Enter to close all plots...")
+    visualize.plot_heat_maps()
