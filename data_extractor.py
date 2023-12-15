@@ -95,6 +95,7 @@ def plot_emg_data(emg_data):
     plt.legend(loc='right')
     plt.show()
 
+
 def dataset_creator_michi(emg_data, dataset_path):
     """
     Creates the dataset including a csv file from the emg_data. Used for the data provided by Michi
@@ -186,6 +187,7 @@ def open_emg_data_Dominik(file_path):
 
     return emg_data
 
+
 def dataset_creator_dominik(data_paths):
     """
     Creates sets of low-resolution and high-resolution data as well as a csv file with their directories.
@@ -210,7 +212,7 @@ def dataset_creator_dominik(data_paths):
 
         # create folder for the results
         base_directory = data_path.replace("data/", "").rsplit("/", 1)[0]
-        dataset_path = 'testset' + '/' + base_directory + '/'
+        dataset_path = 'dataset' + '/' + base_directory + '/'
 
         # get the emg data of that pickle file
         emg_data_complete = open_emg_data_Dominik(data_path)
@@ -220,27 +222,29 @@ def dataset_creator_dominik(data_paths):
 
         # 2D to 3D:
         # reshape back to grid shape
-        emg_data_reshaped = emg_data.reshape(8,8, emg_data.shape[1])
+        emg_data_reshaped = emg_data.reshape(8, 8, emg_data.shape[1])
         # Transpose and flip to get to correct grid numbering
-        emg_data_transposed = np.transpose(emg_data_reshaped,axes=(1, 0, 2))
+        emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
         emg_data_grid = np.flipud(emg_data_transposed)
 
-        #TODO: Change deleted rows
+        # TODO: Change deleted rows
         # delete last row and last column for the low-resolution creation
-        #emg_data_grid = emg_data_grid[:7, :7]
+        # emg_data_grid = emg_data_grid[:7, :7]
 
         # Create the folder if it doesn't exist
         os.makedirs(dataset_path, exist_ok=True)
 
-        # window the signal to 512 samples
-        for window in range(0, 75):
-            emg_windowed = emg_data_grid[:,:, window * 512:(window + 1) * 512]
+        windows = emg_data.shape[1] - 512
 
-            emg_windowed_lr = emg_windowed[::2,::2,:]
+        # window the signal to 512 samples
+        for window in range(0,windows,100):
+            emg_windowed = emg_data_grid[:, :, window:(window + 512)]
+
+            emg_windowed_lr = emg_windowed[::2, ::2, :]
 
             # 3D to 2D array
             emg_windowed_lr_2D = np.flipud(emg_windowed_lr).transpose(1, 0, 2).reshape(16, 512)
-            emg_windowed_2D = np.flipud(emg_windowed).transpose(1, 0, 2).reshape(64,512)
+            emg_windowed_2D = np.flipud(emg_windowed).transpose(1, 0, 2).reshape(64, 512)
 
             # transpose for samples x channels shape
             emg_windowed_lr_2D = emg_windowed_lr_2D.transpose()
@@ -248,7 +252,7 @@ def dataset_creator_dominik(data_paths):
 
             # save high resolution data and add file name to list
             np.save(dataset_path + f'window{window}-hr.npy', emg_windowed_2D)
-            hr_filenames.append('../'+ dataset_path + f'window{window}-hr.npy')
+            hr_filenames.append('../' + dataset_path + f'window{window}-hr.npy')
 
             # save low resolution data and add file name to list
             np.save(dataset_path + f'window{window}-lr.npy', emg_windowed_lr_2D)
@@ -261,7 +265,7 @@ def dataset_creator_dominik(data_paths):
     csv_file = 'data.csv'
 
     # Open the CSV file in append mode and write the data
-    with open('testset' + '/' + csv_file, mode='a', newline='') as file:
+    with open('dataset' + '/' + csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
 
         # Add a header if the file is empty
@@ -274,10 +278,10 @@ def dataset_creator_dominik(data_paths):
 
 
 if __name__ == '__main__':
-    # #data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
-    #               'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
-    #               'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
-    data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
+    data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
+                  'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
+                  'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
+    # data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
 
     movement_name = 'thumb_slow'
 
