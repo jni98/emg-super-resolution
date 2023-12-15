@@ -2,6 +2,9 @@ import json
 import os
 
 import matplotlib
+
+matplotlib.use('Agg')  # Use the 'Agg' backend
+
 import numpy as np
 from datetime import datetime
 import torch
@@ -12,9 +15,8 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 from generator import Generator
 from discriminator import Discriminator
-from data import Dataset
+from data import Custom_Dataset
 
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 
@@ -71,6 +73,7 @@ class Trainer:
         self.run_folder = 'runs/' + datetime.now().strftime('%Y%m%d%H%M%S')
         if not os.path.exists(self.run_folder):
             os.makedirs(self.run_folder)
+            print(f"Folder created at: {self.run_folder}")
 
         # Create a dictionary for the hyperparameters
         self.hyperparameter = {
@@ -78,6 +81,9 @@ class Trainer:
             "batch_size": self.batch_size,
             "learning_rate": self.lr
         }
+
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(self.device)
 
         print("init done")
 
@@ -88,12 +94,15 @@ class Trainer:
         -------
         None
         """
-        data = pd.read_csv('../dataset/data.csv', sep=";")
-        train, test = train_test_split(data, train_size=0.75, test_size=0.25, random_state=42)
-        self.training = torch.utils.data.DataLoader(Dataset(train, "train"), batch_size=self.batch_size)
-        self.validation = torch.utils.data.DataLoader(Dataset(test, "val"), batch_size=self.batch_size)
+        data_train_val = pd.read_csv('../dataset/data.csv', sep=";")
+        train, val = train_test_split(data_train_val, train_size=0.75, test_size=0.25, random_state=42)
+        self.training = torch.utils.data.DataLoader(Custom_Dataset(train, "train"), batch_size=self.batch_size)
+        self.validation = torch.utils.data.DataLoader(Custom_Dataset(val, "val"), batch_size=self.batch_size)
 
-        self.hyperparameter["num_samples"] = data.shape[0]
+        data_test = pd.read_csv('../testset/data.csv', sep=";")
+        self.testing = torch.utils.data.DataLoader(Custom_Dataset(data_test, "test"))
+
+        self.hyperparameter["num_samples"] = data_train_val.shape[0]
         # Save the dictionary to a file
         with open(self.run_folder + '/hyperparameter.json', 'w') as file:
             json.dump(self.hyperparameter, file)
@@ -107,6 +116,10 @@ class Trainer:
         """
         self.generator = Generator()
         self.discriminator = Discriminator()
+
+        # move to gpu in case it's possible
+        self.generator.to(self.device)
+        self.discriminator.to(self.device)
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.content_loss = nn.MSELoss()  # Mean Squared error Loss
@@ -129,8 +142,8 @@ class Trainer:
         psnr = []
         best_val_loss = float('inf')
 
-        for epoch in range(1,self.num_epochs+1):
-            print("epoch",epoch)
+        for epoch in range(1, self.num_epochs + 1):
+            print("epoch", epoch)
             epoch_loss_g, epoch_loss_d = self._train_epoch(epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
 
@@ -170,13 +183,18 @@ class Trainer:
         total_loss_g = 0.0
         total_loss_d = 0.0
 
-        for batch_idx, (lr_emg, hr_emg,lr_emg_paths, hr_emg_paths) in enumerate(self.training):
+        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
+
+            # Move data to CUDA device during training or validation loops
+            lr_emg = lr_emg.to(self.device)
+            hr_emg = hr_emg.to(self.device)
+
             # Train Discriminator
             self.optimizer_D.zero_grad()
 
             # Generate super-resolved data (SR) from LR data
-            sr_emg = self.generator(lr_emg).detach()
+            sr_emg = self.generator(lr_emg).detach().to(self.device)
 
             # Train discriminator with HR data
             real_labels = torch.ones(hr_emg.size(0), 1)
@@ -196,7 +214,7 @@ class Trainer:
             self.optimizer_G.zero_grad()
 
             # Generate SR data from LR data
-            sr_emg = self.generator(lr_emg)
+            sr_emg = self.generator(lr_emg).to(self.device)
 
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
@@ -240,7 +258,7 @@ class Trainer:
         with torch.no_grad():
             for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
                 # Generate SR data from LR data using the generator
-                val_sr_emg = self.generator(val_lr)
+                val_sr_emg = self.generator(val_lr).to(self.device)
 
                 # Calculate validation loss
                 val_loss = self.content_loss(val_sr_emg, val_hr)
@@ -327,7 +345,6 @@ class Trainer:
         ax_train_losses.set_title('Losses over Epochs')
         ax_train_losses.legend()
         fig_train_losses.savefig(self.run_folder + '/training_losses.png')
-        plt.show(fig_train_losses)
 
         # Plot Validation loss, PSNR in a combined figure
         fig_val_psnr, (ax_val_loss, ax_psnr) = plt.subplots(nrows=2, ncols=1)
@@ -348,7 +365,6 @@ class Trainer:
 
         fig_val_psnr.tight_layout()
         fig_val_psnr.savefig(self.run_folder + '/validation_loss_psnr.png')
-        plt.show(fig_val_psnr)
 
     def generate_sr_data(self):
         """
@@ -364,19 +380,16 @@ class Trainer:
         None
         """
         # load the final generator
-        self.generator.load_state_dict(torch.load('runs/20231206115019/final_generator.pt'))
+        self.generator.load_state_dict(torch.load('runs/20231215124402/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
-
-        data = pd.read_csv('../testset/data.csv', sep=";")
-        self.testing = torch.utils.data.DataLoader(Dataset(data, "test"))
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
             # Generate super-resolved data (SR) from LR data
-            lr_sr_emg = self.generator(lr_emg).detach()
+            lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
             lr_sr_emg = lr_sr_emg.squeeze().numpy()
 
             # Generate super-resolved data (SR) from LR data
-            hr_sr_emg = self.generator(hr_emg).detach()
+            hr_sr_emg = self.generator(hr_emg).detach().to(self.device)
             hr_sr_emg = hr_sr_emg.squeeze().numpy()
 
             # Save signal from lr to hr
