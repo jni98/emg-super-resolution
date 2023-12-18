@@ -95,12 +95,25 @@ class Trainer:
         None
         """
         data_train_val = pd.read_csv('../dataset/data.csv', sep=";")
-        train, val = train_test_split(data_train_val, train_size=0.75, test_size=0.25, random_state=42)
-        self.training = torch.utils.data.DataLoader(Custom_Dataset(train, "train"), batch_size=self.batch_size)
-        self.validation = torch.utils.data.DataLoader(Custom_Dataset(val, "val"), batch_size=self.batch_size)
-
         data_test = pd.read_csv('../testset/data.csv', sep=";")
-        self.testing = torch.utils.data.DataLoader(Custom_Dataset(data_test, "test"))
+
+        train, val = train_test_split(data_train_val, train_size=0.75, test_size=0.25, random_state=42)
+
+        # Use Custom_Dataset with min-max normalization
+        self.training = torch.utils.data.DataLoader(
+            Custom_Dataset(train, mode = 'train'),
+            batch_size=self.batch_size
+        )
+
+        min_value = self.training.dataset.min_value
+        max_value = self.training.dataset.max_value
+
+        self.validation = torch.utils.data.DataLoader(
+            Custom_Dataset(val, mode = 'val', min_value= min_value, max_value=max_value),
+            batch_size=self.batch_size
+        )
+        self.testing = torch.utils.data.DataLoader(
+            Custom_Dataset(data_test, mode = 'test', min_value= min_value, max_value=max_value))
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         # Save the dictionary to a file
@@ -335,29 +348,40 @@ class Trainer:
         val_loss_np = np.array(val_loss)
         psnr_np = np.array(psnr)
 
-        # Plot Training losses in a separate figure
-        fig_train_losses, ax_train_losses = plt.subplots()
-        ax_train_losses.plot(np.arange(len(train_g_loss_np)), train_g_loss_np, label='Train Generator loss')
-        ax_train_losses.plot(np.arange(len(train_d_loss_np)), train_d_loss_np, label='Train Discriminator loss')
-        ax_train_losses.set_yscale('log')
-        ax_train_losses.set_xlabel('Epoch')
-        ax_train_losses.set_ylabel('Loss')
-        ax_train_losses.set_title('Losses over Epochs')
-        ax_train_losses.legend()
-        fig_train_losses.savefig(self.run_folder + '/training_losses.png')
+        # Plot Generator and Discriminator loss
+        fig_generator_discriminator, (ax_generator_loss, ax_discriminator_loss) = plt.subplots(nrows=2, ncols=1)
+
+        # Plot Generator loss
+        ax_generator_loss.plot(np.arange(len(train_g_loss_np)), train_g_loss_np)
+        ax_generator_loss.set_yscale('log')
+        ax_generator_loss.set_xlabel('Epoch')
+        ax_generator_loss.set_ylabel('Loss')
+        ax_generator_loss.set_title('Generator Loss over Epochs')
+        ax_generator_loss.legend()
+
+        # Plot Discriminator loss
+        ax_discriminator_loss.plot(np.arange(len(train_d_loss_np)), train_d_loss_np)
+        ax_discriminator_loss.set_yscale('log')
+        ax_discriminator_loss.set_xlabel('Epoch')
+        ax_discriminator_loss.set_ylabel('Loss')
+        ax_discriminator_loss.set_title('Discriminator Loss over Epochs')
+        ax_discriminator_loss.legend()
+
+        fig_generator_discriminator.tight_layout()
+        fig_generator_discriminator.savefig(self.run_folder + '/training_losses.png')
 
         # Plot Validation loss, PSNR in a combined figure
         fig_val_psnr, (ax_val_loss, ax_psnr) = plt.subplots(nrows=2, ncols=1)
 
         # Plot Validation loss
-        ax_val_loss.plot(np.arange(len(val_loss_np)), val_loss_np, label='Validation loss')
+        ax_val_loss.plot(np.arange(len(val_loss_np)), val_loss_np)
         ax_val_loss.set_xlabel('Epoch')
         ax_val_loss.set_ylabel('Loss')
         ax_val_loss.set_title('Validation Loss over Epochs')
         ax_val_loss.legend()
 
         # Plot PSNR
-        ax_psnr.plot(np.arange(len(psnr_np)), psnr_np, label='PSNR')
+        ax_psnr.plot(np.arange(len(psnr_np)), psnr_np)
         ax_psnr.set_xlabel('Epoch')
         ax_psnr.set_ylabel('PSNR')
         ax_psnr.set_title('PSNR over Epochs')
@@ -380,7 +404,7 @@ class Trainer:
         None
         """
         # load the final generator
-        self.generator.load_state_dict(torch.load('runs/20231215124402/final_generator.pt'))
+        self.generator.load_state_dict(torch.load('runs/20231215221106/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
