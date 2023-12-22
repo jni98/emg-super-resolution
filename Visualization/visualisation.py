@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import matplotlib
 
@@ -9,12 +11,20 @@ class Visualizer:
     def __init__(self, file_path):
         self.file_path = file_path
 
-        # Load your data here - replace these with your data loading logic
+        # Load the JSON file with values for min max normalization into a Python dictionary
+        with open('../dataset/min_max.json', 'r') as file:
+            min_max_dict = json.load(file)
+
+        # Load your data (already normalized)
         inter_lr_sr = np.load(self.file_path + '/interpolated/bspline/window10-lr-sr.npy').transpose()
         inter_hr_sr = np.load(self.file_path + '/interpolated/bspline/window10-hr-sr.npy').transpose()
         model1_lr_sr = np.load(self.file_path + '/model1/window10-lr-sr.npy').transpose()
         model1_hr_sr = np.load(self.file_path + '/model1/window10-hr-sr.npy').transpose()
+
+        # Load original data and normalize it
         origin_hr = np.load(self.file_path + '/window10-hr.npy').transpose()
+        origin_hr_normalized = (1 - (-1)) * (origin_hr - min_max_dict['min']) / (min_max_dict['max'] - min_max_dict['min']) -1
+
 
         # Create a dictionary with titles as keys and EMG data as values
         self.emg_data_dict = {
@@ -22,11 +32,11 @@ class Visualizer:
             'Interpolation HR to SR': inter_hr_sr,
             'Model 1 LR to SR': model1_lr_sr,
             'Model 1 HR to SR': model1_hr_sr,
-            'Origin HR': origin_hr
+            'Origin HR': origin_hr_normalized
         }
 
     def plot_emg_channels(self):
-        time_axis = np.arange(512)  # Assuming the time axis runs along axis 2
+        time_axis = np.arange(200)  # Assuming the time axis runs along axis 2
 
         figure = 1
 
@@ -38,14 +48,16 @@ class Visualizer:
             offset = 0
             # Use only few channels here
             for j in range(16):
-                signal = emg_data[j]
+                #TODO: Achtung, nicht das volle Zeitfenster
+                signal = emg_data[j][:200]
                 plt.plot(time_axis, signal.squeeze() + offset, label=f'Channel {j + 1}')
-                offset += 1500
+                offset += 0.1
 
-            plt.xlabel('Time')
+            plt.xlabel('Time in samples')
             plt.ylabel('Voltage')
             plt.title(title)
-            plt.legend(loc='best')
+            plt.legend(loc='right')
+            plt.tight_layout()  # Adjust layouts to avoid overlapping
             plt.savefig(f'plot_channels/{title}.png')
         plt.show()
 
@@ -56,7 +68,7 @@ class Visualizer:
             self.emg_data_dict['Model 1 LR to SR']
         )
 
-        keys_list = ('Origin HR', 'Interpolation LR to SR', 'Model 1 LR to SR')
+        keys_list = ('Origin HR', 'Interpolation', 'Model 1')
 
         time_points = [200, 300, 400]
 
@@ -78,6 +90,7 @@ class Visualizer:
                 axs[g][i].set_yticks(range(8))
                 axs[g][i].set_xticklabels(range(1, 9))
                 axs[g][i].set_yticklabels(range(1, 9))
+                axs[g][i].set_title(keys_list[g] +f'-{time_point}')
 
                 axs[g][i].invert_yaxis()  # Invert the y-axis direction
                 fig.colorbar(im, ax=axs[g][i])
@@ -131,6 +144,7 @@ class Visualizer:
                     style += 1
 
                 if ((i + 1) % 8) == 0:
+                    plt.tight_layout()  # Adjust layouts to avoid overlapping
                     plt.savefig(f'plot_correlations/{keys_list[g]} with Origin HR - {number}.png')
                     number += 1
                     plt.close()
