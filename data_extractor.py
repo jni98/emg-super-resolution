@@ -1,3 +1,4 @@
+import json
 import os
 import pickle
 import pandas as pandas
@@ -205,6 +206,9 @@ def dataset_creator_dominik(data_paths):
     lr_filenames = []
     hr_filenames = []
 
+    min_value_dataset = np.inf
+    max_value_dataset = -np.inf
+
     for i in range(len(data_paths)):
 
         # extract data path and pickle file name from list of paths
@@ -213,6 +217,9 @@ def dataset_creator_dominik(data_paths):
         # create folder for the results
         base_directory = data_path.replace("data/", "").rsplit("/", 1)[0]
         dataset_path = 'dataset' + '/' + base_directory + '/'
+
+        # Create the folder if it doesn't exist
+        os.makedirs(dataset_path, exist_ok=True)
 
         # get the emg data of that pickle file
         emg_data_complete = open_emg_data_Dominik(data_path)
@@ -227,18 +234,17 @@ def dataset_creator_dominik(data_paths):
         emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
         emg_data_grid = np.flipud(emg_data_transposed)
 
-        # TODO: Change deleted rows
-        # delete last row and last column for the low-resolution creation
-        # emg_data_grid = emg_data_grid[:7, :7]
-
-        # Create the folder if it doesn't exist
-        os.makedirs(dataset_path, exist_ok=True)
-
         windows = emg_data.shape[1] - 512
 
         # window the signal to 512 samples
-        for window in range(0,windows,100):
+        for window in range(0, windows, 200):
             emg_windowed = emg_data_grid[:, :, window:(window + 512)]
+
+            if emg_windowed.min() < min_value_dataset:
+                min_value_dataset = emg_windowed.min()
+
+            if emg_windowed.max() > max_value_dataset:
+                max_value_dataset = emg_windowed.max()
 
             emg_windowed_lr = emg_windowed[::2, ::2, :]
 
@@ -258,6 +264,16 @@ def dataset_creator_dominik(data_paths):
             np.save(dataset_path + f'window{window}-lr.npy', emg_windowed_lr_2D)
             lr_filenames.append('../' + dataset_path + f'window{window}-lr.npy')
 
+    # Create a dictionary for the hyperparameters
+    min_max_dic = {
+        "min": min_value_dataset,
+        "max": max_value_dataset,
+    }
+
+    with open('dataset' + '/min_max.json', 'w') as file:
+        json.dump(min_max_dic, file)
+
+
     # Combine LR and HR filenames row-wise
     data = zip(lr_filenames, hr_filenames)
 
@@ -275,7 +291,6 @@ def dataset_creator_dominik(data_paths):
         # Add each LR/HR pair as a row in the CSV file
         for lr_filename, hr_filename in data:
             writer.writerow([lr_filename + ';' + hr_filename])
-
 
 if __name__ == '__main__':
     data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
