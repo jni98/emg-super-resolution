@@ -4,7 +4,7 @@ import pickle
 import pandas as pandas
 import matplotlib
 
-matplotlib.use('TkAgg')  # Set the backend before importing pyplot
+matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
@@ -216,7 +216,7 @@ def dataset_creator_dominik(data_paths):
 
         # create folder for the results
         base_directory = data_path.replace("data/", "").rsplit("/", 1)[0]
-        dataset_path = 'dataset' + '/' + base_directory + '/'
+        dataset_path = 'testset' + '/' + base_directory + '/'
 
         # Create the folder if it doesn't exist
         os.makedirs(dataset_path, exist_ok=True)
@@ -224,45 +224,63 @@ def dataset_creator_dominik(data_paths):
         # get the emg data of that pickle file
         emg_data_complete = open_emg_data_Dominik(data_path)
 
-        # only use first 64 channels, since data is from two grids
-        emg_data = emg_data_complete[:64, :]
+        plt.figure(i)
 
-        # 2D to 3D:
-        # reshape back to grid shape
-        emg_data_reshaped = emg_data.reshape(8, 8, emg_data.shape[1])
-        # Transpose and flip to get to correct grid numbering
-        emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
-        emg_data_grid = np.flipud(emg_data_transposed)
+        # Creating a histogram using numpy.histogram()
+        counts, bins = np.histogram(emg_data_complete, bins=20)  # Adjust bins as needed
 
-        windows = emg_data.shape[1] - 512
+        # Plotting the histogram
+        plt.stairs(counts, bins)
+        plt.xlabel('Data')
+        plt.ylabel('Density')
+        plt.title('Histogram Data')
+        plt.savefig(dataset_path + f'Histogram-path-{i}-20bins.png')
 
-        # window the signal to 512 samples
-        for window in range(0, windows, 200):
-            emg_windowed = emg_data_grid[:, :, window:(window + 512)]
 
-            if emg_windowed.min() < min_value_dataset:
-                min_value_dataset = emg_windowed.min()
+        for grid in range(1):
+            # only use first 64 channels, since data is from two grids
+            emg_data = emg_data_complete[grid*64:(grid*64)+64, :]
 
-            if emg_windowed.max() > max_value_dataset:
-                max_value_dataset = emg_windowed.max()
+            # 2D to 3D:
+            # reshape back to grid shape
+            emg_data_reshaped = emg_data.reshape(8, 8, emg_data.shape[1])
+            # Transpose and flip to get to correct grid numbering
+            emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
+            emg_data_grid = np.flipud(emg_data_transposed)
 
-            emg_windowed_lr = emg_windowed[::2, ::2, :]
+            windows = emg_data.shape[1] - 512
 
-            # 3D to 2D array
-            emg_windowed_lr_2D = np.flipud(emg_windowed_lr).transpose(1, 0, 2).reshape(16, 512)
-            emg_windowed_2D = np.flipud(emg_windowed).transpose(1, 0, 2).reshape(64, 512)
+            # window the signal to 512 samples
+            for window in range(0, windows, 200):
+                emg_windowed = emg_data_grid[:, :, window:(window + 512)]
 
-            # transpose for samples x channels shape
-            emg_windowed_lr_2D = emg_windowed_lr_2D.transpose()
-            emg_windowed_2D = emg_windowed_2D.transpose()
+                if emg_windowed.min() < min_value_dataset:
+                    min_value_dataset = emg_windowed.min()
 
-            # save high resolution data and add file name to list
-            np.save(dataset_path + f'window{window}-hr.npy', emg_windowed_2D)
-            hr_filenames.append('../' + dataset_path + f'window{window}-hr.npy')
+                if emg_windowed.max() > max_value_dataset:
+                    max_value_dataset = emg_windowed.max()
 
-            # save low resolution data and add file name to list
-            np.save(dataset_path + f'window{window}-lr.npy', emg_windowed_lr_2D)
-            lr_filenames.append('../' + dataset_path + f'window{window}-lr.npy')
+                # In case LR grid should move on HR grid change range(1) to range(2)
+                for col in range(1):
+                    for row in range(1):
+
+                        emg_windowed_lr = emg_windowed[row::2, col::2, :]
+
+                        # 3D to 2D array
+                        emg_windowed_lr_2D = np.flipud(emg_windowed_lr).transpose(1, 0, 2).reshape(16, 512)
+                        emg_windowed_2D = np.flipud(emg_windowed).transpose(1, 0, 2).reshape(64, 512)
+
+                        # transpose for samples x channels shape
+                        emg_windowed_lr_2D = emg_windowed_lr_2D.transpose()
+                        emg_windowed_2D = emg_windowed_2D.transpose()
+
+                        # save high resolution data and add file name to list
+                        np.save(dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-hr.npy', emg_windowed_2D)
+                        hr_filenames.append('../' + dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-hr.npy')
+
+                        # save low resolution data and add file name to list
+                        np.save(dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-lr.npy', emg_windowed_lr_2D)
+                        lr_filenames.append('../' + dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-lr.npy')
 
     # Create a dictionary for the hyperparameters
     min_max_dic = {
@@ -270,7 +288,7 @@ def dataset_creator_dominik(data_paths):
         "max": max_value_dataset,
     }
 
-    with open('dataset' + '/min_max.json', 'w') as file:
+    with open('testset' + '/min_max.json', 'w') as file:
         json.dump(min_max_dic, file)
 
 
@@ -281,7 +299,7 @@ def dataset_creator_dominik(data_paths):
     csv_file = 'data.csv'
 
     # Open the CSV file in append mode and write the data
-    with open('dataset' + '/' + csv_file, mode='a', newline='') as file:
+    with open('testset' + '/' + csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
 
         # Add a header if the file is empty
@@ -293,10 +311,10 @@ def dataset_creator_dominik(data_paths):
             writer.writerow([lr_filename + ';' + hr_filename])
 
 if __name__ == '__main__':
-    data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
-                  'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
-                  'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
-    # data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
+    # data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
+    #               'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
+    #               'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
+    data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
 
     movement_name = 'thumb_slow'
 
