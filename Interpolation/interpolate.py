@@ -1,20 +1,25 @@
+import json
 import os
 import numpy as np
 import pandas as pd
 from scipy.interpolate import RegularGridInterpolator, interp2d
 import torch
-from data import Dataset
+from data import Custom_Dataset
 
 
 class Interpolation:
     def __init__(self):
+        # Load the JSON file with values for min max normalization into a Python dictionary
+        with open('../dataset/min_max.json', 'r') as file:
+            min_max_dict = json.load(file)
+
         # Load data
         data = pd.read_csv('../testset/data.csv', sep=";")
-        self.testing = torch.utils.data.DataLoader(Dataset(data, "test"))
+        self.testing = torch.utils.data.DataLoader(
+            Custom_Dataset(data, min_value=min_max_dict['min'], max_value=min_max_dict['max']))
 
         # Create folders for B-Spline and Bicubic interpolated signals
         self.bspline_folder = 'interpolated_data/bspline'
-        self.bicubic_folder = 'interpolated_data/bicubic'
 
     def b_spline_interpolation(self, lr_emg, hr_emg_shape):
         # Create a grid for the original signal
@@ -30,6 +35,7 @@ class Interpolation:
         # Create meshgrid from new grid
         mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
 
+        #TODO vielleicht nochmal andere Optionen durchgehen
         # Create interpolator
         interpolator = RegularGridInterpolator((x, y, z), lr_emg)
 
@@ -37,9 +43,6 @@ class Interpolation:
         interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
 
         return interpolated_signal
-
-    def bicubic_interpolation(self):
-        pass
 
     def interpolate(self):
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
@@ -82,8 +85,6 @@ class Interpolation:
             last_slash_index_hr = hr_emg_paths[0].rfind("/")
             np.save(bspline_path + (hr_emg_paths[0][last_slash_index_hr:]).replace('-hr.npy', '-hr-sr.npy'),
                     interpolated_hr_sr)
-
-            # TODO: Perform bicubic interpolation
 
 
 if __name__ == '__main__':
