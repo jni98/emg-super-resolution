@@ -48,7 +48,7 @@ class Trainer:
 
     """
 
-    def __init__(self, num_epochs, batch_size, learning_rate):
+    def __init__(self, num_epochs, batch_size, learning_rate, run_folder):
         """
         Constructs all the necessary attributes for the Trainer object.
 
@@ -62,18 +62,13 @@ class Trainer:
                        Learning rates for the optimizers.
         """
 
-        # self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.lr = learning_rate
 
         self.betas = (0.9, 0.999)
 
-        # Create a directory for the run if it doesn't exist
-        self.run_folder = 'runs/' + datetime.now().strftime('%Y%m%d%H%M%S')
-        if not os.path.exists(self.run_folder):
-            os.makedirs(self.run_folder)
-            print(f"Folder created at: {self.run_folder}")
+        self.run_folder = run_folder
 
         # Create a dictionary for the hyperparameters
         self.hyperparameter = {
@@ -94,6 +89,10 @@ class Trainer:
         -------
         None
         """
+        # Load the JSON file with values for min max normalization into a Python dictionary
+        with open('../dataset/min_max.json', 'r') as file:
+            min_max_dict = json.load(file)
+
         data_train_val = pd.read_csv('../dataset/data.csv', sep=";")
         data_test = pd.read_csv('../testset/data.csv', sep=";")
 
@@ -101,19 +100,16 @@ class Trainer:
 
         # Use Custom_Dataset with min-max normalization
         self.training = torch.utils.data.DataLoader(
-            Custom_Dataset(train, mode = 'train'),
+            Custom_Dataset(train, min_max_dict['min'], min_max_dict['max']),
             batch_size=self.batch_size
         )
 
-        min_value = self.training.dataset.min_value
-        max_value = self.training.dataset.max_value
-
         self.validation = torch.utils.data.DataLoader(
-            Custom_Dataset(val, mode = 'val', min_value= min_value, max_value=max_value),
+            Custom_Dataset(val, min_max_dict['min'], min_max_dict['max']),
             batch_size=self.batch_size
         )
         self.testing = torch.utils.data.DataLoader(
-            Custom_Dataset(data_test, mode = 'test', min_value= min_value, max_value=max_value))
+            Custom_Dataset(data_test, min_max_dict['min'], min_max_dict['max']))
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         # Save the dictionary to a file
@@ -135,7 +131,11 @@ class Trainer:
         self.discriminator.to(self.device)
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
-        self.content_loss = nn.MSELoss()  # Mean Squared error Loss
+        self.mse = nn.MSELoss()  # Mean Squared error Loss
+
+        # move to gpu in case it's possible
+        self.adversarial_loss.to(self.device)
+        self.mse.to(self.device)
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
@@ -150,6 +150,8 @@ class Trainer:
         None
         """
         train_d_loss = []
+        train_d_loss_real = []
+        train_d_loss_fake = []
         train_g_loss = []
         val_loss = []
         psnr = []
@@ -157,11 +159,13 @@ class Trainer:
 
         for epoch in range(1, self.num_epochs + 1):
             print("epoch", epoch)
-            epoch_loss_g, epoch_loss_d = self._train_epoch(epoch)
+            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d = self._train_epoch(epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
 
             train_g_loss.append(epoch_loss_g)
             train_d_loss.append(epoch_loss_d)
+            train_d_loss_real.append(epoch_loss_d_real)
+            train_d_loss_fake.append(epoch_loss_d_fake)
             val_loss.append(avg_val_loss)
             psnr.append(avg_psnr)
 
@@ -174,7 +178,7 @@ class Trainer:
 
             self._save_checkpoint(epoch)
 
-        return train_g_loss, train_d_loss, val_loss, psnr
+        return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, val_loss, psnr
 
     def _train_epoch(self, epoch):
         """
@@ -194,6 +198,8 @@ class Trainer:
         self.generator.train()
         self.discriminator.train()
         total_loss_g = 0.0
+        total_loss_d_real = 0.0
+        total_loss_d_fake = 0.0
         total_loss_d = 0.0
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
@@ -209,18 +215,33 @@ class Trainer:
             # Generate super-resolved data (SR) from LR data
             sr_emg = self.generator(lr_emg).detach().to(self.device)
 
-            # Train discriminator with HR data
-            real_labels = torch.ones(hr_emg.size(0), 1)
-            fake_labels = torch.zeros(hr_emg.size(0), 1)
+            # Create real and fake labels to train discriminator for both cases
+            real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
+            fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
 
-            output_discriminator_real = self.discriminator(hr_emg)
+            # calculate loss for discriminator receiving real data
+            output_discriminator_real = self.discriminator(hr_emg).to(self.device)
             loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
 
+            # calculate loss for discriminator receiving fake data
             output_discriminator_fake = self.discriminator(sr_emg)
             loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
-            loss_discriminator = (loss_discriminator_real + loss_discriminator_fake) * 0.5
+            loss_discriminator = (loss_discriminator_real + loss_discriminator_fake) * 100
+            # print(loss_discriminator)
+            # print(loss_discriminator_real)
+            # print(loss_discriminator_fake)
+
             loss_discriminator.backward()
+
+            # Open a file to save gradients
+            with open('discriminator_gradients.txt', 'w') as file:
+                for name, param in self.discriminator.named_parameters():
+                    if param.grad is not None:
+                        file.write(f"Parameter: {name}, Gradient: {param.grad}\n")
+                    else:
+                        file.write(f"Parameter: {name}, Gradient: None (No gradient computed)\n")
+
             self.optimizer_D.step()
 
             # Train Generator
@@ -232,22 +253,39 @@ class Trainer:
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            loss_generator_content = self.content_loss(sr_emg, hr_emg)  # Content loss
+            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
 
-            loss_generator = loss_generator_adv + 0.01 * loss_generator_content
+            loss_generator = 100 * (0.01 * loss_generator_adv + loss_generator_content)
+            # print(loss_generator)
+            # print(loss_generator_adv)
+            # print(loss_generator_content)
+
             loss_generator.backward()
+
+            # Open a file to save gradients
+            with open('generator_gradients.txt', 'w') as file:
+                for name, param in self.generator.named_parameters():
+                    if param.grad is not None:
+                        file.write(f"Parameter: {name}, Gradient: {param.grad}\n")
+                    else:
+                        file.write(f"Parameter: {name}, Gradient: None (No gradient computed)\n")
+
             self.optimizer_G.step()
 
             total_loss_g += loss_generator.item()
             total_loss_d += loss_discriminator.item()
+            total_loss_d_real += loss_discriminator_real.item()
+            total_loss_d_fake += loss_discriminator_fake.item()
 
         avg_loss_g = total_loss_g / len(self.training)
+        avg_loss_d_real = total_loss_d_real / len(self.training)
+        avg_loss_d_fake = total_loss_d_fake / len(self.training)
         avg_loss_d = total_loss_d / len(self.training)
 
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
 
-        return avg_loss_g, avg_loss_d
+        return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
 
     def _validate(self, epoch):
         """
@@ -270,11 +308,14 @@ class Trainer:
 
         with torch.no_grad():
             for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
+                val_lr = val_lr.to(self.device)
+                val_hr = val_hr.to(self.device)
+
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
 
                 # Calculate validation loss
-                val_loss = self.content_loss(val_sr_emg, val_hr)
+                val_loss = self.mse(val_sr_emg, val_hr)
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
@@ -283,10 +324,10 @@ class Trainer:
 
                 total_psnr += psnr.item()
 
-        avg_validation_loss = total_validation_loss / len(self.validation)
-        print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
+            avg_validation_loss = total_validation_loss / len(self.validation)
+            print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
 
-        avg_psnr = total_psnr / len(self.validation)
+            avg_psnr = total_psnr / len(self.validation)
 
         self.generator.train()  # Set the generator back to training mode
         self.discriminator.train()  # Set the discriminator back to training mode if needed
@@ -306,7 +347,7 @@ class Trainer:
         -------
         None
         """
-        if epoch % 5 == 0:
+        if epoch % 10 == 0:
             torch.save(self.generator.state_dict(), self.run_folder + f'/generator_epoch_{epoch}.pt')
             torch.save(self.discriminator.state_dict(), self.run_folder + f'/discriminator_epoch_{epoch}.pt')
 
@@ -321,7 +362,7 @@ class Trainer:
         torch.save(self.generator.state_dict(), self.run_folder + '/final_generator.pt')
         torch.save(self.discriminator.state_dict(), self.run_folder + '/final_discriminator.pt')
 
-    def _plot_result_losses(self, train_g_loss, train_d_loss, val_loss, psnr):
+    def _plot_result_losses(self, train_g_loss, train_d_loss_real, train_d_loss_fake, train_d_loss, val_loss, psnr):
         """
         Shows and saves a plot of the losses of the Generator during training, the Discriminator during training
         and the validation loss.
@@ -345,11 +386,14 @@ class Trainer:
         # Convert lists to NumPy arrays
         train_g_loss_np = np.array(train_g_loss)
         train_d_loss_np = np.array(train_d_loss)
+        train_d_loss_real_np = np.array(train_d_loss_real)
+        train_d_loss_fake_np = np.array(train_d_loss_fake)
         val_loss_np = np.array(val_loss)
         psnr_np = np.array(psnr)
 
         # Plot Generator and Discriminator loss
-        fig_generator_discriminator, (ax_generator_loss, ax_discriminator_loss) = plt.subplots(nrows=2, ncols=1)
+        fig_generator_discriminator, (
+            ax_generator_loss, ax_discriminator_loss, ax_discriminator_loss_r_f) = plt.subplots(nrows=3, ncols=1)
 
         # Plot Generator loss
         ax_generator_loss.plot(np.arange(len(train_g_loss_np)), train_g_loss_np)
@@ -357,7 +401,6 @@ class Trainer:
         ax_generator_loss.set_xlabel('Epoch')
         ax_generator_loss.set_ylabel('Loss')
         ax_generator_loss.set_title('Generator Loss over Epochs')
-        ax_generator_loss.legend()
 
         # Plot Discriminator loss
         ax_discriminator_loss.plot(np.arange(len(train_d_loss_np)), train_d_loss_np)
@@ -365,7 +408,15 @@ class Trainer:
         ax_discriminator_loss.set_xlabel('Epoch')
         ax_discriminator_loss.set_ylabel('Loss')
         ax_discriminator_loss.set_title('Discriminator Loss over Epochs')
-        ax_discriminator_loss.legend()
+
+        # Plot Discriminator loss
+        ax_discriminator_loss_r_f.plot(np.arange(len(train_d_loss_fake_np)), train_d_loss_fake_np, label='Fake labels')
+        ax_discriminator_loss_r_f.plot(np.arange(len(train_d_loss_real_np)), train_d_loss_real_np, label='Real labels')
+        ax_discriminator_loss_r_f.set_yscale('log')
+        ax_discriminator_loss_r_f.set_xlabel('Epoch')
+        ax_discriminator_loss_r_f.set_ylabel('Loss')
+        ax_discriminator_loss_r_f.legend()
+        ax_discriminator_loss_r_f.set_title('Discriminator Loss over Epochs')
 
         fig_generator_discriminator.tight_layout()
         fig_generator_discriminator.savefig(self.run_folder + '/training_losses.png')
@@ -378,14 +429,12 @@ class Trainer:
         ax_val_loss.set_xlabel('Epoch')
         ax_val_loss.set_ylabel('Loss')
         ax_val_loss.set_title('Validation Loss over Epochs')
-        ax_val_loss.legend()
 
         # Plot PSNR
         ax_psnr.plot(np.arange(len(psnr_np)), psnr_np)
         ax_psnr.set_xlabel('Epoch')
         ax_psnr.set_ylabel('PSNR')
         ax_psnr.set_title('PSNR over Epochs')
-        ax_psnr.legend()
 
         fig_val_psnr.tight_layout()
         fig_val_psnr.savefig(self.run_folder + '/validation_loss_psnr.png')
@@ -396,25 +445,26 @@ class Trainer:
 
         Parameters
         ----------
-        test_set_csv: str
-            Path to the CSV file containing information about the test set.
 
         Returns
         -------
         None
         """
         # load the final generator
-        self.generator.load_state_dict(torch.load('runs/20231215221106/final_generator.pt'))
+        self.generator.load_state_dict(torch.load('runs/20231221091744/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-            # Generate super-resolved data (SR) from LR data
-            lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
-            lr_sr_emg = lr_sr_emg.squeeze().numpy()
+            lr_emg = lr_emg.to(self.device)
+            hr_emg = hr_emg.to(self.device)
 
             # Generate super-resolved data (SR) from LR data
+            lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
+            lr_sr_emg = lr_sr_emg.to('cpu').squeeze().numpy()
+
+            # Generate super-resolved data (SR) from HR data
             hr_sr_emg = self.generator(hr_emg).detach().to(self.device)
-            hr_sr_emg = hr_sr_emg.squeeze().numpy()
+            hr_sr_emg = hr_sr_emg.to('cpu').squeeze().numpy()
 
             # Save signal from lr to hr
             last_slash_index_lr = lr_emg_paths[0].rfind("/")
