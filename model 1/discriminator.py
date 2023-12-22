@@ -98,7 +98,6 @@ class Discriminator(nn.Module):
         out = self.leaky_relu8(out)
 
         out = self.flatten(out)
-        print("shape 10", out.shape)
 
         out = self.dense1(out)
         out = self.leaky_relu9(out)
