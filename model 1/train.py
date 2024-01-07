@@ -7,14 +7,14 @@ import os
 if __name__ == "__main__":
 
     # Create a directory for the run if it doesn't exist
-    run_folder = 'runs/' + datetime.now().strftime('%Y%m%d%H%M%S')
-    if not os.path.exists(run_folder):
-        os.makedirs(run_folder)
-        print(f"Folder created at: {run_folder}")
+    run_folder = datetime.now().strftime('%Y%m%d%H%M%S')
+    if not os.path.exists('runs/' + run_folder):
+        os.makedirs('runs/' + run_folder)
+        print(f"Folder created at: runs/{run_folder}")
 
     # TODO: try learning_rate= 0.0001
     # Create a object of the trainer
-    trainer = Trainer(num_epochs=50, batch_size=16, learning_rate=0.001, run_folder=run_folder)
+    trainer = Trainer(num_epochs=40, batch_size=16, learning_rate=0.001, run_folder='runs/' + run_folder)
 
     # Prepare the data of the trainer (read csv, split train and validation set)
     trainer.prepare_data()

@@ -10,13 +10,17 @@ from data import Custom_Dataset
 class Interpolation:
     def __init__(self):
         # Load the JSON file with values for min max normalization into a Python dictionary
+        with open('../dataset/mean_std.json', 'r') as file:
+            mean_std_dict = json.load(file)
+
+        # Load the JSON file with values for min max normalization into a Python dictionary
         with open('../dataset/min_max.json', 'r') as file:
             min_max_dict = json.load(file)
 
         # Load data
         data = pd.read_csv('../testset/data.csv', sep=";")
         self.testing = torch.utils.data.DataLoader(
-            Custom_Dataset(data, min_value=min_max_dict['min'], max_value=min_max_dict['max']))
+            Custom_Dataset(data, min_max_dict['min'], min_max_dict['max'], mean_std_dict['mean'], mean_std_dict['std']))
 
         # Create folders for B-Spline and Bicubic interpolated signals
         self.bspline_folder = 'interpolated_data/bspline'

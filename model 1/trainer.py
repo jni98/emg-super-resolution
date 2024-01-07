@@ -6,7 +6,6 @@ import matplotlib
 matplotlib.use('Agg')  # Use the 'Agg' backend
 
 import numpy as np
-from datetime import datetime
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -93,6 +92,10 @@ class Trainer:
         with open('../dataset/min_max.json', 'r') as file:
             min_max_dict = json.load(file)
 
+        # Load the JSON file with values for min max normalization into a Python dictionary
+        with open('../dataset/mean_std.json', 'r') as file:
+            mean_std_dict = json.load(file)
+
         data_train_val = pd.read_csv('../dataset/data.csv', sep=";")
         data_test = pd.read_csv('../testset/data.csv', sep=";")
 
@@ -100,16 +103,16 @@ class Trainer:
 
         # Use Custom_Dataset with min-max normalization
         self.training = torch.utils.data.DataLoader(
-            Custom_Dataset(train, min_max_dict['min'], min_max_dict['max']),
+            Custom_Dataset(train, min_max_dict['min'], min_max_dict['max'], mean_std_dict['mean'], mean_std_dict['std']),
             batch_size=self.batch_size
         )
 
         self.validation = torch.utils.data.DataLoader(
-            Custom_Dataset(val, min_max_dict['min'], min_max_dict['max']),
+            Custom_Dataset(val, min_max_dict['min'], min_max_dict['max'], mean_std_dict['mean'], mean_std_dict['std']),
             batch_size=self.batch_size
         )
         self.testing = torch.utils.data.DataLoader(
-            Custom_Dataset(data_test, min_max_dict['min'], min_max_dict['max']))
+            Custom_Dataset(data_test, min_max_dict['min'], min_max_dict['max'], mean_std_dict['mean'], mean_std_dict['std']))
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         # Save the dictionary to a file
@@ -227,7 +230,7 @@ class Trainer:
             output_discriminator_fake = self.discriminator(sr_emg)
             loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
-            loss_discriminator = (loss_discriminator_real + loss_discriminator_fake) * 100
+            loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
             # print(loss_discriminator)
             # print(loss_discriminator_real)
             # print(loss_discriminator_fake)
@@ -253,9 +256,19 @@ class Trainer:
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
+            #TODO
+            # 2D to 3D for deleting last row and column:
+            # reshape back to grid shape
+            # sr_emg_reshaped = sr_emg.reshape(8, 8, emg_data.shape[1])
+            # # Transpose and flip to get to correct grid numbering
+            # emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
+            # emg_data_grid = np.flipud(emg_data_transposed)
+            # sr_emg_permute = sr_emg.permute(0, 1, 3, 2)
+            # sr_emg_reshaped = sr_emg_permute.reshape(self.batch_size,1,)
+
             loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
 
-            loss_generator = 100 * (0.01 * loss_generator_adv + loss_generator_content)
+            loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
             # print(loss_generator)
             # print(loss_generator_adv)
             # print(loss_generator_content)
@@ -450,8 +463,9 @@ class Trainer:
         -------
         None
         """
+
         # load the final generator
-        self.generator.load_state_dict(torch.load('runs/20231221091744/final_generator.pt'))
+        self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):

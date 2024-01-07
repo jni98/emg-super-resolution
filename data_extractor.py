@@ -209,6 +209,8 @@ def dataset_creator_dominik(data_paths):
     min_value_dataset = np.inf
     max_value_dataset = -np.inf
 
+    combined_data = []
+
     for i in range(len(data_paths)):
 
         # extract data path and pickle file name from list of paths
@@ -216,7 +218,7 @@ def dataset_creator_dominik(data_paths):
 
         # create folder for the results
         base_directory = data_path.replace("data/", "").rsplit("/", 1)[0]
-        dataset_path = 'testset' + '/' + base_directory + '/'
+        dataset_path = 'dataset' + '/' + base_directory + '/'
 
         # Create the folder if it doesn't exist
         os.makedirs(dataset_path, exist_ok=True)
@@ -237,7 +239,7 @@ def dataset_creator_dominik(data_paths):
         plt.savefig(dataset_path + f'Histogram-path-{i}-20bins.png')
 
 
-        for grid in range(1):
+        for grid in range(2):
             # only use first 64 channels, since data is from two grids
             emg_data = emg_data_complete[grid*64:(grid*64)+64, :]
 
@@ -260,7 +262,7 @@ def dataset_creator_dominik(data_paths):
                 if emg_windowed.max() > max_value_dataset:
                     max_value_dataset = emg_windowed.max()
 
-                # In case LR grid should move on HR grid change range(1) to range(2)
+                # TODO:In case LR grid should move on HR grid change range(1) to range(2)
                 for col in range(1):
                     for row in range(1):
 
@@ -269,6 +271,8 @@ def dataset_creator_dominik(data_paths):
                         # 3D to 2D array
                         emg_windowed_lr_2D = np.flipud(emg_windowed_lr).transpose(1, 0, 2).reshape(16, 512)
                         emg_windowed_2D = np.flipud(emg_windowed).transpose(1, 0, 2).reshape(64, 512)
+
+                        combined_data.append(emg_windowed_2D)
 
                         # transpose for samples x channels shape
                         emg_windowed_lr_2D = emg_windowed_lr_2D.transpose()
@@ -288,8 +292,20 @@ def dataset_creator_dominik(data_paths):
         "max": max_value_dataset,
     }
 
-    with open('testset' + '/min_max.json', 'w') as file:
+    mean = np.mean(combined_data)
+    std = np.std(combined_data)
+
+    # Create a dictionary for the hyperparameters
+    mean_std_dic = {
+        "mean": mean,
+        "std":std,
+    }
+
+    with open('dataset' + '/min_max.json', 'w') as file:
         json.dump(min_max_dic, file)
+
+    with open('dataset' + '/mean_std.json', 'w') as file:
+        json.dump(mean_std_dic, file)
 
 
     # Combine LR and HR filenames row-wise
@@ -299,7 +315,7 @@ def dataset_creator_dominik(data_paths):
     csv_file = 'data.csv'
 
     # Open the CSV file in append mode and write the data
-    with open('testset' + '/' + csv_file, mode='a', newline='') as file:
+    with open('dataset' + '/' + csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
 
         # Add a header if the file is empty
@@ -311,10 +327,10 @@ def dataset_creator_dominik(data_paths):
             writer.writerow([lr_filename + ';' + hr_filename])
 
 if __name__ == '__main__':
-    # data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
-    #               'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
-    #               'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
-    data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
+    data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
+                   'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
+                   'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
+    #data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
 
     movement_name = 'thumb_slow'
 

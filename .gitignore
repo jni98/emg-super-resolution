@@ -132,3 +132,5 @@ dmypy.json
 /dataset/
 /Visualization/plot_correlations/
 /Visualization/plot_heatmaps/
+/Visualization/plot_pearson_coefficient/
+/Visualization/plot_dtw/

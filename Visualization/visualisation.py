@@ -2,6 +2,7 @@ import json
 
 import numpy as np
 import matplotlib
+from dtw import accelerated_dtw
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
@@ -12,19 +13,18 @@ class Visualizer:
         self.file_path = file_path
 
         # Load the JSON file with values for min max normalization into a Python dictionary
-        with open('../dataset/min_max.json', 'r') as file:
-            min_max_dict = json.load(file)
+        with open('../dataset/mean_std.json', 'r') as file:
+            mean_std_dict = json.load(file)
 
         # Load your data (already normalized)
-        inter_lr_sr = np.load(self.file_path + '/interpolated/bspline/window10-lr-sr.npy').transpose()
-        inter_hr_sr = np.load(self.file_path + '/interpolated/bspline/window10-hr-sr.npy').transpose()
-        model1_lr_sr = np.load(self.file_path + '/model1/window10-lr-sr.npy').transpose()
-        model1_hr_sr = np.load(self.file_path + '/model1/window10-hr-sr.npy').transpose()
+        inter_lr_sr = np.load(self.file_path + '/interpolated/bspline/grid-0-window6000-pos-0-0-lr-sr.npy').transpose()
+        inter_hr_sr = np.load(self.file_path + '/interpolated/bspline/grid-0-window6000-pos-0-0-hr-sr.npy').transpose()
+        model1_lr_sr = np.load(self.file_path + '/model1/grid-0-window6000-pos-0-0-lr-sr.npy').transpose()
+        model1_hr_sr = np.load(self.file_path + '/model1/grid-0-window6000-pos-0-0-hr-sr.npy').transpose()
 
         # Load original data and normalize it
-        origin_hr = np.load(self.file_path + '/window10-hr.npy').transpose()
-        origin_hr_normalized = (1 - (-1)) * (origin_hr - min_max_dict['min']) / (min_max_dict['max'] - min_max_dict['min']) -1
-
+        origin_hr = np.load(self.file_path + '/grid-0-window6000-pos-0-0-hr.npy').transpose()
+        origin_hr_standardized = (origin_hr - mean_std_dict['mean'])/mean_std_dict['std']
 
         # Create a dictionary with titles as keys and EMG data as values
         self.emg_data_dict = {
@@ -32,7 +32,7 @@ class Visualizer:
             'Interpolation HR to SR': inter_hr_sr,
             'Model 1 LR to SR': model1_lr_sr,
             'Model 1 HR to SR': model1_hr_sr,
-            'Origin HR': origin_hr_normalized
+            'Origin HR': origin_hr_standardized
         }
 
     def plot_emg_channels(self):
@@ -51,7 +51,7 @@ class Visualizer:
                 #TODO: Achtung, nicht das volle Zeitfenster
                 signal = emg_data[j][:200]
                 plt.plot(time_axis, signal.squeeze() + offset, label=f'Channel {j + 1}')
-                offset += 0.1
+                offset += 5
 
             plt.xlabel('Time in samples')
             plt.ylabel('Voltage')
@@ -109,25 +109,46 @@ class Visualizer:
         line_styles = ['-', '--']  # You can extend this list as needed
 
         for g in range(1, len(grids)):
-            grid_1 = grids[0]
+            groundtruth = grids[0]
             grid_2 = grids[g]
 
             # Calculate cross-correlation for specific pairs of electrodes
-            correlations = []
+            normalized_corr = []
+
             for i in range(64):  # Iterate through electrodes
-                correlation = np.correlate(grid_1[i], grid_2[i], mode='same')
-                correlations.append(correlation)
+                correlation = np.correlate(groundtruth[i], grid_2[i], mode='full')
 
-            # Find the maximum and minimum values of correlations across all electrodes
-            max_corr = max([max(corr) for corr in correlations])
-            min_corr = min([min(corr) for corr in correlations])
+                # Calculate autocorrelation of groundtruth
+                autocorr_groundtruth = np.correlate(groundtruth[i], groundtruth[i], mode='full')
 
-            # Plot the correlations
+                # normalize correlation by autocorrelation
+                normalized_correlation = correlation / np.max(autocorr_groundtruth)
+
+                normalized_corr.append(normalized_correlation)
+
+                # Calculate dynamic time warping (DTW)
+                d, cost_matrix, acc_cost_matrix, path = accelerated_dtw(groundtruth[i], grid_2[i], dist='euclidean')
+                # Plot and save the DTW visualization for each electrode
+                plt.imshow(acc_cost_matrix.T, origin='lower', cmap='gray', interpolation='nearest')
+                plt.plot(path[0], path[1], 'w')
+
+                # Save the plot with a unique filename for each electrode (e.g., using electrode index)
+                plt.title(f'DTW {keys_list[g]} - Electrode {i}')
+                plt.xlabel('Ground Truth')
+                plt.ylabel('Model Prediction')
+                plt.savefig(f'plot_dtw/{keys_list[g]}/dtw_visualization_electrode_{i}.png')  # Save the plot as an image
+                plt.close()
+
+            # Find the maximum and minimum values of normalized_corr across all electrodes
+            max_corr = max([max(corr) for corr in normalized_corr])
+            min_corr = min([min(corr) for corr in normalized_corr])
+
+            # Plot the normalized_corr
             plt.figure()
             color = 0
             style = 0
             number = 1
-            for i, corr in enumerate(correlations):
+            for i, corr in enumerate(normalized_corr):
                 plt.plot(corr, label=f'Ch {i + 1}', linestyle=line_styles[style % len(line_styles)],
                          color=colors[color % len(colors)])  #
                 plt.xlabel('Shift')
@@ -151,7 +172,6 @@ class Visualizer:
                     plt.figure()
                     color = 0
                     style = 0
-
 
 if __name__ == '__main__':
     file_path = '../testset/Dominik/offline/20230720-091659'
