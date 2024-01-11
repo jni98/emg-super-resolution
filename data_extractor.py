@@ -238,10 +238,9 @@ def dataset_creator_dominik(data_paths):
         plt.title('Histogram Data')
         plt.savefig(dataset_path + f'Histogram-path-{i}-20bins.png')
 
-
         for grid in range(2):
             # only use first 64 channels, since data is from two grids
-            emg_data = emg_data_complete[grid*64:(grid*64)+64, :]
+            emg_data = emg_data_complete[grid * 64:(grid * 64) + 64, :]
 
             # 2D to 3D:
             # reshape back to grid shape
@@ -253,7 +252,7 @@ def dataset_creator_dominik(data_paths):
             windows = emg_data.shape[1] - 512
 
             # window the signal to 512 samples
-            for window in range(0, windows, 200):
+            for window in range(0, windows, 50):
                 emg_windowed = emg_data_grid[:, :, window:(window + 512)]
 
                 if emg_windowed.min() < min_value_dataset:
@@ -265,7 +264,6 @@ def dataset_creator_dominik(data_paths):
                 # TODO:In case LR grid should move on HR grid change range(1) to range(2)
                 for col in range(1):
                     for row in range(1):
-
                         emg_windowed_lr = emg_windowed[row::2, col::2, :]
 
                         # 3D to 2D array
@@ -298,7 +296,7 @@ def dataset_creator_dominik(data_paths):
     # Create a dictionary for the hyperparameters
     mean_std_dic = {
         "mean": mean,
-        "std":std,
+        "std": std,
     }
 
     with open('dataset' + '/min_max.json', 'w') as file:
@@ -306,7 +304,6 @@ def dataset_creator_dominik(data_paths):
 
     with open('dataset' + '/mean_std.json', 'w') as file:
         json.dump(mean_std_dic, file)
-
 
     # Combine LR and HR filenames row-wise
     data = zip(lr_filenames, hr_filenames)
@@ -326,11 +323,12 @@ def dataset_creator_dominik(data_paths):
         for lr_filename, hr_filename in data:
             writer.writerow([lr_filename + ';' + hr_filename])
 
+
 if __name__ == '__main__':
     data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
-                   'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
-                   'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
-    #data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
+                  'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
+                  'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
+    # data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
 
     movement_name = 'thumb_slow'
 

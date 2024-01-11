@@ -3,7 +3,6 @@ from datetime import datetime
 from trainer import Trainer
 import os
 
-
 if __name__ == "__main__":
 
     # Create a directory for the run if it doesn't exist
@@ -12,7 +11,6 @@ if __name__ == "__main__":
         os.makedirs('runs/' + run_folder)
         print(f"Folder created at: runs/{run_folder}")
 
-    # TODO: try learning_rate= 0.0001
     # Create a object of the trainer
     trainer = Trainer(num_epochs=40, batch_size=16, learning_rate=0.001, run_folder='runs/' + run_folder)
 
@@ -23,10 +21,10 @@ if __name__ == "__main__":
     trainer.initialize_models()
 
     # Run the training
-    train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, val_loss, psnr = trainer.train()
+    #train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, val_loss, psnr = trainer.train()
 
     # Plot the training results
-    trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, val_loss, psnr)
+    #trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, val_loss, psnr)
 
     # TODO: Funkion noch ordentlich schreiben
     trainer.generate_sr_data()

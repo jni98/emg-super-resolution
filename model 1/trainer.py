@@ -94,7 +94,7 @@ class Trainer:
 
         # Load the JSON file with values for min max normalization into a Python dictionary
         with open('../dataset/mean_std.json', 'r') as file:
-            mean_std_dict = json.load(file)
+            self.mean_std_dict = json.load(file)
 
         data_train_val = pd.read_csv('../dataset/data.csv', sep=";")
         data_test = pd.read_csv('../testset/data.csv', sep=";")
@@ -103,18 +103,23 @@ class Trainer:
 
         # Use Custom_Dataset with min-max normalization
         self.training = torch.utils.data.DataLoader(
-            Custom_Dataset(train, min_max_dict['min'], min_max_dict['max'], mean_std_dict['mean'], mean_std_dict['std']),
+            Custom_Dataset(train, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'],
+                           self.mean_std_dict['std']),
             batch_size=self.batch_size
         )
 
         self.validation = torch.utils.data.DataLoader(
-            Custom_Dataset(val, min_max_dict['min'], min_max_dict['max'], mean_std_dict['mean'], mean_std_dict['std']),
+            Custom_Dataset(val, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'],
+                           self.mean_std_dict['std']),
             batch_size=self.batch_size
         )
         self.testing = torch.utils.data.DataLoader(
-            Custom_Dataset(data_test, min_max_dict['min'], min_max_dict['max'], mean_std_dict['mean'], mean_std_dict['std']))
+            Custom_Dataset(data_test, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'],
+                           self.mean_std_dict['std']))
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
+        self.hyperparameter["standardized"] = 'True'
+
         # Save the dictionary to a file
         with open(self.run_folder + '/hyperparameter.json', 'w') as file:
             json.dump(self.hyperparameter, file)
@@ -256,7 +261,7 @@ class Trainer:
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            #TODO
+            # TODO
             # 2D to 3D for deleting last row and column:
             # reshape back to grid shape
             # sr_emg_reshaped = sr_emg.reshape(8, 8, emg_data.shape[1])
@@ -464,6 +469,8 @@ class Trainer:
         None
         """
 
+        self.run_folder = 'runs/20240110210637'
+
         # load the final generator
         self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
@@ -475,19 +482,26 @@ class Trainer:
             # Generate super-resolved data (SR) from LR data
             lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
             lr_sr_emg = lr_sr_emg.to('cpu').squeeze().numpy()
+            lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
             # Generate super-resolved data (SR) from HR data
             hr_sr_emg = self.generator(hr_emg).detach().to(self.device)
             hr_sr_emg = hr_sr_emg.to('cpu').squeeze().numpy()
+            hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
             # Save signal from lr to hr
             last_slash_index_lr = lr_emg_paths[0].rfind("/")
             model1_path = lr_emg_paths[0][:last_slash_index_lr] + '/model1'
             os.makedirs(model1_path, exist_ok=True)
-            np.save(model1_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'), lr_sr_emg
+            np.save(model1_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
+                    lr_sr_emg_destandardized
                     )
 
             # Save B-Spline interpolated signal from hr to sr
             last_slash_index_hr = hr_emg_paths[0].rfind("/")
             np.save(model1_path + (hr_emg_paths[0][last_slash_index_hr:]).replace('-hr.npy', '-hr-sr.npy'),
-                    hr_sr_emg)
+                    hr_sr_emg_destandardized)
+
+    def destandardize_data(self, standardized_data):
+
+        return standardized_data * self.mean_std_dict['std'] + self.mean_std_dict['mean']
