@@ -134,3 +134,5 @@ dmypy.json
 /Visualization/plot_heatmaps/
 /Visualization/plot_pearson_coefficient/
 /Visualization/plot_dtw/
+/Visualization/plot_channels_loss/
+/Visualization/plot_mean_differences_heatmap/
