@@ -1,4 +1,5 @@
 import json
+import math
 import os
 
 import matplotlib
@@ -236,19 +237,8 @@ class Trainer:
             loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
             loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
-            # print(loss_discriminator)
-            # print(loss_discriminator_real)
-            # print(loss_discriminator_fake)
 
             loss_discriminator.backward()
-
-            # Open a file to save gradients
-            with open('discriminator_gradients.txt', 'w') as file:
-                for name, param in self.discriminator.named_parameters():
-                    if param.grad is not None:
-                        file.write(f"Parameter: {name}, Gradient: {param.grad}\n")
-                    else:
-                        file.write(f"Parameter: {name}, Gradient: None (No gradient computed)\n")
 
             self.optimizer_D.step()
 
@@ -261,32 +251,28 @@ class Trainer:
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            # TODO
-            # 2D to 3D for deleting last row and column:
-            # reshape back to grid shape
-            # sr_emg_reshaped = sr_emg.reshape(8, 8, emg_data.shape[1])
-            # # Transpose and flip to get to correct grid numbering
-            # emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
-            # emg_data_grid = np.flipud(emg_data_transposed)
-            # sr_emg_permute = sr_emg.permute(0, 1, 3, 2)
-            # sr_emg_reshaped = sr_emg_permute.reshape(self.batch_size,1,)
+            #######################################
+            # # Delete last row and column
+            #
+            # # Erzeugen Sie ein leeres Array der Form (16, 1, 64, 10)
+            # sr_emg = np.zeros((16, 1, 64,10))
+            #
+            # # Füllen Sie das Array entsprechend den Anforderungen
+            # for i in range(64):
+            #     sr_emg[:, :, i, :] = i + 1
+            #
+            # sr_emg = np.moveaxis(sr_emg, -1, -2)
+            # sr_emg = torch.tensor(sr_emg).to(torch.float32).to(self.device)
 
-            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
+            ########################################
+
+            sr_emg_final = self._delete_row_column(sr_emg)
+
+            loss_generator_content = self.mse(sr_emg_final, hr_emg)  # Content loss
 
             loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
-            # print(loss_generator)
-            # print(loss_generator_adv)
-            # print(loss_generator_content)
 
             loss_generator.backward()
-
-            # Open a file to save gradients
-            with open('generator_gradients.txt', 'w') as file:
-                for name, param in self.generator.named_parameters():
-                    if param.grad is not None:
-                        file.write(f"Parameter: {name}, Gradient: {param.grad}\n")
-                    else:
-                        file.write(f"Parameter: {name}, Gradient: None (No gradient computed)\n")
 
             self.optimizer_G.step()
 
@@ -304,6 +290,37 @@ class Trainer:
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
 
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
+
+
+    def _delete_row_column(self, sr_emg):
+        sr_emg_shape = sr_emg.shape
+
+        new_channel_number = int((math.sqrt(sr_emg_shape[3])-1)**2)
+
+        # Switch last two axes to go from (batch, channel, 512, 64) to (batch, channel, 64, 512)
+        sr_emg_move_axis = sr_emg.permute(0, 1, 3, 2)
+
+        # Reshape to grid shape (batch, 1,8,8,512)
+        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, int(math.sqrt(sr_emg_shape[3])), int(math.sqrt(sr_emg_shape[3])), sr_emg_shape[2])
+
+        # Create array for the new shape where the last row and column are deleted
+        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, sr_emg_shape[2], new_channel_number, dtype=torch.float32, device=self.device)
+
+        for i in range(sr_emg_shape[0]):
+            grid = sr_emg_reshaped[i, 0, :, :, :]
+            grid = grid.transpose(0, 1)
+            grid = torch.flip(grid, [0])
+            grid_small = grid[:-1, :-1, :]
+
+            grid_new = torch.flip(grid_small,[0])
+            grid_new = grid_new.transpose(0,1)
+            grid_new = grid_new.view(new_channel_number,sr_emg_shape[2])
+            grid_new = grid_new.transpose(0,1)
+
+            sr_emg_final[i][0][:][:] = grid_new
+
+        return sr_emg_final
+
 
     def _validate(self, epoch):
         """
@@ -332,8 +349,10 @@ class Trainer:
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
 
+                val_sr_emg_final = self._delete_row_column(val_sr_emg)
+
                 # Calculate validation loss
-                val_loss = self.mse(val_sr_emg, val_hr)
+                val_loss = self.mse(val_sr_emg_final, val_hr)
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
@@ -481,11 +500,13 @@ class Trainer:
 
             # Generate super-resolved data (SR) from LR data
             lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
+            lr_sr_emg = self._delete_row_column(lr_sr_emg)
             lr_sr_emg = lr_sr_emg.to('cpu').squeeze().numpy()
             lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
             # Generate super-resolved data (SR) from HR data
             hr_sr_emg = self.generator(hr_emg).detach().to(self.device)
+            hr_sr_emg = self._delete_row_column(hr_sr_emg)
             hr_sr_emg = hr_sr_emg.to('cpu').squeeze().numpy()
             hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
