@@ -261,23 +261,23 @@ def dataset_creator_dominik(data_paths):
                 if emg_windowed.max() > max_value_dataset:
                     max_value_dataset = emg_windowed.max()
 
-                # TODO:In case LR grid should move on HR grid change range(1) to range(2)
-                for col in range(1):
-                    for row in range(1):
+                for col in range(2):
+                    for row in range(2):
+                        emg_windowed_hr = emg_windowed[row:row+7, col:col+7, :]
                         emg_windowed_lr = emg_windowed[row::2, col::2, :]
 
                         # 3D to 2D array
                         emg_windowed_lr_2D = np.flipud(emg_windowed_lr).transpose(1, 0, 2).reshape(16, 512)
-                        emg_windowed_2D = np.flipud(emg_windowed).transpose(1, 0, 2).reshape(64, 512)
+                        emg_windowed_hr_2D = np.flipud(emg_windowed_hr).transpose(1, 0, 2).reshape(49, 512)
 
-                        combined_data.append(emg_windowed_2D)
+                        combined_data.append(emg_windowed_hr_2D)
 
                         # transpose for samples x channels shape
                         emg_windowed_lr_2D = emg_windowed_lr_2D.transpose()
-                        emg_windowed_2D = emg_windowed_2D.transpose()
+                        emg_windowed_hr_2D = emg_windowed_hr_2D.transpose()
 
                         # save high resolution data and add file name to list
-                        np.save(dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-hr.npy', emg_windowed_2D)
+                        np.save(dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-hr.npy', emg_windowed_hr_2D)
                         hr_filenames.append('../' + dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-hr.npy')
 
                         # save low resolution data and add file name to list
