@@ -3,8 +3,6 @@ import os
 import numpy as np
 import pandas as pd
 from scipy.interpolate import RegularGridInterpolator
-from scipy.interpolate import RectBivariateSpline
-
 import torch
 from data import Custom_Dataset
 
@@ -22,36 +20,10 @@ class Interpolation:
         # Load data
         data = pd.read_csv('../testset/data.csv', sep=";")
         self.testing = torch.utils.data.DataLoader(
-            Custom_Dataset(data, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'], self.mean_std_dict['std']))
+            Custom_Dataset(data, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'],
+                           self.mean_std_dict['std']))
 
-        # Create folders for B-Spline and Bicubic interpolated signals
-        self.bspline_folder = 'interpolated_data/bspline'
-
-    def bicubic_interpolation(self, lr_emg, hr_emg_shape):
-        # Create a grid for the original signal
-        x = np.linspace(0, 1, lr_emg.shape[0])
-        y = np.linspace(0, 1, lr_emg.shape[1])
-        z = np.linspace(0, 1, lr_emg.shape[2])
-
-        # Create a new grid for the desired interpolated signal
-        new_x = np.linspace(0, 1, hr_emg_shape[0])
-        new_y = np.linspace(0, 1, hr_emg_shape[1])
-        new_z = np.linspace(0, 1, hr_emg_shape[2])
-
-        # Create meshgrid from new grid
-        mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
-
-        # Initialize the interpolated signal
-        interpolated_signal = np.zeros(hr_emg_shape)
-
-        # Interpolate along each dimension
-        for i in range(lr_emg.shape[2]):
-            interp = RectBivariateSpline(x, y, lr_emg[:, :, i])
-            interpolated_signal[:, :, i] = interp(new_x, new_y)
-
-        return interpolated_signal
-
-    def b_spline_interpolation(self, lr_emg, hr_emg_shape):
+    def cubic_interpolation(self, lr_emg, hr_emg_shape):
         # Create a grid for the original signal
         x = np.linspace(0, 1, lr_emg.shape[0])
         y = np.linspace(0, 1, lr_emg.shape[1])
@@ -83,68 +55,27 @@ class Interpolation:
             lr_emg_transposed = np.transpose(lr_emg_reshaped, axes=(1, 0, 2))
             lr_emg_grid = np.flipud(lr_emg_transposed)
 
-            # 2D to 3D: reshape back to grid shape
-            hr_emg = hr_emg.squeeze().numpy()
-            hr_emg = hr_emg.transpose()
-            hr_emg_reshaped = hr_emg.reshape(8, 8, hr_emg.shape[1])
-            # Transpose and flip to get to correct grid numbering
-            hr_emg_transposed = np.transpose(hr_emg_reshaped, axes=(1, 0, 2))
-            hr_emg_grid = np.flipud(hr_emg_transposed)
-
-            # Perform B-Spline interpolation
-            interpolated_spline_lr_hr = self.b_spline_interpolation(lr_emg_grid, (8, 8, lr_emg.shape[1]))
-            interpolated_spline_hr_sr = self.b_spline_interpolation(hr_emg_grid, (16, 16, lr_emg.shape[1]))
-
-            # Perform bicubic interpolation
-            interpolated_bicubic_lr_hr = self.bicubic_interpolation(lr_emg_grid, (8, 8, lr_emg.shape[1]))
-            interpolated_bicubic_hr_sr = self.bicubic_interpolation(hr_emg_grid, (16, 16, lr_emg.shape[1]))
+            # Perform cubic interpolation
+            interpolated_spline_lr_hr = self.cubic_interpolation(lr_emg_grid, (7, 7, lr_emg.shape[1]))
 
             # 3D to 2D: reshape back
-            interpolated_spline_lr_hr = np.flipud(interpolated_spline_lr_hr).transpose(1, 0, 2).reshape(64, 512)
-            interpolated_spline_hr_sr = np.flipud(interpolated_spline_hr_sr).transpose(1, 0, 2).reshape(256, 512)
-            interpolated_bicubic_lr_hr = np.flipud(interpolated_bicubic_lr_hr).transpose(1, 0, 2).reshape(64, 512)
-            interpolated_bicubic_hr_sr = np.flipud(interpolated_bicubic_hr_sr).transpose(1, 0, 2).reshape(256, 512)
+            interpolated_spline_lr_hr = np.flipud(interpolated_spline_lr_hr).transpose(1, 0, 2).reshape(49, 512)
 
             # flip rows and columns
             interpolated_spline_lr_hr = interpolated_spline_lr_hr.transpose()
             interpolated_spline_lr_hr = self.destandardize_data(interpolated_spline_lr_hr)
 
-            interpolated_spline_hr_sr = interpolated_spline_hr_sr.transpose()
-            interpolated_spline_hr_sr = self.destandardize_data(interpolated_spline_hr_sr)
-
-            interpolated_bicubic_lr_hr = interpolated_bicubic_lr_hr.transpose()
-            interpolated_bicubic_lr_hr = self.destandardize_data(interpolated_bicubic_lr_hr)
-
-            interpolated_bicubic_hr_sr = interpolated_bicubic_hr_sr.transpose()
-            interpolated_bicubic_hr_sr = self.destandardize_data(interpolated_bicubic_hr_sr)
-
-
-            # Save B-Spline interpolated signal from lr to hr
+            # Save cubic interpolated signal from lr to hr
             last_slash_index_lr = lr_emg_paths[0].rfind("/")
-            bspline_path = lr_emg_paths[0][:last_slash_index_lr] + '/interpolated/bspline'
-            bicubic_path = lr_emg_paths[0][:last_slash_index_lr] + '/interpolated/bicubic'
+            cubic_path = lr_emg_paths[0][:last_slash_index_lr] + '/interpolated/cubic'
 
-            os.makedirs(bspline_path, exist_ok=True)
-            np.save(bspline_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
+            os.makedirs(cubic_path, exist_ok=True)
+            np.save(cubic_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
                     interpolated_spline_lr_hr)
 
-            os.makedirs(bicubic_path, exist_ok=True)
-            np.save(bicubic_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
-                    interpolated_bicubic_lr_hr)
-
-            # Save B-Spline interpolated signal from hr to sr
-            last_slash_index_hr = hr_emg_paths[0].rfind("/")
-            np.save(bspline_path + (hr_emg_paths[0][last_slash_index_hr:]).replace('-hr.npy', '-hr-sr.npy'),
-                    interpolated_spline_hr_sr)
-
-            # Save Bicubic interpolated signal from hr to sr
-            last_slash_index_hr = hr_emg_paths[0].rfind("/")
-            np.save(bicubic_path + (hr_emg_paths[0][last_slash_index_hr:]).replace('-hr.npy', '-hr-sr.npy'),
-                    interpolated_bicubic_hr_sr)
-
     def destandardize_data(self, standardized_data):
-
         return standardized_data * self.mean_std_dict['std'] + self.mean_std_dict['mean']
+
 
 if __name__ == '__main__':
     interpolater = Interpolation()
