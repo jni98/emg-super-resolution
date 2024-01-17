@@ -1,4 +1,3 @@
-import json
 import os
 
 import numpy as np
@@ -9,7 +8,6 @@ matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
 
 from scipy.stats import pearsonr
-import seaborn as sns
 
 
 class Visualizer:
@@ -18,19 +16,16 @@ class Visualizer:
 
         # Load your data (already normalized)
         inter_spline_lr_sr = np.load(
-            self.file_path + '/interpolated/cubic/grid-0-window6000-pos-0-0-lr-sr.npy').transpose()
-        # inter_spline_hr_sr = np.load(
-        #    self.file_path + '/interpolated/cubic/grid-0-window6000-pos-0-0-hr-sr.npy').transpose()
-        model1_lr_sr = np.load(self.file_path + '/model1/grid-0-window6000-pos-0-0-lr-sr.npy').transpose()
-        model1_hr_sr = np.load(self.file_path + '/model1/grid-0-window6000-pos-0-0-hr-sr.npy').transpose()
+            self.file_path + '/interpolated/cubic/grid-0-window1000-pos-0-0-lr-sr.npy').transpose()
+        model1_lr_sr = np.load(self.file_path + '/model1/grid-0-window1000-pos-0-0-lr-sr.npy').transpose()
+        model1_hr_sr = np.load(self.file_path + '/model1/grid-0-window1000-pos-0-0-hr-sr.npy').transpose()
 
         # Load original data and normalize it
-        origin_hr = np.load(self.file_path + '/grid-0-window6000-pos-0-0-hr.npy').transpose()
+        origin_hr = np.load(self.file_path + '/grid-0-window1000-pos-0-0-hr.npy').transpose()
 
         # Create a dictionary with titles as keys and EMG data as values
         self.emg_data_dict = {
             'Cubic LR to SR': inter_spline_lr_sr,
-            # 'Cubic HR to SR': inter_spline_hr_sr,
             'Model 1 LR to SR': model1_lr_sr,
             'Model 1 HR to SR': model1_hr_sr,
             'Original HR': origin_hr
@@ -73,7 +68,8 @@ class Visualizer:
             handles = handles[::-1]
             labels = labels[::-1]
 
-            plt.legend(handles, labels, loc='upper right')
+            plt.legend(handles, labels, loc='upper left', bbox_to_anchor=(1, 1))
+
             plt.tight_layout()
 
             # Create the directory if it doesn't exist
@@ -132,7 +128,8 @@ class Visualizer:
             handles = handles[::-1]
             labels = labels[::-1]
 
-            plt.legend(handles, labels, loc='upper right')
+            plt.legend(handles, labels, loc='upper left', bbox_to_anchor=(1, 1))
+
             plt.tight_layout()  # Adjust layouts to avoid overlapping
 
             # Create the directory if it doesn't exist
@@ -329,16 +326,16 @@ class Visualizer:
             mask = np.tril(np.ones_like(correlation_coefficients, dtype=bool))
 
             # Create a larger heatmap
-            plt.figure(figsize=(25,25))
+            plt.figure(figsize=(8.27, 7))
 
             # Plot the heatmap with values and ticks
             plt.imshow(np.ma.masked_array(correlation_coefficients, ~mask), cmap='viridis', origin='upper', vmin=0,
                        vmax=1)
 
             # Add specific values to each cell
-            for i in range(49):
-                for j in range(49):
-                    plt.text(j, i, f'{correlation_coefficients[i, j]:.2f}', ha='center', va='center', color='white')
+            # for i in range(49):
+            #     for j in range(49):
+            #         plt.text(j, i, f'{correlation_coefficients[i, j]:.2f}', ha='center', va='center', color='white')
 
             # Add colorbar
             cbar = plt.colorbar()
@@ -365,8 +362,8 @@ if __name__ == '__main__':
     file_path = '../testset/Dominik/offline/20230720-091659'
     visualize = Visualizer(file_path)
 
-    # visualize.plot_emg_channels()
+    visualize.plot_emg_channels()
     visualize.plot_emg_channels_difference()
-    # visualize.plot_correlations()
-    # visualize.plot_heat_maps()
-    #visualize.plot_pearson_coefficient()
+    visualize.plot_correlations()
+    visualize.plot_heat_maps()
+    visualize.plot_pearson_coefficient()

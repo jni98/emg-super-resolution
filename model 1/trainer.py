@@ -488,8 +488,6 @@ class Trainer:
         None
         """
 
-        self.run_folder = 'runs/20240110210637'
-
         # load the final generator
         self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode

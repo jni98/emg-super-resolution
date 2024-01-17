@@ -12,7 +12,7 @@ if __name__ == "__main__":
         print(f"Folder created at: runs/{run_folder}")
 
     # Create a object of the trainer
-    trainer = Trainer(num_epochs=30, batch_size=16, learning_rate=0.0001, run_folder='runs/' + run_folder)
+    trainer = Trainer(num_epochs=40, batch_size=16, learning_rate=0.0001, run_folder='runs/' + run_folder)
 
     # Prepare the data of the trainer (read csv, split train and validation set)
     trainer.prepare_data()

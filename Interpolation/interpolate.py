@@ -38,15 +38,17 @@ class Interpolation:
         mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
 
         # Create interpolator
-        interpolator = RegularGridInterpolator((x, y, z), lr_emg)
+        interpolator = RegularGridInterpolator((x, y, z), lr_emg, method = 'cubic')
+        print("Created the interpolater")
 
         # Interpolate
         interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
-
+        print("Finished the interpolator")
         return interpolated_signal
 
     def interpolate(self):
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+            print(f'{batch_idx} of 98 batches')
             # 2D to 3D: reshape back to grid shape
             lr_emg = lr_emg.squeeze().numpy()
             lr_emg = lr_emg.transpose()
@@ -70,6 +72,7 @@ class Interpolation:
             cubic_path = lr_emg_paths[0][:last_slash_index_lr] + '/interpolated/cubic'
 
             os.makedirs(cubic_path, exist_ok=True)
+            print("Saving")
             np.save(cubic_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
                     interpolated_spline_lr_hr)
 
