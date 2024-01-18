@@ -356,14 +356,90 @@ class Visualizer:
 
             plt.savefig(f'{directory}{keys_list[g]} with Original HR.png')
 
+
+    def plot_pearson_coefficient_grid(self):
+
+        grids = (
+            self.emg_data_dict['Original HR'], self.emg_data_dict['Cubic LR to SR'],
+            self.emg_data_dict['Model 1 LR to SR'])
+
+        # Accessing keys by index
+        keys_list = ('Original HR', 'Cubic LR to SR', 'Model 1 LR to SR')
+
+        for g in range(1, len(grids)):
+            groundtruth = grids[0]
+            grid_2 = grids[g]
+
+            # Initialize an array to store correlation coefficients
+            correlation_coefficients = np.zeros((49, 49))
+
+            # Calculate Pearson correlation coefficients
+            for i in range(49):
+                for j in range(49):
+                    correlation_coefficients[i, j], _ = pearsonr(groundtruth[i], grid_2[j])
+
+                correlation_grid = correlation_coefficients[i]
+                correlation_grid = correlation_grid.reshape(7,7)
+                correlation_grid = np.transpose(correlation_grid, axes=(1,0))
+                correlation_grid = np.flipud(correlation_grid)
+
+                # Plot and save mean_differences_grid
+                plt.figure()
+                plt.imshow(correlation_grid, cmap='viridis', origin='upper', vmin=0, vmax=1)
+
+                # Set ticks and tick labels before calling imshow
+                plt.xticks(range(7), labels=range(1, 8))
+                plt.yticks(range(7), labels=range(7, 0, -1))
+
+                plt.title(f'Pearson coefficient - Original channel {i} with {keys_list[g]}')
+                plt.colorbar()
+
+                # Create the directory if it doesn't exist
+                directory = f'plot_pearsonr_heatmap/'
+                os.makedirs(directory, exist_ok=True)
+
+                plt.savefig(f'{directory}OriginalChannel{i}_{keys_list[g]}.png')
+                plt.close()
+
+
+            # Mask the upper triangle
+            mask = np.tril(np.ones_like(correlation_coefficients, dtype=bool))
+
+            # Create a larger heatmap
+            plt.figure(figsize=(8.27, 7))
+
+            # Plot the heatmap with values and ticks
+            plt.imshow(np.ma.masked_array(correlation_coefficients, ~mask), cmap='viridis', origin='upper', vmin=0,
+                       vmax=1)
+
+            # Add colorbar
+            cbar = plt.colorbar()
+            cbar.set_label('Pearson Coefficient')
+
+            # Add ticks to both axes
+            plt.xticks(np.arange(0, 49, step=5), labels=np.arange(0, 49, step=5))
+            plt.yticks(np.arange(0, 49, step=5), labels=np.arange(0, 49, step=5))
+
+            plt.title(f'Pearson coefficient of {keys_list[g]} with Original HR')
+            plt.xlabel(f'{keys_list[g]}')
+            plt.ylabel('Original HR')
+            plt.tight_layout()
+
+            # Create the directory if it doesn't exist
+            directory = f'plot_pearsonr/'
+            os.makedirs(directory, exist_ok=True)
+
+            plt.savefig(f'{directory}{keys_list[g]} with Original HR.png')
+
 if __name__ == '__main__':
     # TODO: Beschriftung mit (predicted) etc. passt nicht zu HR to SR plots
 
     file_path = '../testset/Dominik/offline/20230720-091659'
     visualize = Visualizer(file_path)
 
-    visualize.plot_emg_channels()
-    visualize.plot_emg_channels_difference()
-    visualize.plot_correlations()
-    visualize.plot_heat_maps()
-    visualize.plot_pearson_coefficient()
+    # visualize.plot_emg_channels()
+    # visualize.plot_emg_channels_difference()
+    # visualize.plot_correlations()
+    # visualize.plot_heat_maps()
+    # visualize.plot_pearson_coefficient()
+    visualize.plot_pearson_coefficient_grid()
