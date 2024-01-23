@@ -117,7 +117,6 @@ class Visualizer:
                 plt.plot(time_axis, (difference + offset), label=f'Channel {j + 1} {predicted}')
                 offset += 400
 
-
             plt.xlabel('Time in samples')
             plt.title(title)
 
@@ -155,7 +154,7 @@ class Visualizer:
             plt.xticks(range(7), labels=range(1, 8))
             plt.yticks(range(7), labels=range(7, 0, -1))
 
-            plt.title(f'Absolute Mean Differences - {title}')
+            plt.title(f'Mean absolute differences - {title}')
             plt.colorbar()
 
             # Create the directory if it doesn't exist
@@ -356,7 +355,6 @@ class Visualizer:
 
             plt.savefig(f'{directory}{keys_list[g]} with Original HR.png')
 
-
     def plot_pearson_coefficient_grid(self):
 
         grids = (
@@ -379,8 +377,8 @@ class Visualizer:
                     correlation_coefficients[i, j], _ = pearsonr(groundtruth[i], grid_2[j])
 
                 correlation_grid = correlation_coefficients[i]
-                correlation_grid = correlation_grid.reshape(7,7)
-                correlation_grid = np.transpose(correlation_grid, axes=(1,0))
+                correlation_grid = correlation_grid.reshape(7, 7)
+                correlation_grid = np.transpose(correlation_grid, axes=(1, 0))
                 correlation_grid = np.flipud(correlation_grid)
 
                 # Plot and save mean_differences_grid
@@ -400,7 +398,6 @@ class Visualizer:
 
                 plt.savefig(f'{directory}OriginalChannel{i}_{keys_list[g]}.png')
                 plt.close()
-
 
             # Mask the upper triangle
             mask = np.tril(np.ones_like(correlation_coefficients, dtype=bool))
@@ -431,15 +428,16 @@ class Visualizer:
 
             plt.savefig(f'{directory}{keys_list[g]} with Original HR.png')
 
+
 if __name__ == '__main__':
     # TODO: Beschriftung mit (predicted) etc. passt nicht zu HR to SR plots
 
     file_path = '../testset/Dominik/offline/20230720-091659'
     visualize = Visualizer(file_path)
 
-    # visualize.plot_emg_channels()
-    # visualize.plot_emg_channels_difference()
-    # visualize.plot_correlations()
-    # visualize.plot_heat_maps()
-    # visualize.plot_pearson_coefficient()
+    visualize.plot_emg_channels()
+    visualize.plot_emg_channels_difference()
+    visualize.plot_correlations()
+    visualize.plot_heat_maps()
+    visualize.plot_pearson_coefficient()
     visualize.plot_pearson_coefficient_grid()

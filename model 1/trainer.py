@@ -291,20 +291,21 @@ class Trainer:
 
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
 
-
     def _delete_row_column(self, sr_emg):
         sr_emg_shape = sr_emg.shape
 
-        new_channel_number = int((math.sqrt(sr_emg_shape[3])-1)**2)
+        new_channel_number = int((math.sqrt(sr_emg_shape[3]) - 1) ** 2)
 
         # Switch last two axes to go from (batch, channel, 512, 64) to (batch, channel, 64, 512)
         sr_emg_move_axis = sr_emg.permute(0, 1, 3, 2)
 
         # Reshape to grid shape (batch, 1,8,8,512)
-        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, int(math.sqrt(sr_emg_shape[3])), int(math.sqrt(sr_emg_shape[3])), sr_emg_shape[2])
+        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, int(math.sqrt(sr_emg_shape[3])),
+                                                int(math.sqrt(sr_emg_shape[3])), sr_emg_shape[2])
 
         # Create array for the new shape where the last row and column are deleted
-        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, sr_emg_shape[2], new_channel_number, dtype=torch.float32, device=self.device)
+        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, sr_emg_shape[2], new_channel_number, dtype=torch.float32,
+                                   device=self.device)
 
         for i in range(sr_emg_shape[0]):
             grid = sr_emg_reshaped[i, 0, :, :, :]
@@ -312,15 +313,14 @@ class Trainer:
             grid = torch.flip(grid, [0])
             grid_small = grid[:-1, :-1, :]
 
-            grid_new = torch.flip(grid_small,[0])
-            grid_new = grid_new.transpose(0,1)
-            grid_new = grid_new.view(new_channel_number,sr_emg_shape[2])
-            grid_new = grid_new.transpose(0,1)
+            grid_new = torch.flip(grid_small, [0])
+            grid_new = grid_new.transpose(0, 1)
+            grid_new = grid_new.view(new_channel_number, sr_emg_shape[2])
+            grid_new = grid_new.transpose(0, 1)
 
             sr_emg_final[i][0][:][:] = grid_new
 
         return sr_emg_final
-
 
     def _validate(self, epoch):
         """
@@ -427,6 +427,14 @@ class Trainer:
         train_d_loss_fake_np = np.array(train_d_loss_fake)
         val_loss_np = np.array(val_loss)
         psnr_np = np.array(psnr)
+
+        # Save NumPy arrays to files
+        np.save('train_g_loss.npy', train_g_loss_np)
+        np.save('train_d_loss.npy', train_d_loss_np)
+        np.save('train_d_loss_real.npy', train_d_loss_real_np)
+        np.save('train_d_loss_fake.npy', train_d_loss_fake_np)
+        np.save('val_loss.npy', val_loss_np)
+        np.save('psnr.npy', psnr_np)
 
         # Plot Generator and Discriminator loss
         fig_generator_discriminator, (

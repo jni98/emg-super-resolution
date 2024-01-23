@@ -252,7 +252,7 @@ def dataset_creator_dominik(data_paths):
             windows = emg_data.shape[1] - 512
 
             # window the signal to 512 samples
-            for window in range(0, windows, 50):
+            for window in range(0, windows,50):
                 emg_windowed = emg_data_grid[:, :, window:(window + 512)]
 
                 if emg_windowed.min() < min_value_dataset:
