@@ -139,3 +139,4 @@ dmypy.json
 /Visualization/plot_pearsonr/
 /Visualization/plot_channels_difference/
 /Visualization/plot_pearsonr_heatmap/
+/Visualization/plot_pearsonr_heatmap_diagonal/

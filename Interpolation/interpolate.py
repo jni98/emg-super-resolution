@@ -8,7 +8,13 @@ from data import Custom_Dataset
 
 
 class Interpolation:
+    """
+    Class that performs cubic interpolation on the low resolution data to get high resolution data.
+    """
     def __init__(self):
+        """
+        Constructs all the necessary attributes for the interpolation object.
+        """
         # Load the JSON file with values for min max normalization into a Python dictionary
         with open('../dataset/mean_std.json', 'r') as file:
             self.mean_std_dict = json.load(file)
@@ -24,6 +30,20 @@ class Interpolation:
                            self.mean_std_dict['std']))
 
     def cubic_interpolation(self, lr_emg, hr_emg_shape):
+        """
+        Performs cubic interpolation on the low resolution data to get high resolution data.
+        Parameters
+        ----------
+        lr_emg: numpy.ndarray
+                Low resolution emg data.
+        hr_emg_shape: tuple
+                Shape of the high resolution emg data.
+
+        Returns
+        -------
+        interpolated_signal: numpy.ndarray
+                High resolution emg data.
+        """
         # Create a grid for the original signal
         x = np.linspace(0, 1, lr_emg.shape[0])
         y = np.linspace(0, 1, lr_emg.shape[1])
@@ -47,25 +67,34 @@ class Interpolation:
         return interpolated_signal
 
     def interpolate(self):
+        """
+        Performs cubic interpolation on the low resolution data to get high resolution data.
+
+        Returns
+        -------
+        interpolated_lr_hr: numpy.ndarray
+                High resolution emg data.
+        """
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-            print(f'{batch_idx} of 98 batches')
+            print(f'{batch_idx} of 157 batches')
             # 2D to 3D: reshape back to grid shape
             lr_emg = lr_emg.squeeze().numpy()
             lr_emg = lr_emg.transpose()
             lr_emg_reshaped = lr_emg.reshape(4, 4, lr_emg.shape[1])
+
             # Transpose and flip to get to correct grid numbering
             lr_emg_transposed = np.transpose(lr_emg_reshaped, axes=(1, 0, 2))
             lr_emg_grid = np.flipud(lr_emg_transposed)
+            lr_emg_grid = self.destandardize_data(lr_emg_grid)
 
             # Perform cubic interpolation
-            interpolated_spline_lr_hr = self.cubic_interpolation(lr_emg_grid, (7, 7, lr_emg.shape[1]))
+            interpolated_lr_hr = self.cubic_interpolation(lr_emg_grid, (7, 7, lr_emg.shape[1]))
 
             # 3D to 2D: reshape back
-            interpolated_spline_lr_hr = np.flipud(interpolated_spline_lr_hr).transpose(1, 0, 2).reshape(49, 512)
+            interpolated_lr_hr = np.flipud(interpolated_lr_hr).transpose(1, 0, 2).reshape(49, 512)
 
             # flip rows and columns
-            interpolated_spline_lr_hr = interpolated_spline_lr_hr.transpose()
-            interpolated_spline_lr_hr = self.destandardize_data(interpolated_spline_lr_hr)
+            interpolated_lr_hr = interpolated_lr_hr.transpose()
 
             # Save cubic interpolated signal from lr to hr
             last_slash_index_lr = lr_emg_paths[0].rfind("/")
@@ -74,9 +103,21 @@ class Interpolation:
             os.makedirs(cubic_path, exist_ok=True)
             print("Saving")
             np.save(cubic_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
-                    interpolated_spline_lr_hr)
+                    interpolated_lr_hr)
 
     def destandardize_data(self, standardized_data):
+        """
+        De-standardizes the data according to the mean and standard deviation of the training data.
+        Parameters
+        ----------
+        standardized_data: numpy.ndarray
+                Standardized data.
+
+        Returns
+        -------
+        destandardized_data: numpy.ndarray
+                De-standardized data.
+        """
         return standardized_data * self.mean_std_dict['std'] + self.mean_std_dict['mean']
 
 

@@ -11,17 +11,28 @@ from scipy.stats import pearsonr
 
 
 class Visualizer:
+    """
+    Class to visualize the results of the interpolation and the neural networks.
+    """
+
     def __init__(self, file_path):
+        """
+        Constructs all the necessary attributes for the Visualizer object.
+        Parameters
+        ----------
+        file_path: str
+                      Path to the directory where the data is stored.
+        """
         self.file_path = file_path
 
         # Load your data (already normalized)
         inter_spline_lr_sr = np.load(
-            self.file_path + '/interpolated/cubic/grid-0-window1000-pos-0-0-lr-sr.npy').transpose()
-        model1_lr_sr = np.load(self.file_path + '/model1/grid-0-window1000-pos-0-0-lr-sr.npy').transpose()
-        model1_hr_sr = np.load(self.file_path + '/model1/grid-0-window1000-pos-0-0-hr-sr.npy').transpose()
+            self.file_path + '/interpolated/cubic/grid-0-window5120-pos-0-0-lr-sr.npy').transpose()
+        model1_lr_sr = np.load(self.file_path + '/model1/grid-0-window5120-pos-0-0-lr-sr.npy').transpose()
+        model1_hr_sr = np.load(self.file_path + '/model1/grid-0-window5120-pos-0-0-hr-sr.npy').transpose()
 
         # Load original data and normalize it
-        origin_hr = np.load(self.file_path + '/grid-0-window1000-pos-0-0-hr.npy').transpose()
+        origin_hr = np.load(self.file_path + '/grid-0-window5120-pos-0-0-hr.npy').transpose()
 
         # Create a dictionary with titles as keys and EMG data as values
         self.emg_data_dict = {
@@ -32,6 +43,13 @@ class Visualizer:
         }
 
     def plot_emg_channels(self):
+        """
+        Plot all emg channels for the original signal, the model 1 signal and the interpolated signal. Channels are plotted by an offset of 500.
+        Returns
+        -------
+        None
+        """
+
         time_axis = np.arange(200)  # Assuming the time axis runs along axis 2
 
         for title, emg_data in self.emg_data_dict.items():
@@ -81,6 +99,14 @@ class Visualizer:
             plt.figure()
 
     def plot_emg_channels_difference(self):
+        """
+        Plot the mean absolute difference between the channels of the groundtruth signal and model 1 or interpolated signal.
+        Results are displayed on the grid.
+
+        Returns
+        -------
+
+        """
         time_axis = np.arange(512)  # Assuming the time axis runs along axis 2
 
         groundtruth = self.emg_data_dict['Original HR']
@@ -165,6 +191,13 @@ class Visualizer:
             plt.close()
 
     def plot_heat_maps(self):
+        """
+        Plots a heatmap at one specific point in time for each the Original, the cubic interpolated and the model 1 created signal.
+
+        Returns
+        -------
+
+        """
         grids = (
             self.emg_data_dict['Original HR'],
             self.emg_data_dict['Cubic LR to SR'],
@@ -207,6 +240,13 @@ class Visualizer:
         plt.savefig(f'{directory}Heatmaps.png')
 
     def plot_correlations(self):
+        """
+        Plots the cross correlation and the dtw of the original, cubic interpolated and model 1 signal.
+
+        Returns
+        -------
+
+        """
         grids = (
             self.emg_data_dict['Original HR'], self.emg_data_dict['Cubic LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'])
@@ -302,6 +342,15 @@ class Visualizer:
 
     def plot_pearson_coefficient(self):
 
+        """
+        Plots the pearson coefficient of the original signal with the cubic interpolated or the model 1 created signal.
+        Each of the 49 channels is correlated with each of the artifical 49 channels.
+
+        Returns
+        -------
+
+        """
+
         grids = (
             self.emg_data_dict['Original HR'], self.emg_data_dict['Cubic LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'])
@@ -357,6 +406,15 @@ class Visualizer:
 
     def plot_pearson_coefficient_grid(self):
 
+        """
+        Plots the pearson coefficient of the correlation of one channel in the groundtruth signal with all other channels
+        of the interpolated or model 1 signal channels. Results are displayed on the grid.
+
+        Returns
+        -------
+
+        """
+
         grids = (
             self.emg_data_dict['Original HR'], self.emg_data_dict['Cubic LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'])
@@ -371,6 +429,9 @@ class Visualizer:
             # Initialize an array to store correlation coefficients
             correlation_coefficients = np.zeros((49, 49))
 
+            # Initialize an array to store correlation coefficients
+            correlation_coefficients_diagonal = np.zeros((49))
+
             # Calculate Pearson correlation coefficients
             for i in range(49):
                 for j in range(49):
@@ -383,21 +444,47 @@ class Visualizer:
 
                 # Plot and save mean_differences_grid
                 plt.figure()
-                plt.imshow(correlation_grid, cmap='viridis', origin='upper', vmin=0, vmax=1)
+                plt.imshow(correlation_grid, cmap='viridis', origin='upper', vmin=0.2, vmax=1)
 
                 # Set ticks and tick labels before calling imshow
                 plt.xticks(range(7), labels=range(1, 8))
                 plt.yticks(range(7), labels=range(7, 0, -1))
 
-                plt.title(f'Pearson coefficient - Original channel {i} with {keys_list[g]}')
+                plt.title(f'Pearson coefficient - Original channel {i + 1} with {keys_list[g]}')
                 plt.colorbar()
 
                 # Create the directory if it doesn't exist
                 directory = f'plot_pearsonr_heatmap/'
                 os.makedirs(directory, exist_ok=True)
 
-                plt.savefig(f'{directory}OriginalChannel{i}_{keys_list[g]}.png')
+                plt.savefig(f'{directory}OriginalChannel{i + 1}_{keys_list[g]}.png')
                 plt.close()
+
+            # Calculate Pearson correlation coefficients
+            for i in range(49):
+                correlation_coefficients_diagonal[i], _ = pearsonr(groundtruth[i], grid_2[i])
+
+            correlation_coefficients_diagonal = correlation_coefficients_diagonal.reshape(7, 7)
+            correlation_coefficients_diagonal = np.transpose(correlation_coefficients_diagonal, axes=(1, 0))
+            correlation_coefficients_diagonal = np.flipud(correlation_coefficients_diagonal)
+
+            # Plot and save mean_differences_grid
+            plt.figure()
+            plt.imshow(correlation_coefficients_diagonal, cmap='viridis', origin='upper', vmin=0.85, vmax=1)
+
+            # Set ticks and tick labels before calling imshow
+            plt.xticks(range(7), labels=range(1, 8))
+            plt.yticks(range(7), labels=range(7, 0, -1))
+
+            plt.title(f'Pearson coefficient - Diagonal - Origin with {keys_list[g]}')
+            plt.colorbar()
+
+            # Create the directory if it doesn't exist
+            directory = f'plot_pearsonr_heatmap_diagonal/'
+            os.makedirs(directory, exist_ok=True)
+
+            plt.savefig(f'{directory}Diagonal_{keys_list[g]}.png')
+            plt.close()
 
             # Mask the upper triangle
             mask = np.tril(np.ones_like(correlation_coefficients, dtype=bool))
@@ -435,9 +522,9 @@ if __name__ == '__main__':
     file_path = '../testset/Dominik/offline/20230720-091659'
     visualize = Visualizer(file_path)
 
-    visualize.plot_emg_channels()
-    visualize.plot_emg_channels_difference()
-    visualize.plot_correlations()
-    visualize.plot_heat_maps()
-    visualize.plot_pearson_coefficient()
+    #visualize.plot_emg_channels()
+    #visualize.plot_emg_channels_difference()
+    #visualize.plot_correlations()
+    #visualize.plot_heat_maps()
+    #visualize.plot_pearson_coefficient()
     visualize.plot_pearson_coefficient_grid()

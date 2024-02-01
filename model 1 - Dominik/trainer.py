@@ -5,6 +5,7 @@ import os
 import matplotlib
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
+import matplotlib.pyplot as plt
 
 import numpy as np
 import torch
@@ -17,35 +18,10 @@ from generator import Generator
 from discriminator import Discriminator
 from data import Custom_Dataset
 
-import matplotlib.pyplot as plt
-
 
 class Trainer:
     """
-    A class to train a GAN for super-resolution.
-
-    Attributes
-    ----------
-    epoch : int
-        Current epoch of the training process
-
-    Methods
-    -------
-    prepare_data:
-        Prepares training and validation set.
-    initialize_models:
-        Initializes model, optimizer and loss functions.
-    train:
-        Trains the complete model for a number of epochs.
-    _train_epoch(epoch):
-        Trains the model for one epoch.
-    _validate(epoch):
-        Validates the model.
-    _save_checkpoint(epoch):
-        Saves the generator and discriminator state at a given epoch.
-    _save_final_models:
-        Saves the final generator and discriminator.
-
+    Class to train the model.
     """
 
     def __init__(self, num_epochs, batch_size, learning_rate, run_folder):
@@ -55,11 +31,13 @@ class Trainer:
         Parameters
         ----------
         num_epochs: int
-                    Number of epochs that the model will be trained
+                    Number of epochs to train the model
         batch_size: int
-                    Number of samples that are in one batch.
+                    Batch size to use during training
         learning_rate: float
-                       Learning rates for the optimizers.
+                    Learning rate to use during training
+        run_folder: str
+                    Path to the folder where the results should be saved
         """
 
         self.num_epochs = num_epochs
@@ -84,16 +62,14 @@ class Trainer:
 
     def prepare_data(self):
         """
-        Prepares the training and validation dataset from a given csv file.
+        Prepares the training, validation and testing set.
+
         Returns
         -------
         None
         """
-        # Load the JSON file with values for min max normalization into a Python dictionary
-        with open('../dataset/min_max.json', 'r') as file:
-            min_max_dict = json.load(file)
 
-        # Load the JSON file with values for min max normalization into a Python dictionary
+        # Load the JSON file with values for standardization into a Python dictionary
         with open('../dataset/mean_std.json', 'r') as file:
             self.mean_std_dict = json.load(file)
 
@@ -102,20 +78,20 @@ class Trainer:
 
         train, val = train_test_split(data_train_val, train_size=0.75, test_size=0.25, random_state=42)
 
-        # Use Custom_Dataset with min-max normalization
+        # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
-            Custom_Dataset(train, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'],
+            Custom_Dataset(train, self.mean_std_dict['mean'],
                            self.mean_std_dict['std']),
             batch_size=self.batch_size
         )
 
         self.validation = torch.utils.data.DataLoader(
-            Custom_Dataset(val, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'],
+            Custom_Dataset(val, self.mean_std_dict['mean'],
                            self.mean_std_dict['std']),
             batch_size=self.batch_size
         )
         self.testing = torch.utils.data.DataLoader(
-            Custom_Dataset(data_test, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'],
+            Custom_Dataset(data_test, self.mean_std_dict['mean'],
                            self.mean_std_dict['std']))
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
@@ -127,7 +103,8 @@ class Trainer:
 
     def initialize_models(self):
         """
-        Initializes the generator and discriminator, as well as the loss functions and optimizers.
+        Initializes the Generator, Discriminator, Optimizers and Loss functions.
+
         Returns
         -------
         None
@@ -151,12 +128,18 @@ class Trainer:
 
     def train(self):
         """
-        Trains the Generator and Discriminator for a defined number of epochs and validates the current model.
-        It saves the best and final model.
+        Trains the complete model for a number of epochs.
 
         Returns
         -------
-        None
+        train_g_loss: list
+                    Generator loss over the epochs
+        train_d_loss: list
+                    Discriminator loss over the epochs
+        val_loss: list
+                    Validation loss over the epochs
+        psnr: list
+                    PSNR over the epochs
         """
         train_d_loss = []
         train_d_loss_real = []
@@ -191,18 +174,22 @@ class Trainer:
 
     def _train_epoch(self, epoch):
         """
-        Runs the training step for one epoch for the generator and discriminator.
+        Trains the model for one epoch.
+
         Parameters
         ----------
         epoch: int
-               current epoch
 
         Returns
         -------
         avg_loss_g: float
-                    Generator loss averaged over the batch
+                    Average loss of the generator over the training set
+        avg_loss_d_real: float
+                    Average loss of the discriminator over the training set when receiving real data
+        avg_loss_d_fake: float
+                    Average loss of the discriminator over the training set when receiving fake data
         avg_loss_d: float
-                    Discriminator loss averaged over the batch
+                    Average loss of the discriminator over the training set
         """
         self.generator.train()
         self.discriminator.train()
@@ -251,21 +238,6 @@ class Trainer:
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            #######################################
-            # # Delete last row and column
-            #
-            # # Erzeugen Sie ein leeres Array der Form (16, 1, 64, 10)
-            # sr_emg = np.zeros((16, 1, 64,10))
-            #
-            # # Füllen Sie das Array entsprechend den Anforderungen
-            # for i in range(64):
-            #     sr_emg[:, :, i, :] = i + 1
-            #
-            # sr_emg = np.moveaxis(sr_emg, -1, -2)
-            # sr_emg = torch.tensor(sr_emg).to(torch.float32).to(self.device)
-
-            ########################################
-
             sr_emg_final = self._delete_row_column(sr_emg)
 
             loss_generator_content = self.mse(sr_emg_final, hr_emg)  # Content loss
@@ -292,6 +264,18 @@ class Trainer:
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
 
     def _delete_row_column(self, sr_emg):
+        """
+        Deletes the last row and column of the super-resolved data.
+
+        Parameters
+        ----------
+        sr_emg: torch tensor
+
+        Returns
+        -------
+        sr_emg_final: torch tensor
+                      Super-resolved data without the last row and column
+        """
         sr_emg_shape = sr_emg.shape
 
         new_channel_number = int((math.sqrt(sr_emg_shape[3]) - 1) ** 2)
@@ -324,16 +308,18 @@ class Trainer:
 
     def _validate(self, epoch):
         """
-        Validates the current model with the validation dataset.
+        Validates the model by calculating the loss on the validation set.
 
         Parameters
         ----------
-        epoch
+        epoch: int
 
         Returns
         -------
         avg_validation_loss: float
-                             Validation loss averaged over the batch.
+                             Average validation loss over the validation set
+        avg_psnr: float
+                    Average PSNR over the validation set
         """
         self.generator.eval()  # Set the generator to evaluation mode
         self.discriminator.eval()  # Set the discriminator to evaluation mode if needed
@@ -373,12 +359,11 @@ class Trainer:
 
     def _save_checkpoint(self, epoch):
         """
-        Saves the state of the Generator and Discriminator for a given epoch.
+        Saves the Generator and Discriminator at a given epoch.
 
         Parameters
         ----------
         epoch: int
-               Current epoch
 
         Returns
         -------
@@ -390,7 +375,7 @@ class Trainer:
 
     def _save_final_models(self):
         """
-        Saves the final model.
+        Saves the final Generator and Discriminator.
 
         Returns
         -------
@@ -401,19 +386,16 @@ class Trainer:
 
     def _plot_result_losses(self, train_g_loss, train_d_loss_real, train_d_loss_fake, train_d_loss, val_loss, psnr):
         """
-        Shows and saves a plot of the losses of the Generator during training, the Discriminator during training
-        and the validation loss.
+        Plots the Generator and Discriminator loss over the epochs and the validation loss and PSNR over the epochs.
 
         Parameters
         ----------
         train_g_loss: list
-                      Averaged losses per epoch for the generator.
+        train_d_loss_real: list
+        train_d_loss_fake: list
         train_d_loss: list
-                      Averaged losses per epoch for the discriminator.
         val_loss: list
-                  Averaged validation losses.
         psnr: list
-              PSNR values per epoch.
 
         Returns
         -------
@@ -486,15 +468,14 @@ class Trainer:
 
     def generate_sr_data(self):
         """
-        Generates super-resolved (SR) data for the test set.
-
-        Parameters
-        ----------
+        Generates super-resolved data from the test dataset and saves it to a file.
 
         Returns
         -------
-        None
+
         """
+        # in case you only want to generate data:
+        # self.run_folder = "runs/20240117172449"
 
         # load the final generator
         self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
@@ -530,5 +511,17 @@ class Trainer:
                     hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data):
+
+        """
+        De-standardizes the data with the mean and standard deviation from the training set.
+
+        Parameters
+        ----------
+        standardized_data: numpy array
+
+        Returns
+        -------
+        destandardized_data: numpy array
+        """
 
         return standardized_data * self.mean_std_dict['std'] + self.mean_std_dict['mean']

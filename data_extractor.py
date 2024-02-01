@@ -8,57 +8,7 @@ matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
-
-
-def open_all_files_for_one_patient_and_movement(folder_path, movement_name, pickle_file_name):
-    """
-    opens all files (EMG, MU, ref) for one patient and one movement and returns the data as a dictionary
-    :param folder_path: path to the folder that contains data pkl and the 12 csv files for kinematics
-    :param movement_name: which movement you want to open all the files for
-    :param pickle_file_name:
-    :return: dictionarys for emg_data, MU_data, ref_data
-    """
-
-    movement_list = ["thumb_slow", "thumg_fast", "indec_slow", "index_fast", "middle_slow", "middle_fast", "ring_slow",
-                     "ring_fast", "pinky_slow", "pinky_fast", "fist", "2pinch", "3pinch"]
-    movement_number = movement_list.index(movement_name) + 1
-    file_path = os.path.join(folder_path, pickle_file_name)
-    with open(file_path, 'rb') as f:
-        data = pickle.load(f)
-    emg_data = data[movement_name]["SIG"]
-    MU_data = data[movement_name]["MUPulses"]
-    ref_file = os.path.join(folder_path, str(movement_number) + "_transformed.csv")
-    ref_data = pandas.read_csv(ref_file)
-
-    return emg_data, MU_data, ref_data
-
-
-def open_emg_data_Michael(folder_path, movement_name, pickle_file_name):
-    """
-    Opens the emg signal of a defined movement
-    Parameters
-    ----------
-    folder_path: str
-                 directory of the pickle file
-    movement_name : str
-                 the movement you want to open the emg for
-    pickle_file_name : str
-                 name of the pickle file to restore emg signal
-
-    Returns
-    -------
-    emg_data: ndarray
-              EMG signal of electrode Grids 1-5
-    """
-
-    file_path = os.path.join(folder_path, pickle_file_name)
-    with open(file_path, 'rb') as f:
-        data = pickle.load(f)
-
-    # Michaels Data
-    emg_data = data[movement_name]["SIG"]
-
-    return emg_data
+from scipy.io import loadmat
 
 
 def plot_emg_data(emg_data):
@@ -95,76 +45,6 @@ def plot_emg_data(emg_data):
     plt.title('EMG Signals')
     plt.legend(loc='right')
     plt.show()
-
-
-def dataset_creator_michi(emg_data, dataset_path):
-    """
-    Creates the dataset including a csv file from the emg_data. Used for the data provided by Michi
-    Parameters
-    ----------
-    emg_data: ndarray
-              emg signal as a 3D array
-    dataset_path: str
-                  path where the results should be saved
-
-    Returns
-    -------
-    None
-    """
-
-    # TODO: adapt to other method where multiple paths are given as input
-
-    # Create the folder if it doesn't exist
-    os.makedirs(dataset_path, exist_ok=True)
-
-    # List of LR and HR filenames (replace this with your filenames)
-    lr_filenames = []
-    hr_filenames = []
-
-    # go through electrode blockgs G1, G2, G3
-    for block in range(3):
-        emg_block = emg_data[0:8, 1 + block * 8:9 + block * 8]
-
-        # window the signal to 512 samples
-        for window in range(50, 100):
-            emg_windowed = np.zeros((emg_block.shape[0], emg_block.shape[1], 512))
-
-            for row in range(8):
-                for column in range(8):
-                    # squeeze because of shape (1,512)
-                    squeezed = np.squeeze(emg_block[row, column])
-                    emg_windowed[row, column] = squeezed[window * 512:(window + 1) * 512]
-
-            # save high resolution data and add file name to list
-            np.save(dataset_path + f'G{block + 1}-window{window}-hr.npy', emg_windowed)
-            hr_filenames.append(dataset_path + f'G{block + 1}-window{window}-hr.npy')
-
-            # TODO: bei lr version immer unterschiedliche Elektroden nehmen
-
-            # Create low resolution of windowed data, by using only every second row and column
-            emg_windowed_lr = emg_windowed[::2, ::2, :]
-
-            # save low resolution data and add file name to list
-            np.save(dataset_path + f'G{block + 1}-window{window}-lr.npy', emg_windowed_lr)
-            lr_filenames.append(dataset_path + f'G{block + 1}-window{window}-lr.npy')
-
-    # Combine LR and HR filenames row-wise
-    data = zip(lr_filenames, hr_filenames)
-
-    # File path for the CSV file
-    csv_file = 'data.csv'
-
-    # Open the CSV file in append mode and write the data
-    with open(dataset_path + csv_file, mode='a', newline='') as file:
-        writer = csv.writer(file)
-
-        # Add a header if the file is empty
-        if file.tell() == 0:
-            writer.writerow(['lr_filename', 'hr_filename'])
-
-        # Add each LR/HR pair as a row in the CSV file
-        for lr_filename, hr_filename in data:
-            writer.writerow([lr_filename, hr_filename])
 
 
 def open_emg_data_Dominik(file_path):
@@ -252,7 +132,7 @@ def dataset_creator_dominik(data_paths):
             windows = emg_data.shape[1] - 512
 
             # window the signal to 512 samples
-            for window in range(0, windows,50):
+            for window in range(0, windows, 50):
                 emg_windowed = emg_data_grid[:, :, window:(window + 512)]
 
                 if emg_windowed.min() < min_value_dataset:
@@ -263,7 +143,7 @@ def dataset_creator_dominik(data_paths):
 
                 for col in range(2):
                     for row in range(2):
-                        emg_windowed_hr = emg_windowed[row:row+7, col:col+7, :]
+                        emg_windowed_hr = emg_windowed[row:row + 7, col:col + 7, :]
                         emg_windowed_lr = emg_windowed[row::2, col::2, :]
 
                         # 3D to 2D array
@@ -324,12 +204,136 @@ def dataset_creator_dominik(data_paths):
             writer.writerow([lr_filename + ';' + hr_filename])
 
 
+def dataset_creator_alessandro(data_paths):
+    """
+
+    Parameters
+    ----------
+    data_paths: list of str
+
+    Returns
+    -------
+    None
+    """
+
+    # List of LR and HR filenames (replace this with your filenames)
+    lr_filenames = []
+    hr_filenames = []
+
+    for i in range(len(data_paths)):
+        # extract data path and pickle file name from list of paths
+        data_path = data_paths[i]
+
+        # Load MATLAB file
+        mat_contents = loadmat(data_path)
+
+        # Get the data from the MATLAB file
+        emg_data = mat_contents['SIG']
+
+        # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
+        base_directory = data_path.replace("data/", "").rsplit("/", 1)[0]
+        dataset_path = 'dataset' + '/' + base_directory + '/'
+        print(dataset_path)
+
+        # Create the folder if it doesn't exist
+        os.makedirs(dataset_path, exist_ok=True)
+
+        emg_lr = emg_data[::2, ::2]
+
+        emg_length = emg_lr[0][0][0].shape[0]
+        emg_hr_reshaped = np.zeros((emg_data.shape[0], emg_data.shape[1], emg_length))
+        emg_lr_reshaped = np.zeros((emg_lr.shape[0], emg_lr.shape[1], emg_length))
+        print("shape emg_lr_reshaped:", np.shape(emg_lr_reshaped))
+
+        # Reshape HR data into 3D
+        for row in range(emg_data.shape[0]):
+            for col in range(emg_data.shape[1]):
+                if (row == (emg_data.shape[0] - 1) and col == 0):
+                    continue
+                else:
+                    sub_array = emg_data[row][col]
+                    emg_hr_reshaped[row, col] = sub_array
+
+        # Reshape LR data into 3D
+        for row in range(emg_lr.shape[0]):
+            for col in range(emg_lr.shape[1]):
+                if (row == (emg_lr.shape[0] - 1) and col == 0):
+                    continue
+                else:
+                    sub_array = emg_lr[row][col]
+                    emg_lr_reshaped[row, col] = sub_array
+
+
+        # Reshape arrays to channel x samples, counting channels from top to bottom
+        emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
+        emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
+
+        # Get mean and std for standardization
+        mean = np.mean(emg_hr_reshaped_final)
+        std = np.std(emg_hr_reshaped_final)
+
+        # Create a dictionary for the hyperparameters
+        mean_std_dict = {
+            "mean": mean,
+            "std": std,
+        }
+
+        with open('dataset' + '/mean_std.json', 'w') as file:
+            json.dump(mean_std_dict, file)
+
+        windows = emg_length - 512
+
+        # window the signal to 512 samples
+        for window in range(0, windows):
+            print("window", window)
+            emg_lr_windowed = emg_lr_reshaped_final[:, window:(window + 512)]
+            emg_hr_windowed = emg_hr_reshaped_final[:, window:(window + 512)]
+
+            # Delete first channel since it's empty
+            emg_lr_final = emg_lr_windowed[1:]
+            emg_hr_final = emg_hr_windowed[1:]
+
+            # transpose for samples x channels shape
+            emg_lr_final = emg_lr_final.transpose()
+            emg_hr_final = emg_hr_final.transpose()
+
+            # save high resolution data and add file name to list
+            np.save(dataset_path + f'window{window}-hr.npy', emg_hr_final)
+            hr_filenames.append('../' + dataset_path + f'window{window}-hr.npy')
+
+            # save low resolution data and add file name to list
+            np.save(dataset_path + f'window{window}-lr.npy', emg_lr_final)
+            lr_filenames.append('../' + dataset_path + f'window{window}-lr.npy')
+
+    # Combine LR and HR filenames row-wise
+    data = zip(lr_filenames, hr_filenames)
+    # File path for the CSV file
+    csv_file = 'data.csv'
+
+    # Open the CSV file in append mode and write the data
+    with open('dataset' + '/' + csv_file, mode='a', newline='') as file:
+        writer = csv.writer(file)
+
+        # Add a header if the file is empty
+        if file.tell() == 0:
+            writer.writerow(['lr_filename;hr_filename'])
+
+        # Add each LR/HR pair as a row in the CSV file
+        for lr_filename, hr_filename in data:
+            writer.writerow([lr_filename + ';' + hr_filename])
+
+
 if __name__ == '__main__':
-    data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
-                  'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
-                  'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
-    # data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
+    # data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
+    #               'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
+    #               'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
+    # # data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
+    #
+    # movement_name = 'thumb_slow'
+    #
+    # dataset_creator_dominik(data_paths)
 
-    movement_name = 'thumb_slow'
+    data_paths = [
+        'data/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat']
 
-    dataset_creator_dominik(data_paths)
+    dataset_creator_alessandro(data_paths)
