@@ -7,6 +7,7 @@ classify if the input data is real or fake.
 The code is called from the trainer.py file which is started by the train.py.
 """
 import torch.nn as nn
+import torch
 
 
 class Discriminator(nn.Module):
@@ -106,6 +107,7 @@ class Discriminator(nn.Module):
         out = self.leaky_relu8(out)
 
         out = self.flatten(out)
+        print(out.shape)
 
         out = self.dense1(out)
         out = self.leaky_relu9(out)

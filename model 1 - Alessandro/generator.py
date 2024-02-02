@@ -7,6 +7,7 @@ generate high resolution data from low resolution data.
 The code is called from the trainer.py file which is started by the train.py.
 """
 import torch.nn as nn
+import torch
 
 
 class ResidualBlock(nn.Module):
@@ -113,5 +114,7 @@ class Generator(nn.Module):
 
         out = self.upsample(out)
         out = self.conv_output(out)
+
+        print("New network generator output shape: ", out.shape)
 
         return out

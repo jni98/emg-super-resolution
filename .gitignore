@@ -127,16 +127,27 @@ dmypy.json
 # add personal files
 /model 1/runs/
 /testset/
-/Visualization/plot_channels/
+/Visualization - 8x8 grid/plot_channels/
 /data/
 /dataset/
-/Visualization/plot_correlations/
-/Visualization/plot_heatmaps/
-/Visualization/plot_pearson_coefficient/
-/Visualization/plot_dtw/
-/Visualization/plot_channels_loss/
-/Visualization/plot_mean_differences_heatmap/
-/Visualization/plot_pearsonr/
-/Visualization/plot_channels_difference/
-/Visualization/plot_pearsonr_heatmap/
-/Visualization/plot_pearsonr_heatmap_diagonal/
+/Visualization - 8x8 grid/plot_correlations/
+/Visualization - 8x8 grid/plot_heatmaps/
+/Visualization - 8x8 grid/plot_pearson_coefficient/
+/Visualization - 8x8 grid/plot_dtw/
+/Visualization - 8x8 grid/plot_channels_loss/
+/Visualization - 8x8 grid/plot_mean_differences_heatmap/
+/Visualization - 8x8 grid/plot_pearsonr/
+/Visualization - 8x8 grid/plot_channels_difference/
+/Visualization - 8x8 grid/plot_pearsonr_heatmap/
+/Visualization - 8x8 grid/plot_pearsonr_heatmap_diagonal/
+
+/Visualization - 13x5 grid/plot_correlations/
+/Visualization - 13x5 grid/plot_heatmaps/
+/Visualization - 13x5 grid/plot_pearson_coefficient/
+/Visualization - 13x5 grid/plot_dtw/
+/Visualization - 13x5 grid/plot_channels_loss/
+/Visualization - 13x5 grid/plot_mean_differences_heatmap/
+/Visualization - 13x5 grid/plot_pearsonr/
+/Visualization - 13x5 grid/plot_channels_difference/
+/Visualization - 13x5 grid/plot_pearsonr_heatmap/
+/Visualization - 13x5 grid/plot_pearsonr_heatmap_diagonal/

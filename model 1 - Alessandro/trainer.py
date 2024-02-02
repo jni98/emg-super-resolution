@@ -347,7 +347,7 @@ class Trainer:
         torch.save(self.generator.state_dict(), self.run_folder + '/final_generator.pt')
         torch.save(self.discriminator.state_dict(), self.run_folder + '/final_discriminator.pt')
 
-    def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list, train_d_loss:list, val_loss: list, psnr: list) -> None:):
+    def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list, train_d_loss:list, val_loss: list, psnr: list) -> None:
         """
         Plots the Generator and Discriminator loss over the epochs and the validation loss and PSNR over the epochs.
 

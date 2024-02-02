@@ -7,6 +7,8 @@ generate high resolution data from low resolution data.
 The code is called from the trainer.py file which is started by the train.py.
 """
 import torch.nn as nn
+import torch
+import numpy as np
 
 
 class ResidualBlock(nn.Module):

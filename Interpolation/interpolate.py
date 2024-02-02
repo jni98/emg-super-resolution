@@ -38,6 +38,8 @@ class Interpolation:
             Custom_Dataset(data, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'],
                            self.mean_std_dict['std']))
 
+        #TODO: Add linear and b-spline interpolation
+
     def cubic_interpolation(self, lr_emg: np.ndarray, hr_emg_shape: tuple) -> np.ndarray:
         """
         Performs cubic interpolation on the low resolution data to get high resolution data.
@@ -75,7 +77,7 @@ class Interpolation:
         print("Finished the interpolator")
         return interpolated_signal
 
-    def interpolate(self) -> None:
+    def interpolate_8x8(self) -> None:
         """
         Performs cubic interpolation on the low resolution data to get high resolution data.
 
@@ -107,7 +109,46 @@ class Interpolation:
 
             # Save cubic interpolated signal from lr to hr
             last_slash_index_lr = lr_emg_paths[0].rfind("/")
-            cubic_path = lr_emg_paths[0][:last_slash_index_lr] + '/interpolated/cubic'
+            cubic_path = lr_emg_paths[0][:last_slash_index_lr] + '/interpolated/cubic/8x8'
+
+            os.makedirs(cubic_path, exist_ok=True)
+            print("Saving")
+            np.save(cubic_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
+                    interpolated_lr_hr)
+
+    def interpolate_13x5(self) -> None:
+        """
+        Performs cubic interpolation on the low resolution data to get high resolution data.
+
+        Returns
+        -------
+        interpolated_lr_hr: numpy.ndarray
+                High resolution emg data.
+        """
+        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+            print(f'{batch_idx} of 157 batches')
+            # 2D to 3D: reshape back to grid shape
+            lr_emg = lr_emg.squeeze().numpy()
+            lr_emg = lr_emg.transpose()
+            lr_emg_reshaped = lr_emg.reshape(7, 3, lr_emg.shape[1])
+
+            # Transpose and flip to get to correct grid numbering
+            lr_emg_transposed = np.transpose(lr_emg_reshaped, axes=(1, 0, 2))
+            lr_emg_grid = np.flipud(lr_emg_transposed)
+            lr_emg_grid = self.destandardize_data(lr_emg_grid)
+
+            # Perform cubic interpolation
+            interpolated_lr_hr = self.cubic_interpolation(lr_emg_grid, (13, 5, lr_emg.shape[1]))
+
+            # 3D to 2D: reshape back
+            interpolated_lr_hr = np.flipud(interpolated_lr_hr).transpose(1, 0, 2).reshape(64, 2048)
+
+            # flip rows and columns
+            interpolated_lr_hr = interpolated_lr_hr.transpose()
+
+            # Save cubic interpolated signal from lr to hr
+            last_slash_index_lr = lr_emg_paths[0].rfind("/")
+            cubic_path = lr_emg_paths[0][:last_slash_index_lr] + '/interpolated/cubic/13x5'
 
             os.makedirs(cubic_path, exist_ok=True)
             print("Saving")
@@ -132,4 +173,4 @@ class Interpolation:
 
 if __name__ == '__main__':
     interpolater = Interpolation()
-    interpolater.interpolate()
+    interpolater.interpolate_8x8()

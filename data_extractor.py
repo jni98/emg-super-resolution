@@ -215,7 +215,7 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
             writer.writerow([lr_filename + ';' + hr_filename])
 
 
-def dataset_creator_alessandro(data_paths: list[str]) -> None:
+def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
     """
 
     Parameters
@@ -292,13 +292,15 @@ def dataset_creator_alessandro(data_paths: list[str]) -> None:
         with open('dataset' + '/mean_std.json', 'w') as file:
             json.dump(mean_std_dict, file)
 
-        windows = emg_length - 512
+        windows = emg_length - 2048
 
         # window the signal to 512 samples
-        for window in range(0, windows):
+        # 41 samples equals 20ms whcih is approximately 2 action potentials
+        for window in range(0, windows, 41):
             print("window", window)
-            emg_lr_windowed = emg_lr_reshaped_final[:, window:(window + 512)]
-            emg_hr_windowed = emg_hr_reshaped_final[:, window:(window + 512)]
+            # The length of one sample is 2048 which is equal to 1 second
+            emg_lr_windowed = emg_lr_reshaped_final[:, window:(window + 2048)]
+            emg_hr_windowed = emg_hr_reshaped_final[:, window:(window + 2048)]
 
             # Delete first channel since it's empty
             emg_lr_final = emg_lr_windowed[1:]
@@ -345,6 +347,6 @@ if __name__ == '__main__':
     # dataset_creator_dominik(data_paths)
 
     data_paths = [
-        'data/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat']
+        'data/Alessandro_sEmg/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat']
 
-    dataset_creator_alessandro(data_paths)
+    dataset_creator_alessandro_13x5(data_paths)
