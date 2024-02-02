@@ -1,3 +1,11 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file contains the class Interpolation, which performs cubic interpolation on the low resolution
+data to get high resolution data.
+
+You can run this code by creating an object of the class Interpolation and calling the interpolate method.
+"""
 import json
 import os
 import numpy as np
@@ -11,7 +19,8 @@ class Interpolation:
     """
     Class that performs cubic interpolation on the low resolution data to get high resolution data.
     """
-    def __init__(self):
+
+    def __init__(self) -> None:
         """
         Constructs all the necessary attributes for the interpolation object.
         """
@@ -29,7 +38,7 @@ class Interpolation:
             Custom_Dataset(data, min_max_dict['min'], min_max_dict['max'], self.mean_std_dict['mean'],
                            self.mean_std_dict['std']))
 
-    def cubic_interpolation(self, lr_emg, hr_emg_shape):
+    def cubic_interpolation(self, lr_emg: np.ndarray, hr_emg_shape: tuple) -> np.ndarray:
         """
         Performs cubic interpolation on the low resolution data to get high resolution data.
         Parameters
@@ -58,7 +67,7 @@ class Interpolation:
         mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
 
         # Create interpolator
-        interpolator = RegularGridInterpolator((x, y, z), lr_emg, method = 'cubic')
+        interpolator = RegularGridInterpolator((x, y, z), lr_emg, method='cubic')
         print("Created the interpolater")
 
         # Interpolate
@@ -66,7 +75,7 @@ class Interpolation:
         print("Finished the interpolator")
         return interpolated_signal
 
-    def interpolate(self):
+    def interpolate(self) -> None:
         """
         Performs cubic interpolation on the low resolution data to get high resolution data.
 
@@ -105,7 +114,7 @@ class Interpolation:
             np.save(cubic_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
                     interpolated_lr_hr)
 
-    def destandardize_data(self, standardized_data):
+    def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
         """
         De-standardizes the data according to the mean and standard deviation of the training data.
         Parameters

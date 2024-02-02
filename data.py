@@ -1,3 +1,11 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file contains the class Custom_Dataset, which is a custom dataset class for loading the data.
+
+The code is called from every file that is loading a dataset.
+"""
+
 from torch.utils.data import Dataset
 import torch
 import numpy as np
@@ -8,17 +16,17 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
 
     """
-    def __init__(self, data, mean, std):
+    def __init__(self, data, mean: float, std: float) -> None:
         super().__init__()
         self.data = data
 
         self.mean = mean
         self.std = std
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> tuple:
         """
         Returns the data at the given index
         Parameters
@@ -31,6 +39,10 @@ class Custom_Dataset(Dataset):
             Low resolution EMG data standardized
         hr_emg_standardized: torch.tensor
             High resolution EMG data standardized
+        lr_emg_path: str
+            Path to the low resolution EMG data
+        hr_emg_path: str
+            Path to the high resolution EMG data
         """
 
         if torch.is_tensor(index):
@@ -55,7 +67,7 @@ class Custom_Dataset(Dataset):
 
         return lr_emg_standardized, hr_emg_standardized, lr_emg_path, hr_emg_path
 
-    def standardization(self, data, mean, std):
+    def standardization(self, data: np.array, mean: float, std: float) -> np.array:
         """
         Standardize the data using the mean and std values
         Parameters

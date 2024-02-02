@@ -1,8 +1,16 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file contains the class Generator, which is a convolutional neural network that is used to
+generate high resolution data from low resolution data.
+
+The code is called from the trainer.py file which is started by the train.py.
+"""
 import torch.nn as nn
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, in_channels):
+    def __init__(self, in_channels) -> None:
         """
          Constructs all the necessary attributes for the residual block object.
         Parameters
@@ -18,7 +26,7 @@ class ResidualBlock(nn.Module):
         self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
         self.bn2 = nn.BatchNorm2d(64)
 
-    def forward(self, x):
+    def forward(self, x: torch.tensor) -> torch.tensor:
         """
         Forwards the input tensor through all the layers.
 
@@ -44,7 +52,7 @@ class ResidualBlock(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, in_channels=1):
+    def __init__(self, in_channels=1) -> None:
         """
         Constructs all the necessary attributes for the generator object.
         Parameters
@@ -78,7 +86,7 @@ class Generator(nn.Module):
 
         self.conv_output = nn.Conv2d(64, 1, kernel_size=(9, 3), stride=1, padding=(4, 1))
 
-    def forward(self, x):
+    def forward(self, x: torch.tensor) -> torch.tensor:
         """
         Forwards the input tensor through all the layers.
 

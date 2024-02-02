@@ -1,3 +1,11 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file is used to run the training of the GAN. It also calls the function to generate the super
+resolution data.
+
+You can run this file by running the main function.
+"""
 from datetime import datetime
 
 from trainer import Trainer

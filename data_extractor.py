@@ -1,7 +1,18 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file contains functions to open and plot EMG data and to create a dataset from
+                    the EMG data including a csv file with their directories. The dataset_creator_dominik function
+                    creates sets from a pickle file, the dataset_creator_alessandro function creates
+                    the same for a matlab EMG data file.
+
+You can run this code by defining the data paths of the raw data and calling the dataset_creator_dominik or
+dataset_creator_alessandro function with the data paths as an argument.
+"""
+
 import json
 import os
 import pickle
-import pandas as pandas
 import matplotlib
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
@@ -11,7 +22,7 @@ import numpy as np
 from scipy.io import loadmat
 
 
-def plot_emg_data(emg_data):
+def plot_emg_data(emg_data: np.ndarray) -> None:
     """
 
     Parameters
@@ -47,7 +58,7 @@ def plot_emg_data(emg_data):
     plt.show()
 
 
-def open_emg_data_Dominik(file_path):
+def open_emg_data_Dominik(file_path: str) -> np.ndarray:
     """
     Opens the emg signal of from a pickle file in a given directory
     Parameters
@@ -69,7 +80,7 @@ def open_emg_data_Dominik(file_path):
     return emg_data
 
 
-def dataset_creator_dominik(data_paths):
+def dataset_creator_dominik(data_paths: list[str]) -> None:
     """
     Creates sets of low-resolution and high-resolution data as well as a csv file with their directories.
     Parameters
@@ -204,7 +215,7 @@ def dataset_creator_dominik(data_paths):
             writer.writerow([lr_filename + ';' + hr_filename])
 
 
-def dataset_creator_alessandro(data_paths):
+def dataset_creator_alessandro(data_paths: list[str]) -> None:
     """
 
     Parameters

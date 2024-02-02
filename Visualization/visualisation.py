@@ -1,3 +1,13 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file contains the class Visualizer, which is used to visualize the results of the interpolation
+and the neural networks.
+
+The code is started by calling the main function that creates an object of the Visualizer class. The object is then used
+to call the different visualization functions.
+"""
+
 import os
 
 import numpy as np
@@ -15,7 +25,7 @@ class Visualizer:
     Class to visualize the results of the interpolation and the neural networks.
     """
 
-    def __init__(self, file_path):
+    def __init__(self, file_path: str) -> None:
         """
         Constructs all the necessary attributes for the Visualizer object.
         Parameters
@@ -42,7 +52,7 @@ class Visualizer:
             'Original HR': origin_hr
         }
 
-    def plot_emg_channels(self):
+    def plot_emg_channels(self) -> None:
         """
         Plot all emg channels for the original signal, the model 1 signal and the interpolated signal. Channels are plotted by an offset of 500.
         Returns
@@ -98,7 +108,7 @@ class Visualizer:
             plt.close()
             plt.figure()
 
-    def plot_emg_channels_difference(self):
+    def plot_emg_channels_difference(self) -> None:
         """
         Plot the mean absolute difference between the channels of the groundtruth signal and model 1 or interpolated signal.
         Results are displayed on the grid.
@@ -190,7 +200,7 @@ class Visualizer:
             plt.savefig(f'{directory}{title}_mean_differences.png')
             plt.close()
 
-    def plot_heat_maps(self):
+    def plot_heat_maps(self) -> None:
         """
         Plots a heatmap at one specific point in time for each the Original, the cubic interpolated and the model 1 created signal.
 
@@ -239,7 +249,7 @@ class Visualizer:
 
         plt.savefig(f'{directory}Heatmaps.png')
 
-    def plot_correlations(self):
+    def plot_correlations(self) -> None:
         """
         Plots the cross correlation and the dtw of the original, cubic interpolated and model 1 signal.
 
@@ -340,7 +350,7 @@ class Visualizer:
                     color = 0
                     style = 0
 
-    def plot_pearson_coefficient(self):
+    def plot_pearson_coefficient(self) -> None:
 
         """
         Plots the pearson coefficient of the original signal with the cubic interpolated or the model 1 created signal.
@@ -404,7 +414,7 @@ class Visualizer:
 
             plt.savefig(f'{directory}{keys_list[g]} with Original HR.png')
 
-    def plot_pearson_coefficient_grid(self):
+    def plot_pearson_coefficient_grid(self) -> None:
 
         """
         Plots the pearson coefficient of the correlation of one channel in the groundtruth signal with all other channels
@@ -522,9 +532,9 @@ if __name__ == '__main__':
     file_path = '../testset/Dominik/offline/20230720-091659'
     visualize = Visualizer(file_path)
 
-    #visualize.plot_emg_channels()
-    #visualize.plot_emg_channels_difference()
-    #visualize.plot_correlations()
-    #visualize.plot_heat_maps()
-    #visualize.plot_pearson_coefficient()
+    # visualize.plot_emg_channels()
+    # visualize.plot_emg_channels_difference()
+    # visualize.plot_correlations()
+    # visualize.plot_heat_maps()
+    # visualize.plot_pearson_coefficient()
     visualize.plot_pearson_coefficient_grid()

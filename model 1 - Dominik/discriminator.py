@@ -1,8 +1,16 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file contains the class Discriminator, which is a convolutional neural network that is used to
+classify if the input data is real or fake.
+
+The code is called from the trainer.py file which is started by the train.py.
+"""
 import torch.nn as nn
 
 
 class Discriminator(nn.Module):
-    def __init__(self, in_channels=1):
+    def __init__(self, in_channels=1) -> None:
         """
         Constructs all the necessary attributes for the Discriminator object.
         Parameters
@@ -52,7 +60,7 @@ class Discriminator(nn.Module):
         self.dense2 = nn.Linear(1024, 1)
         self.activation = nn.Sigmoid()
 
-    def forward(self, x):
+    def forward(self, x: torch.tensor) -> torch.tensor:
         """
         Forwards the input tensor through all the layers.
 

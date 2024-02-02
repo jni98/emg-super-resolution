@@ -1,3 +1,11 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file contains the class Trainer. It is used to train the GAN and to generate super resolution data.
+
+The code is called from the train.py file which is started by the main function.
+"""
+
 import json
 import math
 import os
@@ -24,7 +32,7 @@ class Trainer:
     Class to train the model.
     """
 
-    def __init__(self, num_epochs, batch_size, learning_rate, run_folder):
+    def __init__(self, num_epochs: int, batch_size: int, learning_rate: float, run_folder: str) -> None:
         """
         Constructs all the necessary attributes for the Trainer object.
 
@@ -60,7 +68,7 @@ class Trainer:
 
         print("init done")
 
-    def prepare_data(self):
+    def prepare_data(self) -> None:
         """
         Prepares the training, validation and testing set.
 
@@ -101,7 +109,7 @@ class Trainer:
         with open(self.run_folder + '/hyperparameter.json', 'w') as file:
             json.dump(self.hyperparameter, file)
 
-    def initialize_models(self):
+    def initialize_models(self) -> None:
         """
         Initializes the Generator, Discriminator, Optimizers and Loss functions.
 
@@ -126,7 +134,7 @@ class Trainer:
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
 
-    def train(self):
+    def train(self) -> tuple:
         """
         Trains the complete model for a number of epochs.
 
@@ -172,7 +180,7 @@ class Trainer:
 
         return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, val_loss, psnr
 
-    def _train_epoch(self, epoch):
+    def _train_epoch(self, epoch: int) -> tuple:
         """
         Trains the model for one epoch.
 
@@ -263,7 +271,7 @@ class Trainer:
 
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
 
-    def _delete_row_column(self, sr_emg):
+    def _delete_row_column(self, sr_emg: torch.tensor) -> torch.tensor:
         """
         Deletes the last row and column of the super-resolved data.
 
@@ -306,7 +314,7 @@ class Trainer:
 
         return sr_emg_final
 
-    def _validate(self, epoch):
+    def _validate(self, epoch: int) -> tuple:
         """
         Validates the model by calculating the loss on the validation set.
 
@@ -357,7 +365,7 @@ class Trainer:
 
         return avg_validation_loss, avg_psnr
 
-    def _save_checkpoint(self, epoch):
+    def _save_checkpoint(self, epoch: int) -> None:
         """
         Saves the Generator and Discriminator at a given epoch.
 
@@ -373,7 +381,7 @@ class Trainer:
             torch.save(self.generator.state_dict(), self.run_folder + f'/generator_epoch_{epoch}.pt')
             torch.save(self.discriminator.state_dict(), self.run_folder + f'/discriminator_epoch_{epoch}.pt')
 
-    def _save_final_models(self):
+    def _save_final_models(self) -> None:
         """
         Saves the final Generator and Discriminator.
 
@@ -384,7 +392,7 @@ class Trainer:
         torch.save(self.generator.state_dict(), self.run_folder + '/final_generator.pt')
         torch.save(self.discriminator.state_dict(), self.run_folder + '/final_discriminator.pt')
 
-    def _plot_result_losses(self, train_g_loss, train_d_loss_real, train_d_loss_fake, train_d_loss, val_loss, psnr):
+    def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list, train_d_loss: list, val_loss: list, psnr: list) -> None:
         """
         Plots the Generator and Discriminator loss over the epochs and the validation loss and PSNR over the epochs.
 
@@ -466,7 +474,7 @@ class Trainer:
         fig_val_psnr.tight_layout()
         fig_val_psnr.savefig(self.run_folder + '/validation_loss_psnr.png')
 
-    def generate_sr_data(self):
+    def generate_sr_data(self) -> None:
         """
         Generates super-resolved data from the test dataset and saves it to a file.
 
@@ -510,7 +518,7 @@ class Trainer:
             np.save(model1_path + (hr_emg_paths[0][last_slash_index_hr:]).replace('-hr.npy', '-hr-sr.npy'),
                     hr_sr_emg_destandardized)
 
-    def destandardize_data(self, standardized_data):
+    def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
 
         """
         De-standardizes the data with the mean and standard deviation from the training set.
