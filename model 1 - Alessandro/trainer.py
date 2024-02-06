@@ -128,8 +128,8 @@ class Trainer:
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         # move to gpu in case it's possible
-        self.adversarial_loss.to(self.device)
-        self.mse.to(self.device)
+        self.adversarial_loss
+        self.mse
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
@@ -219,6 +219,8 @@ class Trainer:
             # Generate super-resolved data (SR) from LR data
             sr_emg = self.generator(lr_emg).detach().to(self.device)
 
+            sr_emg = self._delete_row_column(sr_emg)
+
             # Create real and fake labels to train discriminator for both cases
             real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
             fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
@@ -243,10 +245,12 @@ class Trainer:
             # Generate SR data from LR data
             sr_emg = self.generator(lr_emg).to(self.device)
 
-            output = self.discriminator(sr_emg)
+            sr_emg_final = self._delete_row_column(sr_emg)
+
+            output = self.discriminator(sr_emg_final)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
+            loss_generator_content = self.mse(sr_emg_final, hr_emg)  # Content loss
 
             loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
 
@@ -268,6 +272,48 @@ class Trainer:
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
 
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
+
+    def _delete_row_column(self, sr_emg: torch.tensor) -> torch.tensor:
+        """
+        Deletes the last row and column of the super-resolved data.
+
+        Parameters
+        ----------
+        sr_emg: torch tensor
+
+        Returns
+        -------
+        sr_emg_final: torch tensor
+                      Super-resolved data without the last row and column
+        """
+        sr_emg_shape = sr_emg.shape
+
+        new_channel_number = 65
+
+        # Switch last two axes to go from (batch, channel, 2048, 84) to (batch, channel, 84, 2048)
+        sr_emg_move_axis = sr_emg.permute(0, 1, 3, 2)
+
+        # Reshape to grid shape (batch, 1,8,8,512)
+        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, 14, 6, 2048)
+
+        # Create array for the new shape where the last row and column are deleted
+        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, 2048, 65, dtype=torch.float32,
+                                   device=self.device)
+
+        for i in range(sr_emg_shape[0]):
+            grid = sr_emg_reshaped[i, 0, :, :, :]
+            grid = grid.transpose(0, 1)
+            grid = torch.flip(grid, [0])
+            grid_small = grid[:-1, :-1, :]
+
+            grid_new = torch.flip(grid_small, [0])
+            grid_new = grid_new.transpose(0, 1)
+            grid_new = grid_new.view(new_channel_number, 2048)
+            grid_new = grid_new.transpose(0, 1)
+
+            sr_emg_final[i][0][:][:] = grid_new
+
+        return sr_emg_final
 
     def _validate(self, epoch: int) -> tuple:
         """

@@ -56,7 +56,7 @@ class Discriminator(nn.Module):
         self.flatten = nn.Flatten()
 
         # Adapt dense layer to output size of flatten()
-        self.dense1 = nn.Linear(262144, 1024)
+        self.dense1 = nn.Linear(327680, 1024)
         self.leaky_relu9 = nn.LeakyReLU(0.2, inplace=True)
         self.dense2 = nn.Linear(1024, 1)
         self.activation = nn.Sigmoid()
@@ -75,7 +75,6 @@ class Discriminator(nn.Module):
         out: torch.tensor
              Output tensor of the network.
         """
-        print("Size Discriminator input", x.shape)
         out = self.conv1(x)
         out = self.leaky_relu1(out)
 
@@ -108,8 +107,7 @@ class Discriminator(nn.Module):
         out = self.leaky_relu8(out)
 
         out = self.flatten(out)
-        print("Torch size after flatten",out.shape)
-        # torch.Size([16, 262144])
+        print(out.shape)
 
         out = self.dense1(out)
         out = self.leaky_relu9(out)

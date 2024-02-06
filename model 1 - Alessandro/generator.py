@@ -8,6 +8,7 @@ The code is called from the trainer.py file which is started by the train.py.
 """
 import torch.nn as nn
 import torch
+import numpy as np
 
 
 class ResidualBlock(nn.Module):
@@ -62,8 +63,7 @@ class Generator(nn.Module):
                      Number of channels the emg data has. On default set to 1.
         """
         super(Generator, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=(9, 3), stride=(4, 1),
-                               padding=(4, 1))  # padding changed for correct shapes
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=(9, 3), stride=(4, 1), padding=(4, 1))
         self.prelu = nn.PReLU()
 
         # Adding residual blocks
@@ -94,27 +94,38 @@ class Generator(nn.Module):
         Parameters
         ----------
         x: torch.tensor
-           Tensor that is given to the network.
+            Tensor that is given to the network.
 
         Returns
         -------
         out: torch.tensor
-             Output tensor of the network.
+            Output tensor of the network.
         """
+        print("Generator input", x.shape)
+
         out = self.conv1(x)
+        print("Generator conv1 output", out.shape)
+
         out = self.prelu(out)
 
         residual = out
 
         out = self.res_blocks(out)
+        print("Generator res_blocks output", out.shape)
 
         out = self.conv2(out)
+        print("Generator conv2 output", out.shape)
+
         out = self.bn2(out)
+        print("Generator bn2 output", out.shape)
+
         out += residual
+        print("Generator out += residual output", out.shape)
 
         out = self.upsample(out)
-        out = self.conv_output(out)
+        print("Generator upsample output", out.shape)
 
-        print("New network generator output shape: ", out.shape)
+        out = self.conv_output(out)
+        print("Generator conv_output output", out.shape)
 
         return out

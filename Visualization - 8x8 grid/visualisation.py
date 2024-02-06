@@ -328,8 +328,9 @@ class Visualizer:
                 plt.legend(loc='best', bbox_to_anchor=(1, 1))
                 plt.title(f'Cross-correlation of {keys_list[g]} with Original HR')
 
+                #TODO: Set in a useful way
                 # Set the y-axis limits to the maximum and minimum values across all electrodes
-                plt.ylim(min_corr, max_corr)
+                plt.ylim(-0.4, 1.2)
 
                 color += 1
                 if color == 4:
@@ -470,60 +471,87 @@ class Visualizer:
                 plt.savefig(f'{directory}OriginalChannel{i + 1}_{keys_list[g]}.png')
                 plt.close()
 
-            # Calculate Pearson correlation coefficients
-            for i in range(49):
-                correlation_coefficients_diagonal[i], _ = pearsonr(groundtruth[i], grid_2[i])
+            # TODO: Perform this for all grids
+            if g == 1:
+                correlation_grid_cubic = correlation_grid
+            else:
+                correlation_grid_model1 = correlation_grid
 
-            correlation_coefficients_diagonal = correlation_coefficients_diagonal.reshape(7, 7)
-            correlation_coefficients_diagonal = np.transpose(correlation_coefficients_diagonal, axes=(1, 0))
-            correlation_coefficients_diagonal = np.flipud(correlation_coefficients_diagonal)
+                # Subtract grids to get the difference
+                difference_grid = correlation_grid_cubic - correlation_grid_model1
 
-            # Plot and save mean_differences_grid
-            plt.figure()
-            plt.imshow(correlation_coefficients_diagonal, cmap='viridis', origin='upper', vmin=0.85, vmax=1)
+                # Plot and save the difference between the pearson coefficients of the two grids
+                plt.figure()
+                plt.imshow(difference_grid, cmap='viridis', origin='upper', vmin=-0.1, vmax=0.1)
 
-            # Set ticks and tick labels before calling imshow
-            plt.xticks(range(7), labels=range(1, 8))
-            plt.yticks(range(7), labels=range(7, 0, -1))
+                # Set ticks and tick labels before calling imshow
+                plt.xticks(range(7), labels=range(1, 8))
+                plt.yticks(range(7), labels=range(7, 0, -1))
 
-            plt.title(f'Pearson coefficient - Diagonal - Origin with {keys_list[g]}')
-            plt.colorbar()
+                plt.title(f'Difference of Pearson coefficients - Original channel {i + 1}')
+                plt.colorbar()
 
-            # Create the directory if it doesn't exist
-            directory = f'plot_pearsonr_heatmap_diagonal/'
-            os.makedirs(directory, exist_ok=True)
+                # Create the directory if it doesn't exist
+                directory = f'plot_pearsonr_difference/'
+                os.makedirs(directory, exist_ok=True)
 
-            plt.savefig(f'{directory}Diagonal_{keys_list[g]}.png')
-            plt.close()
+                plt.savefig(f'{directory}OriginalChannel{i + 1}.png')
+                plt.close()
 
-            # Mask the upper triangle
-            mask = np.tril(np.ones_like(correlation_coefficients, dtype=bool))
+        # Calculate Pearson correlation coefficients
+        for i in range(49):
+            correlation_coefficients_diagonal[i], _ = pearsonr(groundtruth[i], grid_2[i])
 
-            # Create a larger heatmap
-            plt.figure(figsize=(8.27, 7))
+        correlation_coefficients_diagonal = correlation_coefficients_diagonal.reshape(7, 7)
+        correlation_coefficients_diagonal = np.transpose(correlation_coefficients_diagonal, axes=(1, 0))
+        correlation_coefficients_diagonal = np.flipud(correlation_coefficients_diagonal)
 
-            # Plot the heatmap with values and ticks
-            plt.imshow(np.ma.masked_array(correlation_coefficients, ~mask), cmap='viridis', origin='upper', vmin=0,
-                       vmax=1)
+        # Plot and save mean_differences_grid
+        plt.figure()
+        plt.imshow(correlation_coefficients_diagonal, cmap='viridis', origin='upper', vmin=0.85, vmax=1)
 
-            # Add colorbar
-            cbar = plt.colorbar()
-            cbar.set_label('Pearson Coefficient')
+        # Set ticks and tick labels before calling imshow
+        plt.xticks(range(7), labels=range(1, 8))
+        plt.yticks(range(7), labels=range(7, 0, -1))
 
-            # Add ticks to both axes
-            plt.xticks(np.arange(0, 49, step=5), labels=np.arange(0, 49, step=5))
-            plt.yticks(np.arange(0, 49, step=5), labels=np.arange(0, 49, step=5))
+        plt.title(f'Pearson coefficient - Diagonal - Origin with {keys_list[g]}')
+        plt.colorbar()
 
-            plt.title(f'Pearson coefficient of {keys_list[g]} with Original HR')
-            plt.xlabel(f'{keys_list[g]}')
-            plt.ylabel('Original HR')
-            plt.tight_layout()
+        # Create the directory if it doesn't exist
+        directory = f'plot_pearsonr_heatmap_diagonal/'
+        os.makedirs(directory, exist_ok=True)
 
-            # Create the directory if it doesn't exist
-            directory = f'plot_pearsonr/'
-            os.makedirs(directory, exist_ok=True)
+        plt.savefig(f'{directory}Diagonal_{keys_list[g]}.png')
+        plt.close()
 
-            plt.savefig(f'{directory}{keys_list[g]} with Original HR.png')
+        # Mask the upper triangle
+        mask = np.tril(np.ones_like(correlation_coefficients, dtype=bool))
+
+        # Create a larger heatmap
+        plt.figure(figsize=(8.27, 7))
+
+        # Plot the heatmap with values and ticks
+        plt.imshow(np.ma.masked_array(correlation_coefficients, ~mask), cmap='viridis', origin='upper', vmin=0,
+                   vmax=1)
+
+        # Add colorbar
+        cbar = plt.colorbar()
+        cbar.set_label('Pearson Coefficient')
+
+        # Add ticks to both axes
+        plt.xticks(np.arange(0, 49, step=5), labels=np.arange(0, 49, step=5))
+        plt.yticks(np.arange(0, 49, step=5), labels=np.arange(0, 49, step=5))
+
+        plt.title(f'Pearson coefficient of {keys_list[g]} with Original HR')
+        plt.xlabel(f'{keys_list[g]}')
+        plt.ylabel('Original HR')
+        plt.tight_layout()
+
+        # Create the directory if it doesn't exist
+        directory = f'plot_pearsonr/'
+        os.makedirs(directory, exist_ok=True)
+
+        plt.savefig(f'{directory}{keys_list[g]} with Original HR.png')
 
 
 if __name__ == '__main__':
@@ -534,7 +562,7 @@ if __name__ == '__main__':
 
     # visualize.plot_emg_channels()
     # visualize.plot_emg_channels_difference()
-    # visualize.plot_correlations()
+    visualize.plot_correlations()
     # visualize.plot_heat_maps()
     # visualize.plot_pearson_coefficient()
-    visualize.plot_pearson_coefficient_grid()
+    #visualize.plot_pearson_coefficient_grid()
