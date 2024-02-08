@@ -39,20 +39,22 @@ class Visualizer:
 
         # Load your data (already normalized)
         inter_spline_lr_sr = np.load(
-            self.file_path + '/interpolated/cubic/grid-0-window5120-pos-0-0-lr-sr.npy').transpose()
-        model1_lr_sr = np.load(self.file_path + '/model1/grid-0-window5120-pos-0-0-lr-sr.npy').transpose()
-        model1_hr_sr = np.load(self.file_path + '/model1/grid-0-window5120-pos-0-0-hr-sr.npy').transpose()
+            self.file_path + '/interpolated/linear/13x5/window738-lr-sr.npy').transpose()
+        model1_lr_sr = np.load(self.file_path + '/window738-hr.npy').transpose()
+        model1_hr_sr = np.load(self.file_path + '/window738-hr.npy').transpose()
 
         # Load original data and normalize it
-        origin_hr = np.load(self.file_path + '/grid-0-window5120-pos-0-0-hr.npy').transpose()
+        origin_hr = np.load(self.file_path + '/window738-hr.npy').transpose()
 
         # Create a dictionary with titles as keys and EMG data as values
         self.emg_data_dict = {
-            'Cubic LR to SR': inter_spline_lr_sr,
+            'Linear LR to SR': inter_spline_lr_sr,
             'Model 1 LR to SR': model1_lr_sr,
             'Model 1 HR to SR': model1_hr_sr,
             'Original HR': origin_hr
         }
+
+        print("init done")
 
     def plot_emg_channels(self) -> None:
         """
@@ -62,6 +64,8 @@ class Visualizer:
         None
         """
 
+        print("Start plotting channels")
+
         time_axis = np.arange(200)  # Assuming the time axis runs along axis 2
 
         for title, emg_data in self.emg_data_dict.items():
@@ -70,24 +74,25 @@ class Visualizer:
 
             offset = 0
             # Use only few channels here
-            for j in range(64):
+            for j in range(65):
                 # TODO: Achtung, nicht das volle Zeitfenster
                 signal = emg_data[j][:200]
 
-                if title == 'Original HR':
-                    predicted = ''
-
-                else:
-                    if (j % 2) != 0:
-                        predicted = '(predicted)'
-                        #TODO: "preditcted" stimmt nicht mehr
-                    elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
-                        predicted = '(predicted)'
-                    else:
-                        predicted = ''
+                predicted = ''
+                # if title == 'Original HR':
+                #     predicted = ''
+                #
+                # else:
+                #     if (j % 2) != 0:
+                #         predicted = '(predicted)'
+                #         #TODO: "preditcted" stimmt nicht mehr
+                #     elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
+                #         predicted = '(predicted)'
+                #     else:
+                #         predicted = ''
 
                 plt.plot(time_axis, signal.squeeze() + offset, label=f'Channel {j + 1} {predicted}')
-                offset += 500
+                offset += 0.06
 
             plt.xlabel('Time in samples')
             plt.title(title)
@@ -111,6 +116,8 @@ class Visualizer:
             plt.close()
             plt.figure()
 
+
+
     def plot_emg_channels_difference(self) -> None:
         """
         Plot the mean absolute difference between the channels of the groundtruth signal and model 1 or interpolated signal.
@@ -120,6 +127,8 @@ class Visualizer:
         -------
 
         """
+        print("Start plotting EMG differences")
+
         time_axis = np.arange(2048)  # Assuming the time axis runs along axis 2
 
         groundtruth = self.emg_data_dict['Original HR']
@@ -130,10 +139,10 @@ class Visualizer:
 
             offset = 0
 
-            mean_absolute_differences = np.zeros(64)
+            mean_absolute_differences = np.zeros(65)
 
             # Use only few channels here
-            for j in range(64):
+            for j in range(65):
                 # TODO: Achtung, nicht das volle Zeitfenster
                 signal = emg_data[j]
                 groundtruth_ch = groundtruth[j]
@@ -142,20 +151,21 @@ class Visualizer:
                 mean_absolute_difference = np.mean(np.abs(groundtruth_ch.squeeze() - signal.squeeze()))
                 mean_absolute_differences[j] = mean_absolute_difference
 
-                if title == 'Original HR':
-                    predicted = ''
-
-                else:
-                    #TODO: CHeck "predicted"
-                    if (j % 2) != 0:
-                        predicted = '(predicted)'
-                    elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
-                        predicted = '(predicted)'
-                    else:
-                        predicted = ''
+                predicted = ''
+                # if title == 'Original HR':
+                #     predicted = ''
+                #
+                # else:
+                #     #TODO: CHeck "predicted"
+                #     if (j % 2) != 0:
+                #         predicted = '(predicted)'
+                #     elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
+                #         predicted = '(predicted)'
+                #     else:
+                #         predicted = ''
 
                 plt.plot(time_axis, (difference + offset), label=f'Channel {j + 1} {predicted}')
-                offset += 400
+                offset += 0.06
 
             plt.xlabel('Time in samples')
             plt.title(title)
@@ -181,10 +191,11 @@ class Visualizer:
 
             # 2D to 3D:
             # reshape back to grid shape
-            mean_differences_reshaped = mean_absolute_differences.reshape(13, 5)
+            mean_differences_reshaped = mean_absolute_differences.reshape(5,13)
             # Transpose and flip to get to correct grid numbering
             mean_differences_transposed = np.transpose(mean_differences_reshaped, axes=(1, 0))
             mean_differences_grid = np.flipud(mean_differences_transposed)
+            mean_differences_grid[:, 1::2] = mean_differences_grid[::-1, 1::2]
 
             # Plot and save mean_differences_grid
             plt.figure()
@@ -206,19 +217,21 @@ class Visualizer:
 
     def plot_heat_maps(self) -> None:
         """
-        Plots a heatmap at one specific point in time for each the Original, the cubic interpolated and the model 1 created signal.
+        Plots a heatmap at one specific point in time for each the Original, the Linear interpolated and the model 1 created signal.
 
         Returns
         -------
 
         """
+        print("Start plotting heat maps")
+
         grids = (
             self.emg_data_dict['Original HR'],
-            self.emg_data_dict['Cubic LR to SR'],
+            self.emg_data_dict['Linear LR to SR'],
             self.emg_data_dict['Model 1 LR to SR']
         )
 
-        keys_list = ('Original HR', 'Cubic', 'Model 1')
+        keys_list = ('Original HR', 'Linear', 'Model 1')
 
         time_points = [200, 300, 400]
 
@@ -227,9 +240,10 @@ class Visualizer:
         for g in range(len(grids)):
             emg_data = grids[g]
             emg_data = emg_data.transpose()
-            emg_data_reshaped = emg_data.reshape(13, 5, 2048)
+            emg_data_reshaped = emg_data.reshape(5,13, 2048)
             emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
             emg_data_grid = np.flipud(emg_data_transposed)
+            emg_data_grid[:, 1::2] = emg_data_grid[::-1, 1::2]
 
             for i, time_point in enumerate(time_points):
                 emg_heatmap = emg_data_grid[:, :, time_point]
@@ -255,18 +269,20 @@ class Visualizer:
 
     def plot_correlations(self) -> None:
         """
-        Plots the cross correlation and the dtw of the original, cubic interpolated and model 1 signal.
+        Plots the cross correlation and the dtw of the original, linear interpolated and model 1 signal.
 
         Returns
         -------
 
         """
+        print("Start plotting correlations")
+
         grids = (
-            self.emg_data_dict['Original HR'], self.emg_data_dict['Cubic LR to SR'],
+            self.emg_data_dict['Original HR'], self.emg_data_dict['Linear LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'])
 
         # Accessing keys by index
-        keys_list = ('Original HR', 'Cubic LR to SR', 'Model 1 LR to SR')
+        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR')
 
         # Create a list of line styles, colors
         colors = ['blue', 'green', 'red', 'black']  # Add more colors if required
@@ -280,14 +296,17 @@ class Visualizer:
             normalized_corr = []
             plt.figure()
 
-            for i in range(64):  # Iterate through electrodes
+            for i in range(65):  # Iterate through electrodes
                 correlation = np.correlate(groundtruth[i], grid_2[i], mode='full')
 
                 # Calculate autocorrelation of groundtruth
                 autocorr_groundtruth = np.correlate(groundtruth[i], groundtruth[i], mode='full')
 
                 # normalize correlation by autocorrelation
-                normalized_correlation = correlation / np.max(autocorr_groundtruth)
+                if i != 0:
+                    normalized_correlation = correlation / np.max(autocorr_groundtruth)
+                else:
+                    normalized_correlation = correlation
 
                 normalized_corr.append(normalized_correlation)
 
@@ -317,24 +336,26 @@ class Visualizer:
             color = 0
             style = 0
             number = 1
+            predicted = ''
+
             #TODO: Achtung, predicted stimmt nicht mehr
             for i, corr in enumerate(normalized_corr):
-                if ((i + 1) % 2) != 0:
-                    predicted = '(predicted)'
-                elif (i > 7 and i < 16) or (i > 23 and i < 32) or (i > 39 and i < 48):
-                    predicted = '(predicted)'
-                else:
-                    predicted = ''
+            #     if ((i + 1) % 2) != 0:
+            #         predicted = '(predicted)'
+            #     elif (i > 7 and i < 16) or (i > 23 and i < 32) or (i > 39 and i < 48):
+            #         predicted = '(predicted)'
+            #     else:
+            #         predicted = ''
 
-                plt.plot(corr, label=f'Ch {i + 1} {predicted}', linestyle=line_styles[style % len(line_styles)],
-                         color=colors[color % len(colors)])  #
+                plt.plot(corr, label=f'Ch {i + 1} {predicted}', linestyle=line_styles[style % len(line_styles)],color=colors[color % len(colors)])  #
                 plt.xlabel('Shift')
                 plt.ylabel('Correlation')
                 plt.legend(loc='best', bbox_to_anchor=(1, 1))
                 plt.title(f'Cross-correlation of {keys_list[g]} with Original HR')
 
+                #TODO: Adjust limits
                 # Set the y-axis limits to the maximum and minimum values across all electrodes
-                plt.ylim(min_corr, max_corr)
+                plt.ylim(-0.4, 1.2)
 
                 color += 1
                 if color == 4:
@@ -358,31 +379,32 @@ class Visualizer:
     def plot_pearson_coefficient(self) -> None:
 
         """
-        Plots the pearson coefficient of the original signal with the cubic interpolated or the model 1 created signal.
+        Plots the pearson coefficient of the original signal with the linear interpolated or the model 1 created signal.
         Each of the 49 channels is correlated with each of the artifical 49 channels.
 
         Returns
         -------
 
         """
+        print("Start plotting pearson coefficient")
 
         grids = (
-            self.emg_data_dict['Original HR'], self.emg_data_dict['Cubic LR to SR'],
+            self.emg_data_dict['Original HR'], self.emg_data_dict['Linear LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'])
 
         # Accessing keys by index
-        keys_list = ('Original HR', 'Cubic LR to SR', 'Model 1 LR to SR')
+        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR')
 
         for g in range(1, len(grids)):
             groundtruth = grids[0]
             grid_2 = grids[g]
 
             # Initialize an array to store correlation coefficients
-            correlation_coefficients = np.zeros((64, 64))
+            correlation_coefficients = np.zeros((65, 65))
 
             # Calculate Pearson correlation coefficients
-            for i in range(64):
-                for j in range(64):
+            for i in range(65):
+                for j in range(65):
                     correlation_coefficients[i, j], _ = pearsonr(groundtruth[i], grid_2[j])
 
             # Mask the upper triangle
@@ -395,18 +417,13 @@ class Visualizer:
             plt.imshow(np.ma.masked_array(correlation_coefficients, ~mask), cmap='viridis', origin='upper', vmin=0,
                        vmax=1)
 
-            # Add specific values to each cell
-            # for i in range(49):
-            #     for j in range(49):
-            #         plt.text(j, i, f'{correlation_coefficients[i, j]:.2f}', ha='center', va='center', color='white')
-
             # Add colorbar
             cbar = plt.colorbar()
             cbar.set_label('Pearson Coefficient')
 
             # Add ticks to both axes
-            plt.xticks(np.arange(0, 64, step=5), labels=np.arange(0, 64, step=5))
-            plt.yticks(np.arange(0, 64, step=5), labels=np.arange(0, 64, step=5))
+            plt.xticks(np.arange(0, 65, step=5), labels=np.arange(0, 65, step=5))
+            plt.yticks(np.arange(0, 65, step=5), labels=np.arange(0, 65, step=5))
 
             plt.title(f'Pearson coefficient of {keys_list[g]} with Original HR')
             plt.xlabel(f'{keys_list[g]}')
@@ -429,33 +446,35 @@ class Visualizer:
         -------
 
         """
+        print("Start plotting pearson coefficient grids")
 
         grids = (
-            self.emg_data_dict['Original HR'], self.emg_data_dict['Cubic LR to SR'],
+            self.emg_data_dict['Original HR'], self.emg_data_dict['Linear LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'])
 
         # Accessing keys by index
-        keys_list = ('Original HR', 'Cubic LR to SR', 'Model 1 LR to SR')
+        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR')
 
         for g in range(1, len(grids)):
             groundtruth = grids[0]
             grid_2 = grids[g]
 
             # Initialize an array to store correlation coefficients
-            correlation_coefficients = np.zeros((64, 64))
+            correlation_coefficients = np.zeros((65, 65))
 
             # Initialize an array to store correlation coefficients
-            correlation_coefficients_diagonal = np.zeros((64))
+            correlation_coefficients_diagonal = np.zeros((65))
 
             # Calculate Pearson correlation coefficients
-            for i in range(64):
-                for j in range(64):
+            for i in range(65):
+                for j in range(65):
                     correlation_coefficients[i, j], _ = pearsonr(groundtruth[i], grid_2[j])
 
                 correlation_grid = correlation_coefficients[i]
-                correlation_grid = correlation_grid.reshape(13, 5)
+                correlation_grid = correlation_grid.reshape(5,13)
                 correlation_grid = np.transpose(correlation_grid, axes=(1, 0))
                 correlation_grid = np.flipud(correlation_grid)
+                correlation_grid[:, 1::2] = correlation_grid[::-1, 1::2]
 
                 # Plot and save mean_differences_grid
                 plt.figure()
@@ -476,12 +495,13 @@ class Visualizer:
                 plt.close()
 
             # Calculate Pearson correlation coefficients
-            for i in range(64):
+            for i in range(65):
                 correlation_coefficients_diagonal[i], _ = pearsonr(groundtruth[i], grid_2[i])
 
-            correlation_coefficients_diagonal = correlation_coefficients_diagonal.reshape(13, 5)
+            correlation_coefficients_diagonal = correlation_coefficients_diagonal.reshape(5,13)
             correlation_coefficients_diagonal = np.transpose(correlation_coefficients_diagonal, axes=(1, 0))
             correlation_coefficients_diagonal = np.flipud(correlation_coefficients_diagonal)
+            correlation_coefficients_diagonal[:, 1::2] = correlation_coefficients_diagonal[::-1, 1::2]
 
             # Plot and save mean_differences_grid
             plt.figure()
@@ -516,8 +536,8 @@ class Visualizer:
             cbar.set_label('Pearson Coefficient')
 
             # Add ticks to both axes
-            plt.xticks(np.arange(0, 64, step=5), labels=np.arange(0, 64, step=5))
-            plt.yticks(np.arange(0, 64, step=5), labels=np.arange(0, 64, step=5))
+            plt.xticks(np.arange(0, 65, step=5), labels=np.arange(0, 65, step=5))
+            plt.yticks(np.arange(0, 65, step=5), labels=np.arange(0, 65, step=5))
 
             plt.title(f'Pearson coefficient of {keys_list[g]} with Original HR')
             plt.xlabel(f'{keys_list[g]}')
@@ -533,13 +553,13 @@ class Visualizer:
 
 if __name__ == '__main__':
     # TODO: Beschriftung mit (predicted) etc. passt nicht zu HR to SR plots
-
-    file_path = '../testset/Dominik/offline/20230720-091659'
+    file_path = '../testset/Alessandro_sEmg/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE'
     visualize = Visualizer(file_path)
 
-    # visualize.plot_emg_channels()
-    # visualize.plot_emg_channels_difference()
-    # visualize.plot_correlations()
-    # visualize.plot_heat_maps()
-    # visualize.plot_pearson_coefficient()
+    visualize.plot_emg_channels()
+    visualize.plot_emg_channels_difference()
+    visualize.plot_heat_maps()
+    #TODO: Check correlation code again
+    #visualize.plot_correlations()
+    visualize.plot_pearson_coefficient()
     visualize.plot_pearson_coefficient_grid()

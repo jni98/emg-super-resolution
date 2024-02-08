@@ -140,12 +140,13 @@ dmypy.json
 /Visualization - 8x8 grid/plot_channels_difference/
 /Visualization - 8x8 grid/plot_pearsonr_heatmap/
 /Visualization - 8x8 grid/plot_pearsonr_heatmap_diagonal/
+/Visualization - 8x8 grid/plot_pearsonr_difference/
 
 /Visualization - 13x5 grid/plot_correlations/
 /Visualization - 13x5 grid/plot_heatmaps/
 /Visualization - 13x5 grid/plot_pearson_coefficient/
 /Visualization - 13x5 grid/plot_dtw/
-/Visualization - 13x5 grid/plot_channels_loss/
+/Visualization - 13x5 grid/plot_channels/
 /Visualization - 13x5 grid/plot_mean_differences_heatmap/
 /Visualization - 13x5 grid/plot_pearsonr/
 /Visualization - 13x5 grid/plot_channels_difference/
