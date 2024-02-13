@@ -280,18 +280,10 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
         emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
         emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
 
-        # Get mean and std for standardization
-        mean = np.mean(emg_hr_reshaped_final)
-        std = np.std(emg_hr_reshaped_final)
-
-        # Create a dictionary for the hyperparameters
-        mean_std_dict = {
-            "mean": mean,
-            "std": std,
-        }
-
-        with open('dataset' + '/mean_std.json', 'w') as file:
-            json.dump(mean_std_dict, file)
+        if i == 0:
+            combined_data = emg_hr_reshaped_final.flatten()
+        else:
+            combined_data = np.concatenate((combined_data, emg_hr_reshaped_final.flatten()))
 
         windows = emg_length - 2048
 
@@ -314,6 +306,19 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
             # save low resolution data and add file name to list
             np.save(dataset_path + f'window{window}-lr.npy', emg_lr_final)
             lr_filenames.append('../' + dataset_path + f'window{window}-lr.npy')
+
+    # Get mean and std for standardization
+    mean = np.mean(combined_data)
+    std = np.std(combined_data)
+
+    # Create a dictionary for the hyperparameters
+    mean_std_dict = {
+            "mean": mean,
+            "std": std,
+        }
+
+    with open('dataset' + '/mean_std.json', 'w') as file:
+        json.dump(mean_std_dict, file)
 
     # Combine LR and HR filenames row-wise
     data = zip(lr_filenames, hr_filenames)
@@ -345,6 +350,7 @@ if __name__ == '__main__':
 
     # TODO: use 10 subjects for the dataset and 2 subjects for the testset
     data_paths = [
-        'data/Alessandro_sEmg/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat']
+        'data/Alessandro_sEmg/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat',
+        'data/Alessandro_sEmg/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400InAnfd170619145709 Rampa_35MVC_5MVCs_1acontrazione_TODECOMPOSE_offset0_length29.682_runs250_EDITED_MATTEO.mat']
 
     dataset_creator_alessandro_13x5(data_paths)
