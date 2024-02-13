@@ -84,23 +84,23 @@ class Trainer:
         data_train_val = pd.read_csv('../dataset/data.csv', sep=";")
         data_test = pd.read_csv('../testset/data.csv', sep=";")
 
-        train, val = train_test_split(data_train_val, train_size=0.8, test_size=0.2, random_state=42)
+        train, val = train_test_split(data_train_val, train_size=0.75, test_size=0.25, random_state=42)
 
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], grid_shape=False),
             batch_size=self.batch_size
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], grid_shape=False),
             batch_size=self.batch_size
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']))
+                           self.mean_std_dict['std'], grid_shape=False))
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
@@ -128,8 +128,8 @@ class Trainer:
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         # move to gpu in case it's possible
-        self.adversarial_loss
-        self.mse
+        self.adversarial_loss.to(self.device)
+        self.mse.to(self.device)
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
@@ -219,8 +219,6 @@ class Trainer:
             # Generate super-resolved data (SR) from LR data
             sr_emg = self.generator(lr_emg).detach().to(self.device)
 
-            sr_emg = self._delete_row_column(sr_emg)
-
             # Create real and fake labels to train discriminator for both cases
             real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
             fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
@@ -245,10 +243,10 @@ class Trainer:
             # Generate SR data from LR data
             sr_emg = self.generator(lr_emg).to(self.device)
 
-            sr_emg_final = self._delete_row_column(sr_emg)
-
-            output = self.discriminator(sr_emg_final)
+            output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
+
+            sr_emg_final = self._delete_row_column(sr_emg)
 
             loss_generator_content = self.mse(sr_emg_final, hr_emg)  # Content loss
 
@@ -288,28 +286,28 @@ class Trainer:
         """
         sr_emg_shape = sr_emg.shape
 
-        new_channel_number = 65
+        new_channel_number = int((math.sqrt(sr_emg_shape[3]) - 1) ** 2)
 
-        # Switch last two axes to go from (batch, channel, 2048, 84) to (batch, channel, 84, 2048)
+        # Switch last two axes to go from (batch, channel, 512, 64) to (batch, channel, 64, 512)
         sr_emg_move_axis = sr_emg.permute(0, 1, 3, 2)
 
         # Reshape to grid shape (batch, 1,8,8,512)
-        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, 6,14, 2048)
+        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, int(math.sqrt(sr_emg_shape[3])),
+                                                int(math.sqrt(sr_emg_shape[3])), sr_emg_shape[2])
 
         # Create array for the new shape where the last row and column are deleted
-        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, 2048, 65, dtype=torch.float32,
+        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, sr_emg_shape[2], new_channel_number, dtype=torch.float32,
                                    device=self.device)
 
         for i in range(sr_emg_shape[0]):
             grid = sr_emg_reshaped[i, 0, :, :, :]
             grid = grid.transpose(0, 1)
             grid = torch.flip(grid, [0])
-            grid[:, 1::2] = torch.flip(grid[:, 1::2], dims=[0])
             grid_small = grid[:-1, :-1, :]
 
             grid_new = torch.flip(grid_small, [0])
             grid_new = grid_new.transpose(0, 1)
-            grid_new = grid_new.view(new_channel_number, 2048)
+            grid_new = grid_new.view(new_channel_number, sr_emg_shape[2])
             grid_new = grid_new.transpose(0, 1)
 
             sr_emg_final[i][0][:][:] = grid_new
@@ -394,7 +392,7 @@ class Trainer:
         torch.save(self.generator.state_dict(), self.run_folder + '/final_generator.pt')
         torch.save(self.discriminator.state_dict(), self.run_folder + '/final_discriminator.pt')
 
-    def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list, train_d_loss:list, val_loss: list, psnr: list) -> None:
+    def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list, train_d_loss: list, val_loss: list, psnr: list) -> None:
         """
         Plots the Generator and Discriminator loss over the epochs and the validation loss and PSNR over the epochs.
 

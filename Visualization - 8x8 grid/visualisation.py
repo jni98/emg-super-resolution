@@ -471,7 +471,7 @@ class Visualizer:
                 plt.savefig(f'{directory}OriginalChannel{i + 1}_{keys_list[g]}.png')
                 plt.close()
 
-            # TODO: Perform this for all grids
+            # TODO: Perform this for all grids and add to 13x5
             if g == 1:
                 correlation_grid_cubic = correlation_grid
             else:

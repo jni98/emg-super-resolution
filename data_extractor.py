@@ -129,7 +129,7 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
         plt.title('Histogram Data')
         plt.savefig(dataset_path + f'Histogram-path-{i}-20bins.png')
 
-        for grid in range(2):
+        for grid in range(1):
             # only use first 64 channels, since data is from two grids
             emg_data = emg_data_complete[grid * 64:(grid * 64) + 64, :]
 
@@ -143,7 +143,7 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
             windows = emg_data.shape[1] - 512
 
             # window the signal to 512 samples
-            for window in range(0, windows, 50):
+            for window in range(0, 3000, 50):
                 emg_windowed = emg_data_grid[:, :, window:(window + 512)]
 
                 if emg_windowed.min() < min_value_dataset:
@@ -152,6 +152,7 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
                 if emg_windowed.max() > max_value_dataset:
                     max_value_dataset = emg_windowed.max()
 
+                # range(2): uses full grid for generation of training data
                 for col in range(2):
                     for row in range(2):
                         emg_windowed_hr = emg_windowed[row:row + 7, col:col + 7, :]
@@ -294,21 +295,17 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
 
         windows = emg_length - 2048
 
-        # window the signal to 512 samples
-        # 41 samples equals 20ms whcih is approximately 2 action potentials
-        for window in range(0, windows, 41):
+        # window the signal to 2048 samples
+        # 51 samples equals 25ms which is approximately 1 action potential --> 2AP overlapping
+        for window in range(0, windows, (2048 - 102)):
             print("window", window)
             # The length of one sample is 2048 which is equal to 1 second
             emg_lr_windowed = emg_lr_reshaped_final[:, window:(window + 2048)]
             emg_hr_windowed = emg_hr_reshaped_final[:, window:(window + 2048)]
 
-            # Delete first channel since it's empty
-            emg_lr_final = emg_lr_windowed[1:]
-            emg_hr_final = emg_hr_windowed[1:]
-
             # transpose for samples x channels shape
-            emg_lr_final = emg_lr_final.transpose()
-            emg_hr_final = emg_hr_final.transpose()
+            emg_lr_final = emg_lr_windowed.transpose()
+            emg_hr_final = emg_hr_windowed.transpose()
 
             # save high resolution data and add file name to list
             np.save(dataset_path + f'window{window}-hr.npy', emg_hr_final)
@@ -337,15 +334,16 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
 
 
 if __name__ == '__main__':
-    # data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl',
-    #               'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
-    #               'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
+    # data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl']
+    #               #'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
+    #               #'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
     # # data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
     #
     # movement_name = 'thumb_slow'
     #
     # dataset_creator_dominik(data_paths)
 
+    # TODO: use 10 subjects for the dataset and 2 subjects for the testset
     data_paths = [
         'data/Alessandro_sEmg/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat']
 

@@ -9,6 +9,7 @@ The code is called from every file that is loading a dataset.
 from torch.utils.data import Dataset
 import torch
 import numpy as np
+from utilities import data_13x5_2D_to_3D
 
 
 class Custom_Dataset(Dataset):
@@ -16,12 +17,14 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
 
     """
-    def __init__(self, data, mean: float, std: float) -> None:
+    def __init__(self, data, mean: float, std: float, grid_shape: bool) -> None:
         super().__init__()
         self.data = data
 
         self.mean = mean
         self.std = std
+
+        self.grid_shape = grid_shape
 
     def __len__(self) -> int:
         return len(self.data)
@@ -52,6 +55,8 @@ class Custom_Dataset(Dataset):
         hr_emg_path = self.data.iloc[index]['hr_filename']
 
         lr_emg = np.load(self.data.iloc[index, 0])
+        if self.grid_shape:
+            lr_emg = data_13x5_2D_to_3D(data=lr_emg, rows=7, cols=3)
 
         # Standardize using mean and std values of the complete dataset
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
@@ -59,6 +64,8 @@ class Custom_Dataset(Dataset):
         lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
 
         hr_emg = np.load(self.data.iloc[index, 1])
+        if self.grid_shape:
+            hr_emg = data_13x5_2D_to_3D(data= hr_emg, rows=13, cols=5)
 
         #  Standardize using mean and std values of the complete dataset
         hr_emg_standardized = self.standardization(hr_emg,self.mean,self.std)

@@ -20,6 +20,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from torchsummary import summary
 from sklearn.model_selection import train_test_split
 import pandas as pd
 from generator import Generator
@@ -84,23 +85,23 @@ class Trainer:
         data_train_val = pd.read_csv('../dataset/data.csv', sep=";")
         data_test = pd.read_csv('../testset/data.csv', sep=";")
 
-        train, val = train_test_split(data_train_val, train_size=0.75, test_size=0.25, random_state=42)
+        train, val = train_test_split(data_train_val, train_size=0.8, test_size=0.2, random_state=42)
 
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], grid_shape=True),
             batch_size=self.batch_size
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], grid_shape=True),
             batch_size=self.batch_size
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']))
+                           self.mean_std_dict['std'], grid_shape=True))
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
@@ -122,14 +123,15 @@ class Trainer:
 
         # move to gpu in case it's possible
         self.generator.to(self.device)
+        # print("Generator summary")
+        # print(str(summary(self.generator, (1, 13,5,2048))))
+
         self.discriminator.to(self.device)
+        print("Discriminator summary")
+        print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
-
-        # move to gpu in case it's possible
-        self.adversarial_loss.to(self.device)
-        self.mse.to(self.device)
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
@@ -217,6 +219,9 @@ class Trainer:
             self.optimizer_D.zero_grad()
 
             # Generate super-resolved data (SR) from LR data
+            # detaching sr_emg prevents gradients from flowing back through the generator network when computing
+            # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
+            # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
             sr_emg = self.generator(lr_emg).detach().to(self.device)
 
             # Create real and fake labels to train discriminator for both cases
@@ -231,6 +236,7 @@ class Trainer:
             output_discriminator_fake = self.discriminator(sr_emg)
             loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
+            # calculate total loss for discriminator
             loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
 
             loss_discriminator.backward()
@@ -246,9 +252,7 @@ class Trainer:
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            sr_emg_final = self._delete_row_column(sr_emg)
-
-            loss_generator_content = self.mse(sr_emg_final, hr_emg)  # Content loss
+            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
 
             loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
 
@@ -284,33 +288,8 @@ class Trainer:
         sr_emg_final: torch tensor
                       Super-resolved data without the last row and column
         """
-        sr_emg_shape = sr_emg.shape
 
-        new_channel_number = int((math.sqrt(sr_emg_shape[3]) - 1) ** 2)
-
-        # Switch last two axes to go from (batch, channel, 512, 64) to (batch, channel, 64, 512)
-        sr_emg_move_axis = sr_emg.permute(0, 1, 3, 2)
-
-        # Reshape to grid shape (batch, 1,8,8,512)
-        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, int(math.sqrt(sr_emg_shape[3])),
-                                                int(math.sqrt(sr_emg_shape[3])), sr_emg_shape[2])
-
-        # Create array for the new shape where the last row and column are deleted
-        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, sr_emg_shape[2], new_channel_number, dtype=torch.float32,
-                                   device=self.device)
-
-        for i in range(sr_emg_shape[0]):
-            grid = sr_emg_reshaped[i, 0, :, :, :]
-            grid = grid.transpose(0, 1)
-            grid = torch.flip(grid, [0])
-            grid_small = grid[:-1, :-1, :]
-
-            grid_new = torch.flip(grid_small, [0])
-            grid_new = grid_new.transpose(0, 1)
-            grid_new = grid_new.view(new_channel_number, sr_emg_shape[2])
-            grid_new = grid_new.transpose(0, 1)
-
-            sr_emg_final[i][0][:][:] = grid_new
+        sr_emg_final = sr_emg[:, :, :-1, :-1, :]
 
         return sr_emg_final
 
@@ -343,10 +322,8 @@ class Trainer:
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
 
-                val_sr_emg_final = self._delete_row_column(val_sr_emg)
-
                 # Calculate validation loss
-                val_loss = self.mse(val_sr_emg_final, val_hr)
+                val_loss = self.mse(val_sr_emg, val_hr)
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
@@ -392,7 +369,8 @@ class Trainer:
         torch.save(self.generator.state_dict(), self.run_folder + '/final_generator.pt')
         torch.save(self.discriminator.state_dict(), self.run_folder + '/final_discriminator.pt')
 
-    def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list, train_d_loss: list, val_loss: list, psnr: list) -> None:
+    def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list,
+                            train_d_loss: list, val_loss: list, psnr: list) -> None:
         """
         Plots the Generator and Discriminator loss over the epochs and the validation loss and PSNR over the epochs.
 
@@ -489,34 +467,33 @@ class Trainer:
         self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
-        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-            lr_emg = lr_emg.to(self.device)
-            hr_emg = hr_emg.to(self.device)
+        with torch.no_grad():
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+                lr_emg = lr_emg.to(self.device)
+                hr_emg = hr_emg.to(self.device)
 
-            # Generate super-resolved data (SR) from LR data
-            lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
-            lr_sr_emg = self._delete_row_column(lr_sr_emg)
-            lr_sr_emg = lr_sr_emg.to('cpu').squeeze().numpy()
-            lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
+                # Generate super-resolved data (SR) from LR data
+                lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
+                lr_sr_emg = lr_sr_emg.to('cpu').squeeze().numpy()
+                lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
-            # Generate super-resolved data (SR) from HR data
-            hr_sr_emg = self.generator(hr_emg).detach().to(self.device)
-            hr_sr_emg = self._delete_row_column(hr_sr_emg)
-            hr_sr_emg = hr_sr_emg.to('cpu').squeeze().numpy()
-            hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
+                # Generate super-resolved data (SR) from HR data
+                hr_sr_emg = self.generator(hr_emg).detach().to(self.device)
+                hr_sr_emg = hr_sr_emg.to('cpu').squeeze().numpy()
+                hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
-            # Save signal from lr to hr
-            last_slash_index_lr = lr_emg_paths[0].rfind("/")
-            model1_path = lr_emg_paths[0][:last_slash_index_lr] + '/model1'
-            os.makedirs(model1_path, exist_ok=True)
-            np.save(model1_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
-                    lr_sr_emg_destandardized
-                    )
+                # Save signal from lr to hr
+                last_slash_index_lr = lr_emg_paths[0].rfind("/")
+                model_path = lr_emg_paths[0][:last_slash_index_lr] + '/model2_13x5'
+                os.makedirs(model_path, exist_ok=True)
+                np.save(model_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
+                        lr_sr_emg_destandardized
+                        )
 
-            # Save B-Spline interpolated signal from hr to sr
-            last_slash_index_hr = hr_emg_paths[0].rfind("/")
-            np.save(model1_path + (hr_emg_paths[0][last_slash_index_hr:]).replace('-hr.npy', '-hr-sr.npy'),
-                    hr_sr_emg_destandardized)
+                # Save B-Spline interpolated signal from hr to sr
+                last_slash_index_hr = hr_emg_paths[0].rfind("/")
+                np.save(model_path + (hr_emg_paths[0][last_slash_index_hr:]).replace('-hr.npy', '-hr-sr.npy'),
+                        hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
 

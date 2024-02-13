@@ -199,7 +199,7 @@ class Visualizer:
 
             # Plot and save mean_differences_grid
             plt.figure()
-            plt.imshow(mean_differences_grid, cmap='viridis', origin='upper', vmin=0, vmax=40)
+            plt.imshow(mean_differences_grid, cmap='viridis', origin='upper', vmin=0, vmax=0.01)
 
             # Set ticks and tick labels before calling imshow
             plt.xticks(range(5), labels=range(1, 6))
@@ -250,10 +250,10 @@ class Visualizer:
                 im = axs[g][i].imshow(emg_heatmap, cmap='hot')
 
                 # Set ticks and tick labels to start from 1 but position them at 0 to match the data
-                axs[g][i].set_xticks(range(13))
-                axs[g][i].set_yticks(range(5))
-                axs[g][i].set_xticklabels(range(1, 14))
-                axs[g][i].set_yticklabels(range(1, 6))
+                axs[g][i].set_xticks(range(5))
+                axs[g][i].set_yticks(range(13))
+                axs[g][i].set_xticklabels(range(1, 6))
+                axs[g][i].set_yticklabels(range(1, 14))
                 axs[g][i].set_title(keys_list[g] + f'-{time_point}')
 
                 axs[g][i].invert_yaxis()  # Invert the y-axis direction
@@ -386,6 +386,8 @@ class Visualizer:
         -------
 
         """
+        #TODO: Check why one coulumn and one row is missing
+
         print("Start plotting pearson coefficient")
 
         grids = (
@@ -481,8 +483,8 @@ class Visualizer:
                 plt.imshow(correlation_grid, cmap='viridis', origin='upper', vmin=0.2, vmax=1)
 
                 # Set ticks and tick labels before calling imshow
-                plt.xticks(range(13), labels=range(1, 14))
-                plt.yticks(range(5), labels=range(5, 0, -1))
+                plt.xticks(range(5), labels=range(1, 6))
+                plt.yticks(range(13), labels=range(13, 0, -1))
 
                 plt.title(f'Pearson coefficient - Original channel {i + 1} with {keys_list[g]}')
                 plt.colorbar()

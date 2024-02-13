@@ -2,7 +2,7 @@
 Author: Janina Kloos (janina.kloos@gmx.de)
 Date created: 02.02.2024
 File description: This file is used to run the training of the GAN. It also calls the function to generate the super
-resolution data.
+resolution data. The grid is of shape 8x8 and the data is processed in 2D (samples x channels).
 
 You can run this file by running the main function.
 """
