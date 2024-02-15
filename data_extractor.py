@@ -248,6 +248,9 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         # Get the data from the MATLAB file
         emg_data = mat_contents['SIG']
 
+        # convert from mV to µV
+        emg_data = emg_data * 1000
+
         # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
         dataset_path = 'dataset' + '/train/'
         print(dataset_path)
@@ -313,7 +316,7 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
 
             # save low resolution data and add file name to list
             np.save(dataset_path + f'window{window}-lr.npy', emg_lr_windowed)
-            lr_filenames_training.append('../' + dataset_path + f'window{window}-lr.npy')
+            lr_filenames_training.append('train/' + f'window{window}-lr.npy')
 
     # Get mean and std for standardization
     mean = np.mean(combined_data)
@@ -360,6 +363,9 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
 
         # Get the data from the MATLAB file
         emg_data = mat_contents['SIG']
+
+        # convert from mV to µV
+        emg_data = emg_data * 1000
 
         # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
         dataset_path = 'dataset' + '/test/'
@@ -417,11 +423,11 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
 
             # save high resolution data and add file name to list
             np.save(dataset_path + f'window{window}-hr.npy', emg_hr_windowed)
-            hr_filenames_test.append('../' + dataset_path + f'window{window}-hr.npy')
+            hr_filenames_test.append('test/' + f'window{window}-hr.npy')
 
             # save low resolution data and add file name to list
             np.save(dataset_path + f'window{window}-lr.npy', emg_lr_windowed)
-            lr_filenames_test.append('../' + dataset_path + f'window{window}-lr.npy')
+            lr_filenames_test.append('test/' + f'window{window}-lr.npy')
 
     # Combine LR and HR filenames row-wise
     data = zip(lr_filenames_test, hr_filenames_test)
