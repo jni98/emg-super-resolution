@@ -34,4 +34,4 @@ if __name__ == "__main__":
     # Plot the training results
     trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, val_loss, psnr)
 
-    trainer.generate_sr_data()
+    #trainer.generate_sr_data()
