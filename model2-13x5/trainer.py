@@ -33,12 +33,18 @@ class Trainer:
     Class to train the model.
     """
 
-    def __init__(self, num_epochs: int, batch_size: int, learning_rate: float, run_folder: str) -> None:
+    def __init__(self, data_directory: str , test_data_directory: str, results_directory: str,num_epochs: int, batch_size: int, learning_rate: float) -> None:
         """
         Constructs all the necessary attributes for the Trainer object.
 
         Parameters
         ----------
+        data_directory: str
+                    Path to the directory where the training data is stored
+        test_data_directory: str
+                    Path to the directory where the testing data is stored
+        results_directory: str
+                    Path to the directory where the results should be saved
         num_epochs: int
                     Number of epochs to train the model
         batch_size: int
@@ -49,13 +55,14 @@ class Trainer:
                     Path to the folder where the results should be saved
         """
 
+        self.data_directory = data_directory
+        self.test_data_directory = test_data_directory
+        self.run_folder = results_directory
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.lr = learning_rate
 
         self.betas = (0.9, 0.999)
-
-        self.run_folder = run_folder
 
         # Create a dictionary for the hyperparameters
         self.hyperparameter = {
@@ -460,8 +467,6 @@ class Trainer:
         -------
 
         """
-        # in case you only want to generate data:
-        # self.run_folder = "runs/20240117172449"
 
         # load the final generator
         self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))

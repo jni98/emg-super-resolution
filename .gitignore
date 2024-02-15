@@ -125,32 +125,32 @@ venv.bak/
 dmypy.json
 
 # add personal files
-/model 1 - 8x8/runs
-/model 1 - 13x5/runs
-/model 2 - 13x5/runs
+/model1-8x8/runs
+/model1-13x5/runs
+/model2-13x5/runs
 
 /testset/
 /data/
 /dataset/
 
-/Visualization - 8x8 grid/plot_channels
-/Visualization - 8x8 grid/plot_channels_difference
-/Visualization - 8x8 grid/plot_correlations
-/Visualization - 8x8 grid/plot_dtw
-/Visualization - 8x8 grid/plot_heatmaps
-/Visualization - 8x8 grid/plot_mean_differences_heatmap
-/Visualization - 8x8 grid/plot_pearsonr
-/Visualization - 8x8 grid/plot_pearsonr_difference
-/Visualization - 8x8 grid/plot_pearsonr_heatmap
-/Visualization - 8x8 grid/plot_pearsonr_heatmap_diagonal
+/Visualization-8x8grid/plot_channels
+/Visualization-8x8grid/plot_channels_difference
+/Visualization-8x8grid/plot_correlations
+/Visualization-8x8grid/plot_dtw
+/Visualization-8x8grid/plot_heatmaps
+/Visualization-8x8grid/plot_mean_differences_heatmap
+/Visualization-8x8grid/plot_pearsonr
+/Visualization-8x8grid/plot_pearsonr_difference
+/Visualization-8x8grid/plot_pearsonr_heatmap
+/Visualization-8x8grid/plot_pearsonr_heatmap_diagonal
 
-/Visualization - 13x5 grid/plot_channels
-/Visualization - 13x5 grid/plot_channels_difference
-/Visualization - 13x5 grid/plot_correlations
-/Visualization - 13x5 grid/plot_dtw
-/Visualization - 13x5 grid/plot_heatmaps
-/Visualization - 13x5 grid/plot_mean_differences_heatmap
-/Visualization - 13x5 grid/plot_pearsonr
-/Visualization - 13x5 grid/plot_pearsonr_difference
-/Visualization - 13x5 grid/plot_pearsonr_heatmap
-/Visualization - 13x5 grid/plot_pearsonr_heatmap_diagonal
+/Visualization-13x5grid/plot_channels
+/Visualization-13x5grid/plot_channels_difference
+/Visualization-13x5grid/plot_correlations
+/Visualization-13x5grid/plot_dtw
+/Visualization-13x5grid/plot_heatmaps
+/Visualization-13x5grid/plot_mean_differences_heatmap
+/Visualization-13x5grid/plot_pearsonr
+/Visualization-13x5grid/plot_pearsonr_difference
+/Visualization-13x5grid/plot_pearsonr_heatmap
+/Visualization-13x5grid/plot_pearsonr_heatmap_diagonal

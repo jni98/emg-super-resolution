@@ -16,14 +16,12 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
 
     """
-    def __init__(self, data, mean: float, std: float, grid_shape: bool) -> None:
+    def __init__(self, data, mean: float, std: float) -> None:
         super().__init__()
         self.data = data
 
         self.mean = mean
         self.std = std
-
-        self.grid_shape = grid_shape
 
     def __len__(self) -> int:
         return len(self.data)

@@ -13,6 +13,8 @@ dataset_creator_alessandro function with the data paths as an argument.
 import json
 import os
 import pickle
+import tarfile
+
 import matplotlib
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
@@ -216,25 +218,29 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
             writer.writerow([lr_filename + ';' + hr_filename])
 
 
-def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
+def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str]) -> None:
     """
 
     Parameters
     ----------
-    data_paths: list of str
+    train_paths: list of str
+                A list of multiple directories, each containing a matlab file
+    test_paths: list of str
+                A list of multiple directories, each containing a matlab file
 
     Returns
     -------
     None
     """
 
+    ######################## Training ########################
     # List of LR and HR filenames (replace this with your filenames)
-    lr_filenames = []
-    hr_filenames = []
+    lr_filenames_training = []
+    hr_filenames_training = []
 
-    for i in range(len(data_paths)):
-        # extract data path and pickle file name from list of paths
-        data_path = data_paths[i]
+    for i in range(len(train_paths)):
+        # extract data path
+        data_path = train_paths[i]
 
         # Load MATLAB file
         mat_contents = loadmat(data_path)
@@ -243,8 +249,7 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
         emg_data = mat_contents['SIG']
 
         # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
-        base_directory = data_path.replace("data/", "").rsplit("/", 1)[0]
-        dataset_path = 'dataset' + '/' + base_directory + '/'
+        dataset_path = 'dataset' + '/train/'
         print(dataset_path)
 
         # Create the folder if it doesn't exist
@@ -279,10 +284,9 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
         plt.plot(emg_hr_reshaped[0, 0])
         plt.savefig('emg_hr_reshaped.png')
 
-
         # Reshape arrays to channel x samples, counting channels from top to bottom
-        #emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
-        #emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
+        # emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
+        # emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
 
         if i == 0:
             combined_data = emg_hr_reshaped.flatten()
@@ -296,20 +300,20 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
         for window in range(0, windows, (2048 - 102)):
             print("window", window)
             # The length of one sample is 2048 which is equal to 1 second
-            emg_lr_windowed = emg_lr_reshaped[:,:, window:(window + 2048)]
-            emg_hr_windowed = emg_hr_reshaped[:,:, window:(window + 2048)]
+            emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 2048)]
+            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 2048)]
 
             # transpose for samples x channels shape
-            #emg_lr_final = emg_lr_windowed.transpose()
-            #emg_hr_final = emg_hr_windowed.transpose()
+            # emg_lr_final = emg_lr_windowed.transpose()
+            # emg_hr_final = emg_hr_windowed.transpose()
 
             # save high resolution data and add file name to list
             np.save(dataset_path + f'window{window}-hr.npy', emg_hr_windowed)
-            hr_filenames.append('../' + dataset_path + f'window{window}-hr.npy')
+            hr_filenames_training.append('../' + dataset_path + f'window{window}-hr.npy')
 
             # save low resolution data and add file name to list
             np.save(dataset_path + f'window{window}-lr.npy', emg_lr_windowed)
-            lr_filenames.append('../' + dataset_path + f'window{window}-lr.npy')
+            lr_filenames_training.append('../' + dataset_path + f'window{window}-lr.npy')
 
     # Get mean and std for standardization
     mean = np.mean(combined_data)
@@ -317,20 +321,20 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
 
     # Create a dictionary for the hyperparameters
     mean_std_dict = {
-            "mean": mean,
-            "std": std,
-        }
+        "mean": mean,
+        "std": std,
+    }
 
     with open('dataset' + '/mean_std.json', 'w') as file:
         json.dump(mean_std_dict, file)
 
     # Combine LR and HR filenames row-wise
-    data = zip(lr_filenames, hr_filenames)
+    data = zip(lr_filenames_training, hr_filenames_training)
     # File path for the CSV file
     csv_file = 'data.csv'
 
     # Open the CSV file in append mode and write the data
-    with open('dataset' + '/' + csv_file, mode='a', newline='') as file:
+    with open('dataset/train' + '/' + csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
 
         # Add a header if the file is empty
@@ -340,6 +344,110 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
         # Add each LR/HR pair as a row in the CSV file
         for lr_filename, hr_filename in data:
             writer.writerow([lr_filename + ';' + hr_filename])
+
+    ######################## Test ########################
+
+    # List of LR and HR filenames (replace this with your filenames)
+    lr_filenames_test = []
+    hr_filenames_test = []
+
+    for i in range(len(test_paths)):
+        # extract data path
+        data_path = test_paths[i]
+
+        # Load MATLAB file
+        mat_contents = loadmat(data_path)
+
+        # Get the data from the MATLAB file
+        emg_data = mat_contents['SIG']
+
+        # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
+        dataset_path = 'dataset' + '/test/'
+        print(dataset_path)
+
+        # Create the folder if it doesn't exist
+        os.makedirs(dataset_path, exist_ok=True)
+
+        emg_lr = emg_data[::2, ::2]
+
+        emg_length = emg_lr[0][0][0].shape[0]
+        emg_hr_reshaped = np.zeros((emg_data.shape[0], emg_data.shape[1], emg_length))
+        emg_lr_reshaped = np.zeros((emg_lr.shape[0], emg_lr.shape[1], emg_length))
+        print("shape emg_lr_reshaped:", np.shape(emg_lr_reshaped))
+
+        # Reshape HR data into 3D
+        for row in range(emg_data.shape[0]):
+            for col in range(emg_data.shape[1]):
+                if (row == (emg_data.shape[0] - 1) and col == 0):
+                    continue
+                else:
+                    sub_array = emg_data[row][col]
+                    emg_hr_reshaped[row, col] = sub_array
+
+        # Reshape LR data into 3D
+        for row in range(emg_lr.shape[0]):
+            for col in range(emg_lr.shape[1]):
+                if (row == (emg_lr.shape[0] - 1) and col == 0):
+                    continue
+                else:
+                    sub_array = emg_lr[row][col]
+                    emg_lr_reshaped[row, col] = sub_array
+
+        plt.figure()
+        plt.plot(emg_hr_reshaped[0, 0])
+        plt.savefig('emg_hr_reshaped.png')
+
+        # Reshape arrays to channel x samples, counting channels from top to bottom
+        # emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
+        # emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
+
+        windows = emg_length - 2048
+
+        # window the signal to 2048 samples
+        # 51 samples equals 25ms which is approximately 1 action potential --> 2AP overlapping
+        for window in range(0, windows, (2048 - 102)):
+            print("window", window)
+            # The length of one sample is 2048 which is equal to 1 second
+            emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 2048)]
+            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 2048)]
+
+            # transpose for samples x channels shape
+            # emg_lr_final = emg_lr_windowed.transpose()
+            # emg_hr_final = emg_hr_windowed.transpose()
+
+            # save high resolution data and add file name to list
+            np.save(dataset_path + f'window{window}-hr.npy', emg_hr_windowed)
+            hr_filenames_test.append('../' + dataset_path + f'window{window}-hr.npy')
+
+            # save low resolution data and add file name to list
+            np.save(dataset_path + f'window{window}-lr.npy', emg_lr_windowed)
+            lr_filenames_test.append('../' + dataset_path + f'window{window}-lr.npy')
+
+    # Combine LR and HR filenames row-wise
+    data = zip(lr_filenames_test, hr_filenames_test)
+    # File path for the CSV file
+    csv_file = 'data.csv'
+
+    # Open the CSV file in append mode and write the data
+    with open('dataset/test' + '/' + csv_file, mode='a', newline='') as file:
+        writer = csv.writer(file)
+
+        # Add a header if the file is empty
+        if file.tell() == 0:
+            writer.writerow(['lr_filename;hr_filename'])
+
+        # Add each LR/HR pair as a row in the CSV file
+        for lr_filename, hr_filename in data:
+            writer.writerow([lr_filename + ';' + hr_filename])
+
+
+def create_tar_from_folder(folder_path, tar_filename):
+    with tarfile.open(tar_filename, 'w') as tar:
+        # Walk through the folder and its subfolders
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                # Add each file to the tar file
+                tar.add(os.path.join(root, file))
 
 
 if __name__ == '__main__':
@@ -353,7 +461,17 @@ if __name__ == '__main__':
     # dataset_creator_dominik(data_paths)
 
     # TODO: use 10 subjects for the dataset and 2 subjects for the testset
-    data_paths = ['data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400InAnfd170619145709 Rampa_35MVC_5MVCs_1acontrazione_TODECOMPOSE_offset0_length29.682_runs250_EDITED_MATTEO.mat',
-                  'data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat']
+    train_paths = [
+        'data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400InAnfd170619145709 Rampa_35MVC_5MVCs_1acontrazione_TODECOMPOSE_offset0_length29.682_runs250_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat']
 
-    dataset_creator_alessandro_13x5(data_paths)
+    test_paths = [
+        'data/Alessandros Daten sEMG/Test/RPAR_DECOMP_PROX_35-50-70_FINISHED/POST/400PaRiRo170628134308 Rampa_35MVC_5MVCs_2acontrazione_TODECOMPOSE_offset0_length30_runs250_EDITED_MATTEO.mat']
+
+    dataset_creator_alessandro_13x5(train_paths, test_paths)
+
+    # Define folder path and tar filename
+    folder_path = 'dataset'
+    tar_filename = 'dataset.tar'
+
+    create_tar_from_folder(folder_path, tar_filename)
