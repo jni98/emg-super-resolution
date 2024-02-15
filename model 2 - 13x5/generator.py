@@ -65,16 +65,21 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
         self.conv1 = nn.Conv3d(in_channels, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                                padding=(1, 1, 1))  # Adjust padding
-        self.prelu = nn.PReLU()
+        self.prelu1 = nn.PReLU()
 
         self.res_blocks = nn.Sequential(*[ResidualBlock(64) for _ in range(17)])
 
         self.conv2 = nn.Conv3d(64, 64, kernel_size=(3, 3, 3), stride=(1, 1,2), padding=(1, 1, 1))
         self.bn2 = nn.BatchNorm3d(64)
+        self.prelu2 = nn.PReLU()
 
         self.conv3 = nn.Conv3d(64, 64, kernel_size=(3, 3, 3), stride=(1, 1, 2), padding=(1, 1, 1))
+        self.bn3 = nn.BatchNorm3d(64)
+        self.prelu3 = nn.PReLU()
 
         self.conv4 = nn.Conv3d(64, 64, kernel_size=(3, 3, 3), stride=(1, 1, 2), padding=(1, 1, 1))
+        self.bn4 = nn.BatchNorm3d(64)
+        self.prelu4 = nn.PReLU()
 
         # Upsampling layers using transposed convolutions
         self.upsample1 = nn.ConvTranspose3d(64, 64, kernel_size=(3, 3, 3), stride=(2, 2,2), padding=(1, 1, 1), output_padding=(0, 0, 1))
@@ -101,7 +106,7 @@ class Generator(nn.Module):
         print("Generator input", x.shape)
 
         out = self.conv1(x)
-        out = self.prelu(out)
+        out = self.prelu1(out)
         print("Generator after conv1", out.shape)
 
         residual = out
@@ -114,12 +119,17 @@ class Generator(nn.Module):
 
         out = self.conv2(out)
         out = self.bn2(out)
+        out = self.prelu2(out)
         print("Generator after conv2", out.shape)
 
         out = self.conv3(out)
+        out = self.bn3(out)
+        out = self.prelu3(out)
         print("Generator after conv3", out.shape)
 
         out = self.conv4(out)
+        out = self.bn4(out)
+        out = self.prelu4(out)
         print("Generator after conv4", out.shape)
 
         # Upsampling

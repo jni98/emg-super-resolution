@@ -66,7 +66,7 @@ class Visualizer:
 
         print("Start plotting channels")
 
-        time_axis = np.arange(200)  # Assuming the time axis runs along axis 2
+        time_axis = np.arange(2048)  # Assuming the time axis runs along axis 2
 
         for title, emg_data in self.emg_data_dict.items():
             # Plot Training losses in a separate figure
@@ -76,7 +76,7 @@ class Visualizer:
             # Use only few channels here
             for j in range(65):
                 # TODO: Achtung, nicht das volle Zeitfenster
-                signal = emg_data[j][:200]
+                signal = emg_data[j][:]
 
                 predicted = ''
                 # if title == 'Original HR':
@@ -559,9 +559,9 @@ if __name__ == '__main__':
     visualize = Visualizer(file_path)
 
     visualize.plot_emg_channels()
-    visualize.plot_emg_channels_difference()
-    visualize.plot_heat_maps()
+    #visualize.plot_emg_channels_difference()
+    #visualize.plot_heat_maps()
     #TODO: Check correlation code again
     #visualize.plot_correlations()
-    visualize.plot_pearson_coefficient()
-    visualize.plot_pearson_coefficient_grid()
+    #visualize.plot_pearson_coefficient()
+    #visualize.plot_pearson_coefficient_grid()

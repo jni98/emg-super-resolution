@@ -90,18 +90,18 @@ class Trainer:
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], grid_shape=True),
+                           self.mean_std_dict['std']),
             batch_size=self.batch_size
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], grid_shape=True),
+                           self.mean_std_dict['std']),
             batch_size=self.batch_size
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], grid_shape=True))
+                           self.mean_std_dict['std']))
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'

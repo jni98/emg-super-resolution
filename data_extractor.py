@@ -55,7 +55,7 @@ def plot_emg_data(emg_data: np.ndarray) -> None:
     plt.ylabel('Channel')
     plt.title('EMG Signals')
     plt.legend(loc='right')
-    plt.show()
+    plt.savefig('emg_signals.png')
 
 
 def open_emg_data_Dominik(file_path: str) -> np.ndarray:
@@ -275,15 +275,19 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
                     sub_array = emg_lr[row][col]
                     emg_lr_reshaped[row, col] = sub_array
 
+        plt.figure()
+        plt.plot(emg_hr_reshaped[0, 0])
+        plt.savefig('emg_hr_reshaped.png')
+
 
         # Reshape arrays to channel x samples, counting channels from top to bottom
-        emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
-        emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
+        #emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
+        #emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
 
         if i == 0:
-            combined_data = emg_hr_reshaped_final.flatten()
+            combined_data = emg_hr_reshaped.flatten()
         else:
-            combined_data = np.concatenate((combined_data, emg_hr_reshaped_final.flatten()))
+            combined_data = np.concatenate((combined_data, emg_hr_reshaped.flatten()))
 
         windows = emg_length - 2048
 
@@ -292,19 +296,19 @@ def dataset_creator_alessandro_13x5(data_paths: list[str]) -> None:
         for window in range(0, windows, (2048 - 102)):
             print("window", window)
             # The length of one sample is 2048 which is equal to 1 second
-            emg_lr_windowed = emg_lr_reshaped_final[:, window:(window + 2048)]
-            emg_hr_windowed = emg_hr_reshaped_final[:, window:(window + 2048)]
+            emg_lr_windowed = emg_lr_reshaped[:,:, window:(window + 2048)]
+            emg_hr_windowed = emg_hr_reshaped[:,:, window:(window + 2048)]
 
             # transpose for samples x channels shape
-            emg_lr_final = emg_lr_windowed.transpose()
-            emg_hr_final = emg_hr_windowed.transpose()
+            #emg_lr_final = emg_lr_windowed.transpose()
+            #emg_hr_final = emg_hr_windowed.transpose()
 
             # save high resolution data and add file name to list
-            np.save(dataset_path + f'window{window}-hr.npy', emg_hr_final)
+            np.save(dataset_path + f'window{window}-hr.npy', emg_hr_windowed)
             hr_filenames.append('../' + dataset_path + f'window{window}-hr.npy')
 
             # save low resolution data and add file name to list
-            np.save(dataset_path + f'window{window}-lr.npy', emg_lr_final)
+            np.save(dataset_path + f'window{window}-lr.npy', emg_lr_windowed)
             lr_filenames.append('../' + dataset_path + f'window{window}-lr.npy')
 
     # Get mean and std for standardization
@@ -349,8 +353,7 @@ if __name__ == '__main__':
     # dataset_creator_dominik(data_paths)
 
     # TODO: use 10 subjects for the dataset and 2 subjects for the testset
-    data_paths = [
-        'data/Alessandro_sEmg/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat',
-        'data/Alessandro_sEmg/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400InAnfd170619145709 Rampa_35MVC_5MVCs_1acontrazione_TODECOMPOSE_offset0_length29.682_runs250_EDITED_MATTEO.mat']
+    data_paths = ['data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400InAnfd170619145709 Rampa_35MVC_5MVCs_1acontrazione_TODECOMPOSE_offset0_length29.682_runs250_EDITED_MATTEO.mat',
+                  'data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat']
 
     dataset_creator_alessandro_13x5(data_paths)
