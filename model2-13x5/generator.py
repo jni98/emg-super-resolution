@@ -12,183 +12,170 @@ import numpy as np
 
 
 class ResidualBlock(nn.Module):
+    """
+    This class is used to create a residual block, which is used in the generator.
+    """
+
     def __init__(self, in_channels) -> None:
-        """
-         Constructs all the necessary attributes for the residual block object.
-        Parameters
-        ----------
-        in_channels: int
-                     Number of channels of the input tensor.
-        """
         super(ResidualBlock, self).__init__()
-        self.conv1 = nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
-        self.bn1 = nn.BatchNorm3d(in_channels)
+        self.conv1 = nn.Sequential(
+            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
+                      padding=(1, 1, 1)),
+            nn.BatchNorm3d(in_channels),
+            nn.PReLU())
+
+        self.conv2 = nn.Sequential(
+            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
+                      padding=(1, 1, 1)),
+            nn.BatchNorm3d(in_channels))
+
         self.prelu = nn.PReLU()
 
-        self.conv2 = nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
-        self.bn2 = nn.BatchNorm3d(in_channels)
-
     def forward(self, x: torch.tensor) -> torch.tensor:
-        """
-        Forwards the input tensor through all the layers.
-
-        Parameters
-        ----------
-        x: torch.tensor
-           Tensor that is given to the network.
-
-        Returns
-        -------
-        out: torch.tensor
-             Output tensor of the network.
-        """
         residual = x
         out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.prelu(out)
-
         out = self.conv2(out)
-        out = self.bn2(out)
         out += residual
+        out = self.prelu(out)
+        return out
+
+
+class DownConvolutionBlock(nn.Module):
+    """
+    This class is used to create a down convolution block, which is used in the generator to downsample the data.
+    """
+
+    def __init__(self, in_channels, out_channels) -> None:
+        super(DownConvolutionBlock, self).__init__()
+        self.downConv = nn.Conv3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                                  stride=(1, 1, 2), padding=(1, 1, 1))
+        self.bn = nn.BatchNorm3d(out_channels)
+        self.prelu = nn.PReLU()
+
+    def forward(self, x: torch.tensor) -> torch.tensor:
+        out = self.downConv(x)
+        out = self.bn(out)
+        out = self.prelu(out)
+        return out
+
+
+class UpConvolutionBlock(nn.Module):
+    """
+    This class is used to create an up convolution block, which is used in the generator to upsample the data and also
+    add the skip connection.
+    """
+    def __init__(self, in_channels, out_channels, stride) -> None:
+        super(UpConvolutionBlock, self).__init__()
+        self.upConv = nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                                         stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1))
+        self.bn1 = nn.BatchNorm3d(out_channels)
+        self.prelu1 = nn.PReLU()
+
+        self.conv = nn.Conv3d(in_channels=out_channels + out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                              stride=(1, 1, 1), padding=(1, 1, 1))
+        self.bn2 = nn.BatchNorm3d(out_channels)
+        self.prelu2 = nn.PReLU()
+
+    def forward(self, x: torch.tensor, skip: torch.tensor) -> torch.tensor:
+        # upsample
+        out = self.upConv(x)
+        out = self.bn1(out)
+        out = self.prelu1(out)
+
+        # concatenate with skip connection
+        out = torch.cat((out, skip), dim=1)
+
+        # convolve to get channel number as before the torch.cat
+        out = self.conv(out)
+        out = self.bn2(out)
+        out = self.prelu2(out)
+
         return out
 
 
 class Generator(nn.Module):
+    """
+    This class is used to create the generator, which is a convolutional neural network that is used to generate high
+    resolution data from low resolution data.
+    """
+
     def __init__(self, in_channels=1) -> None:
-        """
-        Constructs all the necessary attributes for the generator object.
-        Parameters
-        ----------
-        in_channels: int
-                     Number of channels the emg data has. On default set to 1.
-        """
+
         super(Generator, self).__init__()
 
-        # input: 1x7x3x2048
+        # Convolution
         self.conv1 = nn.Conv3d(in_channels, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
         self.bn1 = nn.BatchNorm3d(64)
         self.prelu1 = nn.PReLU()
 
-        # input: 64x7x3x2048
-        self.resUp1 = nn.ConvTranspose3d(64, 64, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-
+        # Upsampling of the residual and residual block 1
+        self.residualUp1 = nn.ConvTranspose3d(64, 64, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
         self.res_blocks1 = nn.Sequential(*[ResidualBlock(64) for _ in range(5)])
 
-        # input: 64x7x3x2048
-        self.conv2 = nn.Conv3d(64, 128, kernel_size=(3, 3, 3), stride=(1, 1,2), padding=(1, 1, 1))
-        self.bn2 = nn.BatchNorm3d(128)
-        self.prelu2 = nn.PReLU()
+        # DownConvolution 1
+        self.downConv1 = DownConvolutionBlock(64, 128)
 
-        self.resUp2 = nn.ConvTranspose3d(128, 128, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-
+        # Upsampling of the residual and residual block 2
+        self.residualUp2 = nn.ConvTranspose3d(128, 128, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
         self.res_blocks2 = nn.Sequential(*[ResidualBlock(128) for _ in range(5)])
 
-        # input: 128x7x3x1024
-        self.conv3 = nn.Conv3d(128, 256, kernel_size=(3, 3, 3), stride=(1, 1, 2), padding=(1, 1, 1))
-        self.bn3 = nn.BatchNorm3d(256)
-        self.prelu3 = nn.PReLU()
+        # DownConvolution 2
+        self.downConv2 = DownConvolutionBlock(128, 256)
 
-        self.resUp3 = nn.ConvTranspose3d(256, 256, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-
+        # Upsampling of the residual and residual block 3
+        self.residualUp3 = nn.ConvTranspose3d(256, 256, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
         self.res_blocks3 = nn.Sequential(*[ResidualBlock(256) for _ in range(5)])
 
-        # input: 256x7x3x512
-        self.conv4 = nn.Conv3d(256, 512, kernel_size=(3, 3, 3), stride=(1, 1, 2), padding=(1, 1, 1))
-        self.bn4 = nn.BatchNorm3d(512)
-        self.prelu4 = nn.PReLU()
+        # DownConvolution 3
+        self.downConv3 = DownConvolutionBlock(256, 512)
 
-        self.resUp4 = nn.ConvTranspose3d(512, 512, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-
+        # Upsampling of the residual and residual block 4
+        self.residualUp4 = nn.ConvTranspose3d(512, 512, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
         self.res_blocks4 = nn.Sequential(*[ResidualBlock(512) for _ in range(5)])
 
-        # input: 512x7x3x256
-        self.upsample1 = nn.ConvTranspose3d(512, 256, kernel_size=(3, 3, 3), stride=(2, 2,2), padding=(1, 1, 1), output_padding=(0, 0, 1))
-        self.bn5 = nn.BatchNorm3d(256)
-        self.prelu5 = nn.PReLU()
+        # Upsampling 1
+        self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
 
-        # input: 256x13x5x512
-        self.upsample2 = nn.ConvTranspose3d(256, 128, kernel_size=(3, 3, 3), stride=(1, 1, 2), padding=(1, 1, 1), output_padding=(0, 0, 1))
-        self.bn6 = nn.BatchNorm3d(128)
-        self.prelu6 = nn.PReLU()
+        # Upsampling 2
+        self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
 
-        # input: 128x13x5x1024
-        self.upsample3 = nn.ConvTranspose3d(128, 64, kernel_size=(3, 3, 3), stride=(1, 1, 2), padding=(1, 1, 1), output_padding=(0, 0, 1))
-        self.bn7 = nn.BatchNorm3d(64)
-        self.prelu7 = nn.PReLU()
+        # Upsampling 3
+        self.upConv3 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
 
-        # input: 64x13x5x2048
-        self.conv5 = nn.Conv3d(64, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
+        # Finale Convolution für Channel 1
+        self.finalConv = nn.Conv3d(64, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
 
     def forward(self, x: torch.tensor) -> torch.tensor:
-        """
-        Forwards the input tensor through all the layers.
 
-        Parameters
-        ----------
-        x: torch.tensor
-            Tensor that is given to the network.
+        conv1 = self.conv1(x)
+        conv1 = self.bn1(conv1)
+        conv1 = self.prelu1(conv1)
+        conv1 = self.res_blocks1(conv1)
+        skip1 = self.residualUp1(conv1)
+        print("Generator output after conv1", conv1.shape)
 
-        Returns
-        -------
-        out: torch.tensor
-            Output tensor of the network.
-        """
-        print("Generator input", x.shape)
+        down1 = self.downConv1(conv1)
+        down1 = self.res_blocks2(down1)
+        skip2 = self.residualUp2(down1)
+        print("Generator output after DownConv 1", down1.shape)
 
-        down1 = self.conv1(x)
-        down1 = self.bn1(down1)
-        down1 = self.prelu1(down1)
-        print("Generator output after conv1", down1.shape)
+        down2 = self.downConv2(down1)
+        down2 = self.res_blocks3(down2)
+        skip3 = self.residualUp3(down2)
+        print("Generator output after DownConv 2", down2.shape)
 
-        res1 = self.resUp1(down1)
-        print("Generator output after resUp1", res1.shape)
+        down3 = self.downConv3(down2)
+        down3 = self.res_blocks4(down3)
+        print("Generator output after DownConv 3", down3.shape)
 
-        down1 = self.res_blocks1(down1)
-
-        down2 = self.conv2(down1)
-        down2 = self.bn2(down2)
-        down2 = self.prelu2(down2)
-        print("Generator output after conv2", down2.shape)
-
-        res2 = self.resUp2(down2)
-        print("Generator output after resUp2", res2.shape)
-
-        down2 = self.res_blocks2(down2)
-
-        down3 = self.conv3(down2)
-        down3 = self.bn3(down3)
-        down3 = self.prelu3(down3)
-        print("Generator output after conv3", down3.shape)
-
-        res3= self.resUp3(down3)
-        print("Generator output after resUp3", res3.shape)
-
-        down3 = self.res_blocks3(down3)
-
-        down4 = self.conv4(down3)
-        down4 = self.bn4(down4)
-        down4 = self.prelu4(down4)
-        print("Generator output after conv4", down4.shape)
-
-        res4 = self.resUp4(down4)
-        print("Generator output after resUp4", res4.shape)
-
-        up1 = self.upsample1(down4)
-        up1 = self.bn5(up1)
-        up1 = self.prelu5(up1)
+        up1 = self.upConv1(down3, skip3)
         print("Generator output after upsample1", up1.shape)
-
-        up2 = self.upsample2(up1)
-        up2 = self.bn6(up2)
-        up2 = self.prelu6(up2)
+        up2 = self.upConv2(up1, skip2)
         print("Generator output after upsample2", up2.shape)
-
-        up3 = self.upsample3(up2)
-        up3 = self.bn7(up3)
-        up3 = self.prelu7(up3)
+        up3 = self.upConv3(up2, skip1)
         print("Generator output after upsample3", up3.shape)
 
-        out = self.conv5(up3)
+        out = self.finalConv(up3)
 
         print("Generator output", out.shape)
 
