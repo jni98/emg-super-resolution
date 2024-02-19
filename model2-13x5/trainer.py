@@ -7,7 +7,6 @@ The code is called from the train.py file which is started by the main function.
 """
 
 import json
-import math
 import os
 
 import matplotlib
@@ -86,11 +85,11 @@ class Trainer:
         """
 
         # Load the JSON file with values for standardization into a Python dictionary
-        with open('../dataset/mean_std.json', 'r') as file:
+        with open(self.data_directory + '/mean_std.json', 'r') as file:
             self.mean_std_dict = json.load(file)
 
-        data_train_val = pd.read_csv('../dataset/data.csv', sep=";")
-        data_test = pd.read_csv('../testset/data.csv', sep=";")
+        data_train_val = pd.read_csv(self.data_directory + '/data.csv', sep=";")
+        data_test = pd.read_csv(self.test_data_directory + '/data.csv', sep=";")
 
         train, val = train_test_split(data_train_val, train_size=0.8, test_size=0.2, random_state=42)
 
@@ -117,6 +116,8 @@ class Trainer:
         with open(self.run_folder + '/hyperparameter.json', 'w') as file:
             json.dump(self.hyperparameter, file)
 
+        print("Successfully prepared the data")
+
     def initialize_models(self) -> None:
         """
         Initializes the Generator, Discriminator, Optimizers and Loss functions.
@@ -130,18 +131,20 @@ class Trainer:
 
         # move to gpu in case it's possible
         self.generator.to(self.device)
-        # print("Generator summary")
-        # print(str(summary(self.generator, (1, 13,5,2048))))
+        #print("Generator summary")
+        #print(str(summary(self.generator, (1, 7,3,2048))))
 
         self.discriminator.to(self.device)
-        print("Discriminator summary")
-        print(str(summary(self.discriminator, (1, 13, 5, 2048))))
+        #print("Discriminator summary")
+        #print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
+
+        print("Successfully initialized the models")
 
     def train(self) -> tuple:
         """
@@ -215,62 +218,63 @@ class Trainer:
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
 
-        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
-            print("batch index", batch_idx)
+        with torch.no_grad():
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
+                print("batch index", batch_idx)
 
-            # Move data to CUDA device during training or validation loops
-            lr_emg = lr_emg.to(self.device)
-            hr_emg = hr_emg.to(self.device)
+                # Move data to CUDA device during training or validation loops
+                lr_emg = lr_emg.to(self.device)
+                hr_emg = hr_emg.to(self.device)
 
-            # Train Discriminator
-            self.optimizer_D.zero_grad()
+                # Train Discriminator
+                #self.optimizer_D.zero_grad()
 
-            # Generate super-resolved data (SR) from LR data
-            # detaching sr_emg prevents gradients from flowing back through the generator network when computing
-            # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
-            # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
-            sr_emg = self.generator(lr_emg).detach().to(self.device)
+                # Generate super-resolved data (SR) from LR data
+                # detaching sr_emg prevents gradients from flowing back through the generator network when computing
+                # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
+                # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
+                sr_emg = self.generator(lr_emg).detach().to(self.device)
 
-            # Create real and fake labels to train discriminator for both cases
-            real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
-            fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
+                # Create real and fake labels to train discriminator for both cases
+                real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
+                fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
 
-            # calculate loss for discriminator receiving real data
-            output_discriminator_real = self.discriminator(hr_emg).to(self.device)
-            loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
+                # calculate loss for discriminator receiving real data
+                output_discriminator_real = self.discriminator(hr_emg).to(self.device)
+                loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
 
-            # calculate loss for discriminator receiving fake data
-            output_discriminator_fake = self.discriminator(sr_emg)
-            loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
+                # calculate loss for discriminator receiving fake data
+                output_discriminator_fake = self.discriminator(sr_emg)
+                loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
-            # calculate total loss for discriminator
-            loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
+                # calculate total loss for discriminator
+                loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
 
-            loss_discriminator.backward()
+                #loss_discriminator.backward()
 
-            self.optimizer_D.step()
+                #self.optimizer_D.step()
 
-            # Train Generator
-            self.optimizer_G.zero_grad()
+                # Train Generator
+                #self.optimizer_G.zero_grad()
 
-            # Generate SR data from LR data
-            sr_emg = self.generator(lr_emg).to(self.device)
+                # Generate SR data from LR data
+                sr_emg = self.generator(lr_emg).to(self.device)
 
-            output = self.discriminator(sr_emg)
-            loss_generator_adv = self.adversarial_loss(output, real_labels)
+                output = self.discriminator(sr_emg)
+                loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
+                loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
 
-            loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
+                loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
 
-            loss_generator.backward()
+                #loss_generator.backward()
 
-            self.optimizer_G.step()
+                #self.optimizer_G.step()
 
-            total_loss_g += loss_generator.item()
-            total_loss_d += loss_discriminator.item()
-            total_loss_d_real += loss_discriminator_real.item()
-            total_loss_d_fake += loss_discriminator_fake.item()
+                total_loss_g += loss_generator.item()
+                total_loss_d += loss_discriminator.item()
+                total_loss_d_real += loss_discriminator_real.item()
+                total_loss_d_fake += loss_discriminator_fake.item()
 
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
@@ -404,12 +408,12 @@ class Trainer:
         psnr_np = np.array(psnr)
 
         # Save NumPy arrays to files
-        np.save('train_g_loss.npy', train_g_loss_np)
-        np.save('train_d_loss.npy', train_d_loss_np)
-        np.save('train_d_loss_real.npy', train_d_loss_real_np)
-        np.save('train_d_loss_fake.npy', train_d_loss_fake_np)
-        np.save('val_loss.npy', val_loss_np)
-        np.save('psnr.npy', psnr_np)
+        np.save(self.run_folder + '/train_g_loss.npy', train_g_loss_np)
+        np.save(self.run_folder + '/train_d_loss.npy', train_d_loss_np)
+        np.save(self.run_folder + '/train_d_loss_real.npy', train_d_loss_real_np)
+        np.save(self.run_folder + '/train_d_loss_fake.npy', train_d_loss_fake_np)
+        np.save(self.run_folder + '/val_loss.npy', val_loss_np)
+        np.save(self.run_folder + '/psnr.npy', psnr_np)
 
         # Plot Generator and Discriminator loss
         fig_generator_discriminator, (

@@ -234,6 +234,9 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
     """
 
     ######################## Training ########################
+
+    EMGGainFactor = 5 / (2 ** 16) / 150 * 1000
+
     # List of LR and HR filenames (replace this with your filenames)
     lr_filenames_training = []
     hr_filenames_training = []
@@ -249,7 +252,7 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         emg_data = mat_contents['SIG']
 
         # convert from mV to µV
-        emg_data = emg_data * 1000
+        emg_data = emg_data / EMGGainFactor
 
         # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
         dataset_path = 'dataset' + '/train/'
@@ -311,12 +314,16 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
             # emg_hr_final = emg_hr_windowed.transpose()
 
             # save high resolution data and add file name to list
-            np.save(dataset_path + f'window{window}-hr.npy', emg_hr_windowed)
-            hr_filenames_training.append('../' + dataset_path + f'window{window}-hr.npy')
+            hr_file_location = dataset_path + f'path{i}-window{window}-hr.npy'
+            np.save(hr_file_location, emg_hr_windowed)
+            hr_filename = 'train/' + f'path{i}-window{window}-hr.npy'
+            hr_filenames_training.append(hr_filename)
 
             # save low resolution data and add file name to list
-            np.save(dataset_path + f'window{window}-lr.npy', emg_lr_windowed)
-            lr_filenames_training.append('train/' + f'window{window}-lr.npy')
+            lr_file_location = dataset_path + f'path{i}-window{window}-lr.npy'
+            np.save(lr_file_location, emg_lr_windowed)
+            lr_filename = 'train/' + f'path{i}-window{window}-lr.npy'
+            lr_filenames_training.append(lr_filename)
 
     # Get mean and std for standardization
     mean = np.mean(combined_data)
@@ -328,7 +335,7 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         "std": std,
     }
 
-    with open('dataset' + '/mean_std.json', 'w') as file:
+    with open('dataset/train' + '/mean_std.json', 'w') as file:
         json.dump(mean_std_dict, file)
 
     # Combine LR and HR filenames row-wise
@@ -365,7 +372,7 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         emg_data = mat_contents['SIG']
 
         # convert from mV to µV
-        emg_data = emg_data * 1000
+        emg_data = emg_data / EMGGainFactor
 
         # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
         dataset_path = 'dataset' + '/test/'
@@ -422,12 +429,17 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
             # emg_hr_final = emg_hr_windowed.transpose()
 
             # save high resolution data and add file name to list
-            np.save(dataset_path + f'window{window}-hr.npy', emg_hr_windowed)
-            hr_filenames_test.append('test/' + f'window{window}-hr.npy')
+            hr_file_location = dataset_path + f'path{i}-window{window}-hr.npy'
+            np.save(hr_file_location, emg_hr_windowed)
+            hr_filename = 'test/' + f'path{i}-window{window}-hr.npy'
+            hr_filenames_test.append(hr_filename)
 
             # save low resolution data and add file name to list
-            np.save(dataset_path + f'window{window}-lr.npy', emg_lr_windowed)
-            lr_filenames_test.append('test/' + f'window{window}-lr.npy')
+            lr_file_location = dataset_path + f'path{i}-window{window}-lr.npy'
+            np.save(lr_file_location, emg_lr_windowed)
+            lr_filename = 'test/' + f'path{i}-window{window}-lr.npy'
+            lr_filenames_test.append(lr_filename)
+
 
     # Combine LR and HR filenames row-wise
     data = zip(lr_filenames_test, hr_filenames_test)
@@ -443,8 +455,8 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
             writer.writerow(['lr_filename;hr_filename'])
 
         # Add each LR/HR pair as a row in the CSV file
-        for lr_filename, hr_filename in data:
-            writer.writerow([lr_filename + ';' + hr_filename])
+        for lr_filename_test, hr_filename_test in data:
+            writer.writerow([lr_filename_test + ';' + hr_filename_test])
 
 
 def create_tar_from_folder(folder_path, tar_filename):
