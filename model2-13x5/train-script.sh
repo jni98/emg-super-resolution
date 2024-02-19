@@ -12,7 +12,7 @@
 
 ############    paths    ###############
 
-SRC_DIR=$HOME/code/model2-13x5/train.py
+SRC_DIR=$HOME/code/model2-13x5
 RESULTS_DIR=$HOME/model2-13x5/$SLURM_JOB_ID
 DATA_ARCHIVE=$HPCVAULT/dataset.tar
 FAST_DATA_DIR=$TMPDIR/model2-13x5-$SLURM_JOB_ID
