@@ -37,12 +37,17 @@ if __name__ == "__main__":
     #     sys.exit(1)
 
     data_directory = sys.argv[1]
+    print(data_directory)
     test_data_directory = sys.argv[2]
+    print(test_data_directory)
     results_directory = sys.argv[3]
+    print(results_directory)
     num_epochs = int(sys.argv[4])
+    print(num_epochs)
     batch_size = int(sys.argv[5])
+    print(batch_size)
     learning_rate = float(sys.argv[6])
-
+    print(learning_rate)
     # data_directory = '../dataset/train'
     # test_data_directory ='../dataset/test'
     # results_directory = 'runs/'
