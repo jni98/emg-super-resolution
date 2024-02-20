@@ -112,6 +112,9 @@ class Trainer:
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
 
+        # Ensure the directory exists
+        os.makedirs(self.run_folder, exist_ok=True)
+
         # Save the dictionary to a file
         with open(self.run_folder + '/hyperparameter.json', 'w') as file:
             json.dump(self.hyperparameter, file)
