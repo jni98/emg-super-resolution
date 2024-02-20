@@ -52,6 +52,8 @@ mkdir "$FAST_DATA_DIR"
 tar -xf "$DATA_ARCHIVE" -C "$FAST_DATA_DIR"
 echo "finished transfer at $(date)"
 cd "$FAST_DATA_DIR" || echo "could not cd into $FAST_DATA_DIR"
+echo "Contents of $FAST_DATA_DIR/dataset/train:"
+ls "$FAST_DATA_DIR/dataset/train"
 du -ah -d 1
 
 # change to src
