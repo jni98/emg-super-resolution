@@ -16,9 +16,10 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
 
     """
-    def __init__(self, data, mean: float, std: float) -> None:
+    def __init__(self, data, directory, mean: float, std: float) -> None:
         super().__init__()
         self.data = data
+        self.directory = directory
 
         self.mean = mean
         self.std = std
@@ -51,14 +52,14 @@ class Custom_Dataset(Dataset):
         lr_emg_path = self.data.iloc[index]['lr_filename']
         hr_emg_path = self.data.iloc[index]['hr_filename']
 
-        lr_emg = np.load('../dataset/' + self.data.iloc[index, 0])
+        lr_emg = np.load(self.directory + self.data.iloc[index, 0])
 
         # Standardize using mean and std values of the complete dataset
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
         # unsqueeze to add a one channel dimension at the beginning
         lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
 
-        hr_emg = np.load('../dataset/' + self.data.iloc[index, 1])
+        hr_emg = np.load(self.directory + self.data.iloc[index, 1])
 
         #  Standardize using mean and std values of the complete dataset
         hr_emg_standardized = self.standardization(hr_emg,self.mean,self.std)
