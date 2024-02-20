@@ -50,6 +50,8 @@ echo "python reaches gpu: $(python -c 'import torch;print(torch.cuda.is_availabl
 echo "started data transfer at $(date)"
 mkdir "$FAST_DATA_DIR"
 tar -xf "$DATA_ARCHIVE" -C "$FAST_DATA_DIR"
+echo "Contents of $FAST_DATA_DIR:"
+ls "$FAST_DATA_DIR"
 echo "finished transfer at $(date)"
 cd "$FAST_DATA_DIR" || echo "could not cd into $FAST_DATA_DIR"
 du -ah -d 1
