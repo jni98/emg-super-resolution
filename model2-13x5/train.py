@@ -43,15 +43,12 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    print("Data directory:", args.data)
-    print("Test data directory:", args.testdata)
-    print("Results directory:", args.results)
-    print("Number of epochs:", args.epochs)
-    print("Batch size:", args.bs)
-    print("Learning rate:", args.lr)
-
-
-
+    data_directory = args.data
+    test_data_directory = args.testdata
+    results_directory = args.results
+    num_epochs = args.epochs
+    batch_size = args.bs
+    learning_rate = args.lr
 
     # data_directory = '../dataset/train'
     # test_data_directory ='../dataset/test'
@@ -60,4 +57,4 @@ if __name__ == "__main__":
     # batch_size = 16
     # learning_rate = 0.0001
 
-    train(args.data, args.testdata, args.results, args.epochs, args.bs, args.lr)
+    train(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)

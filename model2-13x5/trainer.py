@@ -98,17 +98,17 @@ class Trainer:
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
                            self.mean_std_dict['std']),
-            batch_size=self.batch_size
+            batch_size=self.batch_size, pin_memory=True
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
                            self.mean_std_dict['std']),
-            batch_size=self.batch_size
+            batch_size=self.batch_size, pin_memory=True
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']))
+                           self.mean_std_dict['std']),pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
@@ -135,12 +135,12 @@ class Trainer:
 
         # move to gpu in case it's possible
         self.generator.to(self.device)
-        # print("Generator summary")
-        # print(str(summary(self.generator, (1, 7,3,2048))))
+        #print("Generator summary")
+        #print(str(summary(self.generator, (1, 7,3,2048))))
 
         self.discriminator.to(self.device)
-        # print("Discriminator summary")
-        # print(str(summary(self.discriminator, (1, 13, 5, 2048))))
+        print("Discriminator summary")
+        print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
@@ -193,6 +193,8 @@ class Trainer:
                 self._save_final_models()
 
             self._save_checkpoint(epoch)
+            # Clear unnecessary variables to release memory
+            del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
 
         return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, val_loss, psnr
 
@@ -225,9 +227,10 @@ class Trainer:
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
 
-            # Move data to CUDA device during training or validation loops
-            lr_emg = lr_emg.to(self.device)
-            hr_emg = hr_emg.to(self.device)
+            with torch.no_grad():  # Disable gradient calculation within this block
+                # Move data to CUDA device during training or validation loops
+                lr_emg = lr_emg.to(self.device)
+                hr_emg = hr_emg.to(self.device)
 
             # Train Discriminator
             self.optimizer_D.zero_grad()
