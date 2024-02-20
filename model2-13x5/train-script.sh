@@ -20,7 +20,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-$SLURM_JOB_ID
 ############    params   ###############
 
 EPOCHS=50
-BS=16
+BS=8
 LR=0.0001
 
 ############    params   ###############
