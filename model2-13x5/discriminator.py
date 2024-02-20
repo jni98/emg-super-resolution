@@ -99,7 +99,7 @@ class Discriminator(nn.Module):
         out = self.conv5(out)
         out = self.batch_norm5(out)
         out = self.leaky_relu5(out)
-        print("Discriminator after conv5", out.shape)
+        #print("Discriminator after conv5", out.shape)
 
         out = self.conv6(out)
         out = self.batch_norm6(out)
