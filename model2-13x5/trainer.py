@@ -85,7 +85,7 @@ class Trainer:
         """
 
         # Load the JSON file with values for standardization into a Python dictionary
-        with open(self.data_directory + '/train/mean_std.json', 'r') as file:
+        with open(self.data_directory + '/mean_std.json', 'r') as file:
             self.mean_std_dict = json.load(file)
 
         data_train_val = pd.read_csv(self.data_directory + '/data.csv', sep=";")

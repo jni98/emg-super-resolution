@@ -31,23 +31,23 @@ def train(data_directory: str , test_data_directory: str, results_directory: str
     #trainer.generate_sr_data()
 
 if __name__ == "__main__":
-    # if len(sys.argv) != 8:
-    #     print(
-    #         "Usage: python script.py <data_directory> <test_data_directory> <results_directory> <num_epochs> <batch_size> <learning_rate>")
-    #     sys.exit(1)
-    #
-    # data_directory = sys.argv[1]
-    # test_data_directory = sys.argv[2]
-    # results_directory = sys.argv[3]
-    # num_epochs = int(sys.argv[4])
-    # batch_size = int(sys.argv[5])
-    # learning_rate = float(sys.argv[6])
+    if len(sys.argv) != 8:
+        print(
+            "Usage: python script.py <data_directory> <test_data_directory> <results_directory> <num_epochs> <batch_size> <learning_rate>")
+        sys.exit(1)
 
-    data_directory = '../dataset/train'
-    test_data_directory ='../dataset/test'
-    results_directory = 'runs/'
-    num_epochs = 10
-    batch_size = 16
-    learning_rate = 0.0001
+    data_directory = sys.argv[1]
+    test_data_directory = sys.argv[2]
+    results_directory = sys.argv[3]
+    num_epochs = int(sys.argv[4])
+    batch_size = int(sys.argv[5])
+    learning_rate = float(sys.argv[6])
+
+    # data_directory = '../dataset/train'
+    # test_data_directory ='../dataset/test'
+    # results_directory = 'runs/'
+    # num_epochs = 10
+    # batch_size = 16
+    # learning_rate = 0.0001
 
     train(data_directory,test_data_directory,results_directory, num_epochs, batch_size, learning_rate)
