@@ -31,10 +31,10 @@ def train(data_directory: str , test_data_directory: str, results_directory: str
     #trainer.generate_sr_data()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 8:
-        print(
-            "Usage: python script.py <data_directory> <test_data_directory> <results_directory> <num_epochs> <batch_size> <learning_rate>")
-        sys.exit(1)
+    # if len(sys.argv) != 8:
+    #     print(
+    #         "Usage: python script.py <data_directory> <test_data_directory> <results_directory> <num_epochs> <batch_size> <learning_rate>")
+    #     sys.exit(1)
 
     data_directory = sys.argv[1]
     test_data_directory = sys.argv[2]
