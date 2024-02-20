@@ -175,6 +175,11 @@ class Trainer:
 
         for epoch in range(1, self.num_epochs + 1):
             print("epoch", epoch)
+
+            # Check GPU memory usage before training
+            initial_allocated = torch.cuda.memory_allocated()
+            initial_cached = torch.cuda.memory_cached()
+
             epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d = self._train_epoch(epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
 
@@ -195,6 +200,13 @@ class Trainer:
             self._save_checkpoint(epoch)
             # Clear unnecessary variables to release memory
             del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
+
+            # Check GPU memory usage after training
+            allocated_diff = torch.cuda.memory_allocated() - initial_allocated
+            cached_diff = torch.cuda.memory_cached() - initial_cached
+
+            print(f"After epoch {epoch}, GPU memory allocated increased by: {allocated_diff} bytes")
+            print(f"After epoch {epoch}, GPU memory cached increased by: {cached_diff} bytes")
 
         return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, val_loss, psnr
 
