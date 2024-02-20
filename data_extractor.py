@@ -316,13 +316,13 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
             # save high resolution data and add file name to list
             hr_file_location = dataset_path + f'path{i}-window{window}-hr.npy'
             np.save(hr_file_location, emg_hr_windowed)
-            hr_filename = 'train/' + f'path{i}-window{window}-hr.npy'
+            hr_filename = f'path{i}-window{window}-hr.npy'
             hr_filenames_training.append(hr_filename)
 
             # save low resolution data and add file name to list
             lr_file_location = dataset_path + f'path{i}-window{window}-lr.npy'
             np.save(lr_file_location, emg_lr_windowed)
-            lr_filename = 'train/' + f'path{i}-window{window}-lr.npy'
+            lr_filename = f'path{i}-window{window}-lr.npy'
             lr_filenames_training.append(lr_filename)
 
     # Get mean and std for standardization
@@ -431,13 +431,13 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
             # save high resolution data and add file name to list
             hr_file_location = dataset_path + f'path{i}-window{window}-hr.npy'
             np.save(hr_file_location, emg_hr_windowed)
-            hr_filename = 'test/' + f'path{i}-window{window}-hr.npy'
+            hr_filename = f'path{i}-window{window}-hr.npy'
             hr_filenames_test.append(hr_filename)
 
             # save low resolution data and add file name to list
             lr_file_location = dataset_path + f'path{i}-window{window}-lr.npy'
             np.save(lr_file_location, emg_lr_windowed)
-            lr_filename = 'test/' + f'path{i}-window{window}-lr.npy'
+            lr_filename = f'path{i}-window{window}-lr.npy'
             lr_filenames_test.append(lr_filename)
 
 
