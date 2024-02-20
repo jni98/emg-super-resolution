@@ -139,8 +139,8 @@ class Trainer:
         #print(str(summary(self.generator, (1, 7,3,2048))))
 
         self.discriminator.to(self.device)
-        print("Discriminator summary")
-        print(str(summary(self.discriminator, (1, 13, 5, 2048))))
+        #print("Discriminator summary")
+        #print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
