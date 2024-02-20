@@ -51,9 +51,7 @@ echo "started data transfer at $(date)"
 mkdir "$FAST_DATA_DIR"
 tar -xf "$DATA_ARCHIVE" -C "$FAST_DATA_DIR"
 echo "finished transfer at $(date)"
-cd "$FAST_DATA_DIR/dataset" || echo "could not cd into $FAST_DATA_DIR"
-echo "Contents of $FAST_DATA_DIR/dataset:"
-ls "$FAST_DATA_DIR"
+cd "$FAST_DATA_DIR" || echo "could not cd into $FAST_DATA_DIR"
 du -ah -d 1
 
 # change to src
