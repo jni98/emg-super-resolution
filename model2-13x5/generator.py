@@ -152,31 +152,31 @@ class Generator(nn.Module):
         conv1 = self.prelu1(conv1)
         conv1 = self.res_blocks1(conv1)
         skip1 = self.residualUp1(conv1)
-        print("Generator output after conv1", conv1.shape)
+        #print("Generator output after conv1", conv1.shape)
 
         down1 = self.downConv1(conv1)
         down1 = self.res_blocks2(down1)
         skip2 = self.residualUp2(down1)
-        print("Generator output after DownConv 1", down1.shape)
+        #print("Generator output after DownConv 1", down1.shape)
 
         down2 = self.downConv2(down1)
         down2 = self.res_blocks3(down2)
         skip3 = self.residualUp3(down2)
-        print("Generator output after DownConv 2", down2.shape)
+        #print("Generator output after DownConv 2", down2.shape)
 
         down3 = self.downConv3(down2)
         down3 = self.res_blocks4(down3)
-        print("Generator output after DownConv 3", down3.shape)
+        #print("Generator output after DownConv 3", down3.shape)
 
         up1 = self.upConv1(down3, skip3)
-        print("Generator output after upsample1", up1.shape)
+        #print("Generator output after upsample1", up1.shape)
         up2 = self.upConv2(up1, skip2)
-        print("Generator output after upsample2", up2.shape)
+        #print("Generator output after upsample2", up2.shape)
         up3 = self.upConv3(up2, skip1)
-        print("Generator output after upsample3", up3.shape)
+        #print("Generator output after upsample3", up3.shape)
 
         out = self.finalConv(up3)
 
-        print("Generator output", out.shape)
+        #print("Generator output", out.shape)
 
         return out
