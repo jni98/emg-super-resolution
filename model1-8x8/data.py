@@ -59,8 +59,10 @@ class Custom_Dataset(Dataset):
         if self.grid_shape:
             lr_emg = data_13x5_2D_to_3D(data=lr_emg, rows=7, cols=3)
 
+        # bandpass filter the signal
+        lr_emg_filtered = self.butter_bandpass_filter(lr_emg, 20, 500, 2048)
         # Standardize using mean and std values of the complete dataset
-        lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
+        lr_emg_standardized = self.standardization(lr_emg_filtered, self.mean, self.std)
         # unsqueeze to add a one channel dimension at the beginning
         lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
 
@@ -68,8 +70,10 @@ class Custom_Dataset(Dataset):
         if self.grid_shape:
             hr_emg = data_13x5_2D_to_3D(data= hr_emg, rows=13, cols=5)
 
+        # bandpass filter the signal
+        hr_emg_filtered = self.butter_bandpass_filter(hr_emg, 20, 500, 2048)
         #  Standardize using mean and std values of the complete dataset
-        hr_emg_standardized = self.standardization(hr_emg,self.mean,self.std)
+        hr_emg_standardized = self.standardization(hr_emg_filtered,self.mean,self.std)
         # unsqueeze to add a one channel dimension at the beginning
         hr_emg_standardized = torch.tensor(hr_emg_standardized).unsqueeze(0).to(torch.float32)
 
@@ -96,3 +100,31 @@ class Custom_Dataset(Dataset):
         # Min-max normalization using precalculated min and max values
         standardized_data = (data - mean)/std
         return standardized_data
+
+    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=5):
+        """
+        Apply a bandpass filter to the data
+        Parameters
+        ----------
+        data: np.array
+            Data to be filtered
+        lowcut: float
+            Lower cut-off frequency
+        highcut: float
+            Higher cut-off frequency
+        fs: int
+            Sampling frequency
+        order: int
+            Order of the filter
+
+        Returns
+        -------
+        y: np.array
+            Filtered data
+        """
+        nyq = 0.5 * fs
+        low = lowcut / nyq
+        high = highcut / nyq
+        b, a = butter(order, [low, high], btype='band')
+        filtered_signal = filtfilt(b, a, data)
+        return filtered_signal
