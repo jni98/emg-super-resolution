@@ -5,7 +5,7 @@ File description: This file contains the class Custom_Dataset, which is a custom
 
 The code is called from every file that is loading a dataset.
 """
-
+from scipy.signal import butter, filtfilt
 from torch.utils.data import Dataset
 import torch
 import numpy as np
@@ -54,6 +54,8 @@ class Custom_Dataset(Dataset):
 
         lr_emg = np.load(self.directory +'/'+ self.data.iloc[index, 0])
 
+        # bandpass filter
+        lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=5)
         # Standardize using mean and std values of the complete dataset
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
         # unsqueeze to add a one channel dimension at the beginning
@@ -61,6 +63,8 @@ class Custom_Dataset(Dataset):
 
         hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
+        # bandpass filter
+        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=5)
         #  Standardize using mean and std values of the complete dataset
         hr_emg_standardized = self.standardization(hr_emg,self.mean,self.std)
         # unsqueeze to add a one channel dimension at the beginning
@@ -89,3 +93,31 @@ class Custom_Dataset(Dataset):
         # Min-max normalization using precalculated min and max values
         standardized_data = (data - mean)/std
         return standardized_data
+
+    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=5):
+        """
+        Apply a bandpass filter to the data
+        Parameters
+        ----------
+        data: np.array
+            Data to be filtered
+        lowcut: float
+            Lower cut-off frequency
+        highcut: float
+            Higher cut-off frequency
+        fs: int
+            Sampling frequency
+        order: int
+            Order of the filter
+
+        Returns
+        -------
+        y: np.array
+            Filtered data
+        """
+        nyq = 0.5 * fs
+        low = lowcut / nyq
+        high = highcut / nyq
+        b, a = butter(order, [low, high], btype='band')
+        filtered_signal = filtfilt(b, a, data)
+        return filtered_signal
