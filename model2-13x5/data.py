@@ -120,4 +120,6 @@ class Custom_Dataset(Dataset):
         high = highcut / nyq
         b, a = butter(order, [low, high], btype='band')
         filtered_signal = filtfilt(b, a, data)
+
+        print("Signal filtered")
         return filtered_signal
