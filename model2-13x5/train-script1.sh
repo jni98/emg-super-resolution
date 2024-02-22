@@ -5,8 +5,11 @@
 ############    slurm    ###############
 
 #SBATCH --job-name=model2-13x5
+#SBATCH --output=$HOME/model2-13x5-$SLURM_JOB_ID/output.log # Standard output file
+#SBATCH --error=$HOME/model2-13x5-$SLURM_JOB_ID/error.log   # Standard error file
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de
+#SBATCH --mail-type = ALL
 #SBATCH --gres=gpu:a100:1
 #SBATCH --partition=a100
 
@@ -20,7 +23,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-$SLURM_JOB_ID
 ############    params   ###############
 
 EPOCHS=50
-BS=16
+BS=8
 LR=0.001
 
 ############    params   ###############

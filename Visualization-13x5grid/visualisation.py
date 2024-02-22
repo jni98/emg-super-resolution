@@ -39,12 +39,12 @@ class Visualizer:
 
         # Load your data (already normalized)
         inter_spline_lr_sr = np.load(
-            self.file_path + '/interpolated/linear/13x5/window738-lr-sr.npy').transpose()
-        model1_lr_sr = np.load(self.file_path + '/window738-hr.npy').transpose()
-        model1_hr_sr = np.load(self.file_path + '/window738-hr.npy').transpose()
+            self.file_path + 'path0-hr.npy')
+        model1_lr_sr = np.load(self.file_path + 'path0-hr.npy')
+        model1_hr_sr = np.load(self.file_path + 'path0-hr.npy')
 
         # Load original data and normalize it
-        origin_hr = np.load(self.file_path + '/window738-hr.npy').transpose()
+        origin_hr = np.load(self.file_path + 'path1-hr.npy')
 
         # Create a dictionary with titles as keys and EMG data as values
         self.emg_data_dict = {
@@ -66,33 +66,33 @@ class Visualizer:
 
         print("Start plotting channels")
 
-        time_axis = np.arange(2048)  # Assuming the time axis runs along axis 2
+        time_axis = np.arange(60754)  # Assuming the time axis runs along axis 2
 
         for title, emg_data in self.emg_data_dict.items():
             # Plot Training losses in a separate figure
             plt.figure(figsize=(8.27, 14))
 
             offset = 0
-            # Use only few channels here
-            for j in range(65):
-                # TODO: Achtung, nicht das volle Zeitfenster
-                signal = emg_data[j][:]
 
-                predicted = ''
-                # if title == 'Original HR':
-                #     predicted = ''
-                #
-                # else:
-                #     if (j % 2) != 0:
-                #         predicted = '(predicted)'
-                #         #TODO: "preditcted" stimmt nicht mehr
-                #     elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
-                #         predicted = '(predicted)'
-                #     else:
-                #         predicted = ''
+            for rows in range(13):
+                for cols in range(5):
+                    signal = emg_data[rows][cols][:60754]
 
-                plt.plot(time_axis, signal.squeeze() + offset, label=f'Channel {j + 1} {predicted}')
-                offset += 0.06
+                    predicted = ''
+                    # if title == 'Original HR':
+                    #     predicted = ''
+                    #
+                    # else:
+                    #     if (j % 2) != 0:
+                    #         predicted = '(predicted)'
+                    #         #TODO: "preditcted" stimmt nicht mehr
+                    #     elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
+                    #         predicted = '(predicted)'
+                    #     else:
+                    #         predicted = ''
+
+                    plt.plot(time_axis, signal.squeeze() + offset, label=f'Channel row{rows + 1} col{cols +1} {predicted}')
+                    offset += 3500
 
             plt.xlabel('Time in samples')
             plt.title(title)
@@ -129,7 +129,7 @@ class Visualizer:
         """
         print("Start plotting EMG differences")
 
-        time_axis = np.arange(2048)  # Assuming the time axis runs along axis 2
+        time_axis = np.arange(60754)  # Assuming the time axis runs along axis 2
 
         groundtruth = self.emg_data_dict['Original HR']
 
@@ -140,32 +140,33 @@ class Visualizer:
             offset = 0
 
             mean_absolute_differences = np.zeros(65)
+            i = 0
 
-            # Use only few channels here
-            for j in range(65):
-                # TODO: Achtung, nicht das volle Zeitfenster
-                signal = emg_data[j]
-                groundtruth_ch = groundtruth[j]
-                difference = groundtruth_ch.squeeze() - signal.squeeze()
+            for rows in range(13):
+                for cols in range(5):
+                    signal = emg_data[rows][cols][:60754]
+                    groundtruth_ch = groundtruth[rows][cols][:60754]
+                    difference = groundtruth_ch.squeeze() - signal.squeeze()
 
-                mean_absolute_difference = np.mean(np.abs(groundtruth_ch.squeeze() - signal.squeeze()))
-                mean_absolute_differences[j] = mean_absolute_difference
+                    mean_absolute_difference = np.mean(np.abs(groundtruth_ch.squeeze() - signal.squeeze()))
+                    mean_absolute_differences[i] = mean_absolute_difference
+                    i+=1
 
-                predicted = ''
-                # if title == 'Original HR':
-                #     predicted = ''
-                #
-                # else:
-                #     #TODO: CHeck "predicted"
-                #     if (j % 2) != 0:
-                #         predicted = '(predicted)'
-                #     elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
-                #         predicted = '(predicted)'
-                #     else:
-                #         predicted = ''
+                    predicted = ''
+                    # if title == 'Original HR':
+                    #     predicted = ''
+                    #
+                    # else:
+                    #     #TODO: CHeck "predicted"
+                    #     if (j % 2) != 0:
+                    #         predicted = '(predicted)'
+                    #     elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
+                    #         predicted = '(predicted)'
+                    #     else:
+                    #         predicted = ''
 
-                plt.plot(time_axis, (difference + offset), label=f'Channel {j + 1} {predicted}')
-                offset += 0.06
+                    plt.plot(time_axis, (difference + offset), label=f'Channel row{rows + 1} col{cols +1} {predicted}')
+                    offset += 3500
 
             plt.xlabel('Time in samples')
             plt.title(title)
@@ -233,20 +234,15 @@ class Visualizer:
 
         keys_list = ('Original HR', 'Linear', 'Model 1')
 
-        time_points = [200, 300, 400]
+        time_points = [20000, 30000, 40000]
 
         fig, axs = plt.subplots(len(grids), len(time_points))
 
         for g in range(len(grids)):
             emg_data = grids[g]
-            emg_data = emg_data.transpose()
-            emg_data_reshaped = emg_data.reshape(5,13, 2048)
-            emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
-            emg_data_grid = np.flipud(emg_data_transposed)
-            emg_data_grid[:, 1::2] = emg_data_grid[::-1, 1::2]
 
             for i, time_point in enumerate(time_points):
-                emg_heatmap = emg_data_grid[:, :, time_point]
+                emg_heatmap = emg_data[:, :, time_point]
                 im = axs[g][i].imshow(emg_heatmap, cmap='hot')
 
                 # Set ticks and tick labels to start from 1 but position them at 0 to match the data
@@ -284,97 +280,58 @@ class Visualizer:
         # Accessing keys by index
         keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR')
 
-        # Create a list of line styles, colors
-        colors = ['blue', 'green', 'red', 'black']  # Add more colors if required
-        line_styles = ['-', '--']  # You can extend this list as needed
-
         for g in range(1, len(grids)):
-            groundtruth = grids[0]
-            grid_2 = grids[g]
+            groundtruth = grids[0][:][:][:60754]
+            grid_2 = grids[g][:][:][:60754]
 
-            # Calculate cross-correlation for specific pairs of electrodes
-            normalized_corr = []
             plt.figure()
+            number_graphs = 0
+            plot_number = 1
 
-            for i in range(65):  # Iterate through electrodes
-                correlation = np.correlate(groundtruth[i], grid_2[i], mode='full')
+            for row in range(13):
+                for col in range(5):
+                    # Iterate through electrodes
+                    correlation = np.correlate(groundtruth[row][col], grid_2[row][col], mode='full')
 
-                # Calculate autocorrelation of groundtruth
-                autocorr_groundtruth = np.correlate(groundtruth[i], groundtruth[i], mode='full')
+                    # Calculate autocorrelation of groundtruth
+                    autocorr_groundtruth = np.correlate(groundtruth[row][col], groundtruth[row][col], mode='full')
 
-                # normalize correlation by autocorrelation
-                if i != 0:
-                    normalized_correlation = correlation / np.max(autocorr_groundtruth)
-                else:
-                    normalized_correlation = correlation
+                    # normalize correlation by autocorrelation
+                    if (row==12 and col==0):
+                        normalized_correlation = correlation
+                    else:
+                        normalized_correlation = correlation / np.max(autocorr_groundtruth)
 
-                normalized_corr.append(normalized_correlation)
+                    # Find the maximum and minimum values of normalized_corr across all electrodes
+                    #max_corr = max([max(corr) for corr in normalized_corr])
+                    #min_corr = min([min(corr) for corr in normalized_corr])
 
-                # Calculate dynamic time warping (DTW)
-                d, cost_matrix, acc_cost_matrix, path = accelerated_dtw(groundtruth[i], grid_2[i], dist='euclidean')
-                # Plot and save the DTW visualization for each electrode
-                plt.imshow(acc_cost_matrix.T, origin='lower', cmap='gray', interpolation='nearest')
-                plt.plot(path[0], path[1], 'w')
+                    #TODO: Achtung, predicted stimmt nicht mehr
+                    predicted = ''
 
-                # Save the plot with a unique filename for each electrode (e.g., using electrode index)
-                # Create the directory if it doesn't exist
-                directory = f'plot_dtw/{keys_list[g]}/'
-                os.makedirs(directory, exist_ok=True)
+                    plt.plot(normalized_correlation, label=f'Ch row {row} col {col} {predicted}')
+                    number_graphs+=1
+                    plt.xlabel('Shift')
+                    plt.ylabel('Correlation')
+                    plt.legend(loc='best', bbox_to_anchor=(1, 1))
+                    plt.title(f'Cross-correlation of {keys_list[g]} with Original HR - {plot_number}')
 
-                plt.title(f'DTW {keys_list[g]} - Electrode {i}')
-                plt.xlabel('Ground Truth')
-                plt.ylabel('Model Prediction')
-                plt.savefig(f'{directory}dtw_visualization_electrode_{i}.png')  # Save the plot as an image
-                plt.close()
+                    #TODO: Adjust limits
+                    # Set the y-axis limits to the maximum and minimum values across all electrodes
+                    plt.ylim(-0.4, 1.2)
 
-            # Find the maximum and minimum values of normalized_corr across all electrodes
-            max_corr = max([max(corr) for corr in normalized_corr])
-            min_corr = min([min(corr) for corr in normalized_corr])
-
-            # Plot the normalized_corr
-            plt.figure()
-            color = 0
-            style = 0
-            number = 1
-            predicted = ''
-
-            #TODO: Achtung, predicted stimmt nicht mehr
-            for i, corr in enumerate(normalized_corr):
-            #     if ((i + 1) % 2) != 0:
-            #         predicted = '(predicted)'
-            #     elif (i > 7 and i < 16) or (i > 23 and i < 32) or (i > 39 and i < 48):
-            #         predicted = '(predicted)'
-            #     else:
-            #         predicted = ''
-
-                plt.plot(corr, label=f'Ch {i + 1} {predicted}', linestyle=line_styles[style % len(line_styles)],color=colors[color % len(colors)])  #
-                plt.xlabel('Shift')
-                plt.ylabel('Correlation')
-                plt.legend(loc='best', bbox_to_anchor=(1, 1))
-                plt.title(f'Cross-correlation of {keys_list[g]} with Original HR')
-
-                #TODO: Adjust limits
-                # Set the y-axis limits to the maximum and minimum values across all electrodes
-                plt.ylim(-0.4, 1.2)
-
-                color += 1
-                if color == 4:
-                    color = 0
-                    style += 1
-
-                if ((i + 1) % 8) == 0:
                     plt.tight_layout()  # Adjust layouts to avoid overlapping
 
-                    # Create the directory if it doesn't exist
-                    directory = f'plot_correlations/{keys_list[g]}/'
-                    os.makedirs(directory, exist_ok=True)
+                    if number_graphs % 5 == 0:
+                        # Create the directory if it doesn't exist
+                        directory = f'plot_correlations/{keys_list[g]}/'
+                        os.makedirs(directory, exist_ok=True)
 
-                    plt.savefig(f'{directory}{keys_list[g]} with Original HR - {number}.png')
-                    number += 1
-                    plt.close()
-                    plt.figure()
-                    color = 0
-                    style = 0
+                        plt.savefig(f'{directory}{keys_list[g]} with Original HR - {plot_number}.png')
+                        plt.close()
+                        plt.figure()
+                        plot_number += 1
+
 
     def plot_pearson_coefficient(self) -> None:
 
@@ -403,11 +360,19 @@ class Visualizer:
 
             # Initialize an array to store correlation coefficients
             correlation_coefficients = np.zeros((65, 65))
+            i = 0
+            j =0
 
             # Calculate Pearson correlation coefficients
-            for i in range(65):
-                for j in range(65):
-                    correlation_coefficients[i, j], _ = pearsonr(groundtruth[i], grid_2[j])
+            for row1 in range(13):
+                for col1 in range(5):
+                    for row2 in range(13):
+                        for col2 in range(5):
+                            for i in range(65):
+                                for j in range(65):
+                                    #TODO: Muss sinnvoll umgeschrieben werde
+                                    correlation_coefficients[i, j], _ = pearsonr(groundtruth[row1][col1], grid_2[row2][col2])
+
 
             # Mask the upper triangle
             mask = np.tril(np.ones_like(correlation_coefficients, dtype=bool))
@@ -555,13 +520,13 @@ class Visualizer:
 
 if __name__ == '__main__':
     # TODO: Beschriftung mit (predicted) etc. passt nicht zu HR to SR plots
-    file_path = '../testset/Alessandro_sEmg/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE'
+    file_path = '../dataset/test/'
     visualize = Visualizer(file_path)
 
-    visualize.plot_emg_channels()
+    #visualize.plot_emg_channels()
     #visualize.plot_emg_channels_difference()
     #visualize.plot_heat_maps()
     #TODO: Check correlation code again
     #visualize.plot_correlations()
-    #visualize.plot_pearson_coefficient()
+    visualize.plot_pearson_coefficient()
     #visualize.plot_pearson_coefficient_grid()

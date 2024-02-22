@@ -418,31 +418,21 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         # emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
         # emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
 
-        windows = emg_length - 2048
+        # transpose for samples x channels shape
+        # emg_lr_final = emg_lr_windowed.transpose()
+        # emg_hr_final = emg_hr_windowed.transpose()
 
-        # window the signal to 2048 samples
-        # 51 samples equals 25ms which is approximately 1 action potential --> 2AP overlapping
-        for window in range(0, windows, (2048 - 102)):
-            print("window", window)
-            # The length of one sample is 2048 which is equal to 1 second
-            emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 2048)]
-            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 2048)]
+        # save high resolution data and add file name to list
+        hr_file_location = dataset_path + f'path{i}-hr.npy'
+        np.save(hr_file_location, emg_hr_reshaped)
+        hr_filename = f'path{i}-hr.npy'
+        hr_filenames_test.append(hr_filename)
 
-            # transpose for samples x channels shape
-            # emg_lr_final = emg_lr_windowed.transpose()
-            # emg_hr_final = emg_hr_windowed.transpose()
-
-            # save high resolution data and add file name to list
-            hr_file_location = dataset_path + f'path{i}-window{window}-hr.npy'
-            np.save(hr_file_location, emg_hr_windowed)
-            hr_filename = f'path{i}-window{window}-hr.npy'
-            hr_filenames_test.append(hr_filename)
-
-            # save low resolution data and add file name to list
-            lr_file_location = dataset_path + f'path{i}-window{window}-lr.npy'
-            np.save(lr_file_location, emg_lr_windowed)
-            lr_filename = f'path{i}-window{window}-lr.npy'
-            lr_filenames_test.append(lr_filename)
+        # save low resolution data and add file name to list
+        lr_file_location = dataset_path + f'path{i}-lr.npy'
+        np.save(lr_file_location, emg_lr_reshaped)
+        lr_filename = f'path{i}-lr.npy'
+        lr_filenames_test.append(lr_filename)
 
 
     # Combine LR and HR filenames row-wise
