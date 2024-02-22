@@ -57,8 +57,18 @@ class Custom_Dataset(Dataset):
 
         # bandpass filter
         lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=5)
+
+        # plt.figure()
+        # plt.plot(lr_emg[0][0])
+        # plt.savefig('lr_emg.png')
+
         # Standardize using mean and std values of the complete dataset
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
+
+        # plt.figure()
+        # plt.plot(lr_emg_standardized[0][0])
+        # plt.savefig('lr_emg_standardized.png')
+
         # unsqueeze to add a one channel dimension at the beginning
         lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
 
