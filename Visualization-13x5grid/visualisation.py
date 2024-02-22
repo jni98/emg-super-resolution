@@ -137,36 +137,11 @@ class Visualizer:
             # Plot Training losses in a separate figure
             plt.figure(figsize=(8.27, 14))
 
-            offset = 0
 
-            mean_absolute_differences = np.zeros(65)
-            i = 0
+            groundtruth_cut = groundtruth[:,:,:60754]
+            emg_data_cut = emg_data[:,:,:60754]
 
-            for rows in range(13):
-                for cols in range(5):
-                    signal = emg_data[rows][cols][:60754]
-                    groundtruth_ch = groundtruth[rows][cols][:60754]
-                    difference = groundtruth_ch.squeeze() - signal.squeeze()
-
-                    mean_absolute_difference = np.mean(np.abs(groundtruth_ch.squeeze() - signal.squeeze()))
-                    mean_absolute_differences[i] = mean_absolute_difference
-                    i+=1
-
-                    predicted = ''
-                    # if title == 'Original HR':
-                    #     predicted = ''
-                    #
-                    # else:
-                    #     #TODO: CHeck "predicted"
-                    #     if (j % 2) != 0:
-                    #         predicted = '(predicted)'
-                    #     elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
-                    #         predicted = '(predicted)'
-                    #     else:
-                    #         predicted = ''
-
-                    plt.plot(time_axis, (difference + offset), label=f'Channel row{rows + 1} col{cols +1} {predicted}')
-                    offset += 3500
+            mean_absolute_differences =np.mean(np.abs(groundtruth_cut - emg_data_cut), axis=2)
 
             plt.xlabel('Time in samples')
             plt.title(title)
@@ -190,17 +165,9 @@ class Visualizer:
             plt.close()
             plt.figure()
 
-            # 2D to 3D:
-            # reshape back to grid shape
-            mean_differences_reshaped = mean_absolute_differences.reshape(5,13)
-            # Transpose and flip to get to correct grid numbering
-            mean_differences_transposed = np.transpose(mean_differences_reshaped, axes=(1, 0))
-            mean_differences_grid = np.flipud(mean_differences_transposed)
-            mean_differences_grid[:, 1::2] = mean_differences_grid[::-1, 1::2]
-
             # Plot and save mean_differences_grid
             plt.figure()
-            plt.imshow(mean_differences_grid, cmap='viridis', origin='upper', vmin=0, vmax=0.01)
+            plt.imshow(mean_absolute_differences, cmap='viridis', origin='upper', vmin=0, vmax=0.01)
 
             # Set ticks and tick labels before calling imshow
             plt.xticks(range(5), labels=range(1, 6))
@@ -374,8 +341,8 @@ class Visualizer:
             grid_2_cut = grid_2[:65,:60754]
 
             # Calculate Pearson correlation coefficients
-            for i in range(65):
-                for j in range(65):
+            for i in range(1,65):
+                for j in range(1,65):
                     #TODO: Muss sinnvoll umgeschrieben werde
                     correlation_coefficients[i, j], _ = pearsonr(groundtruth_cut[i], grid_2_cut[j])
 
@@ -395,8 +362,8 @@ class Visualizer:
             cbar.set_label('Pearson Coefficient')
 
             # Add ticks to both axes
-            plt.xticks(np.arange(0, 65, step=5), labels=np.arange(0, 65, step=5))
-            plt.yticks(np.arange(0, 65, step=5), labels=np.arange(0, 65, step=5))
+            plt.xticks(np.arange(0, 64, step=5), labels=np.arange(0, 64, step=5))
+            plt.yticks(np.arange(0, 64, step=5), labels=np.arange(0, 64, step=5))
 
             plt.title(f'Pearson coefficient of {keys_list[g]} with Original HR')
             plt.xlabel(f'{keys_list[g]}')
@@ -451,16 +418,16 @@ class Visualizer:
             correlation_coefficients_diagonal = np.zeros((65))
 
             # Calculate Pearson correlation coefficients
-            for i in range(65):
-                for j in range(65):
+            for i in range(1,65):
+                for j in range(1,65):
                     correlation_coefficients[i, j], _ = pearsonr(groundtruth_cut[i], grid_2_cut[j])
 
                 correlation_grid = correlation_coefficients[i]
 
                 # 2D to 3D:
-                correlation_grid = correlation_grid.reshape(5, 13, 4).transpose(1, 0, 2)
+                correlation_grid = correlation_grid.reshape(5, 13).transpose(1, 0)
                 correlation_grid = np.flipud(correlation_grid)
-                correlation_grid[:, 1::2, :] = np.flipud(correlation_grid[:, 1::2, :])
+                correlation_grid[:, 1::2] = np.flipud(correlation_grid[:, 1::2])
 
                 # Plot and save mean_differences_grid
                 plt.figure()
@@ -482,20 +449,20 @@ class Visualizer:
 
             # Calculate Pearson correlation coefficients
             for i in range(65):
-                correlation_coefficients_diagonal[i], _ = pearsonr(groundtruth[i], grid_2[i])
+                correlation_coefficients_diagonal[i], _ = pearsonr(groundtruth_cut[i], grid_2_cut[i])
 
-            correlation_coefficients_diagonal = correlation_coefficients_diagonal.reshape(5,13)
-            correlation_coefficients_diagonal = np.transpose(correlation_coefficients_diagonal, axes=(1, 0))
+            # 2D to 3D:
+            correlation_coefficients_diagonal = correlation_coefficients_diagonal.reshape(5, 13).transpose(1, 0)
             correlation_coefficients_diagonal = np.flipud(correlation_coefficients_diagonal)
-            correlation_coefficients_diagonal[:, 1::2] = correlation_coefficients_diagonal[::-1, 1::2]
+            correlation_coefficients_diagonal[:, 1::2] = np.flipud(correlation_coefficients_diagonal[:, 1::2])
 
             # Plot and save mean_differences_grid
             plt.figure()
             plt.imshow(correlation_coefficients_diagonal, cmap='viridis', origin='upper', vmin=0.85, vmax=1)
 
             # Set ticks and tick labels before calling imshow
-            plt.xticks(range(13), labels=range(1, 14))
-            plt.yticks(range(5), labels=range(5, 0, -1))
+            plt.xticks(range(5), labels=range(1, 6))
+            plt.yticks(range(13), labels=range(13, 0, -1))
 
             plt.title(f'Pearson coefficient - Diagonal - Origin with {keys_list[g]}')
             plt.colorbar()
@@ -542,10 +509,10 @@ if __name__ == '__main__':
     file_path = '../dataset/test/'
     visualize = Visualizer(file_path)
 
-    #visualize.plot_emg_channels()
-    #visualize.plot_emg_channels_difference()
-    #visualize.plot_heat_maps()
-    #TODO: Check correlation code again
-    #visualize.plot_correlations()
-    #visualize.plot_pearson_coefficient()
+    visualize.plot_emg_channels()
+    visualize.plot_emg_channels_difference()
+    visualize.plot_heat_maps()
+    # TODO: Check correlation code again
+    visualize.plot_correlations()
+    visualize.plot_pearson_coefficient()
     visualize.plot_pearson_coefficient_grid()
