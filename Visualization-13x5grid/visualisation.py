@@ -356,22 +356,28 @@ class Visualizer:
 
         for g in range(1, len(grids)):
             groundtruth = grids[0]
+            groundtruth_shape = groundtruth.shape
             grid_2 = grids[g]
+            grid_2_shape = grid_2.shape
 
             # Initialize an array to store correlation coefficients
             correlation_coefficients = np.zeros((65, 65))
-            i = 0
-            j =0
+
+            # 3D to 2D
+            groundtruth[:, 1::2, :] = np.flipud(groundtruth[:, 1::2, :])
+            groundtruth = np.flipud(groundtruth).transpose(1, 0, 2).reshape(65, groundtruth_shape[2])
+            groundtruth_cut = groundtruth[:65,:60754]
+
+            # 3D to 2D
+            grid_2[:, 1::2, :] = np.flipud(grid_2[:, 1::2, :])
+            grid_2 = np.flipud(grid_2).transpose(1, 0, 2).reshape(65, grid_2_shape[2])
+            grid_2_cut = grid_2[:65,:60754]
 
             # Calculate Pearson correlation coefficients
-            for row1 in range(13):
-                for col1 in range(5):
-                    for row2 in range(13):
-                        for col2 in range(5):
-                            for i in range(65):
-                                for j in range(65):
-                                    #TODO: Muss sinnvoll umgeschrieben werde
-                                    correlation_coefficients[i, j], _ = pearsonr(groundtruth[row1][col1], grid_2[row2][col2])
+            for i in range(65):
+                for j in range(65):
+                    #TODO: Muss sinnvoll umgeschrieben werde
+                    correlation_coefficients[i, j], _ = pearsonr(groundtruth_cut[i], grid_2_cut[j])
 
 
             # Mask the upper triangle
@@ -424,7 +430,19 @@ class Visualizer:
 
         for g in range(1, len(grids)):
             groundtruth = grids[0]
+            groundtruth_shape = groundtruth.shape
             grid_2 = grids[g]
+            grid_2_shape = grid_2.shape
+
+            # 3D to 2D
+            groundtruth[:, 1::2, :] = np.flipud(groundtruth[:, 1::2, :])
+            groundtruth = np.flipud(groundtruth).transpose(1, 0, 2).reshape(65, groundtruth_shape[2])
+            groundtruth_cut = groundtruth[:65, :60754]
+
+            # 3D to 2D
+            grid_2[:, 1::2, :] = np.flipud(grid_2[:, 1::2, :])
+            grid_2 = np.flipud(grid_2).transpose(1, 0, 2).reshape(65, grid_2_shape[2])
+            grid_2_cut = grid_2[:65, :60754]
 
             # Initialize an array to store correlation coefficients
             correlation_coefficients = np.zeros((65, 65))
@@ -435,13 +453,14 @@ class Visualizer:
             # Calculate Pearson correlation coefficients
             for i in range(65):
                 for j in range(65):
-                    correlation_coefficients[i, j], _ = pearsonr(groundtruth[i], grid_2[j])
+                    correlation_coefficients[i, j], _ = pearsonr(groundtruth_cut[i], grid_2_cut[j])
 
                 correlation_grid = correlation_coefficients[i]
-                correlation_grid = correlation_grid.reshape(5,13)
-                correlation_grid = np.transpose(correlation_grid, axes=(1, 0))
+
+                # 2D to 3D:
+                correlation_grid = correlation_grid.reshape(5, 13, 4).transpose(1, 0, 2)
                 correlation_grid = np.flipud(correlation_grid)
-                correlation_grid[:, 1::2] = correlation_grid[::-1, 1::2]
+                correlation_grid[:, 1::2, :] = np.flipud(correlation_grid[:, 1::2, :])
 
                 # Plot and save mean_differences_grid
                 plt.figure()
@@ -528,5 +547,5 @@ if __name__ == '__main__':
     #visualize.plot_heat_maps()
     #TODO: Check correlation code again
     #visualize.plot_correlations()
-    visualize.plot_pearson_coefficient()
-    #visualize.plot_pearson_coefficient_grid()
+    #visualize.plot_pearson_coefficient()
+    visualize.plot_pearson_coefficient_grid()

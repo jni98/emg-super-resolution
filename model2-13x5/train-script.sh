@@ -5,8 +5,6 @@
 ############    slurm    ###############
 
 #SBATCH --job-name=model2-13x5
-#SBATCH --output=$HOME/model2-13x5-$SLURM_JOB_ID/output.log # Standard output file
-#SBATCH --error=$HOME/model2-13x5-$SLURM_JOB_ID/error.log   # Standard error file
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de
 #SBATCH --gres=gpu:a100:1
