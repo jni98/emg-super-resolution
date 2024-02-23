@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-## Usage:  sbatch train-script.sh
+## Usage:  sbatch train-script1-1.sh
 
 ############    slurm    ###############
 
