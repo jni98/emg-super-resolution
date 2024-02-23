@@ -1,0 +1,136 @@
+### Starting TaskPrologue of job 773752 on tg072 at Fri 23 Feb 2024 12:49:53 PM CET
+Running on cores 8-9,14-15,24-25,30-31 with governor ondemand
+Fri Feb 23 12:49:53 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla V100-PCIE-32GB           On  | 00000000:18:00.0 Off |                    0 |
+| N/A   52C    P0              32W / 250W |      0MiB / 32768MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+load conda from module
+no change     /apps/python/3.10-anaconda/condabin/conda
+no change     /apps/python/3.10-anaconda/bin/conda
+no change     /apps/python/3.10-anaconda/bin/conda-env
+no change     /apps/python/3.10-anaconda/bin/activate
+no change     /apps/python/3.10-anaconda/bin/deactivate
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.sh
+no change     /apps/python/3.10-anaconda/etc/fish/conf.d/conda.fish
+no change     /apps/python/3.10-anaconda/shell/condabin/Conda.psm1
+no change     /apps/python/3.10-anaconda/shell/condabin/conda-hook.ps1
+no change     /apps/python/3.10-anaconda/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.csh
+no change     /home/hpc/iwso/iwso124h/.bashrc
+No action taken.
+using python /home/woody/iwso/iwso124h/.conda/envs/thesis_env/bin/python
+Fri Feb 23 12:49:57 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla V100-PCIE-32GB           On  | 00000000:18:00.0 Off |                    0 |
+| N/A   51C    P0              32W / 250W |      0MiB / 32768MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+python reaches gpu: True
+started data transfer at Fri 23 Feb 2024 12:50:08 PM CET
+finished transfer at Fri 23 Feb 2024 12:50:19 PM CET
+1.1G	./dataset
+1.1G	.
+Using Repository Revision
+a5ca859 Changed script
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+cuda
+init done
+Successfully prepared the data
+Successfully initialized the models
+epoch 1
+batch index 0
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5/train.py", line 63, in <module>
+    train(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate, workers)
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5/train.py", line 27, in train
+    train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, val_loss, psnr = trainer.train()
+                                                                                       ^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5/trainer.py", line 185, in train
+    epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d = self._train_epoch(epoch)
+                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5/trainer.py", line 256, in _train_epoch
+    sr_emg = self.generator(lr_emg).detach().to(self.device)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5/generator.py", line 175, in forward
+    up3 = self.upConv3(up2, skip1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5/generator.py", line 81, in forward
+    out = self.upConv(x)
+          ^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 1104, in forward
+    return F.conv_transpose3d(
+           ^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 520.00 MiB. GPU 0 has a total capacty of 31.74 GiB of which 287.12 MiB is free. Including non-PyTorch memory, this process has 31.46 GiB memory in use. Of the allocated memory 31.05 GiB is allocated by PyTorch, and 35.11 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+=== JOB_STATISTICS ===
+=== current date     : Fri 23 Feb 2024 12:50:40 PM CET
+= Job-ID             : 773752 on tinygpu
+= Job-Name           : model2-13x5
+= Job-Command        : /home/hpc/iwso/iwso124h/code/model2-13x5/train-script4.sh
+= Initial workdir    : /home/hpc/iwso/iwso124h/code/model2-13x5
+= Queue/Partition    : v100
+= Slurm account      : iwso with QOS=normal
+= Requested resources: cpu=8,mem=23000M,node=1,billing=8,gres/gpu=1,gres/gpu:v100=1 for 1-00:00:00
+= Elapsed runtime    : 00:00:48
+= Total RAM usage    : 0.2 GiB of requested 22 GiB (0.9%)   
+= Node list          : tg072
+= Subm/Elig/Start/End: 2024-02-23T09:44:29 / 2024-02-23T09:44:29 / 2024-02-23T12:49:52 / 2024-02-23T12:50:40
+======================
+=== Quota infos ======
+    Path              Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc           15.0M   104.9G   209.7G        N/A   1,017      500K   1,000K        N/A    
+    /home/woody         19.3G   500.0G   750.0G        N/A      98K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+Tesla V100-PCIE-32GB, 00000000:18:00.0, 1154081, 29 %, 5 %, 32212 MiB, 9489 ms
