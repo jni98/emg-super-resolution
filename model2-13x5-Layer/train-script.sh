@@ -9,8 +9,8 @@
 #SBATCH --mail-user=janina.kloos@fau.de
 #SBATCH --gres=gpu:a100:1
 #SBATCH --partition=a100
-#SBATCH --error=$HOME/model2-13x5-%j.err
-#SBATCH --output=$HOME/model2-13x5-%j.out
+#SBATCH --error=$HOME/model2-13x5-Layer-%j.err
+#SBATCH --output=$HOME/model2-13x5-Layer-%j.out
 
 ############    paths    ###############
 
