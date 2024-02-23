@@ -32,7 +32,7 @@ class Trainer:
     """
 
     def __init__(self, data_directory: str, test_data_directory: str, results_directory: str, num_epochs: int,
-                 batch_size: int, learning_rate: float) -> None:
+                 batch_size: int, learning_rate: float, workers: int) -> None:
         """
         Constructs all the necessary attributes for the Trainer object.
 
@@ -60,6 +60,7 @@ class Trainer:
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.lr = learning_rate
+        self.worker = workers
 
         self.betas = (0.9, 0.999)
 
@@ -97,17 +98,17 @@ class Trainer:
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
                            self.mean_std_dict['std']),
-            batch_size=self.batch_size, pin_memory=True
+            batch_size=self.batch_size, pin_memory=True, num_workers=self.worker
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
                            self.mean_std_dict['std']),
-            batch_size=self.batch_size, pin_memory=True
+            batch_size=self.batch_size, pin_memory=True, num_workers=self.worker
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),pin_memory=True)
+                           self.mean_std_dict['std']),pin_memory=True, num_workers=self.worker)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'

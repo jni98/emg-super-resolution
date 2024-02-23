@@ -22,6 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-$SLURM_JOB_ID
 EPOCHS=50
 BS=8
 LR=0.01
+WORKERS=2
 
 ############    params   ###############
 
@@ -60,7 +61,7 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 # start training
-python train.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS --bs $BS --lr $LR
+python train.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS --bs $BS --lr $LR --workers $WORKERS
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"

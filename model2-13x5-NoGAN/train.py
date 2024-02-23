@@ -39,6 +39,7 @@ def parse_args():
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs')
     parser.add_argument('--bs', type=int, default=16, help='Batch size')
     parser.add_argument('--lr', type=float, default=0.0001, help='Learning rate')
+    parser.add_argument('--workers', type=int, default=2, help='Number of workers for dataloader')
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -49,6 +50,7 @@ if __name__ == "__main__":
     num_epochs = args.epochs
     batch_size = args.bs
     learning_rate = args.lr
+    worker = args.workers
 
     # data_directory = '../dataset/train'
     # test_data_directory ='../dataset/test'
@@ -56,5 +58,6 @@ if __name__ == "__main__":
     # num_epochs = 10
     # batch_size = 16
     # learning_rate = 0.0001
+    #worker = 2
 
-    train(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
+    train(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate, worker)
