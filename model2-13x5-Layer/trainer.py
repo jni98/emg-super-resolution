@@ -10,6 +10,7 @@ import json
 import os
 
 import matplotlib
+import wandb
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
@@ -74,6 +75,8 @@ class Trainer:
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
+
+        wandb.init(project="emg-super-resolution", entity="masterthesis-sr")
 
         print("init done")
 
@@ -174,6 +177,10 @@ class Trainer:
         val_loss = []
         psnr = []
         best_val_loss = float('inf')
+
+        # Add wandb.watch() here to start tracking gradients and parameters
+        wandb.watch(self.generator, criterion='mse', log='all')
+        wandb.watch(self.discriminator, criterion='mse', log='all')
 
         for epoch in range(1, self.num_epochs + 1):
             print("epoch", epoch)
@@ -300,6 +307,8 @@ class Trainer:
         avg_loss_d_real = total_loss_d_real / len(self.training)
         avg_loss_d_fake = total_loss_d_fake / len(self.training)
         avg_loss_d = total_loss_d / len(self.training)
+
+        wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real, 'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d})
 
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
