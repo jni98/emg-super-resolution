@@ -178,7 +178,7 @@ class Trainer:
                 # Save the final models when a new best model is found
                 self._save_final_models()
 
-            self._save_checkpoint(epoch)
+            #self._save_checkpoint(epoch)
 
         return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, val_loss, psnr
 
