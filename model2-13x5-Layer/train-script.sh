@@ -4,7 +4,7 @@
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model2-13x5
+#SBATCH --job-name=model2-13x5-Layer
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de
 #SBATCH --gres=gpu:a100:1
