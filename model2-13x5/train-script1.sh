@@ -6,7 +6,7 @@
 
 #SBATCH --job-name=model2-13x5
 #SBATCH --time=24:00:00
-#SBATCH --mail-user=janina.kloos@fau.de
+#SBATCH --mail-user=janinakloos@gmx.de
 #SBATCH --gres=gpu:a100:1
 #SBATCH --partition=a100
 

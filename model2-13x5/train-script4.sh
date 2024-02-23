@@ -1,12 +1,12 @@
 #!/bin/bash -l
 
-## Usage:  sbatch train-script2.sh
+## Usage:  sbatch train-script4.sh
 
 ############    slurm    ###############
 
 #SBATCH --job-name=model2-13x5
 #SBATCH --time=24:00:00
-#SBATCH --mail-user=janina.kloos@fau.de
+#SBATCH --mail-user=janinakloos@gmx.de
 #SBATCH --gres=gpu:v100:1
 #SBATCH --partition=v100
 
