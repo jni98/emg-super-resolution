@@ -112,6 +112,7 @@ class Trainer:
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
+        self.hyperparameter["device"] = str(self.device)
 
         # Ensure the directory exists
         os.makedirs(self.run_folder, exist_ok=True)
