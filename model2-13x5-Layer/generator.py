@@ -131,7 +131,7 @@ class Generator(nn.Module):
 
         # Upsampling of the residual and residual block 4
         self.residualUp4 = nn.ConvTranspose3d(512, 512, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks4 = nn.Sequential(*[ResidualBlock(512) for _ in range(5)])
+        self.res_blocks4 = nn.Sequential(*[ResidualBlock(512) for _ in range(3)])
 
         # Upsampling 1
         self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
