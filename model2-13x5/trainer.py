@@ -34,7 +34,7 @@ class Trainer:
     """
 
     def __init__(self, data_directory: str, test_data_directory: str, results_directory: str, num_epochs: int,
-                 batch_size: int, learning_rate: float, workers: int) -> None:
+                 workers: int, config) -> None:
         """
         Constructs all the necessary attributes for the Trainer object.
 
@@ -60,9 +60,11 @@ class Trainer:
         self.test_data_directory = test_data_directory
         self.run_folder = results_directory
         self.num_epochs = num_epochs
-        self.batch_size = batch_size
-        self.lr = learning_rate
         self.worker = workers
+        self.config = config
+
+        self.lr = config.learning_rate
+        self.batch_size = config.batch_size
 
         self.betas = (0.9, 0.999)
 
@@ -75,8 +77,6 @@ class Trainer:
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
-
-        wandb.init(project="emg-super-resolution", entity="masterthesis-sr")
 
         print("init done")
 
@@ -102,17 +102,17 @@ class Trainer:
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
                            self.mean_std_dict['std']),
-            batch_size=self.batch_size, pin_memory=True, num_workers=self.worker
+            batch_size=self.batch_size, pin_memory=True
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
                            self.mean_std_dict['std']),
-            batch_size=self.batch_size, pin_memory=True, num_workers=self.worker
+            batch_size=self.batch_size, pin_memory=True
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']), pin_memory=True, num_workers=self.worker)
+                           self.mean_std_dict['std']), pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
@@ -187,7 +187,7 @@ class Trainer:
 
             # Check GPU memory usage before training
             initial_allocated = torch.cuda.memory_allocated()
-            initial_cached = torch.cuda.memory_cached()
+            initial_cached = torch.cuda.memory_reserved()
 
             epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d = self._train_epoch(epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
@@ -212,7 +212,7 @@ class Trainer:
 
             # Check GPU memory usage after training
             allocated_diff = torch.cuda.memory_allocated() - initial_allocated
-            cached_diff = torch.cuda.memory_cached() - initial_cached
+            cached_diff = torch.cuda.memory_reserved() - initial_cached
 
             print(f"After epoch {epoch}, GPU memory allocated increased by: {allocated_diff} bytes")
             print(f"After epoch {epoch}, GPU memory cached increased by: {cached_diff} bytes")
@@ -238,6 +238,7 @@ class Trainer:
         avg_loss_d: float
                     Average loss of the discriminator over the training set
         """
+
         self.generator.train()
         self.discriminator.train()
         total_loss_g = 0.0
@@ -254,7 +255,7 @@ class Trainer:
                 hr_emg = hr_emg.to(self.device)
 
                 # Train Discriminator
-                #self.optimizer_D.zero_grad()
+                self.optimizer_D.zero_grad()
 
                 # Generate super-resolved data (SR) from LR data
                 # detaching sr_emg prevents gradients from flowing back through the generator network when computing
@@ -298,10 +299,10 @@ class Trainer:
 
                 #self.optimizer_G.step()
 
-                total_loss_g += loss_generator.item()
-                total_loss_d += loss_discriminator.item()
-                total_loss_d_real += loss_discriminator_real.item()
-                total_loss_d_fake += loss_discriminator_fake.item()
+                total_loss_g += loss_generator.detach().item()
+                total_loss_d += loss_discriminator.detach().item()
+                total_loss_d_real += loss_discriminator_real.detach().item()
+                total_loss_d_fake += loss_discriminator_fake.detach().item()
 
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
@@ -368,14 +369,15 @@ class Trainer:
                 val_loss = self.mse(val_sr_emg, val_hr)
 
                 # Accumulate validation loss
-                total_validation_loss += val_loss.item()
+                total_validation_loss += val_loss.detach().item()
 
                 psnr = 20 * torch.log10(1.0 / torch.sqrt(val_loss))
 
-                total_psnr += psnr.item()
+                total_psnr += psnr.detach().item()
 
             avg_validation_loss = total_validation_loss / len(self.validation)
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
+            wandb.log({'val_loss': avg_validation_loss})
 
             avg_psnr = total_psnr / len(self.validation)
 
