@@ -38,12 +38,12 @@ def setup_sweep():
 
 
 def train(data_directory: str, test_data_directory: str, results_directory: str,
-          num_epochs: int, workers: int, sweepconfig) -> None:
+          num_epochs: int,sweepconfig) -> None:
 
     with wandb.init(config=sweepconfig):
         config = wandb.config
         # Create a object of the trainer
-        trainer = Trainer(data_directory, test_data_directory, results_directory, num_epochs, workers, config)
+        trainer = Trainer(data_directory, test_data_directory, results_directory, num_epochs, config)
 
         # Prepare the data of the trainer (read csv, split train and validation set)
         trainer.prepare_data()
@@ -66,7 +66,6 @@ def parse_args():
     parser.add_argument('--testdata', type=str, required=True, help='Path to test data directory')
     parser.add_argument('--results', type=str, required=True, help='Path to results directory')
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs')
-    parser.add_argument('--workers', type=int, default=2, help='Number of workers for dataloader')
     return parser.parse_args()
 
 
@@ -74,18 +73,16 @@ if __name__ == "__main__":
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
     # Parse arguments
-    # args = parse_args()
-    # data_directory = args.data
-    # test_data_directory = args.testdata
-    # results_directory = args.results
-    # num_epochs = args.epochs
-    # workers = args.workers
+    args = parse_args()
+    data_directory = args.data
+    test_data_directory = args.testdata
+    results_directory = args.results
+    num_epochs = args.epochs
 
-    data_directory = '../dataset/train'
-    test_data_directory ='../dataset/test'
-    results_directory = 'runs/'
-    num_epochs = 50
-    workers = 2
+    # data_directory = '../dataset/train'
+    # test_data_directory ='../dataset/test'
+    # results_directory = 'runs/'
+    # num_epochs = 50
 
     # Run the sweep
-    wandb.agent(sweep_id, function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, workers, sweep_config))
+    wandb.agent(sweep_id, function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config))

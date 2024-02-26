@@ -12,10 +12,10 @@ from datetime import datetime
 import os
 from trainer import Trainer
 
-def train(data_directory: str , test_data_directory: str, results_directory: str,num_epochs: int, batch_size: int, learning_rate: float, workers: int) -> None:
+def train(data_directory: str , test_data_directory: str, results_directory: str,num_epochs: int, batch_size: int, learning_rate: float) -> None:
 
     # Create a object of the trainer
-    trainer = Trainer(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate, workers)
+    trainer = Trainer(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
 
     # Prepare the data of the trainer (read csv, split train and validation set)
     trainer.prepare_data()
@@ -39,7 +39,6 @@ def parse_args():
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs')
     parser.add_argument('--bs', type=int, default=16, help='Batch size')
     parser.add_argument('--lr', type=float, default=0.0001, help='Learning rate')
-    parser.add_argument('--workers', type=int, default=2, help='Number of workers for dataloader')
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -50,7 +49,6 @@ if __name__ == "__main__":
     num_epochs = args.epochs
     batch_size = args.bs
     learning_rate = args.lr
-    workers = args.workers
 
     # data_directory = '../dataset/train'
     # test_data_directory ='../dataset/test'
@@ -58,6 +56,5 @@ if __name__ == "__main__":
     # num_epochs = 10
     # batch_size = 16
     # learning_rate = 0.0001
-    # workers = 2
 
-    train(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate, workers)
+    train(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)

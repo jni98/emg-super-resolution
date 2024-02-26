@@ -33,8 +33,7 @@ class Trainer:
     Class to train the model.
     """
 
-    def __init__(self, data_directory: str, test_data_directory: str, results_directory: str, num_epochs: int,
-                 workers: int, config) -> None:
+    def __init__(self, data_directory: str, test_data_directory: str, results_directory: str, num_epochs: int, config) -> None:
         """
         Constructs all the necessary attributes for the Trainer object.
 
@@ -52,15 +51,13 @@ class Trainer:
                     Batch size to use during training
         learning_rate: float
                     Learning rate to use during training
-        worker: int
-                    Number of workers for the data loader
+
         """
 
         self.data_directory = data_directory
         self.test_data_directory = test_data_directory
         self.run_folder = results_directory
         self.num_epochs = num_epochs
-        self.worker = workers
         self.config = config
 
         self.lr = config.learning_rate
