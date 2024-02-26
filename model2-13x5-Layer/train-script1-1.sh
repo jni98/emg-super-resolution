@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-## Usage:  sbatch train-script1-1.sh
+## Usage:  sbatch.tinygpu train-script1-1.sh
 
 ############    slurm    ###############
 
@@ -9,8 +9,9 @@
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
 #SBATCH --partition=a100
-#SBATCH --error=model2-13x5-Layer-%j.err
-#SBATCH --output=model2-13x5-Layer-%j.out
+#SBATCH --export=NONE
+
+unset SLURM_EXPORT_ENV
 
 ############    paths    ###############
 
