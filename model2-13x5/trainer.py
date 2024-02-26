@@ -243,8 +243,7 @@ class Trainer:
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
 
-        with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
+        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
                 print("batch index", batch_idx)
 
                 # Move data to CUDA device during training or validation loops
@@ -275,9 +274,9 @@ class Trainer:
                 # calculate total loss for discriminator
                 loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
 
-                #loss_discriminator.backward()
+                loss_discriminator.backward()
 
-                #self.optimizer_D.step()
+                self.optimizer_D.step()
 
                 # Train Generator
                 self.optimizer_G.zero_grad()
@@ -292,9 +291,9 @@ class Trainer:
 
                 loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
 
-                #loss_generator.backward()
+                loss_generator.backward()
 
-                #self.optimizer_G.step()
+                self.optimizer_G.step()
 
                 total_loss_g += loss_generator.detach().item()
                 total_loss_d += loss_discriminator.detach().item()
@@ -313,24 +312,6 @@ class Trainer:
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
 
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
-
-    def _delete_row_column(self, sr_emg: torch.tensor) -> torch.tensor:
-        """
-        Deletes the last row and column of the super-resolved data.
-
-        Parameters
-        ----------
-        sr_emg: torch tensor
-
-        Returns
-        -------
-        sr_emg_final: torch tensor
-                      Super-resolved data without the last row and column
-        """
-
-        sr_emg_final = sr_emg[:, :, :-1, :-1, :]
-
-        return sr_emg_final
 
     def _validate(self, epoch: int) -> tuple:
         """
