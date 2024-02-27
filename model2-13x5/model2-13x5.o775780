@@ -1,0 +1,163 @@
+### Starting TaskPrologue of job 775780 on tg096 at Tue 27 Feb 2024 08:37:31 AM CET
+Running on cores 64-95 with governor ondemand
+Tue Feb 27 08:37:32 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:81:00.0 Off |                    0 |
+| N/A   35C    P0              55W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+load conda from module
+no change     /apps/python/3.10-anaconda/condabin/conda
+no change     /apps/python/3.10-anaconda/bin/conda
+no change     /apps/python/3.10-anaconda/bin/conda-env
+no change     /apps/python/3.10-anaconda/bin/activate
+no change     /apps/python/3.10-anaconda/bin/deactivate
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.sh
+no change     /apps/python/3.10-anaconda/etc/fish/conf.d/conda.fish
+no change     /apps/python/3.10-anaconda/shell/condabin/Conda.psm1
+no change     /apps/python/3.10-anaconda/shell/condabin/conda-hook.ps1
+no change     /apps/python/3.10-anaconda/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.csh
+no change     /home/hpc/iwso/iwso124h/.bashrc
+No action taken.
+using python /home/woody/iwso/iwso124h/.conda/envs/thesis_env/bin/python
+Tue Feb 27 08:37:34 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:81:00.0 Off |                    0 |
+| N/A   35C    P0              55W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+python reaches gpu: True
+started data transfer at Tue 27 Feb 2024 08:37:37 AM CET
+finished transfer at Tue 27 Feb 2024 08:37:40 AM CET
+1.1G	./dataset
+1.1G	.
+Using Repository Revision
+bc32c3d Added gradients again
+wandb: Agent Starting Run: g8753cdg with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.07653259775009526
+wandb: Currently logged in as: janinakloos (masterthesis-sr). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5/wandb/run-20240227_083748-g8753cdg
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run polar-sweep-1
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/gn3eralm
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/g8753cdg
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.891 MB of 0.891 MB uploadedwandb: | 0.891 MB of 0.891 MB uploadedwandb: / 0.891 MB of 0.891 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:      avg_loss_d ▁███████████████████████████████████████
+wandb: avg_loss_d_fake ▁███████████████████████████████████████
+wandb: avg_loss_d_real █▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      avg_loss_g █▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:        val_loss █▁▁▂▃▃▃▂▃▂▂▂▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃▃
+wandb: 
+wandb: Run summary:
+wandb:      avg_loss_d 100.0
+wandb: avg_loss_d_fake 100.0
+wandb: avg_loss_d_real 0.0
+wandb:      avg_loss_g 0.0726
+wandb:           epoch 50
+wandb:        val_loss 56176.65643
+wandb: 
+wandb: 🚀 View run polar-sweep-1 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/g8753cdg
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_083748-g8753cdg/logs
+wandb: Agent Starting Run: f3x0rgjk with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.08726944145936955
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5/wandb/run-20240227_093121-f3x0rgjk
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vital-sweep-2
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/gn3eralm
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/f3x0rgjk
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.022 MB uploadedwandb: | 0.893 MB of 0.893 MB uploadedwandb: / 0.893 MB of 0.893 MB uploadedwandb: - 0.893 MB of 0.893 MB uploadedwandb: \ 0.893 MB of 0.893 MB uploadedwandb: | 0.893 MB of 0.893 MB uploadedwandb: / 0.893 MB of 0.893 MB uploadedwandb: - 0.893 MB of 0.893 MB uploadedwandb: \ 0.893 MB of 0.893 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:      avg_loss_d ▁███████████████████████████████████████
+wandb: avg_loss_d_fake █▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: avg_loss_d_real ▁███████████████████████████████████████
+wandb:      avg_loss_g █▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:        val_loss ▁▂▃▅▅▅▇▆▆▆▅▅▄▄▅▅▆▆▆▆▆▆▆▇████▇▇▇█▇▇▇▇▇▇▆▇
+wandb: 
+wandb: Run summary:
+wandb:      avg_loss_d 100.0
+wandb: avg_loss_d_fake 0.0
+wandb: avg_loss_d_real 100.0
+wandb:      avg_loss_g 1.07402
+wandb:           epoch 50
+wandb:        val_loss 60419.71591
+wandb: 
+wandb: 🚀 View run vital-sweep-2 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/f3x0rgjk
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_093121-f3x0rgjk/logs
+wandb: Agent Starting Run: 9zexu0qx with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.07235924689250667
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5/wandb/run-20240227_102454-9zexu0qx
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run toasty-sweep-3
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/gn3eralm
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/9zexu0qx
+slurmstepd-tg096: error: *** JOB 775780 ON tg096 CANCELLED AT 2024-02-27T10:26:47 ***
+=== JOB_STATISTICS ===
+=== current date     : Tue 27 Feb 2024 10:26:48 AM CET
+= Job-ID             : 775780 on tinygpu
+= Job-Name           : model2-13x5
+= Job-Command        : /home/hpc/iwso/iwso124h/code/model2-13x5/train-script.sh
+= Initial workdir    : /home/hpc/iwso/iwso124h/code/model2-13x5
+= Queue/Partition    : a100
+= Slurm account      : iwso with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 01:49:19
+= Total RAM usage    : 1.0 GiB of requested  GiB (%)   
+= Node list          : tg096
+= Subm/Elig/Start/End: 2024-02-27T08:37:28 / 2024-02-27T08:37:28 / 2024-02-27T08:37:28 / 2024-02-27T10:26:47
+======================
+=== Quota infos ======
+    Path              Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc         3087.3M   104.9G   209.7G        N/A   1,362      500K   1,000K        N/A    
+    /home/vault       2146.8M  1048.6G  2097.2G        N/A       2      200K     400K        N/A    
+    /home/woody         19.3G   500.0G   750.0G        N/A      98K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+NVIDIA A100-SXM4-40GB, 00000000:81:00.0, 590953, 92 %, 34 %, 37398 MiB, 6534012 ms

@@ -1,0 +1,2021 @@
+### Starting TaskPrologue of job 775809 on tg090 at Tue 27 Feb 2024 09:36:36 AM CET
+Running on cores 96-127 with governor ondemand
+Tue Feb 27 09:36:36 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:C1:00.0 Off |                    0 |
+| N/A   33C    P0              53W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+load conda from module
+no change     /apps/python/3.10-anaconda/condabin/conda
+no change     /apps/python/3.10-anaconda/bin/conda
+no change     /apps/python/3.10-anaconda/bin/conda-env
+no change     /apps/python/3.10-anaconda/bin/activate
+no change     /apps/python/3.10-anaconda/bin/deactivate
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.sh
+no change     /apps/python/3.10-anaconda/etc/fish/conf.d/conda.fish
+no change     /apps/python/3.10-anaconda/shell/condabin/Conda.psm1
+no change     /apps/python/3.10-anaconda/shell/condabin/conda-hook.ps1
+no change     /apps/python/3.10-anaconda/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.csh
+no change     /home/hpc/iwso/iwso124h/.bashrc
+No action taken.
+using python /home/woody/iwso/iwso124h/.conda/envs/thesis_env/bin/python
+Tue Feb 27 09:36:38 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:C1:00.0 Off |                    0 |
+| N/A   34C    P0              56W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+python reaches gpu: True
+started data transfer at Tue 27 Feb 2024 09:36:45 AM CET
+finished transfer at Tue 27 Feb 2024 09:36:47 AM CET
+1.1G	./dataset
+1.1G	.
+Using Repository Revision
+bc32c3d Added gradients again
+wandb: Currently logged in as: janinakloos (masterthesis-sr). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/wandb/run-20240227_093656-rd804hfz
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run worldly-bird-191
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/rd804hfz
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+cuda
+init done
+Successfully prepared the data
+Successfully initialized the models
+epoch 1
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [1/50] Average Loss D: 1.6471535220290676, Average Loss G: 0.23839167381326357
+Epoch [1/50] Validation Loss: 67105.55772569444
+After epoch 1, GPU memory allocated increased by: 1981237248 bytes
+After epoch 1, GPU memory cached increased by: 39522926592 bytes
+epoch 2
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [2/50] Average Loss D: 1.4890294038888179, Average Loss G: 0.0787756046788259
+Epoch [2/50] Validation Loss: 63261.780381944445
+After epoch 2, GPU memory allocated increased by: -32768 bytes
+After epoch 2, GPU memory cached increased by: 0 bytes
+epoch 3
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [3/50] Average Loss D: 1.4899067987095227, Average Loss G: 0.06429137481432973
+Epoch [3/50] Validation Loss: 62928.377604166664
+After epoch 3, GPU memory allocated increased by: -950272 bytes
+After epoch 3, GPU memory cached increased by: 0 bytes
+epoch 4
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [4/50] Average Loss D: 1.5309343157392559, Average Loss G: 0.05788646102177374
+Epoch [4/50] Validation Loss: 60439.96875
+After epoch 4, GPU memory allocated increased by: 491520 bytes
+After epoch 4, GPU memory cached increased by: 914358272 bytes
+epoch 5
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [5/50] Average Loss D: 1.5706722447366426, Average Loss G: 0.054739762605591255
+Epoch [5/50] Validation Loss: 60401.19965277778
+After epoch 5, GPU memory allocated increased by: 1572864 bytes
+After epoch 5, GPU memory cached increased by: 0 bytes
+epoch 6
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [6/50] Average Loss D: 1.4777027115677341, Average Loss G: 0.052416367174097984
+Epoch [6/50] Validation Loss: 60412.197916666664
+After epoch 6, GPU memory allocated increased by: -131072 bytes
+After epoch 6, GPU memory cached increased by: 0 bytes
+epoch 7
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [7/50] Average Loss D: 1.415856325265133, Average Loss G: 0.05058082131048044
+Epoch [7/50] Validation Loss: 60292.721354166664
+After epoch 7, GPU memory allocated increased by: -1441792 bytes
+After epoch 7, GPU memory cached increased by: 0 bytes
+epoch 8
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [8/50] Average Loss D: 1.4078855803518584, Average Loss G: 0.04975493150678548
+Epoch [8/50] Validation Loss: 59861.202256944445
+After epoch 8, GPU memory allocated increased by: -65536 bytes
+After epoch 8, GPU memory cached increased by: 0 bytes
+epoch 9
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [9/50] Average Loss D: 1.3847832860368672, Average Loss G: 0.04912667157072009
+Epoch [9/50] Validation Loss: 59287.66449652778
+After epoch 9, GPU memory allocated increased by: 622592 bytes
+After epoch 9, GPU memory cached increased by: 0 bytes
+epoch 10
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [10/50] Average Loss D: 1.3730413191246265, Average Loss G: 0.04951380148078456
+Epoch [10/50] Validation Loss: 58428.88498263889
+After epoch 10, GPU memory allocated increased by: -524288 bytes
+After epoch 10, GPU memory cached increased by: 0 bytes
+epoch 11
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [11/50] Average Loss D: 1.3348951375845708, Average Loss G: 0.05190087499266321
+Epoch [11/50] Validation Loss: 60146.12109375
+After epoch 11, GPU memory allocated increased by: 884736 bytes
+After epoch 11, GPU memory cached increased by: 0 bytes
+epoch 12
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [12/50] Average Loss D: 1.4074012510704272, Average Loss G: 0.0485795581656875
+Epoch [12/50] Validation Loss: 57407.02777777778
+After epoch 12, GPU memory allocated increased by: 294912 bytes
+After epoch 12, GPU memory cached increased by: 0 bytes
+epoch 13
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [13/50] Average Loss D: 1.4334786173069116, Average Loss G: 0.05270434487046617
+Epoch [13/50] Validation Loss: 56591.41558159722
+After epoch 13, GPU memory allocated increased by: -524288 bytes
+After epoch 13, GPU memory cached increased by: 0 bytes
+epoch 14
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [14/50] Average Loss D: 1.526022625691963, Average Loss G: 0.049331999299201096
+Epoch [14/50] Validation Loss: 58021.80034722222
+After epoch 14, GPU memory allocated increased by: -720896 bytes
+After epoch 14, GPU memory cached increased by: 0 bytes
+epoch 15
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [15/50] Average Loss D: 1.4810202591346973, Average Loss G: 0.04862605294946468
+Epoch [15/50] Validation Loss: 57599.91059027778
+After epoch 15, GPU memory allocated increased by: -196608 bytes
+After epoch 15, GPU memory cached increased by: 0 bytes
+epoch 16
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [16/50] Average Loss D: 1.4296050830320879, Average Loss G: 0.04754443077201193
+Epoch [16/50] Validation Loss: 56911.528211805555
+After epoch 16, GPU memory allocated increased by: 196608 bytes
+After epoch 16, GPU memory cached increased by: 0 bytes
+epoch 17
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [17/50] Average Loss D: 1.4033271796775586, Average Loss G: 0.0469828343413996
+Epoch [17/50] Validation Loss: 56917.95095486111
+After epoch 17, GPU memory allocated increased by: 1605632 bytes
+After epoch 17, GPU memory cached increased by: 0 bytes
+epoch 18
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [18/50] Average Loss D: 1.3988541220173691, Average Loss G: 0.04665442708541046
+Epoch [18/50] Validation Loss: 57199.40668402778
+After epoch 18, GPU memory allocated increased by: -1146880 bytes
+After epoch 18, GPU memory cached increased by: 0 bytes
+epoch 19
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [19/50] Average Loss D: 1.3967027917052761, Average Loss G: 0.04636373229776368
+Epoch [19/50] Validation Loss: 57428.000651041664
+After epoch 19, GPU memory allocated increased by: 884736 bytes
+After epoch 19, GPU memory cached increased by: 0 bytes
+epoch 20
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [20/50] Average Loss D: 1.406238039334615, Average Loss G: 0.04604522945980231
+Epoch [20/50] Validation Loss: 57941.79253472222
+After epoch 20, GPU memory allocated increased by: 1179648 bytes
+After epoch 20, GPU memory cached increased by: 0 bytes
+epoch 21
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [21/50] Average Loss D: 1.40719279014703, Average Loss G: 0.04542141548837676
+Epoch [21/50] Validation Loss: 58470.082682291664
+After epoch 21, GPU memory allocated increased by: -1310720 bytes
+After epoch 21, GPU memory cached increased by: 0 bytes
+epoch 22
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [22/50] Average Loss D: 1.4188034028717966, Average Loss G: 0.04497192946798874
+Epoch [22/50] Validation Loss: 59056.746961805555
+After epoch 22, GPU memory allocated increased by: 360448 bytes
+After epoch 22, GPU memory cached increased by: 0 bytes
+epoch 23
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [23/50] Average Loss D: 1.4124040025653262, Average Loss G: 0.04492799745816173
+Epoch [23/50] Validation Loss: 59129.171006944445
+After epoch 23, GPU memory allocated increased by: 0 bytes
+After epoch 23, GPU memory cached increased by: 0 bytes
+epoch 24
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [24/50] Average Loss D: 1.4007760322455205, Average Loss G: 0.04447067726516363
+Epoch [24/50] Validation Loss: 58948.73003472222
+After epoch 24, GPU memory allocated increased by: 1474560 bytes
+After epoch 24, GPU memory cached increased by: 0 bytes
+epoch 25
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [25/50] Average Loss D: 1.3928322647557114, Average Loss G: 0.04462261481041258
+Epoch [25/50] Validation Loss: 59121.917100694445
+After epoch 25, GPU memory allocated increased by: -688128 bytes
+After epoch 25, GPU memory cached increased by: 0 bytes
+epoch 26
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [26/50] Average Loss D: 1.3897334842970877, Average Loss G: 0.044753166367158745
+Epoch [26/50] Validation Loss: 59481.5546875
+After epoch 26, GPU memory allocated increased by: 0 bytes
+After epoch 26, GPU memory cached increased by: 0 bytes
+epoch 27
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [27/50] Average Loss D: 1.3866295164281672, Average Loss G: 0.04485489998125669
+Epoch [27/50] Validation Loss: 59573.948350694445
+After epoch 27, GPU memory allocated increased by: -131072 bytes
+After epoch 27, GPU memory cached increased by: 0 bytes
+epoch 28
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [28/50] Average Loss D: 1.3837785106716733, Average Loss G: 0.04374735113797766
+Epoch [28/50] Validation Loss: 59701.940104166664
+After epoch 28, GPU memory allocated increased by: -458752 bytes
+After epoch 28, GPU memory cached increased by: 0 bytes
+epoch 29
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [29/50] Average Loss D: 1.361450675762061, Average Loss G: 0.04336994028452671
+Epoch [29/50] Validation Loss: 58576.91449652778
+After epoch 29, GPU memory allocated increased by: -1081344 bytes
+After epoch 29, GPU memory cached increased by: 0 bytes
+epoch 30
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [30/50] Average Loss D: 1.3600691159566243, Average Loss G: 0.04460058372580644
+Epoch [30/50] Validation Loss: 58894.061197916664
+After epoch 30, GPU memory allocated increased by: 1376256 bytes
+After epoch 30, GPU memory cached increased by: 0 bytes
+epoch 31
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [31/50] Average Loss D: 1.427330125461925, Average Loss G: 0.04259693679032904
+Epoch [31/50] Validation Loss: 59289.655381944445
+After epoch 31, GPU memory allocated increased by: -1638400 bytes
+After epoch 31, GPU memory cached increased by: 0 bytes
+epoch 32
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [32/50] Average Loss D: 1.4026675946784741, Average Loss G: 0.04173044149171223
+Epoch [32/50] Validation Loss: 58658.64691840278
+After epoch 32, GPU memory allocated increased by: 425984 bytes
+After epoch 32, GPU memory cached increased by: 0 bytes
+epoch 33
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [33/50] Average Loss D: 1.3833095521637888, Average Loss G: 0.04143108630722219
+Epoch [33/50] Validation Loss: 60073.424479166664
+After epoch 33, GPU memory allocated increased by: 360448 bytes
+After epoch 33, GPU memory cached increased by: 0 bytes
+epoch 34
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [34/50] Average Loss D: 1.2636739954803928, Average Loss G: 0.044503359349839615
+Epoch [34/50] Validation Loss: 58645.32986111111
+After epoch 34, GPU memory allocated increased by: 229376 bytes
+After epoch 34, GPU memory cached increased by: 0 bytes
+epoch 35
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [35/50] Average Loss D: 1.5374148614478833, Average Loss G: 0.04509793436436942
+Epoch [35/50] Validation Loss: 58017.167317708336
+After epoch 35, GPU memory allocated increased by: 786432 bytes
+After epoch 35, GPU memory cached increased by: 0 bytes
+epoch 36
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [36/50] Average Loss D: 1.37675142288208, Average Loss G: 0.0423360937133883
+Epoch [36/50] Validation Loss: 58472.81879340278
+After epoch 36, GPU memory allocated increased by: 131072 bytes
+After epoch 36, GPU memory cached increased by: 0 bytes
+epoch 37
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [37/50] Average Loss D: 1.452983080437689, Average Loss G: 0.056149325531088944
+Epoch [37/50] Validation Loss: 58128.72113715278
+After epoch 37, GPU memory allocated increased by: -1015808 bytes
+After epoch 37, GPU memory cached increased by: 0 bytes
+epoch 38
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [38/50] Average Loss D: 1.5262894160819775, Average Loss G: 0.04316453946133455
+Epoch [38/50] Validation Loss: 58833.34917534722
+After epoch 38, GPU memory allocated increased by: 196608 bytes
+After epoch 38, GPU memory cached increased by: 0 bytes
+epoch 39
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [39/50] Average Loss D: 1.4757585742256858, Average Loss G: 0.04142795457984462
+Epoch [39/50] Validation Loss: 59128.81423611111
+After epoch 39, GPU memory allocated increased by: 294912 bytes
+After epoch 39, GPU memory cached increased by: 0 bytes
+epoch 40
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [40/50] Average Loss D: 1.438447973944924, Average Loss G: 0.04001962545920502
+Epoch [40/50] Validation Loss: 59577.64887152778
+After epoch 40, GPU memory allocated increased by: -458752 bytes
+After epoch 40, GPU memory cached increased by: 0 bytes
+epoch 41
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [41/50] Average Loss D: 1.4190199411276616, Average Loss G: 0.039516801635424294
+Epoch [41/50] Validation Loss: 58937.141927083336
+After epoch 41, GPU memory allocated increased by: -131072 bytes
+After epoch 41, GPU memory cached increased by: 0 bytes
+epoch 42
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [42/50] Average Loss D: 1.4090708458062373, Average Loss G: 0.03851955192107143
+Epoch [42/50] Validation Loss: 58904.883680555555
+After epoch 42, GPU memory allocated increased by: 753664 bytes
+After epoch 42, GPU memory cached increased by: 0 bytes
+epoch 43
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [43/50] Average Loss D: 1.4043253335085781, Average Loss G: 0.038308826529166916
+Epoch [43/50] Validation Loss: 58699.90603298611
+After epoch 43, GPU memory allocated increased by: -655360 bytes
+After epoch 43, GPU memory cached increased by: 0 bytes
+epoch 44
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [44/50] Average Loss D: 1.401595621398001, Average Loss G: 0.037398281478972145
+Epoch [44/50] Validation Loss: 58662.444444444445
+After epoch 44, GPU memory allocated increased by: 491520 bytes
+After epoch 44, GPU memory cached increased by: 0 bytes
+epoch 45
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [45/50] Average Loss D: 1.4163429195230657, Average Loss G: 0.03719186478040435
+Epoch [45/50] Validation Loss: 58290.381944444445
+After epoch 45, GPU memory allocated increased by: -688128 bytes
+After epoch 45, GPU memory cached increased by: 0 bytes
+epoch 46
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [46/50] Average Loss D: 1.4234078544558901, Average Loss G: 0.03718772846640962
+Epoch [46/50] Validation Loss: 58422.973741319445
+After epoch 46, GPU memory allocated increased by: 1212416 bytes
+After epoch 46, GPU memory cached increased by: 0 bytes
+epoch 47
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [47/50] Average Loss D: 1.4183369513713953, Average Loss G: 0.03720058111304587
+Epoch [47/50] Validation Loss: 58448.790147569445
+After epoch 47, GPU memory allocated increased by: 720896 bytes
+After epoch 47, GPU memory cached increased by: 0 bytes
+epoch 48
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [48/50] Average Loss D: 1.4075785983692517, Average Loss G: 0.036374195902185005
+Epoch [48/50] Validation Loss: 58760.40256076389
+After epoch 48, GPU memory allocated increased by: -1441792 bytes
+After epoch 48, GPU memory cached increased by: 0 bytes
+epoch 49
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [49/50] Average Loss D: 1.3916780876390862, Average Loss G: 0.036810141959876724
+Epoch [49/50] Validation Loss: 59969.48784722222
+After epoch 49, GPU memory allocated increased by: -1638400 bytes
+After epoch 49, GPU memory cached increased by: 0 bytes
+epoch 50
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+Epoch [50/50] Average Loss D: 1.3812851255590266, Average Loss G: 0.03606753260123007
+Epoch [50/50] Validation Loss: 57747.36089409722
+After epoch 50, GPU memory allocated increased by: 1638400 bytes
+After epoch 50, GPU memory cached increased by: 0 bytes
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.015 MB uploadedwandb: | 0.015 MB of 0.015 MB uploadedwandb: / 0.015 MB of 0.015 MB uploadedwandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.015 MB uploadedwandb: | 0.015 MB of 0.866 MB uploadedwandb: / 0.902 MB of 0.902 MB uploadedwandb: - 0.902 MB of 0.902 MB uploadedwandb: 
+wandb: Run history:
+wandb:      avg_loss_d █▅▅▆▅▄▄▃▂▄▄▆▄▄▃▃▄▄▄▄▃▃▃▃▄▄▃▁▃▄▆▅▄▄▄▄▄▄▄▃
+wandb: avg_loss_d_fake █▅▅▇▅▄▃▃▂▃▅▆▄▄▄▃▄▄▃▄▃▄▃▃▄▄▃▁▃▅▆▅▄▄▄▄▃▄▄▄
+wandb: avg_loss_d_real █▅▅▅▅▃▄▃▂▄▄▆▄▃▃▄▃▃▄▃▃▃▃▃▄▃▃▁▃▄▆▅▄▃▄▃▄▃▃▃
+wandb:      avg_loss_g █▂▂▂▂▂▁▁▂▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▂▁▁▁▁▁▁▁▁▁▁
+wandb:           epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb: 
+wandb: Run summary:
+wandb:      avg_loss_d 1.38129
+wandb: avg_loss_d_fake 0.69787
+wandb: avg_loss_d_real 0.68341
+wandb:      avg_loss_g 0.03607
+wandb:           epoch 50
+wandb: 
+wandb: 🚀 View run worldly-bird-191 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/rd804hfz
+wandb: ️⚡ View job at https://wandb.ai/masterthesis-sr/emg-super-resolution/jobs/QXJ0aWZhY3RDb2xsZWN0aW9uOjE0Mjg2Mjg4NA==/version_details/v2
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_093656-rd804hfz/logs
+=== JOB_STATISTICS ===
+=== current date     : Tue 27 Feb 2024 10:24:22 AM CET
+= Job-ID             : 775809 on tinygpu
+= Job-Name           : model2-13x5-Layer
+= Job-Command        : /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-script1-1.sh
+= Initial workdir    : /home/hpc/iwso/iwso124h/code/model2-13x5-Layer
+= Queue/Partition    : a100
+= Slurm account      : iwso with QOS=normal
+= Requested resources:  for 19:00:00
+= Elapsed runtime    : 00:47:48
+= Total RAM usage    : 0.9 GiB of requested  GiB (%)   
+= Node list          : tg090
+= Subm/Elig/Start/End: 2024-02-27T09:36:34 / 2024-02-27T09:36:34 / 2024-02-27T09:36:34 / 2024-02-27T10:24:22
+======================
+=== Quota infos ======
+    Path              Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc         3238.3M   104.9G   209.7G        N/A   1,347      500K   1,000K        N/A    
+    /home/vault       2146.8M  1048.6G  2097.2G        N/A       2      200K     400K        N/A    
+    /home/woody         19.3G   500.0G   750.0G        N/A      98K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+NVIDIA A100-SXM4-40GB, 00000000:C1:00.0, 105041, 91 %, 36 %, 39814 MiB, 2847540 ms
