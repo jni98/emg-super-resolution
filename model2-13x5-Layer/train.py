@@ -76,16 +76,16 @@ if __name__ == "__main__":
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
     # Parse arguments
-    # args = parse_args()
-    # data_directory = args.data
-    # test_data_directory = args.testdata
-    # results_directory = args.results
-    # num_epochs = args.epochs
+    args = parse_args()
+    data_directory = args.data
+    test_data_directory = args.testdata
+    results_directory = args.results
+    num_epochs = args.epochs
 
-    data_directory = '../dataset/train'
-    test_data_directory ='../dataset/test'
-    results_directory = 'runs/'
-    num_epochs = 50
+    # data_directory = '../dataset/train'
+    # test_data_directory ='../dataset/test'
+    # results_directory = 'runs/'
+    # num_epochs = 50
 
     # Run the sweep
     wandb.agent(sweep_id, function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config, sweep_id))
