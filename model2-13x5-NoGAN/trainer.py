@@ -10,6 +10,7 @@ import json
 import os
 
 import matplotlib
+import wandb
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
@@ -19,7 +20,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torchsummary import summary
 from sklearn.model_selection import train_test_split
 import pandas as pd
 from generator import Generator
@@ -32,7 +32,7 @@ class Trainer:
     """
 
     def __init__(self, data_directory: str, test_data_directory: str, results_directory: str, num_epochs: int,
-                 batch_size: int, learning_rate: float) -> None:
+                 config, sweep_id) -> None:
         """
         Constructs all the necessary attributes for the Trainer object.
 
@@ -46,20 +46,21 @@ class Trainer:
                     Path to the directory where the results should be saved
         num_epochs: int
                     Number of epochs to train the model
-        batch_size: int
-                    Batch size to use during training
-        learning_rate: float
-                    Learning rate to use during training
-        run_folder: str
-                    Path to the folder where the results should be saved
+        config: object
+                    Configuration of the model for sweep
+        sweep_id: str
+                    ID of the sweep
         """
 
         self.data_directory = data_directory
         self.test_data_directory = test_data_directory
         self.run_folder = results_directory
         self.num_epochs = num_epochs
-        self.batch_size = batch_size
-        self.lr = learning_rate
+        self.config = config
+        self.sweep_id = sweep_id
+
+        self.lr = config.learning_rate
+        self.batch_size = config.batch_size
 
         self.betas = (0.9, 0.999)
 
@@ -72,6 +73,8 @@ class Trainer:
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
+
+        wandb.init(project="emg-super-resolution-NoGAN", entity="masterthesis-sr")
 
         print("init done")
 
@@ -107,37 +110,36 @@ class Trainer:
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),pin_memory=True)
+                           self.mean_std_dict['std']), pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
         self.hyperparameter["device"] = str(self.device)
 
         # Ensure the directory exists
-        os.makedirs(self.run_folder, exist_ok=True)
+        os.makedirs(self.run_folder + '/' + self.sweep_id, exist_ok=True)
 
         # Save the dictionary to a file
-        with open(self.run_folder + '/hyperparameter.json', 'w') as file:
+        with open(self.run_folder + '/' + self.sweep_id + '/hyperparameter.json', 'w') as file:
             json.dump(self.hyperparameter, file)
 
         print("Successfully prepared the data")
 
     def initialize_models(self) -> None:
         """
-        Initializes the Generator, Discriminator, Optimizers and Loss functions.
+        Initializes the Generator, Optimizers and Loss functions.
 
         Returns
         -------
         None
         """
-        self.generator = Generator()
+        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
 
         # move to gpu in case it's possible
         self.generator.to(self.device)
-        #print("Generator summary")
-        #print(str(summary(self.generator, (1, 7,3,2048))))
+        # print("Generator summary")
+        # print(str(summary(self.generator, (1, 7,3,2048))))
 
-        self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
@@ -152,18 +154,18 @@ class Trainer:
         -------
         train_g_loss: list
                     Generator loss over the epochs
-        train_d_loss: list
-                    Discriminator loss over the epochs
         val_loss: list
                     Validation loss over the epochs
         psnr: list
                     PSNR over the epochs
         """
-
         train_g_loss = []
         val_loss = []
         psnr = []
         best_val_loss = float('inf')
+
+        # Add wandb.watch() here to start tracking gradients and parameters
+        wandb.watch(self.generator, criterion='mse', log='all')
 
         for epoch in range(1, self.num_epochs + 1):
             print("epoch", epoch)
@@ -172,11 +174,10 @@ class Trainer:
             initial_allocated = torch.cuda.memory_allocated()
             initial_cached = torch.cuda.memory_cached()
 
-            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d = self._train_epoch(epoch)
+            epoch_loss_g = self._train_epoch(epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
 
             train_g_loss.append(epoch_loss_g)
-
             val_loss.append(avg_val_loss)
             psnr.append(avg_psnr)
 
@@ -187,9 +188,9 @@ class Trainer:
                 # Save the final models when a new best model is found
                 self._save_final_models()
 
-            #self._save_checkpoint(epoch)
+            # self._save_checkpoint(epoch)
             # Clear unnecessary variables to release memory
-            del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
+            del epoch_loss_g, avg_val_loss, avg_psnr
 
             # Check GPU memory usage after training
             allocated_diff = torch.cuda.memory_allocated() - initial_allocated
@@ -198,7 +199,7 @@ class Trainer:
             print(f"After epoch {epoch}, GPU memory allocated increased by: {allocated_diff} bytes")
             print(f"After epoch {epoch}, GPU memory cached increased by: {cached_diff} bytes")
 
-        return train_g_loss,val_loss, psnr
+        return train_g_loss, val_loss, psnr
 
     def _train_epoch(self, epoch: int) -> tuple:
         """
@@ -212,12 +213,6 @@ class Trainer:
         -------
         avg_loss_g: float
                     Average loss of the generator over the training set
-        avg_loss_d_real: float
-                    Average loss of the discriminator over the training set when receiving real data
-        avg_loss_d_fake: float
-                    Average loss of the discriminator over the training set when receiving fake data
-        avg_loss_d: float
-                    Average loss of the discriminator over the training set
         """
         self.generator.train()
         total_loss_g = 0.0
@@ -230,21 +225,13 @@ class Trainer:
                 lr_emg = lr_emg.to(self.device)
                 hr_emg = hr_emg.to(self.device)
 
-            # Generate super-resolved data (SR) from LR data
-            # detaching sr_emg prevents gradients from flowing back through the generator network when computing
-            # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
-            # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
-            sr_emg = self.generator(lr_emg).detach().to(self.device)
-
             # Train Generator
             self.optimizer_G.zero_grad()
 
             # Generate SR data from LR data
             sr_emg = self.generator(lr_emg).to(self.device)
 
-            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
-
-            loss_generator = loss_generator_content
+            loss_generator = self.mse(sr_emg, hr_emg)  # Content loss
 
             loss_generator.backward()
 
@@ -252,31 +239,14 @@ class Trainer:
 
             total_loss_g += loss_generator.item()
 
-
         avg_loss_g = total_loss_g / len(self.training)
+
+        wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g})
 
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss G: {avg_loss_g}")
 
         return avg_loss_g
-
-    def _delete_row_column(self, sr_emg: torch.tensor) -> torch.tensor:
-        """
-        Deletes the last row and column of the super-resolved data.
-
-        Parameters
-        ----------
-        sr_emg: torch tensor
-
-        Returns
-        -------
-        sr_emg_final: torch tensor
-                      Super-resolved data without the last row and column
-        """
-
-        sr_emg_final = sr_emg[:, :, :-1, :-1, :]
-
-        return sr_emg_final
 
     def _validate(self, epoch: int) -> tuple:
         """
@@ -319,6 +289,7 @@ class Trainer:
 
             avg_validation_loss = total_validation_loss / len(self.validation)
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
+            wandb.log({'val_loss': avg_validation_loss})
 
             avg_psnr = total_psnr / len(self.validation)
 
@@ -339,7 +310,8 @@ class Trainer:
         None
         """
         if epoch % 10 == 0:
-            torch.save(self.generator.state_dict(), self.run_folder + f'/generator_epoch_{epoch}.pt')
+            torch.save(self.generator.state_dict(),
+                       self.run_folder + '/' + self.sweep_id + f'/generator_epoch_{epoch}.pt')
 
     def _save_final_models(self) -> None:
         """
@@ -349,19 +321,15 @@ class Trainer:
         -------
         None
         """
-        torch.save(self.generator.state_dict(), self.run_folder + '/final_generator.pt')
+        torch.save(self.generator.state_dict(), self.run_folder + '/' + self.sweep_id + '/final_generator.pt')
 
-    def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list,
-                            train_d_loss: list, val_loss: list, psnr: list) -> None:
+    def _plot_result_losses(self, train_g_loss: list, val_loss: list, psnr: list) -> None:
         """
         Plots the Generator and Discriminator loss over the epochs and the validation loss and PSNR over the epochs.
 
         Parameters
         ----------
         train_g_loss: list
-        train_d_loss_real: list
-        train_d_loss_fake: list
-        train_d_loss: list
         val_loss: list
         psnr: list
 
@@ -376,9 +344,9 @@ class Trainer:
         psnr_np = np.array(psnr)
 
         # Save NumPy arrays to files
-        np.save(self.run_folder + '/train_g_loss.npy', train_g_loss_np)
-        np.save(self.run_folder + '/val_loss.npy', val_loss_np)
-        np.save(self.run_folder + '/psnr.npy', psnr_np)
+        np.save(self.run_folder + '/' + self.sweep_id + '/train_g_loss.npy', train_g_loss_np)
+        np.save(self.run_folder + '/' + self.sweep_id + '/val_loss.npy', val_loss_np)
+        np.save(self.run_folder + '/' + self.sweep_id + '/psnr.npy', psnr_np)
 
         # Plot Generator and Discriminator loss
         fig_generator_discriminator, (
@@ -391,9 +359,8 @@ class Trainer:
         ax_generator_loss.set_ylabel('Loss')
         ax_generator_loss.set_title('Generator Loss over Epochs')
 
-
         fig_generator_discriminator.tight_layout()
-        fig_generator_discriminator.savefig(self.run_folder + '/training_losses.png')
+        fig_generator_discriminator.savefig(self.run_folder + '/' + self.sweep_id + '/training_losses.png')
 
         # Plot Validation loss, PSNR in a combined figure
         fig_val_psnr, (ax_val_loss, ax_psnr) = plt.subplots(nrows=2, ncols=1)
@@ -411,7 +378,7 @@ class Trainer:
         ax_psnr.set_title('PSNR over Epochs')
 
         fig_val_psnr.tight_layout()
-        fig_val_psnr.savefig(self.run_folder + '/validation_loss_psnr.png')
+        fig_val_psnr.savefig(self.run_folder + '/' + self.sweep_id + '/validation_loss_psnr.png')
 
     def generate_sr_data(self) -> None:
         """

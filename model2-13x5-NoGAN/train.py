@@ -8,9 +8,7 @@ You can run this file by running the main function.
 """
 # Import necessary libraries
 import argparse
-import math
-import sys
-import os
+
 import wandb  # Import wandb library
 
 from trainer import Trainer
@@ -23,12 +21,18 @@ def setup_sweep():
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-            'values': [8, 12, 16],  # Add the batch sizes you want to include
+                'values': [8, 12, 16],  # Add the batch sizes you want to include
             },
-            'learning_rate': {'distribution': 'uniform',
-                              'max': 0.1,
-                              'min': 0}
-            }
+            'learning_rate': {
+                'values': [0.1, 0.01, 0.001, 0.0001]
+            },
+            'num_res_blocks_last': {
+                'values': [2, 3, 4, 5]
+            },
+            'num_res_blocks': {
+                'values': [2, 3, 4, 5]
+            },
+        }
     }
 
     # Initialize and run the sweep
@@ -38,12 +42,11 @@ def setup_sweep():
 
 
 def train(data_directory: str, test_data_directory: str, results_directory: str,
-          num_epochs: int,  sweepconfig) -> None:
-
+          num_epochs: int, sweepconfig, sweep_id) -> None:
     with wandb.init(config=sweepconfig):
         config = wandb.config
-        # Create a object of the trainer
-        trainer = Trainer(data_directory, test_data_directory, results_directory, num_epochs,  config)
+        # Create an object of the trainer
+        trainer = Trainer(data_directory, test_data_directory, results_directory, num_epochs, config, sweep_id)
 
         # Prepare the data of the trainer (read csv, split train and validation set)
         trainer.prepare_data()
@@ -52,10 +55,10 @@ def train(data_directory: str, test_data_directory: str, results_directory: str,
         trainer.initialize_models()
 
         # Run the training
-        train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, val_loss, psnr = trainer.train()
+        train_G_loss, val_loss, psnr = trainer.train()
 
         # Plot the training results
-        trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, val_loss, psnr)
+        trainer._plot_result_losses(train_G_loss, val_loss, psnr)
 
     # trainer.generate_sr_data()
 
@@ -73,16 +76,18 @@ if __name__ == "__main__":
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
     # Parse arguments
-    # args = parse_args()
-    # data_directory = args.data
-    # test_data_directory = args.testdata
-    # results_directory = args.results
-    # num_epochs = args.epochs
+    args = parse_args()
+    data_directory = args.data
+    test_data_directory = args.testdata
+    results_directory = args.results
+    num_epochs = args.epochs
 
-    data_directory = '../dataset/train'
-    test_data_directory ='../dataset/test'
-    results_directory = 'runs/'
-    num_epochs = 50
+    # data_directory = '../dataset/train'
+    # test_data_directory ='../dataset/test'
+    # results_directory = 'runs/'
+    # num_epochs = 50
 
     # Run the sweep
-    wandb.agent(sweep_id, function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config))
+    wandb.agent(sweep_id,
+                function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+                                       sweep_id))

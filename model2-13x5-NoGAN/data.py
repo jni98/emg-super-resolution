@@ -5,6 +5,7 @@ File description: This file contains the class Custom_Dataset, which is a custom
 
 The code is called from every file that is loading a dataset.
 """
+from matplotlib import pyplot as plt
 from scipy.signal import butter, filtfilt
 from torch.utils.data import Dataset
 import torch
@@ -53,10 +54,21 @@ class Custom_Dataset(Dataset):
         hr_emg_path = self.data.iloc[index]['hr_filename']
 
         lr_emg = np.load(self.directory +'/'+ self.data.iloc[index, 0])
+
         # bandpass filter
         lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=5)
+
+        # plt.figure()
+        # plt.plot(lr_emg[0][0])
+        # plt.savefig('lr_emg.png')
+
         # Standardize using mean and std values of the complete dataset
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
+
+        # plt.figure()
+        # plt.plot(lr_emg_standardized[0][0])
+        # plt.savefig('lr_emg_standardized.png')
+
         # unsqueeze to add a one channel dimension at the beginning
         lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
 
@@ -119,4 +131,25 @@ class Custom_Dataset(Dataset):
         high = highcut / nyq
         b, a = butter(order, [low, high], btype='band')
         filtered_signal = filtfilt(b, a, data)
+
+        # # Compute the frequency spectrum using FFT along the samples axis
+        # spectrum_original = np.fft.fftn(data, axes=(2,))
+        # spectrum_filtered = np.fft.fftn(filtered_signal, axes=(2,))
+        #
+        # # Frequency values
+        # freq = np.fft.fftfreq(data.shape[2], d=1/fs)  # Assuming uniform sampling, adjust if needed
+        #
+        # # Plot the frequency spectra
+        # plt.figure(figsize=(10, 6))
+        # plt.plot(freq, np.abs(np.mean(spectrum_original, axis=(0, 1))), label='Original Signal')
+        # plt.plot(freq, np.abs(np.mean(spectrum_filtered, axis=(0, 1))), label='Filtered Signal')
+        # plt.xlabel('Frequency (Hz)')
+        # plt.ylabel('Magnitude')
+        # plt.title('Frequency Spectrum')
+        # plt.legend()
+        # plt.grid(True)
+        # plt.savefig('frequency_spectrum.png')
+        #
+        # print("Signal filtered")
+
         return filtered_signal

@@ -20,7 +20,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torchsummary import summary
 from sklearn.model_selection import train_test_split
 import pandas as pd
 from generator import Generator
@@ -112,7 +111,7 @@ class Trainer:
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),pin_memory=True)
+                           self.mean_std_dict['std']), pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
@@ -140,12 +139,12 @@ class Trainer:
 
         # move to gpu in case it's possible
         self.generator.to(self.device)
-        #print("Generator summary")
-        #print(str(summary(self.generator, (1, 7,3,2048))))
+        # print("Generator summary")
+        # print(str(summary(self.generator, (1, 7,3,2048))))
 
         self.discriminator.to(self.device)
-        #print("Discriminator summary")
-        #print(str(summary(self.discriminator, (1, 13, 5, 2048))))
+        # print("Discriminator summary")
+        # print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
@@ -206,7 +205,7 @@ class Trainer:
                 # Save the final models when a new best model is found
                 self._save_final_models()
 
-            #self._save_checkpoint(epoch)
+            # self._save_checkpoint(epoch)
             # Clear unnecessary variables to release memory
             del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
 
@@ -308,30 +307,13 @@ class Trainer:
         avg_loss_d_fake = total_loss_d_fake / len(self.training)
         avg_loss_d = total_loss_d / len(self.training)
 
-        wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real, 'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d})
+        wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real,
+                   'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d})
 
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
 
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
-
-    def _delete_row_column(self, sr_emg: torch.tensor) -> torch.tensor:
-        """
-        Deletes the last row and column of the super-resolved data.
-
-        Parameters
-        ----------
-        sr_emg: torch tensor
-
-        Returns
-        -------
-        sr_emg_final: torch tensor
-                      Super-resolved data without the last row and column
-        """
-
-        sr_emg_final = sr_emg[:, :, :-1, :-1, :]
-
-        return sr_emg_final
 
     def _validate(self, epoch: int) -> tuple:
         """
@@ -397,8 +379,10 @@ class Trainer:
         None
         """
         if epoch % 10 == 0:
-            torch.save(self.generator.state_dict(), self.run_folder + '/' + self.sweep_id+ f'/generator_epoch_{epoch}.pt')
-            torch.save(self.discriminator.state_dict(), self.run_folder + '/' + self.sweep_id + f'/discriminator_epoch_{epoch}.pt')
+            torch.save(self.generator.state_dict(),
+                       self.run_folder + '/' + self.sweep_id + f'/generator_epoch_{epoch}.pt')
+            torch.save(self.discriminator.state_dict(),
+                       self.run_folder + '/' + self.sweep_id + f'/discriminator_epoch_{epoch}.pt')
 
     def _save_final_models(self) -> None:
         """
@@ -408,8 +392,8 @@ class Trainer:
         -------
         None
         """
-        torch.save(self.generator.state_dict(), self.run_folder + '/' + self.sweep_id+ '/final_generator.pt')
-        torch.save(self.discriminator.state_dict(), self.run_folder + '/' + self.sweep_id+ '/final_discriminator.pt')
+        torch.save(self.generator.state_dict(), self.run_folder + '/' + self.sweep_id + '/final_generator.pt')
+        torch.save(self.discriminator.state_dict(), self.run_folder + '/' + self.sweep_id + '/final_discriminator.pt')
 
     def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list,
                             train_d_loss: list, val_loss: list, psnr: list) -> None:
@@ -439,12 +423,12 @@ class Trainer:
         psnr_np = np.array(psnr)
 
         # Save NumPy arrays to files
-        np.save(self.run_folder + '/' + self.sweep_id+ '/train_g_loss.npy', train_g_loss_np)
-        np.save(self.run_folder + '/' + self.sweep_id+ '/train_d_loss.npy', train_d_loss_np)
-        np.save(self.run_folder + '/' + self.sweep_id+ '/train_d_loss_real.npy', train_d_loss_real_np)
-        np.save(self.run_folder + '/' + self.sweep_id+ '/train_d_loss_fake.npy', train_d_loss_fake_np)
-        np.save(self.run_folder + '/' + self.sweep_id+ '/val_loss.npy', val_loss_np)
-        np.save(self.run_folder + '/' + self.sweep_id+ '/psnr.npy', psnr_np)
+        np.save(self.run_folder + '/' + self.sweep_id + '/train_g_loss.npy', train_g_loss_np)
+        np.save(self.run_folder + '/' + self.sweep_id + '/train_d_loss.npy', train_d_loss_np)
+        np.save(self.run_folder + '/' + self.sweep_id + '/train_d_loss_real.npy', train_d_loss_real_np)
+        np.save(self.run_folder + '/' + self.sweep_id + '/train_d_loss_fake.npy', train_d_loss_fake_np)
+        np.save(self.run_folder + '/' + self.sweep_id + '/val_loss.npy', val_loss_np)
+        np.save(self.run_folder + '/' + self.sweep_id + '/psnr.npy', psnr_np)
 
         # Plot Generator and Discriminator loss
         fig_generator_discriminator, (
@@ -474,7 +458,7 @@ class Trainer:
         ax_discriminator_loss_r_f.set_title('Discriminator Loss over Epochs')
 
         fig_generator_discriminator.tight_layout()
-        fig_generator_discriminator.savefig(self.run_folder + '/' + self.sweep_id+ '/training_losses.png')
+        fig_generator_discriminator.savefig(self.run_folder + '/' + self.sweep_id + '/training_losses.png')
 
         # Plot Validation loss, PSNR in a combined figure
         fig_val_psnr, (ax_val_loss, ax_psnr) = plt.subplots(nrows=2, ncols=1)
@@ -492,7 +476,7 @@ class Trainer:
         ax_psnr.set_title('PSNR over Epochs')
 
         fig_val_psnr.tight_layout()
-        fig_val_psnr.savefig(self.run_folder + '/' + self.sweep_id+ '/validation_loss_psnr.png')
+        fig_val_psnr.savefig(self.run_folder + '/' + self.sweep_id + '/validation_loss_psnr.png')
 
     def generate_sr_data(self) -> None:
         """
