@@ -1,0 +1,214 @@
+### Starting TaskPrologue of job 775908 on tg096 at Tue 27 Feb 2024 11:27:03 AM CET
+Running on cores 64-95 with governor ondemand
+Tue Feb 27 11:27:03 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:81:00.0 Off |                    0 |
+| N/A   35C    P0              55W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+load conda from module
+no change     /apps/python/3.10-anaconda/condabin/conda
+no change     /apps/python/3.10-anaconda/bin/conda
+no change     /apps/python/3.10-anaconda/bin/conda-env
+no change     /apps/python/3.10-anaconda/bin/activate
+no change     /apps/python/3.10-anaconda/bin/deactivate
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.sh
+no change     /apps/python/3.10-anaconda/etc/fish/conf.d/conda.fish
+no change     /apps/python/3.10-anaconda/shell/condabin/Conda.psm1
+no change     /apps/python/3.10-anaconda/shell/condabin/conda-hook.ps1
+no change     /apps/python/3.10-anaconda/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.csh
+no change     /home/hpc/iwso/iwso124h/.bashrc
+No action taken.
+using python /home/woody/iwso/iwso124h/.conda/envs/thesis_env/bin/python
+Tue Feb 27 11:27:05 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:81:00.0 Off |                    0 |
+| N/A   36C    P0              65W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+python reaches gpu: True
+started data transfer at Tue 27 Feb 2024 11:27:10 AM CET
+finished transfer at Tue 27 Feb 2024 11:27:13 AM CET
+1.1G	./dataset
+1.1G	.
+Using Repository Revision
+e270ecb Changed sweep config
+wandb: Agent Starting Run: 61v9fwpu with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Currently logged in as: janinakloos (masterthesis-sr). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/wandb/run-20240227_112723-61v9fwpu
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fast-sweep-1
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/gvy3r6t8
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/61v9fwpu
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.893 MB uploadedwandb: | 0.015 MB of 0.937 MB uploadedwandb: / 0.015 MB of 0.937 MB uploadedwandb: - 0.015 MB of 0.937 MB uploadedwandb: \ 0.015 MB of 0.937 MB uploadedwandb: | 0.015 MB of 0.937 MB uploadedwandb: / 0.937 MB of 0.937 MB uploadedwandb: - 0.937 MB of 0.937 MB uploadedwandb: \ 0.937 MB of 0.937 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:      avg_loss_d █▇▇▇▇▇▇▇▇▇▇▇▇▆▆▆▄▆▆▇▂█▄▁▇▆▃▃▄▃▁▂▂▁▁▃▂▁▁▃
+wandb: avg_loss_d_fake █▇▇▇▇▇▇▇▇▇▇▇▇▆▆▇▄▅▆▆▁█▄▁▇▆▃▃▄▃▁▂▂▁▁▃▃▂▁▄
+wandb: avg_loss_d_real █▇▇▇▇▇▇▇▇▇▇▇▇▇▆▆▄▇▆▇▂█▄▁▇▆▃▃▄▃▁▂▃▁▁▃▂▁▁▃
+wandb:      avg_loss_g █▃▂▂▂▂▁▁▁▁▁▁▁▁▁▂▂▃▂▂▄▁▁▃▃▁▂▂▂▂▃▃▂▃▃▃▃▃▃▂
+wandb:           epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:        val_loss ▁▆▆▆▆▆▆▆▆▆▅▅▆▆▆▅▆▆▆██▇▆▇▅▅▅▇▅▇▆▇▄▅▃▄█▅▄▇
+wandb: 
+wandb: Run summary:
+wandb:      avg_loss_d 0.76462
+wandb: avg_loss_d_fake 0.4403
+wandb: avg_loss_d_real 0.32432
+wandb:      avg_loss_g 0.08117
+wandb:           epoch 50
+wandb:        val_loss 66757.15803
+wandb: 
+wandb: 🚀 View run fast-sweep-1 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/61v9fwpu
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_112723-61v9fwpu/logs
+wandb: Agent Starting Run: iqozcnpw with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: ERROR Run iqozcnpw errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train.py", line 91, in <lambda>
+wandb: ERROR     wandb.agent(sweep_id, function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config, sweep_id))
+wandb: ERROR                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train.py", line 46, in train
+wandb: ERROR     with wandb.init(config=sweepconfig):
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1195, in init
+wandb: ERROR     raise e
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1172, in init
+wandb: ERROR     wi.setup(kwargs)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 189, in setup
+wandb: ERROR     self._wl = wandb_setup.setup(settings=setup_settings)
+wandb: ERROR                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 327, in setup
+wandb: ERROR     ret = _setup(settings=settings)
+wandb: ERROR           ^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 320, in _setup
+wandb: ERROR     wl = _WandbSetup(settings=settings)
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 303, in __init__
+wandb: ERROR     _WandbSetup._instance = _WandbSetup__WandbSetup(settings=settings, pid=pid)
+wandb: ERROR                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 114, in __init__
+wandb: ERROR     self._setup()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 250, in _setup
+wandb: ERROR     self._setup_manager()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 277, in _setup_manager
+wandb: ERROR     self._manager = wandb_manager._Manager(settings=self._settings)
+wandb: ERROR                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_manager.py", line 139, in __init__
+wandb: ERROR     self._service.start()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 245, in start
+wandb: ERROR     self._launch_server()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 239, in _launch_server
+wandb: ERROR     _sentry.reraise(e)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/analytics/sentry.py", line 154, in reraise
+wandb: ERROR     raise exc.with_traceback(sys.exc_info()[2])
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 237, in _launch_server
+wandb: ERROR     self._wait_for_ports(fname, proc=internal_proc)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 132, in _wait_for_ports
+wandb: ERROR     raise ServiceStartTimeoutError(
+wandb: ERROR wandb.sdk.service.service.ServiceStartTimeoutError: Timed out waiting for wandb service to start after 30.0 seconds. Try increasing the timeout with the `_service_wait` setting.
+wandb: ERROR 
+wandb: Agent Starting Run: g6j6h1uy with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.01
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/__main__.py", line 3, in <module>
+    cli.cli(prog_name="python -m wandb")
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/click/core.py", line 1157, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/click/core.py", line 1688, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/click/core.py", line 1434, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/click/core.py", line 783, in invoke
+    return __callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/cli/cli.py", line 105, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/cli/cli.py", line 289, in service
+    server.serve()
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/server.py", line 114, in serve
+    self._inform_used_ports(sock_port=sock_port)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/server.py", line 52, in _inform_used_ports
+    pf.write(self._port_fname)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/port_file.py", line 21, in write
+    f = tempfile.NamedTemporaryFile(prefix=bname, dir=dname, mode="w", delete=False)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/tempfile.py", line 563, in NamedTemporaryFile
+    file = _io.open(dir, mode, buffering=buffering,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/tempfile.py", line 560, in opener
+    fd, name = _mkstemp_inner(dir, prefix, suffix, flags, output_type)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/tempfile.py", line 256, in _mkstemp_inner
+    fd = _os.open(file, flags, 0o600)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/775908.tinygpu/tmp5bb2o58x/port-702871.txte0hvps2y'
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/wandb/run-20240227_122840-g6j6h1uy
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run cosmic-sweep-3
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/gvy3r6t8
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/g6j6h1uy
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
