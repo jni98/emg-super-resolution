@@ -24,13 +24,13 @@ def setup_sweep():
                 'values': [8, 12, 16],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [0.1, 0.01, 0.001, 0.0001]
+                'values': [0.01, 0.001, 0.0001]
             },
             'num_res_blocks_last': {
                 'values': [2, 3, 4, 5]
             },
             'num_res_blocks': {
-                'values': [2, 3, 4, 5]
+                'values': [4, 5]
             },
         }
     }
