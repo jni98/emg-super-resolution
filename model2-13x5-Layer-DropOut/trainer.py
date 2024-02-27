@@ -343,7 +343,7 @@ class Trainer:
 
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
-                val_sr_emg = self.destandardize_data(val_sr_emg)
+                #val_sr_emg = self.destandardize_data(val_sr_emg)
 
                 # Calculate validation loss
                 val_loss = self.mse(val_sr_emg, val_hr)
