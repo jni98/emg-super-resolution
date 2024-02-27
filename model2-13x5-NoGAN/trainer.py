@@ -133,7 +133,7 @@ class Trainer:
         -------
         None
         """
-        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
+        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, dropout_prob_input=self.config.dropout_prob_input, dropout_prob=self.config.dropout_prob, in_channels=1)
 
         # move to gpu in case it's possible
         self.generator.to(self.device)

@@ -16,13 +16,15 @@ class ResidualBlock(nn.Module):
     This class is used to create a residual block, which is used in the generator.
     """
 
-    def __init__(self, in_channels) -> None:
+    def __init__(self, in_channels, dropout_prob) -> None:
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Sequential(
             nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                       padding=(1, 1, 1)),
             nn.BatchNorm3d(in_channels),
             nn.PReLU())
+
+        self.dropout = nn.Dropout3d(dropout_prob)
 
         self.conv2 = nn.Sequential(
             nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
@@ -45,12 +47,13 @@ class DownConvolutionBlock(nn.Module):
     This class is used to create a down convolution block, which is used in the generator to downsample the data.
     """
 
-    def __init__(self, in_channels, out_channels) -> None:
+    def __init__(self, in_channels, out_channels, dropout_prob) -> None:
         super(DownConvolutionBlock, self).__init__()
         self.downConv = nn.Conv3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                                   stride=(1, 1, 2), padding=(1, 1, 1))
         self.bn = nn.BatchNorm3d(out_channels)
         self.prelu = nn.PReLU()
+        self.dropout = nn.Dropout3d(dropout_prob)
 
     def forward(self, x: torch.tensor) -> torch.tensor:
         out = self.downConv(x)
@@ -64,17 +67,19 @@ class UpConvolutionBlock(nn.Module):
     This class is used to create an up convolution block, which is used in the generator to upsample the data and also
     add the skip connection.
     """
-    def __init__(self, in_channels, out_channels, stride) -> None:
+    def __init__(self, in_channels, out_channels, stride, dropout_prob) -> None:
         super(UpConvolutionBlock, self).__init__()
         self.upConv = nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                                          stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1))
         self.bn1 = nn.BatchNorm3d(out_channels)
         self.prelu1 = nn.PReLU()
+        self.dropout1 = nn.Dropout3d(dropout_prob)
 
         self.conv = nn.Conv3d(in_channels=out_channels + out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                               stride=(1, 1, 1), padding=(1, 1, 1))
         self.bn2 = nn.BatchNorm3d(out_channels)
         self.prelu2 = nn.PReLU()
+        self.dropout2 = nn.Dropout3d(dropout_prob)
 
     def forward(self, x: torch.tensor, skip: torch.tensor) -> torch.tensor:
         # upsample
@@ -99,7 +104,7 @@ class Generator(nn.Module):
     resolution data from low resolution data.
     """
 
-    def __init__(self,num_res_blocks: int, num_res_blocks_last:int, in_channels=1) -> None:
+    def __init__(self,num_res_blocks: int, num_res_blocks_last:int,dropout_prob_input,dropout_prob, in_channels=1) -> None:
 
         super(Generator, self).__init__()
 
@@ -107,40 +112,41 @@ class Generator(nn.Module):
         self.conv1 = nn.Conv3d(in_channels, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
         self.bn1 = nn.BatchNorm3d(64)
         self.prelu1 = nn.PReLU()
+        self.dropout1 = nn.Dropout3d(dropout_prob_input)
 
         # Upsampling of the residual and residual block 1
         self.residualUp1 = nn.ConvTranspose3d(64, 64, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks1 = nn.Sequential(*[ResidualBlock(64) for _ in range(num_res_blocks)])
+        self.res_blocks1 = nn.Sequential(*[ResidualBlock(in_channels=64, dropout_prob=dropout_prob) for _ in range(num_res_blocks)])
 
         # DownConvolution 1
-        self.downConv1 = DownConvolutionBlock(64, 128)
+        self.downConv1 = DownConvolutionBlock(in_channels=64, out_channels=128,dropout_prob=dropout_prob)
 
         # Upsampling of the residual and residual block 2
         self.residualUp2 = nn.ConvTranspose3d(128, 128, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks2 = nn.Sequential(*[ResidualBlock(128) for _ in range(num_res_blocks)])
+        self.res_blocks2 = nn.Sequential(*[ResidualBlock(in_channels=128, dropout_prob=dropout_prob) for _ in range(num_res_blocks)])
 
         # DownConvolution 2
-        self.downConv2 = DownConvolutionBlock(128, 256)
+        self.downConv2 = DownConvolutionBlock(in_channels=128, out_channels=256, dropout_prob=dropout_prob)
 
         # Upsampling of the residual and residual block 3
         self.residualUp3 = nn.ConvTranspose3d(256, 256, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks3 = nn.Sequential(*[ResidualBlock(256) for _ in range(num_res_blocks)])
+        self.res_blocks3 = nn.Sequential(*[ResidualBlock(in_channels=256, dropout_prob=dropout_prob) for _ in range(num_res_blocks)])
 
         # DownConvolution 3
-        self.downConv3 = DownConvolutionBlock(256, 512)
+        self.downConv3 = DownConvolutionBlock(in_channels=256, out_channels=512, dropout_prob=dropout_prob)
 
         # Upsampling of the residual and residual block 4
         self.residualUp4 = nn.ConvTranspose3d(512, 512, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks4 = nn.Sequential(*[ResidualBlock(512) for _ in range(num_res_blocks_last)])
+        self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=512, dropout_prob=dropout_prob) for _ in range(num_res_blocks_last)])
 
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
+        self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2), dropout_prob=dropout_prob)
 
         # Upsampling 2
-        self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
+        self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2), dropout_prob=dropout_prob)
 
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
+        self.upConv3 = UpConvolutionBlock(128, 64, stride=(1, 1, 2), dropout_prob=dropout_prob)
 
         # Finale Convolution für Channel 1
         self.finalConv = nn.Conv3d(64, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
