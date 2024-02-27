@@ -9,7 +9,6 @@ The code is called from every file that is loading a dataset.
 from torch.utils.data import Dataset
 import torch
 import numpy as np
-from utilities import data_13x5_2D_to_3D
 from scipy.signal import butter, filtfilt
 
 
@@ -18,14 +17,13 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
 
     """
-    def __init__(self, data, mean: float, std: float, grid_shape: bool) -> None:
+    def __init__(self, data, mean: float, std: float) -> None:
         super().__init__()
         self.data = data
 
         self.mean = mean
         self.std = std
 
-        self.grid_shape = grid_shape
 
     def __len__(self) -> int:
         return len(self.data)
@@ -56,8 +54,7 @@ class Custom_Dataset(Dataset):
         hr_emg_path = self.data.iloc[index]['hr_filename']
 
         lr_emg = np.load(self.data.iloc[index, 0])
-        if self.grid_shape:
-            lr_emg = data_13x5_2D_to_3D(data=lr_emg, rows=7, cols=3)
+        lr_emg = self.reshape_3D_to_2D(lr_emg)
 
         # bandpass filter the signal
         lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048)
@@ -67,8 +64,7 @@ class Custom_Dataset(Dataset):
         lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
 
         hr_emg = np.load(self.data.iloc[index, 1])
-        if self.grid_shape:
-            hr_emg = data_13x5_2D_to_3D(data= hr_emg, rows=13, cols=5)
+        hr_emg = self.reshape_3D_to_2D(hr_emg)
 
         # bandpass filter the signal
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048)
@@ -129,3 +125,21 @@ class Custom_Dataset(Dataset):
         filtered_signal = filtfilt(b, a, data)
         print("Signal filtered")
         return filtered_signal
+
+    def reshape_3D_to_2D(self, data: np.array) -> np.array:
+        """
+        Reshape the 3D data to 2D
+        Parameters
+        ----------
+        data: np.array
+            3D data
+
+        Returns
+        -------
+        reshaped_data: np.array
+            2D data
+        """
+        data_shape = data.shape
+        data[:, 1::2, :] = np.flipud(data[:, 1::2, :])
+        reshaped_data = np.flipud(data).transpose(1, 0, 2).reshape(65, data_shape[2])
+        return reshaped_data

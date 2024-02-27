@@ -90,18 +90,18 @@ class Trainer:
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], grid_shape=False),
+                           self.mean_std_dict['std']),
             batch_size=self.batch_size
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], grid_shape=False),
+                           self.mean_std_dict['std']),
             batch_size=self.batch_size
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], grid_shape=False))
+                           self.mean_std_dict['std']))
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
@@ -292,6 +292,8 @@ class Trainer:
         sr_emg_final: torch tensor
                       Super-resolved data without the last row and column
         """
+
+        #TODO: CHeck this again!!!!!!!!
         sr_emg_shape = sr_emg.shape
 
         new_channel_number = 65
@@ -299,7 +301,7 @@ class Trainer:
         # Switch last two axes to go from (batch, channel, 2048, 84) to (batch, channel, 84, 2048)
         sr_emg_move_axis = sr_emg.permute(0, 1, 3, 2)
 
-        # Reshape to grid shape (batch, 1,8,8,512)
+        # Reshape to grid shape (batch, 1,6,14,2048)
         sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, 6, 14, 2048)
 
         # Create array for the new shape where the last row and column are deleted
