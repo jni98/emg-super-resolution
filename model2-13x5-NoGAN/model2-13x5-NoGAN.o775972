@@ -1,0 +1,2262 @@
+### Starting TaskPrologue of job 775972 on tg096 at Tue 27 Feb 2024 01:45:12 PM CET
+Running on cores 32-63 with governor ondemand
+Tue Feb 27 13:45:12 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:41:00.0 Off |                    0 |
+| N/A   42C    P0              56W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+load conda from module
+no change     /apps/python/3.10-anaconda/condabin/conda
+no change     /apps/python/3.10-anaconda/bin/conda
+no change     /apps/python/3.10-anaconda/bin/conda-env
+no change     /apps/python/3.10-anaconda/bin/activate
+no change     /apps/python/3.10-anaconda/bin/deactivate
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.sh
+no change     /apps/python/3.10-anaconda/etc/fish/conf.d/conda.fish
+no change     /apps/python/3.10-anaconda/shell/condabin/Conda.psm1
+no change     /apps/python/3.10-anaconda/shell/condabin/conda-hook.ps1
+no change     /apps/python/3.10-anaconda/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.csh
+no change     /home/hpc/iwso/iwso124h/.bashrc
+No action taken.
+using python /home/woody/iwso/iwso124h/.conda/envs/thesis_env/bin/python
+Tue Feb 27 13:45:14 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:41:00.0 Off |                    0 |
+| N/A   43C    P0              67W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+python reaches gpu: True
+started data transfer at Tue 27 Feb 2024 01:45:24 PM CET
+finished transfer at Tue 27 Feb 2024 01:45:27 PM CET
+1.1G	./dataset
+1.1G	.
+Using Repository Revision
+496d065 Adapted train script to NoGAN
+wandb: Agent Starting Run: itaby1pk with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 2
+wandb: Currently logged in as: janinakloos (masterthesis-sr). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_134541-itaby1pk
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run stilted-sweep-1
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/itaby1pk
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.038 MB of 0.038 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▂▂▂▃▃▄▄▄▅▅▅▆▆▇▇▇██
+wandb:   val_loss █▁▆▆▆▆▅▅▆▆▆▅▆▆▆▆▅▆▆▆
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.04397
+wandb:      epoch 20
+wandb:   val_loss 62815.79514
+wandb: 
+wandb: 🚀 View run stilted-sweep-1 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/itaby1pk
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_134541-itaby1pk/logs
+wandb: Agent Starting Run: r6vyqnai with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_135906-r6vyqnai
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run azure-sweep-2
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/r6vyqnai
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.427 MB of 0.427 MB uploadedwandb: / 0.427 MB of 0.427 MB uploadedwandb: - 0.427 MB of 0.427 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▃▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▂▂▂▃▃▄▄▄▅▅▅▆▆▇▇▇██
+wandb:   val_loss ▁▇▇██████▇█▇▇▇▆▆▅▅▆▆
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.04156
+wandb:      epoch 20
+wandb:   val_loss 60256.6044
+wandb: 
+wandb: 🚀 View run azure-sweep-2 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/r6vyqnai
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_135906-r6vyqnai/logs
+wandb: Agent Starting Run: jzrnbojf with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_141517-jzrnbojf
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run dutiful-sweep-3
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/jzrnbojf
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.826 MB of 0.826 MB uploadedwandb: | 0.826 MB of 0.826 MB uploadedwandb: / 0.826 MB of 0.826 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▃▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▂▂▂▃▃▄▄▄▅▅▅▆▆▇▇▇██
+wandb:   val_loss ▂▆██▇▅▄▃▂▂▁▁▁▂▄▄▅▅█▂
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.05233
+wandb:      epoch 20
+wandb:   val_loss 54551.05641
+wandb: 
+wandb: 🚀 View run dutiful-sweep-3 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/jzrnbojf
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_141517-jzrnbojf/logs
+wandb: Sweep Agent: Waiting for job.
+wandb: Job received.
+wandb: Agent Starting Run: 95pdzu92 with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.01
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143150-95pdzu92
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lucky-sweep-4
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/95pdzu92
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+    train_G_loss, val_loss, psnr = trainer.train()
+                                   ^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+    epoch_loss_g = self._train_epoch(epoch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 236, in _train_epoch
+    loss_generator.backward()
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/_tensor.py", line 492, in backward
+    torch.autograd.backward(
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/autograd/__init__.py", line 251, in backward
+    Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.02 GiB. GPU 0 has a total capacty of 39.39 GiB of which 906.69 MiB is free. Including non-PyTorch memory, this process has 38.49 GiB memory in use. Of the allocated memory 34.27 GiB is allocated by PyTorch, and 3.72 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run lucky-sweep-4 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/95pdzu92
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143150-95pdzu92/logs
+wandb: ERROR Run 95pdzu92 errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+wandb: ERROR     train_G_loss, val_loss, psnr = trainer.train()
+wandb: ERROR                                    ^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+wandb: ERROR     epoch_loss_g = self._train_epoch(epoch)
+wandb: ERROR                    ^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 236, in _train_epoch
+wandb: ERROR     loss_generator.backward()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/_tensor.py", line 492, in backward
+wandb: ERROR     torch.autograd.backward(
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/autograd/__init__.py", line 251, in backward
+wandb: ERROR     Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.02 GiB. GPU 0 has a total capacty of 39.39 GiB of which 906.69 MiB is free. Including non-PyTorch memory, this process has 38.49 GiB memory in use. Of the allocated memory 34.27 GiB is allocated by PyTorch, and 3.72 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: b2n4c2ax with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143215-b2n4c2ax
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run playful-sweep-5
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/b2n4c2ax
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+    train_G_loss, val_loss, psnr = trainer.train()
+                                   ^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+    epoch_loss_g = self._train_epoch(epoch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 232, in _train_epoch
+    sr_emg = self.generator(lr_emg).to(self.device)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1568, in _call_impl
+    result = forward_call(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 153, in forward
+    conv1 = self.res_blocks1(conv1)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/container.py", line 215, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 37, in forward
+    out = self.conv2(out)
+          ^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/container.py", line 215, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/batchnorm.py", line 171, in forward
+    return F.batch_norm(
+           ^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/functional.py", line 2478, in batch_norm
+    return torch.batch_norm(
+           ^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 168.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 60.69 MiB is free. Including non-PyTorch memory, this process has 39.32 GiB memory in use. Of the allocated memory 38.20 GiB is allocated by PyTorch, and 636.49 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.029 MB uploadedwandb: \ 0.015 MB of 0.029 MB uploadedwandb: | 0.029 MB of 0.029 MB uploadedwandb:                                                                                
+wandb: 🚀 View run playful-sweep-5 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/b2n4c2ax
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143215-b2n4c2ax/logs
+wandb: ERROR Run b2n4c2ax errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+wandb: ERROR     train_G_loss, val_loss, psnr = trainer.train()
+wandb: ERROR                                    ^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+wandb: ERROR     epoch_loss_g = self._train_epoch(epoch)
+wandb: ERROR                    ^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 232, in _train_epoch
+wandb: ERROR     sr_emg = self.generator(lr_emg).to(self.device)
+wandb: ERROR              ^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1568, in _call_impl
+wandb: ERROR     result = forward_call(*args, **kwargs)
+wandb: ERROR              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 153, in forward
+wandb: ERROR     conv1 = self.res_blocks1(conv1)
+wandb: ERROR             ^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/container.py", line 215, in forward
+wandb: ERROR     input = module(input)
+wandb: ERROR             ^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 37, in forward
+wandb: ERROR     out = self.conv2(out)
+wandb: ERROR           ^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/container.py", line 215, in forward
+wandb: ERROR     input = module(input)
+wandb: ERROR             ^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/batchnorm.py", line 171, in forward
+wandb: ERROR     return F.batch_norm(
+wandb: ERROR            ^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/functional.py", line 2478, in batch_norm
+wandb: ERROR     return torch.batch_norm(
+wandb: ERROR            ^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 168.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 60.69 MiB is free. Including non-PyTorch memory, this process has 39.32 GiB memory in use. Of the allocated memory 38.20 GiB is allocated by PyTorch, and 636.49 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: bkpt38ei with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143231-bkpt38ei
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run silvery-sweep-6
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/bkpt38ei
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+    train_G_loss, val_loss, psnr = trainer.train()
+                                   ^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+    epoch_loss_g = self._train_epoch(epoch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 232, in _train_epoch
+    sr_emg = self.generator(lr_emg).to(self.device)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1568, in _call_impl
+    result = forward_call(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 150, in forward
+    conv1 = self.conv1(x)
+            ^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 610, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 605, in _conv_forward
+    return F.conv3d(
+           ^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 168.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 52.69 MiB is free. Including non-PyTorch memory, this process has 39.33 GiB memory in use. Of the allocated memory 38.60 GiB is allocated by PyTorch, and 234.35 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.027 MB of 0.027 MB uploadedwandb:                                                                                
+wandb: 🚀 View run silvery-sweep-6 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/bkpt38ei
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143231-bkpt38ei/logs
+wandb: ERROR Run bkpt38ei errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+wandb: ERROR     train_G_loss, val_loss, psnr = trainer.train()
+wandb: ERROR                                    ^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+wandb: ERROR     epoch_loss_g = self._train_epoch(epoch)
+wandb: ERROR                    ^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 232, in _train_epoch
+wandb: ERROR     sr_emg = self.generator(lr_emg).to(self.device)
+wandb: ERROR              ^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1568, in _call_impl
+wandb: ERROR     result = forward_call(*args, **kwargs)
+wandb: ERROR              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 150, in forward
+wandb: ERROR     conv1 = self.conv1(x)
+wandb: ERROR             ^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 610, in forward
+wandb: ERROR     return self._conv_forward(input, self.weight, self.bias)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/conv.py", line 605, in _conv_forward
+wandb: ERROR     return F.conv3d(
+wandb: ERROR            ^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 168.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 52.69 MiB is free. Including non-PyTorch memory, this process has 39.33 GiB memory in use. Of the allocated memory 38.60 GiB is allocated by PyTorch, and 234.35 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: zrq1gjpn with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.01
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 2
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143247-zrq1gjpn
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run dandy-sweep-7
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/zrq1gjpn
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 28.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 18.69 MiB is free. Including non-PyTorch memory, this process has 39.36 GiB memory in use. Of the allocated memory 38.78 GiB is allocated by PyTorch, and 83.99 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.026 MB uploadedwandb: | 0.015 MB of 0.026 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run dandy-sweep-7 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/zrq1gjpn
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143247-zrq1gjpn/logs
+wandb: ERROR Run zrq1gjpn errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   [Previous line repeated 1 more time]
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 28.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 18.69 MiB is free. Including non-PyTorch memory, this process has 39.36 GiB memory in use. Of the allocated memory 38.78 GiB is allocated by PyTorch, and 83.99 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: hwuaedpv with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143303-hwuaedpv
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run celestial-sweep-8
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/hwuaedpv
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 12.69 MiB is free. Including non-PyTorch memory, this process has 39.37 GiB memory in use. Of the allocated memory 38.80 GiB is allocated by PyTorch, and 64.96 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run celestial-sweep-8 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/hwuaedpv
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143303-hwuaedpv/logs
+wandb: ERROR Run hwuaedpv errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 12.69 MiB is free. Including non-PyTorch memory, this process has 39.37 GiB memory in use. Of the allocated memory 38.80 GiB is allocated by PyTorch, and 64.96 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: q0hy0o3p with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143319-q0hy0o3p
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run azure-sweep-9
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/q0hy0o3p
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 6.69 MiB is free. Including non-PyTorch memory, this process has 39.37 GiB memory in use. Of the allocated memory 38.81 GiB is allocated by PyTorch, and 65.43 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run azure-sweep-9 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/q0hy0o3p
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143319-q0hy0o3p/logs
+wandb: ERROR Run q0hy0o3p errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 6.69 MiB is free. Including non-PyTorch memory, this process has 39.37 GiB memory in use. Of the allocated memory 38.81 GiB is allocated by PyTorch, and 65.43 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: vsa54yzq with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.01
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143334-vsa54yzq
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fresh-sweep-10
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/vsa54yzq
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.81 GiB is allocated by PyTorch, and 65.90 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run fresh-sweep-10 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/vsa54yzq
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143334-vsa54yzq/logs
+wandb: ERROR Run vsa54yzq errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.81 GiB is allocated by PyTorch, and 65.90 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: 5h1km75z with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143350-5h1km75z
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run youthful-sweep-11
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/5h1km75z
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.81 GiB is allocated by PyTorch, and 65.47 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.026 MB uploadedwandb: | 0.015 MB of 0.026 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run youthful-sweep-11 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/5h1km75z
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143350-5h1km75z/logs
+wandb: ERROR Run 5h1km75z errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   [Previous line repeated 1 more time]
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.81 GiB is allocated by PyTorch, and 65.47 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: wnbggr8j with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 2
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143405-wnbggr8j
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run splendid-sweep-12
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/wnbggr8j
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+    train_G_loss, val_loss, psnr = trainer.train()
+                                   ^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+    epoch_loss_g = self._train_epoch(epoch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 232, in _train_epoch
+    sr_emg = self.generator(lr_emg).to(self.device)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1568, in _call_impl
+    result = forward_call(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 153, in forward
+    conv1 = self.res_blocks1(conv1)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/container.py", line 215, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 36, in forward
+    out = self.conv1(x)
+          ^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/container.py", line 215, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/batchnorm.py", line 171, in forward
+    return F.batch_norm(
+           ^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/functional.py", line 2478, in batch_norm
+    return torch.batch_norm(
+           ^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 168.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 60.69 MiB is free. Including non-PyTorch memory, this process has 39.32 GiB memory in use. Of the allocated memory 38.09 GiB is allocated by PyTorch, and 749.59 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.015 MB uploadedwandb: | 0.029 MB of 0.029 MB uploadedwandb:                                                                                
+wandb: 🚀 View run splendid-sweep-12 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/wnbggr8j
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143405-wnbggr8j/logs
+wandb: ERROR Run wnbggr8j errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+wandb: ERROR     train_G_loss, val_loss, psnr = trainer.train()
+wandb: ERROR                                    ^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+wandb: ERROR     epoch_loss_g = self._train_epoch(epoch)
+wandb: ERROR                    ^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 232, in _train_epoch
+wandb: ERROR     sr_emg = self.generator(lr_emg).to(self.device)
+wandb: ERROR              ^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1568, in _call_impl
+wandb: ERROR     result = forward_call(*args, **kwargs)
+wandb: ERROR              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 153, in forward
+wandb: ERROR     conv1 = self.res_blocks1(conv1)
+wandb: ERROR             ^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/container.py", line 215, in forward
+wandb: ERROR     input = module(input)
+wandb: ERROR             ^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 36, in forward
+wandb: ERROR     out = self.conv1(x)
+wandb: ERROR           ^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/container.py", line 215, in forward
+wandb: ERROR     input = module(input)
+wandb: ERROR             ^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/batchnorm.py", line 171, in forward
+wandb: ERROR     return F.batch_norm(
+wandb: ERROR            ^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/functional.py", line 2478, in batch_norm
+wandb: ERROR     return torch.batch_norm(
+wandb: ERROR            ^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 168.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 60.69 MiB is free. Including non-PyTorch memory, this process has 39.32 GiB memory in use. Of the allocated memory 38.09 GiB is allocated by PyTorch, and 749.59 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: naixywkh with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 2
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143421-naixywkh
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run rich-sweep-13
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/naixywkh
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+    train_G_loss, val_loss, psnr = trainer.train()
+                                   ^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+    epoch_loss_g = self._train_epoch(epoch)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 232, in _train_epoch
+    sr_emg = self.generator(lr_emg).to(self.device)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1568, in _call_impl
+    result = forward_call(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 152, in forward
+    conv1 = self.prelu1(conv1)
+            ^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/activation.py", line 1364, in forward
+    return F.prelu(input, self.weight)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 84.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 52.69 MiB is free. Including non-PyTorch memory, this process has 39.33 GiB memory in use. Of the allocated memory 38.54 GiB is allocated by PyTorch, and 295.68 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.027 MB of 0.027 MB uploadedwandb:                                                                                
+wandb: 🚀 View run rich-sweep-13 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/naixywkh
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143421-naixywkh/logs
+wandb: ERROR Run naixywkh errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 58, in train
+wandb: ERROR     train_G_loss, val_loss, psnr = trainer.train()
+wandb: ERROR                                    ^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 177, in train
+wandb: ERROR     epoch_loss_g = self._train_epoch(epoch)
+wandb: ERROR                    ^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 232, in _train_epoch
+wandb: ERROR     sr_emg = self.generator(lr_emg).to(self.device)
+wandb: ERROR              ^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1568, in _call_impl
+wandb: ERROR     result = forward_call(*args, **kwargs)
+wandb: ERROR              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/generator.py", line 152, in forward
+wandb: ERROR     conv1 = self.prelu1(conv1)
+wandb: ERROR             ^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+wandb: ERROR     return self._call_impl(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+wandb: ERROR     return forward_call(*args, **kwargs)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/activation.py", line 1364, in forward
+wandb: ERROR     return F.prelu(input, self.weight)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 84.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 52.69 MiB is free. Including non-PyTorch memory, this process has 39.33 GiB memory in use. Of the allocated memory 38.54 GiB is allocated by PyTorch, and 295.68 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: o7lvlbc0 with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 2
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143437-o7lvlbc0
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run gentle-sweep-14
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/o7lvlbc0
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 18.69 MiB is free. Including non-PyTorch memory, this process has 39.36 GiB memory in use. Of the allocated memory 38.81 GiB is allocated by PyTorch, and 45.66 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run gentle-sweep-14 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/o7lvlbc0
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143437-o7lvlbc0/logs
+wandb: ERROR Run o7lvlbc0 errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 18.69 MiB is free. Including non-PyTorch memory, this process has 39.36 GiB memory in use. Of the allocated memory 38.81 GiB is allocated by PyTorch, and 45.66 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: qx4tfv4c with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143452-qx4tfv4c
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run expert-sweep-15
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/qx4tfv4c
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 12.69 MiB is free. Including non-PyTorch memory, this process has 39.37 GiB memory in use. Of the allocated memory 38.82 GiB is allocated by PyTorch, and 44.07 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run expert-sweep-15 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/qx4tfv4c
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143452-qx4tfv4c/logs
+wandb: ERROR Run qx4tfv4c errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   [Previous line repeated 1 more time]
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 12.69 MiB is free. Including non-PyTorch memory, this process has 39.37 GiB memory in use. Of the allocated memory 38.82 GiB is allocated by PyTorch, and 44.07 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: w9ays8tm with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.01
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143508-w9ays8tm
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run different-sweep-16
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/w9ays8tm
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 4.69 MiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 46.54 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.015 MB uploadedwandb: | 0.015 MB of 0.015 MB uploadedwandb: / 0.015 MB of 0.024 MB uploadedwandb: - 0.015 MB of 0.024 MB uploadedwandb: \ 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run different-sweep-16 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/w9ays8tm
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143508-w9ays8tm/logs
+wandb: ERROR Run w9ays8tm errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 4.69 MiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 46.54 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: 4ffaxjqz with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 5
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143523-4ffaxjqz
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run divine-sweep-17
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/4ffaxjqz
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.85 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run divine-sweep-17 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/4ffaxjqz
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143523-4ffaxjqz/logs
+wandb: ERROR Run 4ffaxjqz errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.85 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: aj4ptmfl with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143539-aj4ptmfl
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run skilled-sweep-18
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/aj4ptmfl
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.84 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.000 MB of 0.015 MB uploadedwandb: \ 0.000 MB of 0.015 MB uploadedwandb: | 0.015 MB of 0.015 MB uploadedwandb: / 0.015 MB of 0.015 MB uploadedwandb: - 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run skilled-sweep-18 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/aj4ptmfl
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143539-aj4ptmfl/logs
+wandb: ERROR Run aj4ptmfl errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.84 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: l2uqw3ax with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143554-l2uqw3ax
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run swept-sweep-19
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/l2uqw3ax
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.83 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run swept-sweep-19 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/l2uqw3ax
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143554-l2uqw3ax/logs
+wandb: ERROR Run l2uqw3ax errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.83 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: i8q1t8z0 with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 2
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143610-i8q1t8z0
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run morning-sweep-20
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/i8q1t8z0
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.82 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run morning-sweep-20 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/i8q1t8z0
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143610-i8q1t8z0/logs
+wandb: ERROR Run i8q1t8z0 errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.82 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: pfuobu91 with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143625-pfuobu91
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run pretty-sweep-21
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/pfuobu91
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.81 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run pretty-sweep-21 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/pfuobu91
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143625-pfuobu91/logs
+wandb: ERROR Run pfuobu91 errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.81 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: hi8wg5wa with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143641-hi8wg5wa
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run generous-sweep-22
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/hi8wg5wa
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.80 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run generous-sweep-22 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/hi8wg5wa
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143641-hi8wg5wa/logs
+wandb: ERROR Run hi8wg5wa errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.80 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: g6tue80d with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.01
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 2
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143657-g6tue80d
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run breezy-sweep-23
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/g6tue80d
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.79 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run breezy-sweep-23 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/g6tue80d
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143657-g6tue80d/logs
+wandb: ERROR Run g6tue80d errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.79 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: pxubbfdl with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 2
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143712-pxubbfdl
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run valiant-sweep-24
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/pxubbfdl
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.78 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run valiant-sweep-24 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/pxubbfdl
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143712-pxubbfdl/logs
+wandb: ERROR Run pxubbfdl errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.78 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: 5q2daxqp with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.01
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143728-5q2daxqp
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run earthy-sweep-25
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/5q2daxqp
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.77 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run earthy-sweep-25 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/5q2daxqp
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143728-5q2daxqp/logs
+wandb: ERROR Run 5q2daxqp errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.77 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: qbap4bld with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143743-qbap4bld
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run warm-sweep-26
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/qbap4bld
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.76 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run warm-sweep-26 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/qbap4bld
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143743-qbap4bld/logs
+wandb: ERROR Run qbap4bld errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.76 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: j39j8hi5 with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.01
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143758-j39j8hi5
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run dutiful-sweep-27
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/j39j8hi5
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.75 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run dutiful-sweep-27 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/j39j8hi5
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143758-j39j8hi5/logs
+wandb: ERROR Run j39j8hi5 errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.75 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: 4fdh13s6 with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143815-4fdh13s6
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run stoic-sweep-28
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/4fdh13s6
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.74 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run stoic-sweep-28 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/4fdh13s6
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143815-4fdh13s6/logs
+wandb: ERROR Run 4fdh13s6 errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.74 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: e5i78e1b with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143830-e5i78e1b
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run crimson-sweep-29
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/e5i78e1b
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.73 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run crimson-sweep-29 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/e5i78e1b
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143830-e5i78e1b/logs
+wandb: ERROR Run e5i78e1b errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.73 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Sweep Agent: Waiting for job.
+wandb: Job received.
+wandb: Agent Starting Run: dzc8sd9f with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143852-dzc8sd9f
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run sparkling-sweep-30
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/dzc8sd9f
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.72 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run sparkling-sweep-30 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/dzc8sd9f
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143852-dzc8sd9f/logs
+wandb: ERROR Run dzc8sd9f errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.72 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Sweep Agent: Waiting for job.
+wandb: Job received.
+wandb: Agent Starting Run: h1umawtb with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 3
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143914-h1umawtb
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run clear-sweep-31
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/h1umawtb
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.71 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run clear-sweep-31 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/h1umawtb
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143914-h1umawtb/logs
+wandb: ERROR Run h1umawtb errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.71 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: fxgfri3n with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 2
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143929-fxgfri3n
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run treasured-sweep-32
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/fxgfri3n
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.70 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.015 MB uploadedwandb: | 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run treasured-sweep-32 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/fxgfri3n
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143929-fxgfri3n/logs
+wandb: ERROR Run fxgfri3n errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.70 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Sweep Agent: Waiting for job.
+wandb: Job received.
+wandb: Agent Starting Run: iz3uyiys with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.01
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_143950-iz3uyiys
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run legendary-sweep-33
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/iz3uyiys
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.69 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run legendary-sweep-33 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/iz3uyiys
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_143950-iz3uyiys/logs
+wandb: ERROR Run iz3uyiys errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.69 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: si4ulg7u with config:
+wandb: 	batch_size: 16
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 4
+wandb: 	num_res_blocks_last: 5
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240227_144006-si4ulg7u
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lemon-sweep-34
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/j362jifg
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/si4ulg7u
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+    trainer.initialize_models()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+    self.generator.to(self.device)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+    module._apply(fn)
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+    return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.68 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.015 MB of 0.024 MB uploadedwandb: / 0.026 MB of 0.026 MB uploadedwandb:                                                                                
+wandb: 🚀 View run lemon-sweep-34 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/si4ulg7u
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_144006-si4ulg7u/logs
+wandb: ERROR Run si4ulg7u errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train.py", line 55, in train
+wandb: ERROR     trainer.initialize_models()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/trainer.py", line 139, in initialize_models
+wandb: ERROR     self.generator.to(self.device)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1160, in to
+wandb: ERROR     return self._apply(convert)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 810, in _apply
+wandb: ERROR     module._apply(fn)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 833, in _apply
+wandb: ERROR     param_applied = fn(param)
+wandb: ERROR                     ^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1158, in convert
+wandb: ERROR     return t.to(device, dtype if t.is_floating_point() or t.is_complex() else None, non_blocking)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.00 MiB. GPU 0 has a total capacty of 39.39 GiB of which 704.00 KiB is free. Including non-PyTorch memory, this process has 39.38 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 45.68 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+wandb: ERROR 
+wandb: Agent Starting Run: rosa6w4u with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5

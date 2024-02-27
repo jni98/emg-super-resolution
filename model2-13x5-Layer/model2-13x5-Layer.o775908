@@ -212,3 +212,40 @@ wandb: WARNING Ignored wandb.init() arg project when running a sweep.
 wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
 /home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
   warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.858 MB uploadedwandb: | 0.917 MB of 0.917 MB uploadedwandb: / 0.917 MB of 0.917 MB uploadedwandb: - 0.917 MB of 0.917 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:      avg_loss_d ▁███████████████████████████████████████
+wandb: avg_loss_d_fake ▁███████████████████████████████████████
+wandb: avg_loss_d_real █▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      avg_loss_g █▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:        val_loss ▃▁▁▁▂▃▄▆███▇▇▇▇▇▆▆▅▅▄▄▄▄▄▄▄▄▄▃▃▃▄▄▄▄▄▄▄▄
+wandb: 
+wandb: Run summary:
+wandb:      avg_loss_d 100.0
+wandb: avg_loss_d_fake 100.0
+wandb: avg_loss_d_real 0.0
+wandb:      avg_loss_g 0.04631
+wandb:           epoch 50
+wandb:        val_loss 54786.38936
+wandb: 
+wandb: 🚀 View run cosmic-sweep-3 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/g6j6h1uy
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240227_122840-g6j6h1uy/logs
+wandb: Agent Starting Run: iqozcnpw with config:
+wandb: 	batch_size: 8
+wandb: 	learning_rate: 0.001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/wandb/run-20240227_135342-iqozcnpw
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fanciful-sweep-2
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/gvy3r6t8
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/iqozcnpw
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
