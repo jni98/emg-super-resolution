@@ -61,7 +61,7 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 # start training
-python train.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS --bs $BS --lr $LR
+python train.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"
