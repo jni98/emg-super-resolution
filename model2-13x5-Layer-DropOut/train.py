@@ -31,9 +31,13 @@ def setup_sweep():
             'num_res_blocks': {
             'values': [ 4, 5]
             },
+            'dropout_prob_input': {
+            'values': [0.0, 0.1]
+            },
             'dropout_prob': {
-            'values': [0.5, 0.6, 0.7, 0.8]
-            }}
+            'values': [0.1, 0.2, 0.3]
+            },
+            }
     }
 
     # Initialize and run the sweep
