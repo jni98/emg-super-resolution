@@ -155,3 +155,4 @@ dmypy.json
 /Visualization-13x5grid/plot_pearsonr_heatmap
 /Visualization-13x5grid/plot_pearsonr_heatmap_diagonal
 /model2-13x5-NoGAN/runs/
+/model2-13x5-Layer/runs/

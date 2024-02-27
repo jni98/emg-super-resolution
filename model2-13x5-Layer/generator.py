@@ -99,7 +99,7 @@ class Generator(nn.Module):
     resolution data from low resolution data.
     """
 
-    def __init__(self, in_channels=1) -> None:
+    def __init__(self,num_res_blocks: int, num_res_blocks_last:int, in_channels=1) -> None:
 
         super(Generator, self).__init__()
 
@@ -110,28 +110,28 @@ class Generator(nn.Module):
 
         # Upsampling of the residual and residual block 1
         self.residualUp1 = nn.ConvTranspose3d(64, 64, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks1 = nn.Sequential(*[ResidualBlock(64) for _ in range(5)])
+        self.res_blocks1 = nn.Sequential(*[ResidualBlock(64) for _ in range(num_res_blocks)])
 
         # DownConvolution 1
         self.downConv1 = DownConvolutionBlock(64, 128)
 
         # Upsampling of the residual and residual block 2
         self.residualUp2 = nn.ConvTranspose3d(128, 128, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks2 = nn.Sequential(*[ResidualBlock(128) for _ in range(5)])
+        self.res_blocks2 = nn.Sequential(*[ResidualBlock(128) for _ in range(num_res_blocks)])
 
         # DownConvolution 2
         self.downConv2 = DownConvolutionBlock(128, 256)
 
         # Upsampling of the residual and residual block 3
         self.residualUp3 = nn.ConvTranspose3d(256, 256, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks3 = nn.Sequential(*[ResidualBlock(256) for _ in range(5)])
+        self.res_blocks3 = nn.Sequential(*[ResidualBlock(256) for _ in range(num_res_blocks)])
 
         # DownConvolution 3
         self.downConv3 = DownConvolutionBlock(256, 512)
 
         # Upsampling of the residual and residual block 4
         self.residualUp4 = nn.ConvTranspose3d(512, 512, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks4 = nn.Sequential(*[ResidualBlock(512) for _ in range(3)])
+        self.res_blocks4 = nn.Sequential(*[ResidualBlock(512) for _ in range(num_res_blocks_last)])
 
         # Upsampling 1
         self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
