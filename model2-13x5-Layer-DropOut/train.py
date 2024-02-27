@@ -20,24 +20,24 @@ def setup_sweep():
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-            'values': [8, 12, 16],  # Add the batch sizes you want to include
+                'values': [8, 12, 16],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-            'values': [0.01, 0.001, 0.0001]
+                'values': [0.01, 0.001, 0.0001]
             },
             'num_res_blocks_last': {
-            'values': [2, 3, 4]
+                'values': [2, 3, 4]
             },
             'num_res_blocks': {
-            'values': [ 4, 5]
+                'values': [4, 5]
             },
             'dropout_prob_input': {
-            'values': [0.0, 0.1]
+                'values': [0.0, 0.1]
             },
             'dropout_prob': {
-            'values': [0.1, 0.2, 0.3]
+                'values': [0.1, 0.2, 0.3]
             },
-            }
+        }
     }
 
     # Initialize and run the sweep
@@ -47,8 +47,7 @@ def setup_sweep():
 
 
 def train(data_directory: str, test_data_directory: str, results_directory: str,
-          num_epochs: int,sweepconfig, sweep_id) -> None:
-
+          num_epochs: int, sweepconfig, sweep_id) -> None:
     with wandb.init(config=sweepconfig):
         config = wandb.config
         # Create a object of the trainer
@@ -94,4 +93,6 @@ if __name__ == "__main__":
     # num_epochs = 50
 
     # Run the sweep
-    wandb.agent(sweep_id, function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config, sweep_id))
+    wandb.agent(sweep_id,
+                function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+                                       sweep_id))
