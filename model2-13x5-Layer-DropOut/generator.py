@@ -104,7 +104,7 @@ class Generator(nn.Module):
     resolution data from low resolution data.
     """
 
-    def __init__(self,num_res_blocks: int, num_res_blocks_last:int,dropout_prob, in_channels=1) -> None:
+    def __init__(self,num_res_blocks: int, num_res_blocks_last:int,dropout_prob_input,dropout_prob, in_channels=1) -> None:
 
         super(Generator, self).__init__()
 
@@ -112,7 +112,7 @@ class Generator(nn.Module):
         self.conv1 = nn.Conv3d(in_channels, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
         self.bn1 = nn.BatchNorm3d(64)
         self.prelu1 = nn.PReLU()
-        self.dropout1 = nn.Dropout3d(0.8)
+        self.dropout1 = nn.Dropout3d(dropout_prob_input)
 
         # Upsampling of the residual and residual block 1
         self.residualUp1 = nn.ConvTranspose3d(64, 64, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))

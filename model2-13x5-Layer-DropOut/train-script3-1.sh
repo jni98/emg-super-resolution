@@ -1,10 +1,10 @@
 #!/bin/bash -l
 
-## Usage:  sbatch.tinygpu train-script1-1.sh
+## Usage:  sbatch.tinygpu train-script3-1.sh
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model2-13x5-Layer
+#SBATCH --job-name=model2-13x5-Layer-DopOut
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
