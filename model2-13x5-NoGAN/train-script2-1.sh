@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-NoGAN-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=50
+EPOCHS=80
 
 ############    params   ###############
 
