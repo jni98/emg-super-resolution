@@ -11,7 +11,7 @@ import torch
 
 
 class Discriminator(nn.Module):
-    def __init__(self, in_channels=1) -> None:
+    def __init__(self, dropout_prob_input, dropout_prob,in_channels=1) -> None:
         """
         Constructs all the necessary attributes for the Discriminator object.
         Parameters
@@ -24,34 +24,43 @@ class Discriminator(nn.Module):
 
         self.conv1 = nn.Conv3d(in_channels, 64, kernel_size=3, stride=1, padding=1)
         self.leaky_relu1 = nn.LeakyReLU(0.2, inplace=True)
+        self.drop1 = nn.Dropout3d(dropout_prob_input)
+
 
         self.conv2 = nn.Conv3d(64, 64, kernel_size=3, stride=2, padding=1)
         self.batch_norm2 = nn.BatchNorm3d(64)
         self.leaky_relu2 = nn.LeakyReLU(0.2, inplace=True)
+        self.drop2 = nn.Dropout3d(dropout_prob)
 
         self.conv3 = nn.Conv3d(64, 128, kernel_size=3, stride=1, padding=1)
         self.batch_norm3 = nn.BatchNorm3d(128)
         self.leaky_relu3 = nn.LeakyReLU(0.2, inplace=True)
+        self.drop3 = nn.Dropout3d(dropout_prob)
 
         self.conv4 = nn.Conv3d(128, 128, kernel_size=3, stride=2, padding=1)
         self.batch_norm4 = nn.BatchNorm3d(128)
         self.leaky_relu4 = nn.LeakyReLU(0.2, inplace=True)
+        self.drop4 = nn.Dropout3d(dropout_prob)
 
         self.conv5 = nn.Conv3d(128, 256, kernel_size=3, stride=1, padding=1)
         self.batch_norm5 = nn.BatchNorm3d(256)
         self.leaky_relu5 = nn.LeakyReLU(0.2, inplace=True)
+        self.drop5 = nn.Dropout3d(dropout_prob)
 
         self.conv6 = nn.Conv3d(256, 256, kernel_size=3, stride=2, padding=1)
         self.batch_norm6 = nn.BatchNorm3d(256)
         self.leaky_relu6 = nn.LeakyReLU(0.2, inplace=True)
+        self.drop6 = nn.Dropout3d(dropout_prob)
 
         self.conv7 = nn.Conv3d(256, 512, kernel_size=3, stride=1, padding=1)
         self.batch_norm7 = nn.BatchNorm3d(512)
         self.leaky_relu7 = nn.LeakyReLU(0.2, inplace=True)
+        self.drop7 = nn.Dropout3d(dropout_prob)
 
         self.conv8 = nn.Conv3d(512, 512, kernel_size=3, stride=2, padding=1)
         self.batch_norm8 = nn.BatchNorm3d(512)
         self.leaky_relu8 = nn.LeakyReLU(0.2, inplace=True)
+        self.drop8 = nn.Dropout3d(dropout_prob)
 
         self.flatten = nn.Flatten()
 

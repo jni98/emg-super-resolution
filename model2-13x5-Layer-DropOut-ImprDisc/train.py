@@ -16,22 +16,34 @@ from trainer import Trainer
 def setup_sweep():
     # Define the sweep config
     sweep_config = {
-        'method': 'random',
+        'method': 'bayes',
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-            'values': [8, 12, 16],  # Add the batch sizes you want to include
+                'values': [6,12],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-            'values': [0.01, 0.001, 0.0001]
+                'values': [ 0.0001, 0.00001]
             },
             'num_res_blocks_last': {
-            'values': [2, 3, 4, 5]
+                'values': [3, 4]
             },
             'num_res_blocks': {
-            'values': [ 4, 5]
+                'values': [5]
             },
-            }
+            'dropout_prob_input_gen': {
+                'values': [0.1]
+            },
+            'dropout_prob_gen': {
+                'values': [0.2, 0.4]
+            },
+            'dropout_prob_input_disc': {
+                'values': [0.0,0.1]
+            },
+            'dropout_prob_disc': {
+                'values': [0.0,0.2, 0.4]
+            },
+        }
     }
 
     # Initialize and run the sweep
@@ -41,8 +53,7 @@ def setup_sweep():
 
 
 def train(data_directory: str, test_data_directory: str, results_directory: str,
-          num_epochs: int,sweepconfig, sweep_id) -> None:
-
+          num_epochs: int, sweepconfig, sweep_id) -> None:
     with wandb.init(config=sweepconfig):
         config = wandb.config
         # Create a object of the trainer
@@ -88,4 +99,6 @@ if __name__ == "__main__":
     # num_epochs = 50
 
     # Run the sweep
-    wandb.agent(sweep_id, function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config, sweep_id))
+    wandb.agent(sweep_id,
+                function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+                                       sweep_id))

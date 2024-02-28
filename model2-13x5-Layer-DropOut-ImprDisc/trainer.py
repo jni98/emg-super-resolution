@@ -134,8 +134,8 @@ class Trainer:
         -------
         None
         """
-        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
-        self.discriminator = Discriminator()
+        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, dropout_prob_input=self.config.dropout_prob_input_gen, dropout_prob=self.config.dropout_prob_gen, in_channels=1)
+        self.discriminator = Discriminator(dropout_prob_input=self.config.dropout_prob_input_disc, dropout_prob=self.config.dropout_prob_disc, in_channels=1)
 
         # move to gpu in case it's possible
         self.generator.to(self.device)
