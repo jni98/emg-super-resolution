@@ -118,10 +118,10 @@ class Trainer:
         self.hyperparameter["device"] = str(self.device)
 
         # Ensure the directory exists
-        os.makedirs(self.run_folder + '/' + self.sweep_id, exist_ok=True)
+        os.makedirs(self.run_folder , exist_ok=True)
 
         # Save the dictionary to a file
-        with open(self.run_folder + '/' + self.sweep_id + '/hyperparameter.json', 'w') as file:
+        with open(self.run_folder  + '/hyperparameter.json', 'w') as file:
             json.dump(self.hyperparameter, file)
 
         print("Successfully prepared the data")
@@ -380,9 +380,9 @@ class Trainer:
         """
         if epoch % 10 == 0:
             torch.save(self.generator.state_dict(),
-                       self.run_folder + '/' + self.sweep_id + f'/generator_epoch_{epoch}.pt')
+                       self.run_folder  + f'/generator_epoch_{epoch}.pt')
             torch.save(self.discriminator.state_dict(),
-                       self.run_folder + '/' + self.sweep_id + f'/discriminator_epoch_{epoch}.pt')
+                       self.run_folder + f'/discriminator_epoch_{epoch}.pt')
 
     def _save_final_models(self) -> None:
         """
@@ -392,8 +392,8 @@ class Trainer:
         -------
         None
         """
-        torch.save(self.generator.state_dict(), self.run_folder + '/' + self.sweep_id + '/final_generator.pt')
-        torch.save(self.discriminator.state_dict(), self.run_folder + '/' + self.sweep_id + '/final_discriminator.pt')
+        torch.save(self.generator.state_dict(), self.run_folder  + '/final_generator.pt')
+        torch.save(self.discriminator.state_dict(), self.run_folder + '/final_discriminator.pt')
 
     def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list,
                             train_d_loss: list, val_loss: list, psnr: list) -> None:
@@ -423,12 +423,12 @@ class Trainer:
         psnr_np = np.array(psnr)
 
         # Save NumPy arrays to files
-        np.save(self.run_folder + '/' + self.sweep_id + '/train_g_loss.npy', train_g_loss_np)
-        np.save(self.run_folder + '/' + self.sweep_id + '/train_d_loss.npy', train_d_loss_np)
-        np.save(self.run_folder + '/' + self.sweep_id + '/train_d_loss_real.npy', train_d_loss_real_np)
-        np.save(self.run_folder + '/' + self.sweep_id + '/train_d_loss_fake.npy', train_d_loss_fake_np)
-        np.save(self.run_folder + '/' + self.sweep_id + '/val_loss.npy', val_loss_np)
-        np.save(self.run_folder + '/' + self.sweep_id + '/psnr.npy', psnr_np)
+        np.save(self.run_folder  + '/train_g_loss.npy', train_g_loss_np)
+        np.save(self.run_folder  + '/train_d_loss.npy', train_d_loss_np)
+        np.save(self.run_folder + '/train_d_loss_real.npy', train_d_loss_real_np)
+        np.save(self.run_folder  + '/train_d_loss_fake.npy', train_d_loss_fake_np)
+        np.save(self.run_folder  + '/val_loss.npy', val_loss_np)
+        np.save(self.run_folder  + '/psnr.npy', psnr_np)
 
         # Plot Generator and Discriminator loss
         fig_generator_discriminator, (
@@ -458,7 +458,7 @@ class Trainer:
         ax_discriminator_loss_r_f.set_title('Discriminator Loss over Epochs')
 
         fig_generator_discriminator.tight_layout()
-        fig_generator_discriminator.savefig(self.run_folder + '/' + self.sweep_id + '/training_losses.png')
+        fig_generator_discriminator.savefig(self.run_folder +  '/training_losses.png')
 
         # Plot Validation loss, PSNR in a combined figure
         fig_val_psnr, (ax_val_loss, ax_psnr) = plt.subplots(nrows=2, ncols=1)
@@ -476,7 +476,7 @@ class Trainer:
         ax_psnr.set_title('PSNR over Epochs')
 
         fig_val_psnr.tight_layout()
-        fig_val_psnr.savefig(self.run_folder + '/' + self.sweep_id + '/validation_loss_psnr.png')
+        fig_val_psnr.savefig(self.run_folder +  '/validation_loss_psnr.png')
 
     def generate_sr_data(self) -> None:
         """
@@ -498,26 +498,19 @@ class Trainer:
 
                 # Generate super-resolved data (SR) from LR data
                 lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
-                lr_sr_emg = lr_sr_emg.to('cpu').squeeze().numpy()
+                lr_sr_emg = lr_sr_emg.to(self.device).squeeze().numpy()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
                 # Generate super-resolved data (SR) from HR data
                 hr_sr_emg = self.generator(hr_emg).detach().to(self.device)
-                hr_sr_emg = hr_sr_emg.to('cpu').squeeze().numpy()
+                hr_sr_emg = hr_sr_emg.to(self.device).squeeze().numpy()
                 hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
-                # Save signal from lr to hr
-                last_slash_index_lr = lr_emg_paths[0].rfind("/")
-                model_path = lr_emg_paths[0][:last_slash_index_lr] + '/model2_13x5'
+                # Save signal from lr to sr and hr to sr
+                model_path = self.run_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
-                np.save(model_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
-                        lr_sr_emg_destandardized
-                        )
-
-                # Save B-Spline interpolated signal from hr to sr
-                last_slash_index_hr = hr_emg_paths[0].rfind("/")
-                np.save(model_path + (hr_emg_paths[0][last_slash_index_hr:]).replace('-hr.npy', '-hr-sr.npy'),
-                        hr_sr_emg_destandardized)
+                np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
+                np.save(model_path + lr_emg_paths[0], hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
 
