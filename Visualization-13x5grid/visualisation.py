@@ -39,7 +39,7 @@ class Visualizer:
 
         # Load your data (already normalized)
         inter_spline_lr_sr = np.load(
-            self.file_path + 'path0-hr.npy')
+            self.file_path + 'linear_interpolation/path0-lr.npy')
         model1_lr_sr = np.load(self.file_path + 'path0-hr.npy')
         model1_hr_sr = np.load(self.file_path + 'path0-hr.npy')
 
@@ -506,7 +506,7 @@ class Visualizer:
 
 if __name__ == '__main__':
     # TODO: Beschriftung mit (predicted) etc. passt nicht zu HR to SR plots
-    file_path = '../dataset/test/'
+    file_path = '../results/'
     visualize = Visualizer(file_path)
 
     visualize.plot_emg_channels()

@@ -25,14 +25,13 @@ class Interpolation:
         Constructs all the necessary attributes for the interpolation object.
         """
         # Load the JSON file with values for min max normalization into a Python dictionary
-        with open('../dataset/mean_std.json', 'r') as file:
+        with open('../dataset/train/mean_std.json', 'r') as file:
             self.mean_std_dict = json.load(file)
 
         # Load data
-        data = pd.read_csv('../testset/data.csv', sep=";")
+        data = pd.read_csv('../dataset/test/data.csv', sep=";")
         self.testing = torch.utils.data.DataLoader(
-            Custom_Dataset(data, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']))
+            Custom_Dataset(data, '../dataset/test', self.mean_std_dict['mean'], self.mean_std_dict['std']))
 
         #TODO: Add linear and b-spline interpolation
 
@@ -124,36 +123,20 @@ class Interpolation:
                 High resolution emg data.
         """
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-            print(f'{batch_idx} of 157 batches')
-            # 2D to 3D: reshape back to grid shape
-            lr_emg = lr_emg.squeeze().numpy()
-            lr_emg = lr_emg.transpose()
+            print(f'Batch index: {batch_idx}')
 
-            lr_emg_reshaped = lr_emg.reshape(3,7, lr_emg.shape[1])
+            lr_emg = lr_emg.numpy().squeeze()
+            lr_emg_grid = self.destandardize_data(lr_emg)
 
-            # Transpose and flip to get to correct grid numbering
-            lr_emg_transposed = np.transpose(lr_emg_reshaped, axes = (1,0,2))
-            lr_emg_grid = np.flipud(lr_emg_transposed)
-            lr_emg_grid[:, 1::2] = lr_emg_grid[::-1, 1::2]
-            lr_emg_grid = self.destandardize_data(lr_emg_grid)
-
-            # Perform cubic interpolation
-            interpolated_lr_hr = self.grid_interpolation(lr_emg_grid, (13, 5, lr_emg.shape[1]), 'linear')
-
-            # 3D to 2D: reshape back
-            interpolated_lr_hr = np.flipud(interpolated_lr_hr).transpose(1, 0, 2).reshape(-1, interpolated_lr_hr.shape[-1])
-
-            # flip rows and columns
-            interpolated_lr_hr = interpolated_lr_hr.transpose()
+            # Perform linear interpolation
+            interpolated_lr_hr = self.grid_interpolation(lr_emg_grid, (13, 5, lr_emg.shape[2]), 'linear')
 
             # Save cubic interpolated signal from lr to hr
-            last_slash_index_lr = lr_emg_paths[0].rfind("/")
-            cubic_path = lr_emg_paths[0][:last_slash_index_lr] + '/interpolated/linear/13x5'
+            path = '../results/linear_Interpolation/'
 
-            os.makedirs(cubic_path, exist_ok=True)
+            os.makedirs(path, exist_ok=True)
             print("Saving")
-            np.save(cubic_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
-                    interpolated_lr_hr)
+            np.save(path + lr_emg_paths[0], interpolated_lr_hr)
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
         """
