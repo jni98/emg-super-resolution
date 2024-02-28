@@ -161,3 +161,5 @@ dmypy.json
 /model2-13x5-NoGAN/wandb/
 /model2-13x5-Layer-DropOut/runs/
 /model2-13x5-Layer-DropOut/wandb/
+/model2-13x5-Layer-DropOut-ImprovedDisc/runs/
+/model2-13x5-Layer-DropOut-ImprovedDisc/wandb/

@@ -35,7 +35,7 @@ def setup_sweep():
                 'values': [0.1]
             },
             'dropout_prob': {
-                'values': [0.2, 0.6]
+                'values': [0.2, 0.4]
             },
         }
     }

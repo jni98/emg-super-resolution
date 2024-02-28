@@ -24,7 +24,7 @@ class ResidualBlock(nn.Module):
             nn.BatchNorm3d(in_channels),
             nn.PReLU())
 
-        self.dropout = nn.Dropout3d(dropout_prob)
+        self.dropout1 = nn.Dropout3d(dropout_prob)
 
         self.conv2 = nn.Sequential(
             nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
@@ -33,12 +33,16 @@ class ResidualBlock(nn.Module):
 
         self.prelu = nn.PReLU()
 
+        self.dropout2 = nn.Dropout3d(dropout_prob)
+
     def forward(self, x: torch.tensor) -> torch.tensor:
         residual = x
         out = self.conv1(x)
+        out = self.dropout1(out)
         out = self.conv2(out)
         out += residual
         out = self.prelu(out)
+        out = self.dropout2(out)
         return out
 
 
@@ -59,6 +63,7 @@ class DownConvolutionBlock(nn.Module):
         out = self.downConv(x)
         out = self.bn(out)
         out = self.prelu(out)
+        out = self.dropout(out)
         return out
 
 
@@ -86,6 +91,7 @@ class UpConvolutionBlock(nn.Module):
         out = self.upConv(x)
         out = self.bn1(out)
         out = self.prelu1(out)
+        out = self.dropout1(out)
 
         # concatenate with skip connection
         out = torch.cat((out, skip), dim=1)
@@ -94,6 +100,7 @@ class UpConvolutionBlock(nn.Module):
         out = self.conv(out)
         out = self.bn2(out)
         out = self.prelu2(out)
+        out = self.dropout2(out)
 
         return out
 
@@ -156,6 +163,7 @@ class Generator(nn.Module):
         conv1 = self.conv1(x)
         conv1 = self.bn1(conv1)
         conv1 = self.prelu1(conv1)
+        conv1 = self.dropout1(conv1)
         conv1 = self.res_blocks1(conv1)
         skip1 = self.residualUp1(conv1)
         #print("Generator output after conv1", conv1.shape)
