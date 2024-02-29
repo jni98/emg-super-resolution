@@ -1,0 +1,408 @@
+### Starting TaskPrologue of job 776836 on tg095 at Wed 28 Feb 2024 05:37:41 PM CET
+Running on cores 0-31 with governor ondemand
+Wed Feb 28 17:37:41 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:01:00.0 Off |                    0 |
+| N/A   40C    P0              53W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+load conda from module
+no change     /apps/python/3.10-anaconda/condabin/conda
+no change     /apps/python/3.10-anaconda/bin/conda
+no change     /apps/python/3.10-anaconda/bin/conda-env
+no change     /apps/python/3.10-anaconda/bin/activate
+no change     /apps/python/3.10-anaconda/bin/deactivate
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.sh
+no change     /apps/python/3.10-anaconda/etc/fish/conf.d/conda.fish
+no change     /apps/python/3.10-anaconda/shell/condabin/Conda.psm1
+no change     /apps/python/3.10-anaconda/shell/condabin/conda-hook.ps1
+no change     /apps/python/3.10-anaconda/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.csh
+no change     /home/hpc/iwso/iwso124h/.bashrc
+No action taken.
+using python /home/woody/iwso/iwso124h/.conda/envs/thesis_env/bin/python
+Wed Feb 28 17:37:43 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:01:00.0 Off |                    0 |
+| N/A   40C    P0              53W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+python reaches gpu: True
+started data transfer at Wed 28 Feb 2024 05:37:53 PM CET
+finished transfer at Wed 28 Feb 2024 05:37:56 PM CET
+1.1G	./dataset
+1.1G	.
+Using Repository Revision
+29deede Changed comments
+wandb: Agent Starting Run: s5ebleu9 with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0.4
+wandb: 	dropout_prob_input: 0
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Currently logged in as: janinakloos (masterthesis-sr). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_173806-s5ebleu9
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run silver-sweep-1
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/s5ebleu9
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.015 MB uploadedwandb: | 0.820 MB of 0.820 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▇▅▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:   val_loss █▅▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.24416
+wandb:      epoch 50
+wandb:   val_loss 0.0924
+wandb: 
+wandb: 🚀 View run silver-sweep-1 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/s5ebleu9
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240228_173806-s5ebleu9/logs
+wandb: Agent Starting Run: ciepcqot with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0.4
+wandb: 	dropout_prob_input: 0
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_181717-ciepcqot
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run easy-sweep-2
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/ciepcqot
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.823 MB uploadedwandb: | 0.015 MB of 0.823 MB uploadedwandb: / 0.823 MB of 0.823 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▇▆▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:   val_loss █▆▄▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.23747
+wandb:      epoch 50
+wandb:   val_loss 0.09577
+wandb: 
+wandb: 🚀 View run easy-sweep-2 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/ciepcqot
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240228_181717-ciepcqot/logs
+wandb: Agent Starting Run: p5nlp072 with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0
+wandb: 	dropout_prob_input: 0.1
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_185619-p5nlp072
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run jumping-sweep-3
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/p5nlp072
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.781 MB uploadedwandb: | 0.823 MB of 0.823 MB uploadedwandb: / 0.823 MB of 0.823 MB uploadedwandb: - 0.823 MB of 0.823 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:   val_loss █▄▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.0299
+wandb:      epoch 50
+wandb:   val_loss 0.01939
+wandb: 
+wandb: 🚀 View run jumping-sweep-3 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/p5nlp072
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240228_185619-p5nlp072/logs
+wandb: Agent Starting Run: rbhc940n with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0
+wandb: 	dropout_prob_input: 0.1
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_193438-rbhc940n
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run devoted-sweep-4
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/rbhc940n
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.015 MB uploadedwandb: | 0.015 MB of 0.015 MB uploadedwandb: / 0.015 MB of 0.782 MB uploadedwandb: - 0.015 MB of 0.782 MB uploadedwandb: \ 0.824 MB of 0.824 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:   val_loss █▃▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.03036
+wandb:      epoch 50
+wandb:   val_loss 0.0197
+wandb: 
+wandb: 🚀 View run devoted-sweep-4 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/rbhc940n
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240228_193438-rbhc940n/logs
+wandb: Sweep Agent: Waiting for job.
+wandb: Job received.
+wandb: Agent Starting Run: wgoncmrb with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0.2
+wandb: 	dropout_prob_input: 0.1
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_201304-wgoncmrb
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run good-sweep-5
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/wgoncmrb
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.824 MB of 0.824 MB uploadedwandb: | 0.824 MB of 0.824 MB uploadedwandb: / 0.824 MB of 0.824 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▄▃▃▂▂▂▂▂▂▂▂▁▂▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:   val_loss █▅▄▄▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▂▂▁▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.1224
+wandb:      epoch 50
+wandb:   val_loss 0.03837
+wandb: 
+wandb: 🚀 View run good-sweep-5 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/wgoncmrb
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240228_201304-wgoncmrb/logs
+wandb: Agent Starting Run: sr3inqjv with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0
+wandb: 	dropout_prob_input: 0.1
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_205214-sr3inqjv
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run whole-sweep-6
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/sr3inqjv
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.823 MB uploadedwandb: | 0.015 MB of 0.823 MB uploadedwandb: / 0.823 MB of 0.823 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:   val_loss █▃▃▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.0304
+wandb:      epoch 50
+wandb:   val_loss 0.01815
+wandb: 
+wandb: 🚀 View run whole-sweep-6 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/sr3inqjv
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240228_205214-sr3inqjv/logs
+wandb: Agent Starting Run: 0d02himm with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0
+wandb: 	dropout_prob_input: 0.1
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_213033-0d02himm
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run crimson-sweep-7
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/0d02himm
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.024 MB uploadedwandb: | 0.823 MB of 0.823 MB uploadedwandb: / 0.823 MB of 0.823 MB uploadedwandb: - 0.823 MB of 0.823 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:   val_loss █▄▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.03056
+wandb:      epoch 50
+wandb:   val_loss 0.02067
+wandb: 
+wandb: 🚀 View run crimson-sweep-7 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/0d02himm
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240228_213033-0d02himm/logs
+wandb: Agent Starting Run: wxg42bh4 with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0
+wandb: 	dropout_prob_input: 0.1
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_220852-wxg42bh4
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run winter-sweep-8
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/wxg42bh4
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.023 MB uploadedwandb: | 0.824 MB of 0.824 MB uploadedwandb: / 0.824 MB of 0.824 MB uploadedwandb: - 0.824 MB of 0.824 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:   val_loss █▄▃▂▂▂▂▂▁▂▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.03223
+wandb:      epoch 50
+wandb:   val_loss 0.01789
+wandb: 
+wandb: 🚀 View run winter-sweep-8 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/wxg42bh4
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240228_220852-wxg42bh4/logs
+wandb: Agent Starting Run: ld8mrk2p with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0
+wandb: 	dropout_prob_input: 0.1
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_224705-ld8mrk2p
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run resilient-sweep-9
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/ld8mrk2p
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+wandb: - 0.015 MB of 0.015 MB uploadedwandb: \ 0.015 MB of 0.783 MB uploadedwandb: | 0.825 MB of 0.825 MB uploadedwandb: / 0.825 MB of 0.825 MB uploadedwandb: - 0.825 MB of 0.825 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb: avg_loss_g █▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:      epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇███
+wandb:   val_loss █▃▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: avg_loss_g 0.03126
+wandb:      epoch 50
+wandb:   val_loss 0.01949
+wandb: 
+wandb: 🚀 View run resilient-sweep-9 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/ld8mrk2p
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240228_224705-ld8mrk2p/logs
+wandb: Agent Starting Run: gnbksd00 with config:
+wandb: 	batch_size: 12
+wandb: 	dropout_prob: 0
+wandb: 	dropout_prob_input: 0.1
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/wandb/run-20240228_232518-gnbksd00
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run winter-sweep-10
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/wgp42as9
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/gnbksd00
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+slurmstepd-tg095: error: *** JOB 776836 ON tg095 CANCELLED AT 2024-02-28T23:52:40 ***
+=== JOB_STATISTICS ===
+=== current date     : Wed 28 Feb 2024 11:52:41 PM CET
+= Job-ID             : 776836 on tinygpu
+= Job-Name           : model2-13x5-NoGAN
+= Job-Command        : /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN/train-script2-1.sh
+= Initial workdir    : /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN
+= Queue/Partition    : a100
+= Slurm account      : iwso with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 06:15:10
+= Total RAM usage    : 1.3 GiB of requested  GiB (%)   
+= Node list          : tg095
+= Subm/Elig/Start/End: 2024-02-28T15:46:50 / 2024-02-28T15:46:50 / 2024-02-28T17:37:30 / 2024-02-28T23:52:40
+======================
+=== Quota infos ======
+    Path              Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc         3903.5M   104.9G   209.7G        N/A   7,488      500K   1,000K        N/A    
+    /home/vault       2146.8M  1048.6G  2097.2G        N/A       2      200K     400K        N/A    
+    /home/woody         19.3G   500.0G   750.0G        N/A      98K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+NVIDIA A100-SXM4-40GB, 00000000:01:00.0, 733486, 89 %, 32 %, 31730 MiB, 22469707 ms
