@@ -358,18 +358,24 @@ class Trainer:
 
                 total_psnr += psnr.item()
 
+                # x-axis for the following logs
+                x_values = range(val_hr.shape[4])
+
                 # log absolute difference for one channel absolute difference
-                abs_diff = torch.abs(val_sr_emg - val_hr)
-                wandb.log({'abs_diff': abs_diff[0][0][6][2][:]})
+                abs_diff = torch.abs(val_sr_emg[0][0][6][2] - val_hr[0][0][6][2])
+                abs_diff = abs_diff.squeeze()
+                wandb.log({"abs difference plot": wandb.plot.line_series(x=x_values, y=abs_diff, title='abs difference')})
 
                 # Log one channel in the middle of the grid
-                wandb.log({'Validation Channel [6][2]': val_hr[0][0][6][2][:]})
-                wandb.log({'Super resolution Channel [6][2]': val_sr_emg[0][0][6][2][:]})
+                val_channel = val_hr[0][0][6][2]
+                sr_channel  = val_sr_emg[0][0][6][2]
+                wandb.log({"val channel": wandb.plot.line_series(x=x_values, y=val_channel, title='val channel')})
+                wandb.log({"sr channel": wandb.plot.line_series(x=x_values, y=sr_channel, title='sr channel')})
 
                 # log cross corretlation
-                cross_correlation = torch.correlate(val_sr_emg[0][0][6][2], val_hr[0][0][6][2])
                 auto_correlation = torch.correlate(val_hr[0][0][6][2], val_hr[0][0][6][2])
-                wandb.log({'Normed cross_correlation': cross_correlation/ torch.max(auto_correlation)})
+                cross_correlation = (torch.correlate(val_sr_emg[0][0][6][2], val_hr[0][0][6][2]))/auto_correlation
+                wandb.log({'cross_correlation': wandb.plot.line_series(x=x_values, y=cross_correlation, title='cross_corr')})
 
             avg_validation_loss = total_validation_loss / len(self.validation)
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
