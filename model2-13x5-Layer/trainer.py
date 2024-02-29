@@ -121,7 +121,7 @@ class Trainer:
         self.hyperparameter["device"] = str(self.device)
 
         # Ensure the directory exists
-        os.makedirs(self.run_folder, exist_ok=True)
+        os.makedirs(self.run_folder +self.unique_folder, exist_ok=True)
 
         # Save the dictionary to a file
         with open(self.run_folder + self.unique_folder + '/hyperparameter.json', 'w') as file:
