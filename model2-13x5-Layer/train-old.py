@@ -20,29 +20,18 @@ def setup_sweep():
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-                'values': [6,12],  # Add the batch sizes you want to include
+                'values': [12, 16, 34, 68],  # Add the batch sizes you want to include
             },
             'learning_rate': {
                 'values': [ 0.0001, 0.00001]
             },
             'num_res_blocks_last': {
-                'values': [3, 4]
+                'values': [4, 5]
             },
             'num_res_blocks': {
-                'values': [5]
+                'values': [4, 5]
             },
-            'dropout_prob_input_gen': {
-                'values': [0.1]
-            },
-            'dropout_prob_gen': {
-                'values': [0.2, 0.4]
-            },
-            'dropout_prob_input_disc': {
-                'values': [0.0,0.1]
-            },
-            'dropout_prob_disc': {
-                'values': [0.0,0.2, 0.4]
-            },
+
         }
     }
 

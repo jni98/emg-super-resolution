@@ -8,6 +8,7 @@ The code is called from the train.py file which is started by the main function.
 
 import json
 import os
+from datetime import datetime
 
 import matplotlib
 import wandb
@@ -62,6 +63,8 @@ class Trainer:
 
         self.lr = config.learning_rate
         self.batch_size = config.batch_size
+
+        self.unique_folder = '/' + datetime.now().strftime('%Y%m%d%H%M%S')
 
         self.betas = (0.9, 0.999)
 
@@ -118,10 +121,10 @@ class Trainer:
         self.hyperparameter["device"] = str(self.device)
 
         # Ensure the directory exists
-        os.makedirs(self.run_folder , exist_ok=True)
+        os.makedirs(self.run_folder, exist_ok=True)
 
         # Save the dictionary to a file
-        with open(self.run_folder  + '/hyperparameter.json', 'w') as file:
+        with open(self.run_folder + self.unique_folder + '/hyperparameter.json', 'w') as file:
             json.dump(self.hyperparameter, file)
 
         print("Successfully prepared the data")
@@ -134,8 +137,8 @@ class Trainer:
         -------
         None
         """
-        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, dropout_prob_input=self.config.dropout_prob_input_gen, dropout_prob=self.config.dropout_prob_gen, in_channels=1)
-        self.discriminator = Discriminator(dropout_prob_input=self.config.dropout_prob_input_disc, dropout_prob=self.config.dropout_prob_disc, in_channels=1)
+        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
+        self.discriminator = Discriminator()
 
         # move to gpu in case it's possible
         self.generator.to(self.device)
@@ -343,7 +346,7 @@ class Trainer:
 
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
-                #val_sr_emg = self.destandardize_data(val_sr_emg)
+                # val_sr_emg = self.destandardize_data(val_sr_emg)
 
                 # Calculate validation loss
                 val_loss = self.mse(val_sr_emg, val_hr)
@@ -354,6 +357,19 @@ class Trainer:
                 psnr = 20 * torch.log10(1.0 / torch.sqrt(val_loss))
 
                 total_psnr += psnr.item()
+
+                # log absolute difference for one channel absolute difference
+                abs_diff = torch.abs(val_sr_emg - val_hr)
+                wandb.log({'abs_diff': abs_diff[0][0][6][2][:]})
+
+                # Log one channel in the middle of the grid
+                wandb.log({'Validation Channel [6][2]': val_hr[0][0][6][2][:]})
+                wandb.log({'Super resolution Channel [6][2]': val_sr_emg[0][0][6][2][:]})
+
+                # log cross corretlation
+                cross_correlation = torch.correlate(val_sr_emg[0][0][6][2], val_hr[0][0][6][2])
+                auto_correlation = torch.correlate(val_hr[0][0][6][2], val_hr[0][0][6][2])
+                wandb.log({'Normed cross_correlation': cross_correlation/ torch.max(auto_correlation)})
 
             avg_validation_loss = total_validation_loss / len(self.validation)
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
@@ -380,7 +396,7 @@ class Trainer:
         """
         if epoch % 10 == 0:
             torch.save(self.generator.state_dict(),
-                       self.run_folder  + f'/generator_epoch_{epoch}.pt')
+                       self.run_folder + f'/generator_epoch_{epoch}.pt')
             torch.save(self.discriminator.state_dict(),
                        self.run_folder + f'/discriminator_epoch_{epoch}.pt')
 
@@ -392,8 +408,8 @@ class Trainer:
         -------
         None
         """
-        torch.save(self.generator.state_dict(), self.run_folder  + '/final_generator.pt')
-        torch.save(self.discriminator.state_dict(), self.run_folder + '/final_discriminator.pt')
+        torch.save(self.generator.state_dict(), self.run_folder + self.unique_folder + '/final_generator.pt')
+        torch.save(self.discriminator.state_dict(), self.run_folder + self.unique_folder + '/final_discriminator.pt')
 
     def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list,
                             train_d_loss: list, val_loss: list, psnr: list) -> None:
@@ -423,12 +439,12 @@ class Trainer:
         psnr_np = np.array(psnr)
 
         # Save NumPy arrays to files
-        np.save(self.run_folder  + '/train_g_loss.npy', train_g_loss_np)
-        np.save(self.run_folder  + '/train_d_loss.npy', train_d_loss_np)
-        np.save(self.run_folder + '/train_d_loss_real.npy', train_d_loss_real_np)
-        np.save(self.run_folder  + '/train_d_loss_fake.npy', train_d_loss_fake_np)
-        np.save(self.run_folder  + '/val_loss.npy', val_loss_np)
-        np.save(self.run_folder  + '/psnr.npy', psnr_np)
+        np.save(self.run_folder + self.unique_folder + '/train_g_loss.npy', train_g_loss_np)
+        np.save(self.run_folder + self.unique_folder + '/train_d_loss.npy', train_d_loss_np)
+        np.save(self.run_folder + self.unique_folder + '/train_d_loss_real.npy', train_d_loss_real_np)
+        np.save(self.run_folder + self.unique_folder + '/train_d_loss_fake.npy', train_d_loss_fake_np)
+        np.save(self.run_folder + self.unique_folder + '/val_loss.npy', val_loss_np)
+        np.save(self.run_folder + self.unique_folder + '/psnr.npy', psnr_np)
 
         # Plot Generator and Discriminator loss
         fig_generator_discriminator, (
@@ -458,7 +474,7 @@ class Trainer:
         ax_discriminator_loss_r_f.set_title('Discriminator Loss over Epochs')
 
         fig_generator_discriminator.tight_layout()
-        fig_generator_discriminator.savefig(self.run_folder +  '/training_losses.png')
+        fig_generator_discriminator.savefig(self.run_folder + self.unique_folder + '/training_losses.png')
 
         # Plot Validation loss, PSNR in a combined figure
         fig_val_psnr, (ax_val_loss, ax_psnr) = plt.subplots(nrows=2, ncols=1)
@@ -476,7 +492,7 @@ class Trainer:
         ax_psnr.set_title('PSNR over Epochs')
 
         fig_val_psnr.tight_layout()
-        fig_val_psnr.savefig(self.run_folder +  '/validation_loss_psnr.png')
+        fig_val_psnr.savefig(self.run_folder + self.unique_folder + '/validation_loss_psnr.png')
 
     def generate_sr_data(self) -> None:
         """
@@ -507,7 +523,7 @@ class Trainer:
                 hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
                 # Save signal from lr to sr and hr to sr
-                model_path = self.run_folder + '/results/'
+                model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
                 np.save(model_path + lr_emg_paths[0], hr_sr_emg_destandardized)
