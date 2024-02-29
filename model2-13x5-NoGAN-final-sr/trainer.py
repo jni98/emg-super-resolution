@@ -392,7 +392,7 @@ class Trainer:
         """
 
         # load the final generator
-        self.generator.load_state_dict(torch.load('../../model2-13x5-NoGAN-final/final_generator.pt'))
+        self.generator.load_state_dict(torch.load('../../model2-13x5-NoGAN-final-77054/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
         with torch.no_grad():
