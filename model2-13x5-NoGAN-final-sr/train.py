@@ -66,7 +66,7 @@ def train(data_directory: str, test_data_directory: str, results_directory: str,
         # # Plot the training results
         # trainer._plot_result_losses(train_G_loss, val_loss, psnr)
 
-    trainer.generate_sr_data()
+        trainer.generate_sr_data()
 
 
 def parse_args():
