@@ -95,4 +95,4 @@ if __name__ == "__main__":
 
     # Run the sweep
     wandb.agent(sweep_id,
-                function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs))
+                function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config, sweep_id))
