@@ -305,6 +305,41 @@ class Trainer:
             total_loss_d_real += loss_discriminator_real.item()
             total_loss_d_fake += loss_discriminator_fake.item()
 
+            ##############################Plot test ########################################
+            print("Plot log test")
+
+            # x-axis for the following logs
+            x_values = range(hr_emg.shape[4])
+
+            # log absolute difference for one channel absolute difference
+            abs_diff = torch.abs(hr_emg[0][0][6][2] - (200* hr_emg[0][0][6][2]))
+            abs_diff = abs_diff.squeeze()
+            fig, axs = plt.subplots(4, 1, figsize=(8, 10))
+
+            axs[0].plot(x_values, abs_diff)
+            axs[0].set_title('Abs Difference')
+
+            # Log one channel in the middle of the grid
+            val_channel = hr_emg[0][0][6][2]
+            axs[1].plot(x_values, val_channel)
+            axs[1].set_title('Val Channel')
+
+            # Log one channel in the middle of the grid
+            sr_channel = hr_emg[0][0][6][2]
+            axs[2].plot(x_values, sr_channel)
+            axs[2].set_title('SR Channel')
+
+            # log cross correlation
+            auto_correlation = torch.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])
+            cross_correlation = (torch.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])) / auto_correlation
+            axs[3].plot(x_values, cross_correlation)
+            axs[3].set_title('Cross Correlation')
+
+            plt.tight_layout()
+            wandb.log({"plots": [wandb.Image(fig)]})
+
+
+
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
         avg_loss_d_fake = total_loss_d_fake / len(self.training)
@@ -364,18 +399,30 @@ class Trainer:
                 # log absolute difference for one channel absolute difference
                 abs_diff = torch.abs(val_sr_emg[0][0][6][2] - val_hr[0][0][6][2])
                 abs_diff = abs_diff.squeeze()
-                wandb.log({"abs difference plot": wandb.plot.line_series(x=x_values, y=abs_diff, title='abs difference')})
+                fig, axs = plt.subplots(4, 1, figsize=(8, 10))
+
+                axs[0].plot(x_values, abs_diff)
+                axs[0].set_title('Abs Difference')
 
                 # Log one channel in the middle of the grid
                 val_channel = val_hr[0][0][6][2]
-                sr_channel  = val_sr_emg[0][0][6][2]
-                wandb.log({"val channel": wandb.plot.line_series(x=x_values, y=val_channel, title='val channel')})
-                wandb.log({"sr channel": wandb.plot.line_series(x=x_values, y=sr_channel, title='sr channel')})
+                axs[1].plot(x_values, val_channel)
+                axs[1].set_title('Val Channel')
 
-                # log cross corretlation
+                # Log one channel in the middle of the grid
+                sr_channel = val_sr_emg[0][0][6][2]
+                axs[2].plot(x_values, sr_channel)
+                axs[2].set_title('SR Channel')
+
+                # log cross correlation
                 auto_correlation = torch.correlate(val_hr[0][0][6][2], val_hr[0][0][6][2])
-                cross_correlation = (torch.correlate(val_sr_emg[0][0][6][2], val_hr[0][0][6][2]))/auto_correlation
-                wandb.log({'cross_correlation': wandb.plot.line_series(x=x_values, y=cross_correlation, title='cross_corr')})
+                cross_correlation = (torch.correlate(val_sr_emg[0][0][6][2], val_hr[0][0][6][2])) / auto_correlation
+                axs[3].plot(x_values, cross_correlation)
+                axs[3].set_title('Cross Correlation')
+
+                plt.tight_layout()
+                wandb.log({"plots": [wandb.Image(fig)]})
+
 
             avg_validation_loss = total_validation_loss / len(self.validation)
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
