@@ -313,27 +313,34 @@ class Trainer:
 
             # log absolute difference for one channel absolute difference
             abs_diff = torch.abs(hr_emg[0][0][6][2] - (200* hr_emg[0][0][6][2]))
-            abs_diff = abs_diff.squeeze()
+            abs_diff = abs_diff.squeeze().to('cpu')
+            abs_diff = np.asarray(abs_diff)
             fig, axs = plt.subplots(4, 1, figsize=(8, 10))
 
             axs[0].plot(x_values, abs_diff)
-            axs[0].set_title('Abs Difference')
+            axs[0].set_title('Train Abs Difference')
 
             # Log one channel in the middle of the grid
             val_channel = hr_emg[0][0][6][2]
+            val_channel = val_channel.to('cpu')
+            val_channel = np.asarray(val_channel)
             axs[1].plot(x_values, val_channel)
-            axs[1].set_title('Val Channel')
+            axs[1].set_title('Train Val Channel')
 
             # Log one channel in the middle of the grid
             sr_channel = hr_emg[0][0][6][2]
+            sr_channel = sr_channel.to('cpu')
+            sr_channel = np.asarray(sr_channel)
             axs[2].plot(x_values, sr_channel)
-            axs[2].set_title('SR Channel')
+            axs[2].set_title('Train SR Channel')
 
             # log cross correlation
             auto_correlation = torch.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])
             cross_correlation = (torch.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])) / auto_correlation
+            cross_correlation = cross_correlation.to('cpu')
+            cross_correlation = np.asarray(cross_correlation)
             axs[3].plot(x_values, cross_correlation)
-            axs[3].set_title('Cross Correlation')
+            axs[3].set_title('Train Cross Correlation')
 
             plt.tight_layout()
             wandb.log({"plots": [wandb.Image(fig)]})
