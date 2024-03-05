@@ -417,8 +417,6 @@ class Trainer:
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
-            avg_abs_diff = avg_abs_diff.squeeze().to('cpu')
-            avg_abs_diff = np.asarray(avg_abs_diff)
             fig1, axs1 = plt.subplots(1, 1, figsize=(8, 10))
             axs1.plot(range(len(avg_abs_diff)), avg_abs_diff)
             axs1.set_title('Average Absolute difference')
