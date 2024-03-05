@@ -85,7 +85,6 @@ class Visualizer:
                     # else:
                     #     if (j % 2) != 0:
                     #         predicted = '(predicted)'
-                    #         #TODO: "preditcted" stimmt nicht mehr
                     #     elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
                     #         predicted = '(predicted)'
                     #     else:
@@ -310,7 +309,6 @@ class Visualizer:
         -------
 
         """
-        #TODO: Check why one coulumn and one row is missing
 
         print("Start plotting pearson coefficient")
 
@@ -512,7 +510,6 @@ if __name__ == '__main__':
     visualize.plot_emg_channels()
     visualize.plot_emg_channels_difference()
     visualize.plot_heat_maps()
-    # TODO: Check correlation code again
     visualize.plot_correlations()
     visualize.plot_pearson_coefficient()
     visualize.plot_pearson_coefficient_grid()

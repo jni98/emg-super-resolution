@@ -396,6 +396,9 @@ class Trainer:
                 plt.tight_layout()
                 wandb.log({"plots": [wandb.Image(fig)]})
 
+                # Close the figure
+                plt.close(fig)
+
 
             avg_validation_loss = total_validation_loss / len(self.validation)
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
