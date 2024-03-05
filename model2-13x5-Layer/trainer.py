@@ -305,51 +305,6 @@ class Trainer:
             total_loss_d_real += loss_discriminator_real.item()
             total_loss_d_fake += loss_discriminator_fake.item()
 
-            ##############################Plot test ########################################
-            print("Plot log test")
-
-            # x-axis for the following logs
-            x_values = range(hr_emg.shape[4])
-
-            # log absolute difference for one channel absolute difference
-            abs_diff = torch.abs(hr_emg[0][0][6][2] - (200* hr_emg[0][0][6][2]))
-            abs_diff = abs_diff.squeeze().to('cpu')
-            abs_diff = np.asarray(abs_diff)
-            fig, axs = plt.subplots(4, 1, figsize=(8, 10))
-
-            axs[0].plot(x_values, abs_diff)
-            axs[0].set_title('Train Abs Difference')
-
-            # Log one channel in the middle of the grid
-            val_channel = hr_emg[0][0][6][2]
-            val_channel = val_channel.to('cpu')
-            val_channel = np.asarray(val_channel)
-            axs[1].plot(x_values, val_channel)
-            axs[1].set_title('Train Val Channel')
-
-            # Log one channel in the middle of the grid
-            sr_channel = hr_emg[0][0][6][2]
-            sr_channel = sr_channel.to('cpu')
-            sr_channel = np.asarray(sr_channel)
-            axs[2].plot(x_values, sr_channel)
-            axs[2].set_title('Train SR Channel')
-
-            # log cross correlation
-            print("val shape" + str(val_channel.shape))
-            print("sr shape" + str(sr_channel.shape))
-            auto_correlation = np.correlate(sr_channel, val_channel, mode='full')
-            cross_correlation = (np.correlate(val_channel, val_channel, mode='full')) / np.max(auto_correlation)
-            cross_correlation = cross_correlation.squeeze()
-            print("cross correlation shape" + str(cross_correlation.shape))
-            print("cross correlation len" + str(len(cross_correlation)))
-            axs[3].plot(range(len(cross_correlation)), cross_correlation)
-            axs[3].set_title('Train Cross Correlation')
-
-            plt.tight_layout()
-            wandb.log({"plots": [wandb.Image(fig)]})
-
-
-
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
         avg_loss_d_fake = total_loss_d_fake / len(self.training)
@@ -391,7 +346,6 @@ class Trainer:
 
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
-                # val_sr_emg = self.destandardize_data(val_sr_emg)
 
                 # Calculate validation loss
                 val_loss = self.mse(val_sr_emg, val_hr)
@@ -403,31 +357,40 @@ class Trainer:
 
                 total_psnr += psnr.item()
 
+                ############################## Log Plots########################################
+                print("Logging plots")
+
                 # x-axis for the following logs
                 x_values = range(val_hr.shape[4])
 
                 # log absolute difference for one channel absolute difference
-                abs_diff = torch.abs(val_sr_emg[0][0][6][2] - val_hr[0][0][6][2])
-                abs_diff = abs_diff.squeeze()
+                abs_diff = torch.abs(val_hr[0][0][6][2] - val_sr_emg[0][0][6][2])
+                abs_diff = abs_diff.squeeze().to('cpu')
+                abs_diff = np.asarray(abs_diff)
                 fig, axs = plt.subplots(4, 1, figsize=(8, 10))
 
                 axs[0].plot(x_values, abs_diff)
-                axs[0].set_title('Abs Difference')
+                axs[0].set_title('Absolute difference')
 
                 # Log one channel in the middle of the grid
                 val_channel = val_hr[0][0][6][2]
+                val_channel = val_channel.to('cpu')
+                val_channel = np.asarray(val_channel)
                 axs[1].plot(x_values, val_channel)
-                axs[1].set_title('Val Channel')
+                axs[1].set_title('Validation channel')
 
                 # Log one channel in the middle of the grid
                 sr_channel = val_sr_emg[0][0][6][2]
+                sr_channel = sr_channel.to('cpu')
+                sr_channel = np.asarray(sr_channel)
                 axs[2].plot(x_values, sr_channel)
-                axs[2].set_title('SR Channel')
+                axs[2].set_title('Super-resolution channel')
 
                 # log cross correlation
-                auto_correlation = torch.correlate(val_hr[0][0][6][2], val_hr[0][0][6][2])
-                cross_correlation = (torch.correlate(val_sr_emg[0][0][6][2], val_hr[0][0][6][2])) / auto_correlation
-                axs[3].plot(x_values, cross_correlation)
+                auto_correlation = np.correlate(val_hr, val_hr, mode='full')
+                cross_correlation = (np.correlate(val_hr, val_sr_emg, mode='full')) / np.max(auto_correlation)
+                cross_correlation = cross_correlation.squeeze()
+                axs[3].plot(range(len(cross_correlation)), cross_correlation)
                 axs[3].set_title('Cross Correlation')
 
                 plt.tight_layout()
