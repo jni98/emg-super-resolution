@@ -360,8 +360,12 @@ class Trainer:
 
                 total_psnr += psnr.item()
 
+                # destacndardize the data for the logged plots
+                val_hr_destandardized = self.destandardize_data(val_hr)
+                val_sr_emg_destandardized = self.destandardize_data(val_sr_emg)
+
                 # log absolute difference for one channel absolute difference
-                abs_diff = torch.abs(val_hr[0][0][6][2] - val_sr_emg[0][0][6][2])
+                abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_emg_destandardized[0][0][6][2])
                 abs_diff = abs_diff.squeeze().to('cpu')
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
@@ -379,14 +383,14 @@ class Trainer:
                     axs[0].set_title('Absolute difference')
 
                     # Log one channel in the middle of the grid
-                    val_channel = val_hr[0][0][6][2]
+                    val_channel = val_hr_destandardized[0][0][6][2]
                     val_channel = val_channel.to('cpu')
                     val_channel = np.asarray(val_channel)
                     axs[1].plot(x_values, val_channel)
                     axs[1].set_title('Validation channel [6][2]')
 
                     # Log one channel in the middle of the grid
-                    sr_channel = val_sr_emg[0][0][6][2]
+                    sr_channel = val_sr_emg_destandardized[0][0][6][2]
                     sr_channel = sr_channel.to('cpu')
                     sr_channel = np.asarray(sr_channel)
                     axs[2].plot(x_values, sr_channel)
