@@ -1,0 +1,14 @@
+wandb_version: 1
+
+batch_size:
+  value: 12
+dropout_prob:
+  value: 0
+dropout_prob_input:
+  value: 0
+learning_rate:
+  value: 1.0e-05
+num_res_blocks:
+  value: 5
+num_res_blocks_last:
+  value: 4

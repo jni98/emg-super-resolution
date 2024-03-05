@@ -83,3 +83,27 @@ wandb: WARNING Ignored wandb.init() arg project when running a sweep.
 wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
 /home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
   warnings.warn(
+slurmstepd-tg074: error: *** JOB 777054 ON tg074 CANCELLED AT 2024-02-29T09:18:21 ***
+=== JOB_STATISTICS ===
+=== current date     : Thu 29 Feb 2024 09:18:23 AM CET
+= Job-ID             : 777054 on tinygpu
+= Job-Name           : model2-13x5-NoGAN-final
+= Job-Command        : /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN-final/train-script5-2.sh
+= Initial workdir    : /home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN-final
+= Queue/Partition    : v100
+= Slurm account      : iwso with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 01:50:10
+= Total RAM usage    : 0.9 GiB of requested  GiB (%)   
+= Node list          : tg074
+= Subm/Elig/Start/End: 2024-02-29T07:28:11 / 2024-02-29T07:28:11 / 2024-02-29T07:28:11 / 2024-02-29T09:18:21
+======================
+=== Quota infos ======
+    Path              Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc            5.3G   104.9G   209.7G        N/A   7,632      500K   1,000K        N/A    
+    /home/vault       2146.8M  1048.6G  2097.2G        N/A       2      200K     400K        N/A    
+    /home/woody         19.3G   500.0G   750.0G        N/A      98K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+Tesla V100-PCIE-32GB, 00000000:86:00.0, 663612, 95 %, 20 %, 27660 MiB, 6560425 ms

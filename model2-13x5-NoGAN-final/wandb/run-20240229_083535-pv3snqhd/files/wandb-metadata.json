@@ -1,0 +1,217 @@
+{
+    "os": "Linux-5.4.0-163-generic-x86_64-with-glibc2.31",
+    "python": "3.11.5",
+    "heartbeatAt": "2024-02-29T07:35:36.683059",
+    "startedAt": "2024-02-29T07:35:35.835058",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--data",
+        "/tmp/777058.tinygpu/model2-13x5-NoGAN-final-777058/dataset/train",
+        "--testdata",
+        "/tmp/777058.tinygpu/model2-13x5-NoGAN-final-777058/dataset/test",
+        "--results",
+        "/home/hpc/iwso/iwso124h/model2-13x5-NoGAN-final-777058",
+        "--epochs",
+        "30"
+    ],
+    "state": "running",
+    "program": "/home/hpc/iwso/iwso124h/code/model2-13x5-NoGAN-final/train.py",
+    "codePathLocal": "train.py",
+    "codePath": "model2-13x5-NoGAN-final/train.py",
+    "git": {
+        "remote": "https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git",
+        "commit": "495fb36d8b0fe38c69298cdf226de146f8d2445f"
+    },
+    "email": null,
+    "root": "/home/hpc/iwso/iwso124h/code",
+    "host": "tg072",
+    "username": "iwso124h",
+    "executable": "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/bin/python",
+    "cpu_count": 16,
+    "cpu_count_logical": 32,
+    "cpu_freq": {
+        "current": 2165.26484375,
+        "min": 1200.0,
+        "max": 3201.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3700.0,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1300.005,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 2006.721,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 2004.923,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1346.696,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1810.915,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 3699.999,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1224.017,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1200.825,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1235.824,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 2173.959,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 2848.616,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 2810.579,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 2843.254,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1800.784,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1201.006,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 3699.835,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1289.959,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 2019.078,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 2087.661,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1431.562,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1807.159,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 3697.89,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1246.989,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1200.046,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1276.45,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 3507.394,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 3473.258,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 2248.96,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 3483.546,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1451.385,
+            "min": 1200.0,
+            "max": 3201.0
+        },
+        {
+            "current": 1200.282,
+            "min": 1200.0,
+            "max": 3201.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 58.75761032104492,
+            "used": 37.634666442871094
+        }
+    },
+    "gpu": "Tesla V100-PCIE-32GB",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "Tesla V100-PCIE-32GB",
+            "memory_total": 34359738368
+        }
+    ],
+    "memory": {
+        "total": 93.07289505004883
+    }
+}
