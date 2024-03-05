@@ -404,7 +404,7 @@ class Trainer:
                     axs[3].set_title('Cross Correlation channel [6][2]')
 
                     plt.tight_layout()
-                    wandb.log({"plots": [wandb.Image(fig)]})
+                    wandb.log({"Logged plots": [wandb.Image(fig)]})
 
                     # Close the figure
                     plt.close(fig)
@@ -419,9 +419,9 @@ class Trainer:
             avg_abs_diff = total_abs_diff / len(self.validation)
             fig1, axs1 = plt.subplots(1, 1, figsize=(8, 10))
             axs1.plot(range(len(avg_abs_diff)), avg_abs_diff)
-            axs1.set_title('Average Absolute difference')
+            axs1.set_title('Average absolute difference')
             plt.tight_layout()
-            wandb.log({"plots": [wandb.Image(fig1)]})
+            wandb.log({"Average absolute difference": [wandb.Image(fig1)]})
             # Close the figure
             plt.close(fig1)
 
