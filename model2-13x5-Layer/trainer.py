@@ -339,7 +339,7 @@ class Trainer:
             hr_emg = np.asarray(hr_emg)
             auto_correlation = np.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])
             cross_correlation = (np.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])) / auto_correlation
-            axs[3].plot(x_values, cross_correlation)
+            axs[3].plot(len(cross_correlation), cross_correlation)
             axs[3].set_title('Train Cross Correlation')
 
             plt.tight_layout()
