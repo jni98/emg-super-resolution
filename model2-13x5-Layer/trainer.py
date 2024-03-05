@@ -339,8 +339,10 @@ class Trainer:
             print("sr shape" + str(sr_channel.shape))
             auto_correlation = np.correlate(sr_channel, val_channel, mode='full')
             cross_correlation = (np.correlate(val_channel, val_channel, mode='full')) / np.max(auto_correlation)
+            cross_correlation = cross_correlation.squeeze()
             print("cross correlation shape" + str(cross_correlation.shape))
-            axs[3].plot(cross_correlation.shape[0], cross_correlation)
+            print("cross correlation len" + str(len(cross_correlation)))
+            axs[3].plot(len(cross_correlation), cross_correlation)
             axs[3].set_title('Train Cross Correlation')
 
             plt.tight_layout()
