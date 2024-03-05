@@ -335,10 +335,8 @@ class Trainer:
             axs[2].set_title('Train SR Channel')
 
             # log cross correlation
-            hr_emg = hr_emg.to('cpu')
-            hr_emg = np.asarray(hr_emg)
-            auto_correlation = np.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])
-            cross_correlation = (np.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])) / auto_correlation
+            auto_correlation = np.correlate(sr_channel, val_channel)
+            cross_correlation = (np.correlate(val_channel, val_channel)) / auto_correlation
             axs[3].plot(len(cross_correlation), cross_correlation)
             axs[3].set_title('Train Cross Correlation')
 
