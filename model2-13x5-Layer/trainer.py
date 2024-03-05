@@ -387,8 +387,8 @@ class Trainer:
                 axs[2].set_title('Super-resolution channel')
 
                 # log cross correlation
-                auto_correlation = np.correlate(val_hr, val_hr, mode='full')
-                cross_correlation = (np.correlate(val_hr, val_sr_emg, mode='full')) / np.max(auto_correlation)
+                auto_correlation = np.correlate(val_channel, val_channel, mode='full')
+                cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
                 cross_correlation = cross_correlation.squeeze()
                 axs[3].plot(range(len(cross_correlation)), cross_correlation)
                 axs[3].set_title('Cross Correlation')
