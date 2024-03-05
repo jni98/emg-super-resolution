@@ -342,7 +342,7 @@ class Trainer:
             cross_correlation = cross_correlation.squeeze()
             print("cross correlation shape" + str(cross_correlation.shape))
             print("cross correlation len" + str(len(cross_correlation)))
-            axs[3].plot(len(cross_correlation), cross_correlation)
+            axs[3].plot(range(len(cross_correlation)), cross_correlation)
             axs[3].set_title('Train Cross Correlation')
 
             plt.tight_layout()
