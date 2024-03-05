@@ -16,7 +16,7 @@ from trainer import Trainer
 def setup_sweep():
     # Define the sweep config
     sweep_config = {
-        'method': 'random',
+        'method': 'bayes',
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
