@@ -335,10 +335,10 @@ class Trainer:
             axs[2].set_title('Train SR Channel')
 
             # log cross correlation
-            auto_correlation = torch.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])
-            cross_correlation = (torch.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])) / auto_correlation
-            cross_correlation = cross_correlation.to('cpu')
-            cross_correlation = np.asarray(cross_correlation)
+            hr_emg = hr_emg.to('cpu')
+            hr_emg = np.asarray(hr_emg)
+            auto_correlation = np.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])
+            cross_correlation = (np.correlate(hr_emg[0][0][6][2], hr_emg[0][0][6][2])) / auto_correlation
             axs[3].plot(x_values, cross_correlation)
             axs[3].set_title('Train Cross Correlation')
 
