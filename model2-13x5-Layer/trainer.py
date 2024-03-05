@@ -336,7 +336,7 @@ class Trainer:
 
             # log cross correlation
             auto_correlation = np.correlate(sr_channel, val_channel, mode='full')
-            cross_correlation = (np.correlate(val_channel, val_channel, mode='full')) / np.Max(auto_correlation)
+            cross_correlation = (np.correlate(val_channel, val_channel, mode='full')) / np.max(auto_correlation)
             axs[3].plot(len(cross_correlation), cross_correlation)
             axs[3].set_title('Train Cross Correlation')
 
