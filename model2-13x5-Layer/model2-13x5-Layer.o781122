@@ -1,0 +1,2266 @@
+### Starting TaskPrologue of job 781122 on tg074 at Tue 05 Mar 2024 09:15:36 PM CET
+Running on cores 6-7,12-13,22-23,28-29 with governor ondemand
+Tue Mar  5 21:15:36 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla V100-PCIE-32GB           On  | 00000000:86:00.0 Off |                    0 |
+| N/A   40C    P0              27W / 250W |      0MiB / 32768MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+load conda from module
+no change     /apps/python/3.10-anaconda/condabin/conda
+no change     /apps/python/3.10-anaconda/bin/conda
+no change     /apps/python/3.10-anaconda/bin/conda-env
+no change     /apps/python/3.10-anaconda/bin/activate
+no change     /apps/python/3.10-anaconda/bin/deactivate
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.sh
+no change     /apps/python/3.10-anaconda/etc/fish/conf.d/conda.fish
+no change     /apps/python/3.10-anaconda/shell/condabin/Conda.psm1
+no change     /apps/python/3.10-anaconda/shell/condabin/conda-hook.ps1
+no change     /apps/python/3.10-anaconda/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.csh
+no change     /home/hpc/iwso/iwso124h/.bashrc
+No action taken.
+using python /home/woody/iwso/iwso124h/.conda/envs/thesis_env/bin/python
+Tue Mar  5 21:15:40 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla V100-PCIE-32GB           On  | 00000000:86:00.0 Off |                    0 |
+| N/A   40C    P0              27W / 250W |      0MiB / 32768MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+python reaches gpu: True
+started data transfer at Tue 05 Mar 2024 09:15:50 PM CET
+finished transfer at Tue 05 Mar 2024 09:16:08 PM CET
+1.1G	./dataset
+1.1G	.
+Using Repository Revision
+f88dfdf Changed mode of third script
+wandb: Agent Starting Run: 31agrwvc with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 3
+wandb: Currently logged in as: janinakloos (masterthesis-sr). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/wandb/run-20240305_211629-31agrwvc
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run zany-sweep-1
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/1gbbqrwr
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/31agrwvc
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 63, in train
+    trainer.generate_sr_data()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/trainer.py", line 557, in generate_sr_data
+    self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 986, in load
+    with _open_file_like(f, 'rb') as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 435, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 416, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/hpc/iwso/iwso124h/model2-13x5-Layer-781122/final_generator.pt'
+wandb: - 7.445 MB of 7.445 MB uploadedwandb: \ 7.445 MB of 8.338 MB uploadedwandb: | 7.445 MB of 8.338 MB uploadedwandb: / 7.445 MB of 8.338 MB uploadedwandb: - 7.445 MB of 8.338 MB uploadedwandb: \ 7.445 MB of 8.338 MB uploadedwandb: | 7.445 MB of 8.338 MB uploadedwandb: / 7.445 MB of 8.338 MB uploadedwandb: - 7.453 MB of 8.338 MB uploadedwandb: \ 7.454 MB of 8.338 MB uploadedwandb: | 7.454 MB of 8.338 MB uploadedwandb: / 7.454 MB of 8.338 MB uploadedwandb: - 7.454 MB of 8.338 MB uploadedwandb: \ 7.454 MB of 8.338 MB uploadedwandb: | 7.454 MB of 8.338 MB uploadedwandb: / 7.454 MB of 8.338 MB uploadedwandb: - 7.454 MB of 8.338 MB uploadedwandb: \ 8.301 MB of 8.338 MB uploadedwandb: | 8.301 MB of 8.338 MB uploadedwandb: / 8.301 MB of 8.338 MB uploadedwandb: - 8.301 MB of 8.338 MB uploadedwandb: \ 8.301 MB of 8.338 MB uploadedwandb: | 8.338 MB of 8.338 MB uploadedwandb: / 8.338 MB of 8.338 MB uploadedwandb: - 8.338 MB of 8.338 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:      avg_loss_d ▆▅▆▄▃▂▅█▅▃▂▁▁▇▆▃▃▃▆▇▅▄▅▅▅▅▆▅▄▅
+wandb: avg_loss_d_fake ▆▅▆▅▃▂█▅▅▄▃▁▁█▆▄▃▃▆▆▆▄▅▅▅▅▇▅▄▅
+wandb: avg_loss_d_real ▄▄▄▃▂▂▂█▃▃▂▁▁▅▄▂▂▂▄▆▃▃▃▃▄▄▃▄▃▃
+wandb:      avg_loss_g █▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           epoch ▁▁▁▂▂▂▂▃▃▃▃▄▄▄▄▅▅▅▅▆▆▆▆▇▇▇▇███
+wandb:            psnr ▁▃▅▅▆▆▆▇▇▇▇▇▇▇██▇▇▇███████████
+wandb:        val_loss █▄▃▃▂▂▂▂▂▁▁▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      avg_loss_d 1.27428
+wandb: avg_loss_d_fake 0.66442
+wandb: avg_loss_d_real 0.60986
+wandb:      avg_loss_g 0.04825
+wandb:           epoch 30
+wandb:            psnr 16.68122
+wandb:        val_loss 0.02188
+wandb: 
+wandb: 🚀 View run zany-sweep-1 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/31agrwvc
+wandb: Synced 6 W&B file(s), 60 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240305_211629-31agrwvc/logs
+wandb: ERROR Run 31agrwvc errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 63, in train
+wandb: ERROR     trainer.generate_sr_data()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/trainer.py", line 557, in generate_sr_data
+wandb: ERROR     self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
+wandb: ERROR                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 986, in load
+wandb: ERROR     with _open_file_like(f, 'rb') as opened_file:
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 435, in _open_file_like
+wandb: ERROR     return _open_file(name_or_buffer, mode)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 416, in __init__
+wandb: ERROR     super().__init__(open(name, mode))
+wandb: ERROR                      ^^^^^^^^^^^^^^^^
+wandb: ERROR FileNotFoundError: [Errno 2] No such file or directory: '/home/hpc/iwso/iwso124h/model2-13x5-Layer-781122/final_generator.pt'
+wandb: ERROR 
+wandb: Agent Starting Run: c3tv0qe6 with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: ERROR Run c3tv0qe6 errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 46, in train
+wandb: ERROR     with wandb.init(config=sweepconfig):
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1195, in init
+wandb: ERROR     raise e
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1172, in init
+wandb: ERROR     wi.setup(kwargs)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 189, in setup
+wandb: ERROR     self._wl = wandb_setup.setup(settings=setup_settings)
+wandb: ERROR                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 327, in setup
+wandb: ERROR     ret = _setup(settings=settings)
+wandb: ERROR           ^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 320, in _setup
+wandb: ERROR     wl = _WandbSetup(settings=settings)
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 303, in __init__
+wandb: ERROR     _WandbSetup._instance = _WandbSetup__WandbSetup(settings=settings, pid=pid)
+wandb: ERROR                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 114, in __init__
+wandb: ERROR     self._setup()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 250, in _setup
+wandb: ERROR     self._setup_manager()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 277, in _setup_manager
+wandb: ERROR     self._manager = wandb_manager._Manager(settings=self._settings)
+wandb: ERROR                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_manager.py", line 139, in __init__
+wandb: ERROR     self._service.start()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 245, in start
+wandb: ERROR     self._launch_server()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 239, in _launch_server
+wandb: ERROR     _sentry.reraise(e)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/analytics/sentry.py", line 154, in reraise
+wandb: ERROR     raise exc.with_traceback(sys.exc_info()[2])
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 237, in _launch_server
+wandb: ERROR     self._wait_for_ports(fname, proc=internal_proc)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 132, in _wait_for_ports
+wandb: ERROR     raise ServiceStartTimeoutError(
+wandb: ERROR wandb.sdk.service.service.ServiceStartTimeoutError: Timed out waiting for wandb service to start after 30.0 seconds. Try increasing the timeout with the `_service_wait` setting.
+wandb: ERROR 
+wandb: Agent Starting Run: 1t3h7q4v with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: ERROR Run 1t3h7q4v errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 46, in train
+wandb: ERROR     with wandb.init(config=sweepconfig):
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1195, in init
+wandb: ERROR     raise e
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1172, in init
+wandb: ERROR     wi.setup(kwargs)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 189, in setup
+wandb: ERROR     self._wl = wandb_setup.setup(settings=setup_settings)
+wandb: ERROR                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 327, in setup
+wandb: ERROR     ret = _setup(settings=settings)
+wandb: ERROR           ^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 320, in _setup
+wandb: ERROR     wl = _WandbSetup(settings=settings)
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 303, in __init__
+wandb: ERROR     _WandbSetup._instance = _WandbSetup__WandbSetup(settings=settings, pid=pid)
+wandb: ERROR                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 114, in __init__
+wandb: ERROR     self._setup()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 250, in _setup
+wandb: ERROR     self._setup_manager()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 277, in _setup_manager
+wandb: ERROR     self._manager = wandb_manager._Manager(settings=self._settings)
+wandb: ERROR                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_manager.py", line 139, in __init__
+wandb: ERROR     self._service.start()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 245, in start
+wandb: ERROR     self._launch_server()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 239, in _launch_server
+wandb: ERROR     _sentry.reraise(e)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/analytics/sentry.py", line 154, in reraise
+wandb: ERROR     raise exc.with_traceback(sys.exc_info()[2])
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 237, in _launch_server
+wandb: ERROR     self._wait_for_ports(fname, proc=internal_proc)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 132, in _wait_for_ports
+wandb: ERROR     raise ServiceStartTimeoutError(
+wandb: ERROR wandb.sdk.service.service.ServiceStartTimeoutError: Timed out waiting for wandb service to start after 30.0 seconds. Try increasing the timeout with the `_service_wait` setting.
+wandb: ERROR 
+wandb: Agent Starting Run: vvhc4023 with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: ERROR Run vvhc4023 errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 46, in train
+wandb: ERROR     with wandb.init(config=sweepconfig):
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1195, in init
+wandb: ERROR     raise e
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1172, in init
+wandb: ERROR     wi.setup(kwargs)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 189, in setup
+wandb: ERROR     self._wl = wandb_setup.setup(settings=setup_settings)
+wandb: ERROR                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 327, in setup
+wandb: ERROR     ret = _setup(settings=settings)
+wandb: ERROR           ^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 320, in _setup
+wandb: ERROR     wl = _WandbSetup(settings=settings)
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 303, in __init__
+wandb: ERROR     _WandbSetup._instance = _WandbSetup__WandbSetup(settings=settings, pid=pid)
+wandb: ERROR                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 114, in __init__
+wandb: ERROR     self._setup()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 250, in _setup
+wandb: ERROR     self._setup_manager()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 277, in _setup_manager
+wandb: ERROR     self._manager = wandb_manager._Manager(settings=self._settings)
+wandb: ERROR                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_manager.py", line 139, in __init__
+wandb: ERROR     self._service.start()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 245, in start
+wandb: ERROR     self._launch_server()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 239, in _launch_server
+wandb: ERROR     _sentry.reraise(e)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/analytics/sentry.py", line 154, in reraise
+wandb: ERROR     raise exc.with_traceback(sys.exc_info()[2])
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 237, in _launch_server
+wandb: ERROR     self._wait_for_ports(fname, proc=internal_proc)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 132, in _wait_for_ports
+wandb: ERROR     raise ServiceStartTimeoutError(
+wandb: ERROR wandb.sdk.service.service.ServiceStartTimeoutError: Timed out waiting for wandb service to start after 30.0 seconds. Try increasing the timeout with the `_service_wait` setting.
+wandb: ERROR 
+wandb: Agent Starting Run: 36tb450k with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 4
+wandb: ERROR Run 36tb450k errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 46, in train
+wandb: ERROR     with wandb.init(config=sweepconfig):
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1195, in init
+wandb: ERROR     raise e
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1172, in init
+wandb: ERROR     wi.setup(kwargs)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 189, in setup
+wandb: ERROR     self._wl = wandb_setup.setup(settings=setup_settings)
+wandb: ERROR                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 327, in setup
+wandb: ERROR     ret = _setup(settings=settings)
+wandb: ERROR           ^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 320, in _setup
+wandb: ERROR     wl = _WandbSetup(settings=settings)
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 303, in __init__
+wandb: ERROR     _WandbSetup._instance = _WandbSetup__WandbSetup(settings=settings, pid=pid)
+wandb: ERROR                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 114, in __init__
+wandb: ERROR     self._setup()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 250, in _setup
+wandb: ERROR     self._setup_manager()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 277, in _setup_manager
+wandb: ERROR     self._manager = wandb_manager._Manager(settings=self._settings)
+wandb: ERROR                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_manager.py", line 139, in __init__
+wandb: ERROR     self._service.start()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 245, in start
+wandb: ERROR     self._launch_server()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 239, in _launch_server
+wandb: ERROR     _sentry.reraise(e)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/analytics/sentry.py", line 154, in reraise
+wandb: ERROR     raise exc.with_traceback(sys.exc_info()[2])
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 237, in _launch_server
+wandb: ERROR     self._wait_for_ports(fname, proc=internal_proc)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 132, in _wait_for_ports
+wandb: ERROR     raise ServiceStartTimeoutError(
+wandb: ERROR wandb.sdk.service.service.ServiceStartTimeoutError: Timed out waiting for wandb service to start after 30.0 seconds. Try increasing the timeout with the `_service_wait` setting.
+wandb: ERROR 
+wandb: Agent Starting Run: 7zchk95z with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: ERROR Run 7zchk95z errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-3.py", line 46, in train
+wandb: ERROR     with wandb.init(config=sweepconfig):
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1195, in init
+wandb: ERROR     raise e
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 1172, in init
+wandb: ERROR     wi.setup(kwargs)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_init.py", line 189, in setup
+wandb: ERROR     self._wl = wandb_setup.setup(settings=setup_settings)
+wandb: ERROR                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 327, in setup
+wandb: ERROR     ret = _setup(settings=settings)
+wandb: ERROR           ^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 320, in _setup
+wandb: ERROR     wl = _WandbSetup(settings=settings)
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 303, in __init__
+wandb: ERROR     _WandbSetup._instance = _WandbSetup__WandbSetup(settings=settings, pid=pid)
+wandb: ERROR                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 114, in __init__
+wandb: ERROR     self._setup()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 250, in _setup
+wandb: ERROR     self._setup_manager()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_setup.py", line 277, in _setup_manager
+wandb: ERROR     self._manager = wandb_manager._Manager(settings=self._settings)
+wandb: ERROR                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/wandb_manager.py", line 139, in __init__
+wandb: ERROR     self._service.start()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 245, in start
+wandb: ERROR     self._launch_server()
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 239, in _launch_server
+wandb: ERROR     _sentry.reraise(e)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/analytics/sentry.py", line 154, in reraise
+wandb: ERROR     raise exc.with_traceback(sys.exc_info()[2])
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 237, in _launch_server
+wandb: ERROR     self._wait_for_ports(fname, proc=internal_proc)
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/sdk/service/service.py", line 132, in _wait_for_ports
+wandb: ERROR     raise ServiceStartTimeoutError(
+wandb: ERROR wandb.sdk.service.service.ServiceStartTimeoutError: Timed out waiting for wandb service to start after 30.0 seconds. Try increasing the timeout with the `_service_wait` setting.
+wandb: ERROR 
+wandb: ERROR Detected 5 failed runs in a row at start, killing sweep.
+wandb: To change this value set WANDB_AGENT_MAX_INITIAL_FAILURES=val
+Create sweep with ID: 1gbbqrwr
+Sweep URL: https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/1gbbqrwr
+cuda
+init done
+Successfully prepared the data
+Successfully initialized the models
+epoch 1
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [1/30] Average Loss D: 1.3670540126887234, Average Loss G: 0.31760184991766105
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [1/30] Validation Loss: 0.09588498317382553
+After epoch 1, GPU memory allocated increased by: 1980844032 bytes
+After epoch 1, GPU memory cached increased by: 28164751360 bytes
+epoch 2
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [2/30] Average Loss D: 1.296041185205633, Average Loss G: 0.12659203633666039
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [2/30] Validation Loss: 0.056767301125959915
+After epoch 2, GPU memory allocated increased by: 524288 bytes
+After epoch 2, GPU memory cached increased by: 408944640 bytes
+epoch 3
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [3/30] Average Loss D: 1.3920446119525216, Average Loss G: 0.10128044049170884
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [3/30] Validation Loss: 0.04469664496454326
+After epoch 3, GPU memory allocated increased by: -1048576 bytes
+After epoch 3, GPU memory cached increased by: 0 bytes
+epoch 4
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [4/30] Average Loss D: 1.2295702587474475, Average Loss G: 0.0903638249093836
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [4/30] Validation Loss: 0.03849404372952201
+After epoch 4, GPU memory allocated increased by: 524288 bytes
+After epoch 4, GPU memory cached increased by: 0 bytes
+epoch 5
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [5/30] Average Loss D: 1.043057304891673, Average Loss G: 0.0850414979186925
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [5/30] Validation Loss: 0.03458705713803118
+After epoch 5, GPU memory allocated increased by: 65536 bytes
+After epoch 5, GPU memory cached increased by: 0 bytes
+epoch 6
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [6/30] Average Loss D: 0.9347196153619073, Average Loss G: 0.08299152383750136
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [6/30] Validation Loss: 0.03204523264007135
+After epoch 6, GPU memory allocated increased by: 983040 bytes
+After epoch 6, GPU memory cached increased by: 0 bytes
+epoch 7
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [7/30] Average Loss D: 1.347418804060329, Average Loss G: 0.0796354069289836
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [7/30] Validation Loss: 0.030157879333604466
+After epoch 7, GPU memory allocated increased by: -131072 bytes
+After epoch 7, GPU memory cached increased by: 0 bytes
+epoch 8
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [8/30] Average Loss D: 1.6773530786687678, Average Loss G: 0.07705140664157542
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [8/30] Validation Loss: 0.02759920924224637
+After epoch 8, GPU memory allocated increased by: -1310720 bytes
+After epoch 8, GPU memory cached increased by: 0 bytes
+epoch 9
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [9/30] Average Loss D: 1.2416769293221561, Average Loss G: 0.06922528968954628
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [9/30] Validation Loss: 0.02631602944298224
+After epoch 9, GPU memory allocated increased by: 1048576 bytes
+After epoch 9, GPU memory cached increased by: 0 bytes
+epoch 10
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [10/30] Average Loss D: 1.1090909378095106, Average Loss G: 0.06839669351889328
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [10/30] Validation Loss: 0.025579255582256752
+After epoch 10, GPU memory allocated increased by: 1310720 bytes
+After epoch 10, GPU memory cached increased by: 0 bytes
+epoch 11
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [11/30] Average Loss D: 0.9815968965942209, Average Loss G: 0.06793706711720336
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [11/30] Validation Loss: 0.02527046169747006
+After epoch 11, GPU memory allocated increased by: -1966080 bytes
+After epoch 11, GPU memory cached increased by: 0 bytes
+epoch 12
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [12/30] Average Loss D: 0.8130476501854983, Average Loss G: 0.0689613748003136
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [12/30] Validation Loss: 0.025511267679658802
+After epoch 12, GPU memory allocated increased by: 524288 bytes
+After epoch 12, GPU memory cached increased by: 0 bytes
+epoch 13
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [13/30] Average Loss D: 0.7981619442051108, Average Loss G: 0.06979734264314175
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [13/30] Validation Loss: 0.026129478758031673
+After epoch 13, GPU memory allocated increased by: -1048576 bytes
+After epoch 13, GPU memory cached increased by: 0 bytes
+epoch 14
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [14/30] Average Loss D: 1.5880843549966812, Average Loss G: 0.06777962728996169
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [14/30] Validation Loss: 0.02381827529858459
+After epoch 14, GPU memory allocated increased by: 524288 bytes
+After epoch 14, GPU memory cached increased by: 0 bytes
+epoch 15
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [15/30] Average Loss D: 1.3637077591635964, Average Loss G: 0.06248749750242992
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [15/30] Validation Loss: 0.022835789756341415
+After epoch 15, GPU memory allocated increased by: 65536 bytes
+After epoch 15, GPU memory cached increased by: 0 bytes
+epoch 16
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [16/30] Average Loss D: 1.0880808911540292, Average Loss G: 0.059998564845459026
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [16/30] Validation Loss: 0.02304140478372574
+After epoch 16, GPU memory allocated increased by: 983040 bytes
+After epoch 16, GPU memory cached increased by: 0 bytes
+epoch 17
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [17/30] Average Loss D: 1.0307872214100577, Average Loss G: 0.06098211273042993
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [17/30] Validation Loss: 0.02392276528884064
+After epoch 17, GPU memory allocated increased by: -131072 bytes
+After epoch 17, GPU memory cached increased by: 0 bytes
+epoch 18
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [18/30] Average Loss D: 1.0754061801867052, Average Loss G: 0.060798857657408174
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [18/30] Validation Loss: 0.0248771243813363
+After epoch 18, GPU memory allocated increased by: -1310720 bytes
+After epoch 18, GPU memory cached increased by: 0 bytes
+epoch 19
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [19/30] Average Loss D: 1.4432809908281674, Average Loss G: 0.05984369800849394
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [19/30] Validation Loss: 0.024269829588857563
+After epoch 19, GPU memory allocated increased by: 1048576 bytes
+After epoch 19, GPU memory cached increased by: 0 bytes
+epoch 20
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [20/30] Average Loss D: 1.541495144367218, Average Loss G: 0.058258325792849064
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [20/30] Validation Loss: 0.02193527871912176
+After epoch 20, GPU memory allocated increased by: 1310720 bytes
+After epoch 20, GPU memory cached increased by: 0 bytes
+epoch 21
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [21/30] Average Loss D: 1.32635928013108, Average Loss G: 0.053546698806299406
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [21/30] Validation Loss: 0.021627502346580677
+After epoch 21, GPU memory allocated increased by: -1966080 bytes
+After epoch 21, GPU memory cached increased by: 0 bytes
+epoch 22
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [22/30] Average Loss D: 1.2280653010715137, Average Loss G: 0.05303321105682037
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [22/30] Validation Loss: 0.02192188392985951
+After epoch 22, GPU memory allocated increased by: 524288 bytes
+After epoch 22, GPU memory cached increased by: 0 bytes
+epoch 23
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [23/30] Average Loss D: 1.2543185244907031, Average Loss G: 0.052203654777258635
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [23/30] Validation Loss: 0.022122894583100624
+After epoch 23, GPU memory allocated increased by: -1048576 bytes
+After epoch 23, GPU memory cached increased by: 0 bytes
+epoch 24
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [24/30] Average Loss D: 1.2759702639146284, Average Loss G: 0.051506178665228865
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [24/30] Validation Loss: 0.02239843068475073
+After epoch 24, GPU memory allocated increased by: 524288 bytes
+After epoch 24, GPU memory cached increased by: 0 bytes
+epoch 25
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [25/30] Average Loss D: 1.3049433421004901, Average Loss G: 0.051428874361921444
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [25/30] Validation Loss: 0.022644877433776855
+After epoch 25, GPU memory allocated increased by: 65536 bytes
+After epoch 25, GPU memory cached increased by: 0 bytes
+epoch 26
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [26/30] Average Loss D: 1.3488417294892399, Average Loss G: 0.0517192254350944
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [26/30] Validation Loss: 0.02219432092864405
+After epoch 26, GPU memory allocated increased by: 983040 bytes
+After epoch 26, GPU memory cached increased by: 0 bytes
+epoch 27
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [27/30] Average Loss D: 1.3825591016899457, Average Loss G: 0.049376152963800865
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [27/30] Validation Loss: 0.020703994669020176
+After epoch 27, GPU memory allocated increased by: -131072 bytes
+After epoch 27, GPU memory cached increased by: 0 bytes
+epoch 28
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [28/30] Average Loss D: 1.2650306577032262, Average Loss G: 0.049494818318635225
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [28/30] Validation Loss: 0.021178902126848698
+After epoch 28, GPU memory allocated increased by: -1310720 bytes
+After epoch 28, GPU memory cached increased by: 0 bytes
+epoch 29
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [29/30] Average Loss D: 1.2310087816281752, Average Loss G: 0.0491302710195834
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [29/30] Validation Loss: 0.022146350196139378
+After epoch 29, GPU memory allocated increased by: 1048576 bytes
+After epoch 29, GPU memory cached increased by: 0 bytes
+epoch 30
+batch index 0
+batch index 1
+batch index 2
+batch index 3
+batch index 4
+batch index 5
+batch index 6
+batch index 7
+batch index 8
+batch index 9
+batch index 10
+batch index 11
+batch index 12
+batch index 13
+batch index 14
+batch index 15
+batch index 16
+batch index 17
+batch index 18
+batch index 19
+batch index 20
+batch index 21
+batch index 22
+batch index 23
+batch index 24
+batch index 25
+batch index 26
+batch index 27
+batch index 28
+batch index 29
+batch index 30
+batch index 31
+batch index 32
+batch index 33
+batch index 34
+batch index 35
+batch index 36
+batch index 37
+batch index 38
+batch index 39
+batch index 40
+batch index 41
+batch index 42
+batch index 43
+Epoch [30/30] Average Loss D: 1.2742822522466832, Average Loss G: 0.04824923067776994
+validation batch index 0
+Logging plots for batch index 0
+validation batch index 1
+validation batch index 2
+validation batch index 3
+validation batch index 4
+validation batch index 5
+validation batch index 6
+validation batch index 7
+validation batch index 8
+validation batch index 9
+validation batch index 10
+Epoch [30/30] Validation Loss: 0.021878799762238155
+After epoch 30, GPU memory allocated increased by: 1310720 bytes
+After epoch 30, GPU memory cached increased by: 0 bytes
+=== JOB_STATISTICS ===
+=== current date     : Wed 06 Mar 2024 12:50:12 AM CET
+= Job-ID             : 781122 on tinygpu
+= Job-Name           : model2-13x5-Layer
+= Job-Command        : /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train-script3-3.sh
+= Initial workdir    : /home/hpc/iwso/iwso124h/code/model2-13x5-Layer
+= Queue/Partition    : v100
+= Slurm account      : iwso with QOS=normal
+= Requested resources:  for 1-00:00:00
+= Elapsed runtime    : 03:34:38
+= Total RAM usage    : 1.1 GiB of requested  GiB (%)   
+= Node list          : tg074
+= Subm/Elig/Start/End: 2024-03-05T16:38:39 / 2024-03-05T16:38:39 / 2024-03-05T21:15:34 / 2024-03-06T00:50:12
+======================
+=== Quota infos ======
+    Path              Used     SoftQ    HardQ    Gracetime  Filec    FileQ    FiHaQ    FileGrace    
+    /home/hpc            6.3G   104.9G   209.7G        N/A   3,839      500K   1,000K        N/A    
+    /home/vault       2146.8M  1048.6G  2097.2G        N/A       2      200K     400K        N/A    
+    /home/woody         19.3G   500.0G   750.0G        N/A      98K   5,000K   7,500K        N/A    
+======================
+=== GPU utilization ==
+gpu_name, gpu_bus_id, pid, gpu_utilization [%], mem_utilization [%], max_memory_usage [MiB], time [ms]
+Tesla V100-PCIE-32GB, 00000000:86:00.0, 1659883, 92 %, 20 %, 28338 MiB, 12815116 ms

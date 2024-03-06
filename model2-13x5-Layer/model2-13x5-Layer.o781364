@@ -1,0 +1,245 @@
+### Starting TaskPrologue of job 781364 on tg095 at Wed 06 Mar 2024 05:51:19 AM CET
+Running on cores 0-31 with governor ondemand
+Wed Mar  6 05:51:19 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:01:00.0 Off |                    0 |
+| N/A   45C    P0              55W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+### Finished TaskPrologue
+
+load conda from module
+no change     /apps/python/3.10-anaconda/condabin/conda
+no change     /apps/python/3.10-anaconda/bin/conda
+no change     /apps/python/3.10-anaconda/bin/conda-env
+no change     /apps/python/3.10-anaconda/bin/activate
+no change     /apps/python/3.10-anaconda/bin/deactivate
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.sh
+no change     /apps/python/3.10-anaconda/etc/fish/conf.d/conda.fish
+no change     /apps/python/3.10-anaconda/shell/condabin/Conda.psm1
+no change     /apps/python/3.10-anaconda/shell/condabin/conda-hook.ps1
+no change     /apps/python/3.10-anaconda/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /apps/python/3.10-anaconda/etc/profile.d/conda.csh
+no change     /home/hpc/iwso/iwso124h/.bashrc
+No action taken.
+using python /home/woody/iwso/iwso124h/.conda/envs/thesis_env/bin/python
+Wed Mar  6 05:51:21 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.113.01             Driver Version: 535.113.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  | 00000000:01:00.0 Off |                    0 |
+| N/A   45C    P0              62W / 400W |      4MiB / 40960MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+python reaches gpu: True
+started data transfer at Wed 06 Mar 2024 05:51:30 AM CET
+finished transfer at Wed 06 Mar 2024 05:51:32 AM CET
+1.1G	./dataset
+1.1G	.
+Using Repository Revision
+7274660 Changed batch size due to cuda problems
+wandb: Agent Starting Run: t407v4pj with config:
+wandb: 	batch_size: 13
+wandb: 	learning_rate: 1e-05
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 5
+wandb: Currently logged in as: janinakloos (masterthesis-sr). Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.16.4 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/wandb/run-20240306_055144-t407v4pj
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run glamorous-sweep-1
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/4lq0kl76
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/t407v4pj
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train.py", line 63, in train
+    trainer.generate_sr_data()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/trainer.py", line 557, in generate_sr_data
+    self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 986, in load
+    with _open_file_like(f, 'rb') as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 435, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 416, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/hpc/iwso/iwso124h/model2-13x5-Layer-781364/final_generator.pt'
+wandb: - 25.715 MB of 25.715 MB uploadedwandb: \ 25.638 MB of 26.748 MB uploadedwandb: | 26.748 MB of 26.748 MB uploadedwandb: / 26.748 MB of 26.748 MB uploadedwandb: - 26.748 MB of 26.748 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:      avg_loss_d ▇▇▆▁▅▁▅▅▆▇▇▇▇▇██▇▆▇▇▇▇█▇▇▇▇▆▇▇▆▅▇▇▇▇▇▇▇▆
+wandb: avg_loss_d_fake ▇▇▆▂▅▁▄▅▅▇█▅▅▆▇▆█▇██▅▆▆▅▇▆▆▆▆▆▅▆▆▇█▇█▅▅▅
+wandb: avg_loss_d_real ▆▆▅▁▄▁▅▅▆▅▄▇▇▆▇▇▅▅▅▅▇▇██▆▆▆▅▇▆▅▄▇▅▅▆▆█▇▆
+wandb:      avg_loss_g █▃▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:           epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇▇███
+wandb:            psnr ▁▄▆▆▇▆▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▆███▇▇██▇███▆▇▇▇
+wandb:        val_loss █▃▂▂▂▂▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▂▁▁▁▂▁▁▁▁▁▁▁▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      avg_loss_d 1.25732
+wandb: avg_loss_d_fake 0.58634
+wandb: avg_loss_d_real 0.67099
+wandb:      avg_loss_g 0.01918
+wandb:           epoch 100
+wandb:            psnr 16.87919
+wandb:        val_loss 0.02206
+wandb: 
+wandb: 🚀 View run glamorous-sweep-1 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/t407v4pj
+wandb: Synced 6 W&B file(s), 200 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240306_055144-t407v4pj/logs
+wandb: ERROR Run t407v4pj errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train.py", line 63, in train
+wandb: ERROR     trainer.generate_sr_data()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/trainer.py", line 557, in generate_sr_data
+wandb: ERROR     self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
+wandb: ERROR                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 986, in load
+wandb: ERROR     with _open_file_like(f, 'rb') as opened_file:
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 435, in _open_file_like
+wandb: ERROR     return _open_file(name_or_buffer, mode)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 416, in __init__
+wandb: ERROR     super().__init__(open(name, mode))
+wandb: ERROR                      ^^^^^^^^^^^^^^^^
+wandb: ERROR FileNotFoundError: [Errno 2] No such file or directory: '/home/hpc/iwso/iwso124h/model2-13x5-Layer-781364/final_generator.pt'
+wandb: ERROR 
+wandb: Agent Starting Run: d6hx8qyw with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 3
+wandb: wandb version 0.16.4 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/wandb/run-20240306_073844-d6hx8qyw
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run gentle-sweep-2
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/4lq0kl76
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/d6hx8qyw
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
+Traceback (most recent call last):
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train.py", line 63, in train
+    trainer.generate_sr_data()
+  File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/trainer.py", line 557, in generate_sr_data
+    self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 986, in load
+    with _open_file_like(f, 'rb') as opened_file:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 435, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 416, in __init__
+    super().__init__(open(name, mode))
+                     ^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/hpc/iwso/iwso124h/model2-13x5-Layer-781364/final_generator.pt'
+wandb: - 27.172 MB of 27.172 MB uploadedwandb: \ 28.141 MB of 28.143 MB uploadedwandb: | 28.143 MB of 28.143 MB uploadedwandb: / 28.143 MB of 28.143 MB uploadedwandb: - 28.143 MB of 28.143 MB uploadedwandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:      avg_loss_d █▇▆▆▆▇▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▅▆▆▆▃▃▇▆▅▄▂▃▂▁▇▆▅▃
+wandb: avg_loss_d_fake ▇▆▆▅▅▆▅▆▅▅▅▅▅▆▅▅▅▅▅▅▅▅▄▅▅▅▃▂▇▅▅▂▁▂▂▁█▅▄▃
+wandb: avg_loss_d_real █▇▆▆▆▇▇▆▆▆▆▆▆▆▆▆▆▆▆▆▆▆▅▆▆▆▃▃▇▆▅▅▃▃▂▁▅▅▅▃
+wandb:      avg_loss_g █▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▂▁▁▁▂▂▂▃▂▂▁▂▁
+wandb:           epoch ▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇▇███
+wandb:            psnr ▁▅▆▆▇▆▇▅▆▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▅▅▆▇█▇▆▆▆▅▆█▅▇
+wandb:        val_loss █▃▂▂▂▂▂▃▂▂▂▁▁▂▂▂▁▁▂▁▂▁▂▁▁▁▃▃▂▁▁▂▂▂▂▃▂▁▃▂
+wandb: 
+wandb: Run summary:
+wandb:      avg_loss_d 0.97407
+wandb: avg_loss_d_fake 0.53851
+wandb: avg_loss_d_real 0.43556
+wandb:      avg_loss_g 0.0372
+wandb:           epoch 100
+wandb:            psnr 17.88281
+wandb:        val_loss 0.01673
+wandb: 
+wandb: 🚀 View run gentle-sweep-2 at: https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/d6hx8qyw
+wandb: Synced 6 W&B file(s), 200 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240306_073844-d6hx8qyw/logs
+wandb: ERROR Run d6hx8qyw errored:
+wandb: ERROR Traceback (most recent call last):
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/wandb/agents/pyagent.py", line 308, in _run_job
+wandb: ERROR     self._function()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train.py", line 92, in <lambda>
+wandb: ERROR     function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
+wandb: ERROR                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/train.py", line 63, in train
+wandb: ERROR     trainer.generate_sr_data()
+wandb: ERROR   File "/home/hpc/iwso/iwso124h/code/model2-13x5-Layer/trainer.py", line 557, in generate_sr_data
+wandb: ERROR     self.generator.load_state_dict(torch.load(self.run_folder + '/final_generator.pt'))
+wandb: ERROR                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 986, in load
+wandb: ERROR     with _open_file_like(f, 'rb') as opened_file:
+wandb: ERROR          ^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 435, in _open_file_like
+wandb: ERROR     return _open_file(name_or_buffer, mode)
+wandb: ERROR            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wandb: ERROR   File "/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/serialization.py", line 416, in __init__
+wandb: ERROR     super().__init__(open(name, mode))
+wandb: ERROR                      ^^^^^^^^^^^^^^^^
+wandb: ERROR FileNotFoundError: [Errno 2] No such file or directory: '/home/hpc/iwso/iwso124h/model2-13x5-Layer-781364/final_generator.pt'
+wandb: ERROR 
+wandb: Agent Starting Run: 3sz4udvf with config:
+wandb: 	batch_size: 12
+wandb: 	learning_rate: 0.0001
+wandb: 	num_res_blocks: 5
+wandb: 	num_res_blocks_last: 3
+wandb: wandb version 0.16.4 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.16.3
+wandb: Run data is saved locally in /home/hpc/iwso/iwso124h/code/model2-13x5-Layer/wandb/run-20240306_091939-3sz4udvf
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run dauntless-sweep-3
+wandb: ⭐️ View project at https://wandb.ai/masterthesis-sr/emg-super-resolution
+wandb: 🧹 View sweep at https://wandb.ai/masterthesis-sr/emg-super-resolution/sweeps/4lq0kl76
+wandb: 🚀 View run at https://wandb.ai/masterthesis-sr/emg-super-resolution/runs/3sz4udvf
+wandb: WARNING Ignored wandb.init() arg project when running a sweep.
+wandb: WARNING Ignored wandb.init() arg entity when running a sweep.
+/home/woody/iwso/iwso124h/.conda/envs/thesis_env/lib/python3.11/site-packages/torch/cuda/memory.py:444: FutureWarning: torch.cuda.memory_cached has been renamed to torch.cuda.memory_reserved
+  warnings.warn(
