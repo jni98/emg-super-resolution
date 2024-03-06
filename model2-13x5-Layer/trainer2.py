@@ -1,7 +1,8 @@
 """
 Author: Janina Kloos (janina.kloos@gmx.de)
 Date created: 02.02.2024
-File description: This file contains the class Trainer. It is used to train the GAN and to generate super resolution data.
+File description: This file contains the class Trainer. It is used to train the GAN and to generate super resolution
+data.
 
 The code is called from the train.py file which is started by the main function.
 """
@@ -48,10 +49,6 @@ class Trainer:
                     Path to the directory where the results should be saved
         num_epochs: int
                     Number of epochs to train the model
-        batch_size: int
-                    Batch size to use during training
-        learning_rate: float
-                    Learning rate to use during training
         """
 
         self.data_directory = data_directory
@@ -124,7 +121,7 @@ class Trainer:
         # Ensure the directory exists
         print("Creating folder")
         print(self.run_folder + self.unique_folder)
-        os.makedirs(self.run_folder +self.unique_folder, exist_ok=True)
+        os.makedirs(self.run_folder + self.unique_folder, exist_ok=True)
 
         # Save the dictionary to a file
         with open(self.run_folder + self.unique_folder + '/hyperparameter.json', 'w') as file:
@@ -557,7 +554,8 @@ class Trainer:
         """
         print("Starting to generate SR data")
         # load the final generator
-        self.generator.load_state_dict(torch.load('/home/hpc/iwso/iwso124h/model2-13x5-Layer-781364/20240306091944/final_generator.pt'))
+        self.generator.load_state_dict(
+            torch.load('/home/hpc/iwso/iwso124h/model2-13x5-Layer-781364/20240306091944/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
         with torch.no_grad():
