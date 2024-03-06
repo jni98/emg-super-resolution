@@ -12,23 +12,23 @@ import argparse
 import torch
 import wandb  # Import wandb library
 
-from trainer import Trainer
+from trainer3 import Trainer
 
 
 def setup_sweep():
     # Define the sweep config
     sweep_config = {
-        'method': 'bayes',
+        'method': 'grid',
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-                'values': [12],  # Add the batch sizes you want to include
+                'values': [1],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [0.00001]
+                'values': [0.0001]
             },
             'num_res_blocks_last': {
-                'values': [3, 4,5]
+                'values': [3]
             },
             'num_res_blocks': {
                 'values': [5]
@@ -81,16 +81,16 @@ if __name__ == "__main__":
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
     # Parse arguments
-    args = parse_args()
-    data_directory = args.data
-    test_data_directory = args.testdata
-    results_directory = args.results
-    num_epochs = args.epochs
+    # args = parse_args()
+    # data_directory = args.data
+    # test_data_directory = args.testdata
+    # results_directory = args.results
+    # num_epochs = args.epochs
 
-    # data_directory = '../dataset/train'
-    # test_data_directory ='../dataset/test'
-    # results_directory = 'runs/'
-    # num_epochs = 50
+    data_directory = '../dataset/train'
+    test_data_directory ='../dataset/test'
+    results_directory = 'runs'
+    num_epochs = 1
 
     # Run the sweep
     wandb.agent(sweep_id,

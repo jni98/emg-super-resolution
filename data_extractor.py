@@ -400,6 +400,10 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
                     sub_array = emg_data[row][col]
                     emg_hr_reshaped[row, col] = sub_array
 
+        # In case that last dimension is not divisible by 6 delete samples so that generator works
+        if emg_hr_reshaped.shape[2] % 6 != 0:
+            emg_hr_reshaped = emg_hr_reshaped[:, :, :-(emg_hr_reshaped.shape[2] % 6)]
+
         # Reshape LR data into 3D
         for row in range(emg_lr.shape[0]):
             for col in range(emg_lr.shape[1]):
@@ -408,6 +412,10 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
                 else:
                     sub_array = emg_lr[row][col]
                     emg_lr_reshaped[row, col] = sub_array
+
+        # In case that last dimension is not divisible by 6 delete samples so that generator works
+        if emg_lr_reshaped.shape[2] % 6 != 0:
+            emg_lr_reshaped = emg_lr_reshaped[:, :, :-(emg_lr_reshaped.shape[2] % 6)]
 
         plt.figure()
         plt.plot(emg_hr_reshaped[0, 0])

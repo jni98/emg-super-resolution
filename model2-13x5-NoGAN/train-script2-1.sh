@@ -4,25 +4,25 @@
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model2-13x5-NoGAN-final
+#SBATCH --job-name=model2-13x5-NoGAN
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
-#SBATCH --gres=gpu:v100:1
-#SBATCH --partition=v100
+#SBATCH --gres=gpu:a100:1
+#SBATCH --partition=a100
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV
 
 ############    paths    ###############
 
-SRC_DIR=$HOME/code/model2-13x5-NoGAN-final
-RESULTS_DIR=$HOME/model2-13x5-NoGAN-final-$SLURM_JOB_ID
+SRC_DIR=$HOME/code/model2-13x5-NoGAN
+RESULTS_DIR=$HOME/model2-13x5-NoGAN-$SLURM_JOB_ID
 DATA_ARCHIVE=$HPCVAULT/dataset.tar
-FAST_DATA_DIR=$TMPDIR/model2-13x5-NoGAN-final-$SLURM_JOB_ID
+FAST_DATA_DIR=$TMPDIR/model2-13x5-NoGAN-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=30
+EPOCHS=50
 
 ############    params   ###############
 

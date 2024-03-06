@@ -557,7 +557,7 @@ class Trainer:
         """
         print("Starting to generate SR data")
         # load the final generator
-        self.generator.load_state_dict(torch.load('/home/hpc/iwso/iwso124h/model2-13x5-Layer-781033/20240305154059/final_generator.pt'))
+        self.generator.load_state_dict(torch.load('/home/hpc/iwso/iwso124h/model2-13x5-Layer-781364/20240306091944/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
         with torch.no_grad():

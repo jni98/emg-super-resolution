@@ -17,7 +17,7 @@ from trainer import Trainer
 def setup_sweep():
     # Define the sweep config
     sweep_config = {
-        'method': 'grid',
+        'method': 'bayes',
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
@@ -33,10 +33,10 @@ def setup_sweep():
                 'values': [5]
             },
             'dropout_prob_input': {
-                'values': [0.0]
+                'values': [0.0, 0.1]
             },
             'dropout_prob': {
-                'values': [0.0]
+                'values': [0.0, 0.2, 0.4]
             },
         }
     }
@@ -66,7 +66,7 @@ def train(data_directory: str, test_data_directory: str, results_directory: str,
         # Plot the training results
         trainer._plot_result_losses(train_G_loss, val_loss, psnr)
 
-    trainer.generate_sr_data()
+    # trainer.generate_sr_data()
 
 
 def parse_args():
