@@ -12,7 +12,7 @@ import argparse
 import torch
 import wandb  # Import wandb library
 
-from trainer import Trainer
+from trainer2 import Trainer
 
 
 def setup_sweep():
@@ -25,10 +25,10 @@ def setup_sweep():
                 'values': [12],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [ 0.0001, 0.00001]
+                'values': [ 0.00001]
             },
             'num_res_blocks_last': {
-                'values': [3, 4,5]
+                'values': [5]
             },
             'num_res_blocks': {
                 'values': [5]
@@ -57,10 +57,10 @@ def train(data_directory: str, test_data_directory: str, results_directory: str,
         trainer.initialize_models()
 
         # Run the training
-        train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, val_loss, psnr = trainer.train()
+        #train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, val_loss, psnr = trainer.train()
 
         # Plot the training results
-        trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, val_loss, psnr)
+        #trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, val_loss, psnr)
 
         trainer.generate_sr_data()
 
@@ -81,16 +81,16 @@ if __name__ == "__main__":
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
     # Parse arguments
-    args = parse_args()
-    data_directory = args.data
-    test_data_directory = args.testdata
-    results_directory = args.results
-    num_epochs = args.epochs
+    # args = parse_args()
+    # data_directory = args.data
+    # test_data_directory = args.testdata
+    # results_directory = args.results
+    # num_epochs = args.epochs
 
-    # data_directory = '../dataset/train'
-    # test_data_directory ='../dataset/test'
-    # results_directory = 'runs/'
-    # num_epochs = 50
+    data_directory = '../dataset/train'
+    test_data_directory ='../dataset/test'
+    results_directory = 'runs'
+    num_epochs = 50
 
     # Run the sweep
     wandb.agent(sweep_id,
