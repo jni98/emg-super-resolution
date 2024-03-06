@@ -25,25 +25,23 @@ class Visualizer:
     Class to visualize the results of the interpolation and the neural networks.
     """
 
-    def __init__(self, file_path: str, file: str) -> None:
+    def __init__(self, file_path: str) -> None:
         """
         Constructs all the necessary attributes for the Visualizer object.
         Parameters
         ----------
         file_path: str
                       Path to the directory where the data is stored.
-        file: str
-                        Name of the file containing the data.
         """
         self.file_path = file_path
-        self.file = file
 
         #TODO: Load the correct data from the file_path
 
         # Load your data (already normalized)
         inter_spline_lr_sr = np.load(
-            self.file_path + 'linear_interpolation/' + self.file)
+            self.file_path + 'linear_interpolation/path0-lr.npy')
         model1_lr_sr = np.load(self.file_path + 'path0-hr.npy')
+        model1_hr_sr = np.load(self.file_path + 'path0-hr.npy')
 
         # Load original data and normalize it
         origin_hr = np.load(self.file_path + 'path1-hr.npy')
@@ -52,6 +50,7 @@ class Visualizer:
         self.emg_data_dict = {
             'Linear LR to SR': inter_spline_lr_sr,
             'Model 1 LR to SR': model1_lr_sr,
+            'Model 1 HR to SR': model1_hr_sr,
             'Original HR': origin_hr
         }
 
@@ -506,8 +505,8 @@ class Visualizer:
 if __name__ == '__main__':
     # TODO: Beschriftung mit (predicted) etc. passt nicht zu HR to SR plots
     file_path = '../results/'
-    files = ['path0-lr.npy', 'path1-lr.npy', 'path2-lr.npy', 'path3-lr.npy']
-    visualize = Visualizer(file_path, files[0])
+    visualize = Visualizer(file_path)
+
     visualize.plot_emg_channels()
     visualize.plot_emg_channels_difference()
     visualize.plot_heat_maps()
