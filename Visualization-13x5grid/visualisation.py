@@ -39,18 +39,16 @@ class Visualizer:
 
         # Load your data (already normalized)
         inter_spline_lr_sr = np.load(
-            self.file_path + 'linear_interpolation/path0-lr.npy')
-        model1_lr_sr = np.load(self.file_path + 'path0-hr.npy')
-        model1_hr_sr = np.load(self.file_path + 'path0-hr.npy')
+            self.file_path + 'linear_Interpolation/path0-lr.npy')
+        model1_lr_sr = np.load(self.file_path + 'groundtruth/path0-hr.npy')
 
         # Load original data and normalize it
-        origin_hr = np.load(self.file_path + 'path1-hr.npy')
+        origin_hr = np.load(self.file_path + 'groundtruth/path0-hr.npy')
 
         # Create a dictionary with titles as keys and EMG data as values
         self.emg_data_dict = {
             'Linear LR to SR': inter_spline_lr_sr,
             'Model 1 LR to SR': model1_lr_sr,
-            'Model 1 HR to SR': model1_hr_sr,
             'Original HR': origin_hr
         }
 
@@ -166,7 +164,7 @@ class Visualizer:
 
             # Plot and save mean_differences_grid
             plt.figure()
-            plt.imshow(mean_absolute_differences, cmap='viridis', origin='upper', vmin=0, vmax=0.01)
+            plt.imshow(mean_absolute_differences, cmap='viridis', origin='upper', vmin=0, vmax=100)
 
             # Set ticks and tick labels before calling imshow
             plt.xticks(range(5), labels=range(1, 6))
@@ -505,11 +503,12 @@ class Visualizer:
 if __name__ == '__main__':
     # TODO: Beschriftung mit (predicted) etc. passt nicht zu HR to SR plots
     file_path = '../results/'
+
     visualize = Visualizer(file_path)
 
-    visualize.plot_emg_channels()
+    #visualize.plot_emg_channels()
     visualize.plot_emg_channels_difference()
-    visualize.plot_heat_maps()
-    visualize.plot_correlations()
-    visualize.plot_pearson_coefficient()
-    visualize.plot_pearson_coefficient_grid()
+    #visualize.plot_heat_maps()
+    #visualize.plot_correlations()
+    #visualize.plot_pearson_coefficient()
+    #visualize.plot_pearson_coefficient_grid()
