@@ -61,10 +61,6 @@ echo "finished transfer at $(date)"
 cd "$FAST_DATA_DIR" || { echo "Error: Unable to change directory to $FAST_DATA_DIR"; exit 1; }
 du -ah -d 1
 
-# Display quota
-echo "Quota information for $FAST_DATA_DIR:"
-quota -s "$FAST_DATA_DIR"
-
 # change to src
 cd "$SRC_DIR" || { echo "Error: Unable to change directory to $SRC_DIR"; exit 1; }
 echo "Using Repository Revision"

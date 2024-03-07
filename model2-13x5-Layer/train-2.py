@@ -28,7 +28,7 @@ def setup_sweep():
                 'values': [ 0.0001]
             },
             'num_res_blocks_last': {
-                'values': [5]
+                'values': [3]
             },
             'num_res_blocks': {
                 'values': [5]
