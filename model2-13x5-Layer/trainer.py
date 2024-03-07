@@ -372,6 +372,8 @@ class Trainer:
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
 
+
+
                 if val_batch_idx == 0:
                     ############################## Log Plots########################################
                     print("Logging plots for batch index 0")
@@ -424,6 +426,8 @@ class Trainer:
             axs1.set_title('Average absolute difference')
             plt.tight_layout()
             wandb.log({"Average absolute difference": [wandb.Image(fig1)]})
+            wandb.log({'Mean absolute difference': np.mean(avg_abs_diff)})
+
             # Close the figure
             plt.close(fig1)
 
