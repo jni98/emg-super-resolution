@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=30
+EPOCHS=100
 
 ############    params   ###############
 
@@ -33,9 +33,9 @@ export https_proxy=http://proxy:80
 # load and init conda if it doesnt exist
 if ! command -v conda &> /dev/null
 then
-	echo "load conda from module"
-	module load python/3.10-anaconda
-	conda init bash
+    echo "load conda from module"
+    module load python/3.10-anaconda
+    conda init bash
 fi
 
 # activate conda env
@@ -49,19 +49,25 @@ echo "python reaches gpu: $(python -c 'import torch;print(torch.cuda.is_availabl
 # copy training data to faster drive
 
 echo "started data transfer at $(date)"
-mkdir "$FAST_DATA_DIR"
+if mkdir "$FAST_DATA_DIR"; then
+    echo "Directory $FAST_DATA_DIR created successfully."
+else
+    echo "Error: Unable to create directory $FAST_DATA_DIR"
+    exit 1
+fi
+
 tar -xf "$DATA_ARCHIVE" -C "$FAST_DATA_DIR"
 echo "finished transfer at $(date)"
-cd "$FAST_DATA_DIR" || echo "could not cd into $FAST_DATA_DIR"
+cd "$FAST_DATA_DIR" || { echo "Error: Unable to change directory to $FAST_DATA_DIR"; exit 1; }
 du -ah -d 1
 
 # change to src
-cd "$SRC_DIR" || echo "could not cd into $SRC_DIR"
+cd "$SRC_DIR" || { echo "Error: Unable to change directory to $SRC_DIR"; exit 1; }
 echo "Using Repository Revision"
 git log --oneline -n 1
 
 # start training
-python train-3.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS
+python train-2.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"
