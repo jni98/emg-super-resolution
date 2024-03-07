@@ -5,12 +5,19 @@ import scipy.io
 import numpy as np
 
 
-def numpy_to_mat(file):
+def numpy_to_mat(file, file_path_mat):
     # Create a NumPy array filled with None to represent the cell variable
     cell_variable = np.empty((13, 5), dtype=object)
 
+    #Load corresbonding mat file
+    mat = scipy.io.loadmat(file_path_mat)
+
+    mat_ref_signal = mat['ref_signal']
+
+    # Gain factor to convert the EMG data back to original data
     gain_factor = 5 / (2 ** 16) / 150 * 1000
 
+    # Load numpy file to be converted
     emg = np.load('results/' + file + '.npy')
     emg = emg * gain_factor
 
@@ -22,24 +29,39 @@ def numpy_to_mat(file):
             cell_new = np.expand_dims(cell, axis=0)
             cell_variable[i, j] = cell_new
 
-    # Save the numpy array to a .mat file
-    scipy.io.savemat('results_mat/' + file + '.mat', {'SIG': cell_variable, 'fsamp': 2048})
-    print("Hello")
+    fsamp = 2048.0
 
+    # Save the numpy array to a .mat file
+    scipy.io.savemat('results_mat/' + file + '.mat', {'SIG': cell_variable, 'fsamp':np.float64(fsamp), 'ref_signal':mat_ref_signal})
 
 if __name__ == '__main__':
-    files = ['linear_Interpolation/path0-lr', 'linear_Interpolation/path1-lr',
-             'linear_Interpolation/path2-lr', 'linear_Interpolation/path3-lr',
-             'groundtruth/path0-hr', 'groundtruth/path1-hr',
-             'groundtruth/path2-hr', 'groundtruth/path3-hr']
-    # ,'model2/path0-lr.npy', 'model2/path1-lr.npy', 'model2/path2-lr.npy', 'model2/path3-lr.npy']
+    files_interpolation = ['linear_Interpolation/path0-lr', 'linear_Interpolation/path1-lr',
+             'linear_Interpolation/path2-lr', 'linear_Interpolation/path3-lr']
+    files_groundtruth = ['groundtruth/path0-hr', 'groundtruth/path1-hr', 'groundtruth/path2-hr', 'groundtruth/path3-hr']
+    files_model2 = ['model2/path0-lr', 'model2/path1-lr', 'model2/path2-lr', 'model2/path3-lr']
+
+    test_paths_mat = [
+        'data/Alessandros Daten sEMG/Test/RPAR_DECOMP_PROX_35-50-70_FINISHED/POST/400PaRiRo170628134308 Rampa_35MVC_5MVCs_2acontrazione_TODECOMPOSE_offset0_length30_runs250_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Test/RPAR_DECOMP_PROX_35-50-70_FINISHED/PRE/400PaRifd170606133208 Rampa_35MVC_5MVCs_2acontrazione_TODECOMPOSE_offset0_length27_runs250_FINISHED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/POST/400NuStRo171221103923 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length29.665_runs100_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/PRE/400NuStRo171215104010 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED.mat']
 
     os.makedirs('results_mat/linear_Interpolation', exist_ok=True)
     os.makedirs('results_mat/groundtruth', exist_ok=True)
     os.makedirs('results_mat/model2', exist_ok=True)
 
 
-    for file in files:
-        numpy_to_mat(file)
+    for file, test_path_mat in zip(files_interpolation, test_paths_mat):
+        numpy_to_mat(file, test_path_mat)
         print(file)
         print("Done")
+
+    for file, test_path_mat in zip(files_groundtruth, test_paths_mat):
+        numpy_to_mat(file, test_path_mat)
+        print(file)
+        print("Done")
+
+    # for file, test_path_mat in zip(files_model2, test_paths_mat):
+    #     numpy_to_mat(file, test_path_mat)
+    #     print(file)
+    #     print("Done")
