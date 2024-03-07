@@ -566,11 +566,11 @@ class Trainer:
                 hr_emg = hr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
-                lr_sr_emg = self.generator(lr_emg).cpu().numpy()
+                lr_sr_emg = self.generator(lr_emg).cpu().numpy().squeeze()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
                 # Generate super-resolved data (SR) from HR data
-                hr_sr_emg = self.generator(hr_emg).cpu().numpy()
+                hr_sr_emg = self.generator(hr_emg).cpu().numpy().squeeze()
                 hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
                 # Save signal from lr to sr and hr to sr
