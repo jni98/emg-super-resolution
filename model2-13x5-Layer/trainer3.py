@@ -598,8 +598,14 @@ class Trainer:
         -------
 
         """
-        # free memory
+        #free memory
         del self.discriminator
+        del self.optimizer_G
+        del self.optimizer_D
+        del self.adversarial_loss
+        del self.mse
+        del self.training
+        del self.validation
         torch.cuda.empty_cache()
 
         print("Starting to generate SR data")
