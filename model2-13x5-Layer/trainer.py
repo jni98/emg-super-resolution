@@ -569,20 +569,18 @@ class Trainer:
                 hr_emg = hr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
-                lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
-                lr_sr_emg = lr_sr_emg.to(self.device).squeeze().numpy()
+                lr_sr_emg = self.generator(lr_emg).cpu().numpy().squeeze()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
                 # Generate super-resolved data (SR) from HR data
-                hr_sr_emg = self.generator(hr_emg).detach().to(self.device)
-                hr_sr_emg = hr_sr_emg.to(self.device).squeeze().numpy()
+                hr_sr_emg = self.generator(hr_emg).cpu().numpy().squeeze()
                 hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
                 # Save signal from lr to sr and hr to sr
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
-                np.save(model_path + lr_emg_paths[0], hr_sr_emg_destandardized)
+                np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
 
