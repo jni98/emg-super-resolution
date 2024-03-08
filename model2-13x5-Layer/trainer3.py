@@ -123,7 +123,7 @@ class Trainer:
         # Ensure the directory exists
         print("Creating folder")
         print(self.run_folder + self.unique_folder)
-        os.makedirs(self.run_folder + self.unique_folder, exist_ok=True)
+        os.makedirs(self.run_folder +self.unique_folder, exist_ok=True)
 
         # Save the dictionary to a file
         with open(self.run_folder + self.unique_folder + '/hyperparameter.json', 'w') as file:
@@ -181,6 +181,8 @@ class Trainer:
         val_loss = []
         psnr = []
         best_val_loss = float('inf')
+        epochs_without_improvement = 0
+        patience = 10  # Define patience threshold
 
         # Add wandb.watch() here to start tracking gradients and parameters
         wandb.watch(self.generator, criterion='mse', log='all')
@@ -194,25 +196,30 @@ class Trainer:
             initial_cached = torch.cuda.memory_cached()
 
             epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d = self._train_epoch(epoch)
-            #avg_val_loss, avg_psnr = self._validate(epoch)
+            avg_val_loss, avg_psnr = self._validate(epoch)
 
             train_g_loss.append(epoch_loss_g)
             train_d_loss.append(epoch_loss_d)
             train_d_loss_real.append(epoch_loss_d_real)
             train_d_loss_fake.append(epoch_loss_d_fake)
-            #val_loss.append(avg_val_loss)
-            #psnr.append(avg_psnr)
+            val_loss.append(avg_val_loss)
+            psnr.append(avg_psnr)
 
-            # Save best model based on validation loss or other metrics
-            #if avg_val_loss < best_val_loss:
-            #    best_val_loss = avg_val_loss
+            # Save best model based on validation loss
+            if avg_val_loss < best_val_loss:
+                best_val_loss = avg_val_loss
+                epochs_without_improvement = 0  # Reset patience counter
+                self._save_final_models()  # Save the final models when a new best model is found
+            else:
+                epochs_without_improvement += 1
 
-            #    # Save the final models when a new best model is found
-            #    self._save_final_models()
+            # Check for early stopping
+            if epochs_without_improvement >= patience:
+                print("Early stopping: No improvement for", patience, "epochs.")
+                break
 
-            # self._save_checkpoint(epoch)
             # Clear unnecessary variables to release memory
-            #del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
+            del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
 
             # Check GPU memory usage after training
             allocated_diff = torch.cuda.memory_allocated() - initial_allocated
@@ -221,7 +228,7 @@ class Trainer:
             print(f"After epoch {epoch}, GPU memory allocated increased by: {allocated_diff} bytes")
             print(f"After epoch {epoch}, GPU memory cached increased by: {cached_diff} bytes")
 
-        return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake#, val_loss, psnr
+        return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, val_loss, psnr
 
     def _train_epoch(self, epoch: int) -> tuple:
         """
@@ -249,64 +256,63 @@ class Trainer:
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
 
-        with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
-                print("batch index", batch_idx)
+        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
+            print("batch index", batch_idx)
 
-                with torch.no_grad():  # Disable gradient calculation within this block
-                    # Move data to CUDA device during training or validation loops
-                    lr_emg = lr_emg.to(self.device)
-                    hr_emg = hr_emg.to(self.device)
+            with torch.no_grad():  # Disable gradient calculation within this block
+                # Move data to CUDA device during training or validation loops
+                lr_emg = lr_emg.to(self.device)
+                hr_emg = hr_emg.to(self.device)
 
-                # Train Discriminator
-                #self.optimizer_D.zero_grad()
+            # Train Discriminator
+            self.optimizer_D.zero_grad()
 
-                # Generate super-resolved data (SR) from LR data
-                # detaching sr_emg prevents gradients from flowing back through the generator network when computing
-                # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
-                # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
-                sr_emg = self.generator(lr_emg).detach().to(self.device)
+            # Generate super-resolved data (SR) from LR data
+            # detaching sr_emg prevents gradients from flowing back through the generator network when computing
+            # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
+            # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
+            sr_emg = self.generator(lr_emg).detach().to(self.device)
 
-                # Create real and fake labels to train discriminator for both cases
-                real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
-                fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
+            # Create real and fake labels to train discriminator for both cases
+            real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
+            fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
 
-                # calculate loss for discriminator receiving real data
-                output_discriminator_real = self.discriminator(hr_emg).to(self.device)
-                loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
+            # calculate loss for discriminator receiving real data
+            output_discriminator_real = self.discriminator(hr_emg).to(self.device)
+            loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
 
-                # calculate loss for discriminator receiving fake data
-                output_discriminator_fake = self.discriminator(sr_emg)
-                loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
+            # calculate loss for discriminator receiving fake data
+            output_discriminator_fake = self.discriminator(sr_emg)
+            loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
-                # calculate total loss for discriminator
-                loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
+            # calculate total loss for discriminator
+            loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
 
-                #loss_discriminator.backward()
+            loss_discriminator.backward()
 
-                #self.optimizer_D.step()
+            self.optimizer_D.step()
 
-                # Train Generator
-                #self.optimizer_G.zero_grad()
+            # Train Generator
+            self.optimizer_G.zero_grad()
 
-                # Generate SR data from LR data
-                sr_emg = self.generator(lr_emg).to(self.device)
+            # Generate SR data from LR data
+            sr_emg = self.generator(lr_emg).to(self.device)
 
-                output = self.discriminator(sr_emg)
-                loss_generator_adv = self.adversarial_loss(output, real_labels)
+            output = self.discriminator(sr_emg)
+            loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-                loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
+            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
 
-                loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
+            loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
 
-                #loss_generator.backward()
+            loss_generator.backward()
 
-                #self.optimizer_G.step()
+            self.optimizer_G.step()
 
-                total_loss_g += loss_generator.item()
-                total_loss_d += loss_discriminator.item()
-                total_loss_d_real += loss_discriminator_real.item()
-                total_loss_d_fake += loss_discriminator_fake.item()
+            total_loss_g += loss_generator.item()
+            total_loss_d += loss_discriminator.item()
+            total_loss_d_real += loss_discriminator_real.item()
+            total_loss_d_fake += loss_discriminator_fake.item()
 
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
@@ -373,9 +379,11 @@ class Trainer:
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
 
+
+
                 if val_batch_idx == 0:
-                    ############################## Log Plots########################################
-                    print("Logging plots for batch index 0")
+                    ############################## Log Plots given channel########################################
+                    print("Logging plots for batch index 0 given channel")
 
                     # x-axis for the following logs
                     fig, axs = plt.subplots(4, 1, figsize=(8, 10))
@@ -383,7 +391,7 @@ class Trainer:
 
                     # log absolute difference for one channel
                     axs[0].plot(x_values, abs_diff)
-                    axs[0].set_title('Absolute difference')
+                    axs[0].set_title('Absolute difference given channel')
 
                     # Log one channel in the middle of the grid
                     val_channel = val_hr_destandardized[0][0][6][2]
@@ -412,6 +420,44 @@ class Trainer:
                     # Close the figure
                     plt.close(fig)
 
+                    ############################## Log Plots predicted channel########################################
+                    print("Logging plots for batch index 0 predicted channel")
+
+                    # x-axis for the following logs
+                    fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
+                    x_values = range(val_hr.shape[4])
+
+                    # log absolute difference for one channel
+                    axs1[0].plot(x_values, torch.abs(val_hr_destandardized[0][0][6][1] - val_sr_emg_destandardized[0][0][6][1]).squeeze().to('cpu'))
+                    axs1[0].set_title('Absolute difference predicted channel')
+
+                    # Log one channel in the middle of the grid
+                    val_channel = val_hr_destandardized[0][0][6][1]
+                    val_channel = val_channel.to('cpu')
+                    val_channel = np.asarray(val_channel)
+                    axs1[1].plot(x_values, val_channel)
+                    axs1[1].set_title('Validation channel [6][1]')
+
+                    # Log one channel in the middle of the grid
+                    sr_channel = val_sr_emg_destandardized[0][0][6][1]
+                    sr_channel = sr_channel.to('cpu')
+                    sr_channel = np.asarray(sr_channel)
+                    axs1[2].plot(x_values, sr_channel)
+                    axs1[2].set_title('Super-resolution channel [6][1]')
+
+                    # log cross correlation
+                    auto_correlation = np.correlate(val_channel, val_channel, mode='full')
+                    cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
+                    cross_correlation = cross_correlation.squeeze()
+                    axs1[3].plot(range(len(cross_correlation)), cross_correlation)
+                    axs1[3].set_title('Cross Correlation channel [6][1]')
+
+                    plt.tight_layout()
+                    wandb.log({"Logged plots": [wandb.Image(fig1)]})
+
+                    # Close the figure
+                    plt.close(fig1)
+
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
@@ -420,13 +466,15 @@ class Trainer:
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
-            fig1, axs1 = plt.subplots(1, 1, figsize=(8, 10))
-            axs1.plot(range(len(avg_abs_diff)), avg_abs_diff)
-            axs1.set_title('Average absolute difference')
+            fig2, axs2 = plt.subplots(1, 1, figsize=(8, 10))
+            axs2.plot(range(len(avg_abs_diff)), avg_abs_diff)
+            axs2.set_title('Average absolute difference')
             plt.tight_layout()
-            wandb.log({"Average absolute difference": [wandb.Image(fig1)]})
+            wandb.log({"Average absolute difference": [wandb.Image(fig2)]})
+            wandb.log({'Mean absolute difference': np.mean(avg_abs_diff)})
+
             # Close the figure
-            plt.close(fig1)
+            plt.close(fig2)
 
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
 
@@ -557,7 +605,7 @@ class Trainer:
         """
         print("Starting to generate SR data")
         # load the final generator
-        self.generator.load_state_dict(torch.load('runs/model2-13x5-Layer-781364/20240306091944/final_generator.pt'))
+        self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
         with torch.no_grad():
@@ -566,20 +614,18 @@ class Trainer:
                 hr_emg = hr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
-                lr_sr_emg = self.generator(lr_emg).detach().to(self.device)
-                lr_sr_emg = lr_sr_emg.to(self.device).squeeze().numpy()
+                lr_sr_emg = self.generator(lr_emg).to('cpu').numpy().squeeze()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
                 # Generate super-resolved data (SR) from HR data
-                hr_sr_emg = self.generator(hr_emg).detach().to(self.device)
-                hr_sr_emg = hr_sr_emg.to(self.device).squeeze().numpy()
+                hr_sr_emg = self.generator(hr_emg).to('cpu').numpy().squeeze()
                 hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
                 # Save signal from lr to sr and hr to sr
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
-                np.save(model_path + lr_emg_paths[0], hr_sr_emg_destandardized)
+                np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
 

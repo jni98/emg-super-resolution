@@ -22,10 +22,10 @@ def setup_sweep():
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-                'values': [1],  # Add the batch sizes you want to include
+                'values': [8,10,12],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [0.0001]
+                'values': [ 0.0001]
             },
             'num_res_blocks_last': {
                 'values': [3]
@@ -67,7 +67,6 @@ def train(data_directory: str, test_data_directory: str, results_directory: str,
         # Explicitly release CUDA memory
         torch.cuda.empty_cache()
 
-
 def parse_args():
     parser = argparse.ArgumentParser(description="Training script arguments")
     parser.add_argument('--data', type=str, required=True, help='Path to training data directory')
@@ -81,16 +80,16 @@ if __name__ == "__main__":
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
     # Parse arguments
-    # args = parse_args()
-    # data_directory = args.data
-    # test_data_directory = args.testdata
-    # results_directory = args.results
-    # num_epochs = args.epochs
+    args = parse_args()
+    data_directory = args.data
+    test_data_directory = args.testdata
+    results_directory = args.results
+    num_epochs = args.epochs
 
-    data_directory = '../dataset/train'
-    test_data_directory ='../dataset/test'
-    results_directory = 'runs'
-    num_epochs = 1
+    # data_directory = '../dataset/train'
+    # test_data_directory ='../dataset/test'
+    # results_directory = 'runs/'
+    # num_epochs = 50
 
     # Run the sweep
     wandb.agent(sweep_id,
