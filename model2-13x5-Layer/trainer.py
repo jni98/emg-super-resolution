@@ -181,8 +181,6 @@ class Trainer:
         val_loss = []
         psnr = []
         best_val_loss = float('inf')
-        epochs_without_improvement = 0
-        patience = 10  # Define patience threshold
 
         # Add wandb.watch() here to start tracking gradients and parameters
         wandb.watch(self.generator, criterion='mse', log='all')
@@ -208,15 +206,7 @@ class Trainer:
             # Save best model based on validation loss
             if avg_val_loss < best_val_loss:
                 best_val_loss = avg_val_loss
-                epochs_without_improvement = 0  # Reset patience counter
                 self._save_final_models()  # Save the final models when a new best model is found
-            else:
-                epochs_without_improvement += 1
-
-            # Check for early stopping
-            if epochs_without_improvement >= patience:
-                print("Early stopping: No improvement for", patience, "epochs.")
-                break
 
             # Clear unnecessary variables to release memory
             del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
