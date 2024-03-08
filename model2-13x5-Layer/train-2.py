@@ -25,7 +25,7 @@ def setup_sweep():
                 'values': [12],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [ 0.0001]
+                'values': [0.0001]
             },
             'num_res_blocks_last': {
                 'values': [3]
@@ -57,10 +57,10 @@ def train(data_directory: str, test_data_directory: str, results_directory: str,
         trainer.initialize_models()
 
         # Run the training
-        #train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, val_loss, psnr = trainer.train()
+        # train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, val_loss, psnr = trainer.train()
 
         # Plot the training results
-        #trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, val_loss, psnr)
+        # trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, val_loss, psnr)
 
         trainer.generate_sr_data()
 

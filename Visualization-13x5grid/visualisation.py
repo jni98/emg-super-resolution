@@ -35,7 +35,7 @@ class Visualizer:
         """
         self.file_path = file_path
 
-        #TODO: Load the correct data from the file_path
+        # TODO: Load the correct data from the file_path
 
         # Load your data (already normalized)
         inter_spline_lr_sr = np.load(
@@ -56,7 +56,8 @@ class Visualizer:
 
     def plot_emg_channels(self) -> None:
         """
-        Plot all emg channels for the original signal, the model 1 signal and the interpolated signal. Channels are plotted by an offset of 500.
+        Plot all emg channels for the original signal, the model 1 signal and the interpolated signal. Channels are
+        plotted by an offset of 500.
         Returns
         -------
         None
@@ -88,7 +89,8 @@ class Visualizer:
                     #     else:
                     #         predicted = ''
 
-                    plt.plot(time_axis, signal.squeeze() + offset, label=f'Channel row{rows + 1} col{cols +1} {predicted}')
+                    plt.plot(time_axis, signal.squeeze() + offset,
+                             label=f'Channel row{rows + 1} col{cols + 1} {predicted}')
                     offset += 3500
 
             plt.xlabel('Time in samples')
@@ -113,11 +115,10 @@ class Visualizer:
             plt.close()
             plt.figure()
 
-
-
     def plot_emg_channels_difference(self) -> None:
         """
-        Plot the mean absolute difference between the channels of the groundtruth signal and model 1 or interpolated signal.
+        Plot the mean absolute difference between the channels of the groundtruth signal and model 1 or interpolated
+        signal.
         Results are displayed on the grid.
 
         Returns
@@ -134,11 +135,10 @@ class Visualizer:
             # Plot Training losses in a separate figure
             plt.figure(figsize=(8.27, 14))
 
+            groundtruth_cut = groundtruth[:, :, :60754]
+            emg_data_cut = emg_data[:, :, :60754]
 
-            groundtruth_cut = groundtruth[:,:,:60754]
-            emg_data_cut = emg_data[:,:,:60754]
-
-            mean_absolute_differences =np.mean(np.abs(groundtruth_cut - emg_data_cut), axis=2)
+            mean_absolute_differences = np.mean(np.abs(groundtruth_cut - emg_data_cut), axis=2)
 
             plt.xlabel('Time in samples')
             plt.title(title)
@@ -182,7 +182,8 @@ class Visualizer:
 
     def plot_heat_maps(self) -> None:
         """
-        Plots a heatmap at one specific point in time for each the Original, the Linear interpolated and the model 1 created signal.
+        Plots a heatmap at one specific point in time for each the Original, the Linear interpolated and the model 1
+        created signal.
 
         Returns
         -------
@@ -261,26 +262,26 @@ class Visualizer:
                     autocorr_groundtruth = np.correlate(groundtruth[row][col], groundtruth[row][col], mode='full')
 
                     # normalize correlation by autocorrelation
-                    if (row==12 and col==0):
+                    if (row == 12 and col == 0):
                         normalized_correlation = correlation
                     else:
                         normalized_correlation = correlation / np.max(autocorr_groundtruth)
 
                     # Find the maximum and minimum values of normalized_corr across all electrodes
-                    #max_corr = max([max(corr) for corr in normalized_corr])
-                    #min_corr = min([min(corr) for corr in normalized_corr])
+                    # max_corr = max([max(corr) for corr in normalized_corr])
+                    # min_corr = min([min(corr) for corr in normalized_corr])
 
-                    #TODO: Achtung, predicted stimmt nicht mehr
+                    # TODO: Achtung, predicted stimmt nicht mehr
                     predicted = ''
 
                     plt.plot(normalized_correlation, label=f'Ch row {row} col {col} {predicted}')
-                    number_graphs+=1
+                    number_graphs += 1
                     plt.xlabel('Shift')
                     plt.ylabel('Correlation')
                     plt.legend(loc='best', bbox_to_anchor=(1, 1))
                     plt.title(f'Cross-correlation of {keys_list[g]} with Original HR - {plot_number}')
 
-                    #TODO: Adjust limits
+                    # TODO: Adjust limits
                     # Set the y-axis limits to the maximum and minimum values across all electrodes
                     plt.ylim(-0.4, 1.2)
 
@@ -295,7 +296,6 @@ class Visualizer:
                         plt.close()
                         plt.figure()
                         plot_number += 1
-
 
     def plot_pearson_coefficient(self) -> None:
 
@@ -329,19 +329,18 @@ class Visualizer:
             # 3D to 2D
             groundtruth[:, 1::2, :] = np.flipud(groundtruth[:, 1::2, :])
             groundtruth = np.flipud(groundtruth).transpose(1, 0, 2).reshape(65, groundtruth_shape[2])
-            groundtruth_cut = groundtruth[:65,:60754]
+            groundtruth_cut = groundtruth[:65, :60754]
 
             # 3D to 2D
             grid_2[:, 1::2, :] = np.flipud(grid_2[:, 1::2, :])
             grid_2 = np.flipud(grid_2).transpose(1, 0, 2).reshape(65, grid_2_shape[2])
-            grid_2_cut = grid_2[:65,:60754]
+            grid_2_cut = grid_2[:65, :60754]
 
             # Calculate Pearson correlation coefficients
-            for i in range(1,65):
-                for j in range(1,65):
-                    #TODO: Muss sinnvoll umgeschrieben werde
+            for i in range(1, 65):
+                for j in range(1, 65):
+                    # TODO: Muss sinnvoll umgeschrieben werde
                     correlation_coefficients[i, j], _ = pearsonr(groundtruth_cut[i], grid_2_cut[j])
-
 
             # Mask the upper triangle
             mask = np.tril(np.ones_like(correlation_coefficients, dtype=bool))
@@ -375,8 +374,8 @@ class Visualizer:
     def plot_pearson_coefficient_grid(self) -> None:
 
         """
-        Plots the pearson coefficient of the correlation of one channel in the groundtruth signal with all other channels
-        of the interpolated or model 1 signal channels. Results are displayed on the grid.
+        Plots the pearson coefficient of the correlation of one channel in the groundtruth signal with all other
+        channels of the interpolated or model 1 signal channels. Results are displayed on the grid.
 
         Returns
         -------
@@ -411,11 +410,11 @@ class Visualizer:
             correlation_coefficients = np.zeros((65, 65))
 
             # Initialize an array to store correlation coefficients
-            correlation_coefficients_diagonal = np.zeros((65))
+            correlation_coefficients_diagonal = np.zeros(65)
 
             # Calculate Pearson correlation coefficients
-            for i in range(1,65):
-                for j in range(1,65):
+            for i in range(1, 65):
+                for j in range(1, 65):
                     correlation_coefficients[i, j], _ = pearsonr(groundtruth_cut[i], grid_2_cut[j])
 
                 correlation_grid = correlation_coefficients[i]
@@ -506,9 +505,9 @@ if __name__ == '__main__':
 
     visualize = Visualizer(file_path)
 
-    #visualize.plot_emg_channels()
+    # visualize.plot_emg_channels()
     visualize.plot_emg_channels_difference()
-    #visualize.plot_heat_maps()
-    #visualize.plot_correlations()
-    #visualize.plot_pearson_coefficient()
-    #visualize.plot_pearson_coefficient_grid()
+    # visualize.plot_heat_maps()
+    # visualize.plot_correlations()
+    # visualize.plot_pearson_coefficient()
+    # visualize.plot_pearson_coefficient_grid()

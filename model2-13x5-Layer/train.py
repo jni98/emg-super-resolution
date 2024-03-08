@@ -22,10 +22,10 @@ def setup_sweep():
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-                'values': [8,10,12],  # Add the batch sizes you want to include
+                'values': [8, 10, 12],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [ 0.00001]
+                'values': [0.00001]
             },
             'num_res_blocks_last': {
                 'values': [3]
@@ -66,6 +66,7 @@ def train(data_directory: str, test_data_directory: str, results_directory: str,
 
         # Explicitly release CUDA memory
         torch.cuda.empty_cache()
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Training script arguments")

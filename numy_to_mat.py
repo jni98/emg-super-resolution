@@ -9,7 +9,7 @@ def numpy_to_mat(file, file_path_mat):
     # Create a NumPy array filled with None to represent the cell variable
     cell_variable = np.empty((13, 5), dtype=object)
 
-    #Load corresbonding mat file
+    # Load corresbonding mat file
     mat = scipy.io.loadmat(file_path_mat)
 
     mat_ref_signal = mat['ref_signal']
@@ -32,11 +32,13 @@ def numpy_to_mat(file, file_path_mat):
     fsamp = 2048.0
 
     # Save the numpy array to a .mat file
-    scipy.io.savemat('results_mat/' + file + '.mat', {'SIG': cell_variable, 'fsamp':np.float64(fsamp), 'ref_signal':mat_ref_signal})
+    scipy.io.savemat('results_mat/' + file + '.mat',
+                     {'SIG': cell_variable, 'fsamp': np.float64(fsamp), 'ref_signal': mat_ref_signal})
+
 
 if __name__ == '__main__':
     files_interpolation = ['linear_Interpolation/path0-lr', 'linear_Interpolation/path1-lr',
-             'linear_Interpolation/path2-lr', 'linear_Interpolation/path3-lr']
+                           'linear_Interpolation/path2-lr', 'linear_Interpolation/path3-lr']
     files_groundtruth = ['groundtruth/path0-hr', 'groundtruth/path1-hr', 'groundtruth/path2-hr', 'groundtruth/path3-hr']
     files_model2 = ['model2/path0-lr', 'model2/path1-lr', 'model2/path2-lr', 'model2/path3-lr']
 
@@ -49,7 +51,6 @@ if __name__ == '__main__':
     os.makedirs('results_mat/linear_Interpolation', exist_ok=True)
     os.makedirs('results_mat/groundtruth', exist_ok=True)
     os.makedirs('results_mat/model2', exist_ok=True)
-
 
     for file, test_path_mat in zip(files_interpolation, test_paths_mat):
         numpy_to_mat(file, test_path_mat)

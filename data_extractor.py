@@ -442,7 +442,6 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         lr_filename = f'path{i}-lr.npy'
         lr_filenames_test.append(lr_filename)
 
-
     # Combine LR and HR filenames row-wise
     data = zip(lr_filenames_test, hr_filenames_test)
     # File path for the CSV file
@@ -481,31 +480,33 @@ if __name__ == '__main__':
     # dataset_creator_dominik(data_paths)
 
     # TODO: use 10 subjects for the dataset and 2 subjects for the testset
-    train_paths = ['data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400InAnfd170619145709 Rampa_35MVC_5MVCs_1acontrazione_TODECOMPOSE_offset0_length29.682_runs250_EDITED_MATTEO.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/ESAN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400SaEnRo171205164509 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length30_runs100_FINISHED.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/ESAN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400SaEnRo171128171409 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length30_runs250_FINISHED_ANDREA.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/LRUM_DECOMP_PROX_35-50-70_FINISHED/POST/400RuLoRo171026112715 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/LRUM_DECOMP_PROX_35-50-70_FINISHED/PRE/400RuLoRo171019122211 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length29.993_runs250_FINISHED.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/LSEB_DECOMP_PROX_35-50-70_FINISHED/POST/400SeLuRo171212105809 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length28.224_runs100_FINISHED.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/LSEB_DECOMP_PROX_35-50-70_FINISHED/PRE/400SeLuRo171206114409 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs10_FINISHED.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MCAC_DECOMP_PROX_35-50-70_FINISHED/POST/400CaMARo171027153608 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MCAC_DECOMP_PROX_35-50-70_FINISHED/PRE/400CaMARo171017190803 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length28.602_runs250_FINISHED.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MCIAN_DECOMP_PROX_35-50-70_FINISHED/POST/400CiMaRo180116151710 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MCIAN_DECOMP_PROX_35-50-70_FINISHED/PRE/400CiMaRo171222104608 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED_ANDREA.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MGIR_DECOMP_PROX_35-50-70_FINISHED/POST/400GiMiRo171207102708 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30.212_runs100_FINISHED.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MGIR_DECOMP_PROX_35-50-70_FINISHED/PRE/400GiMiRo171130110703 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length28.771_FINISHED.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MIZZO_DECOMP_PROX_35-50-70_FINISHED/POST/400IzMaRo171019160209 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MIZZO_DECOMP_PROX_35-50-70_FINISHED/PRE/400IzMaRo171012113009 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs250_EDITED_MATTEO.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MMAGN_DECOMP_PROX_35-50-70_FINISHED/POST/400MaMiRo171130170007 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length29.317_runs100_FINISHED.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MMAGN_DECOMP_PROX_35-50-70_FINISHED/PRE/400MaMiRo171123105508 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MMAND_DECOMP_PROX_35_50_70_FINISHED/POST/400MaMaRo180115175709 Rampa_35MVC_5MVCs_1_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
-                   'data/Alessandros Daten sEMG/Train and Val/MMAND_DECOMP_PROX_35_50_70_FINISHED/PRE/400MaMaRo171220163607 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED_MATTEO.mat']
+    train_paths = [
+        'data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400InAnfd170619145709 Rampa_35MVC_5MVCs_1acontrazione_TODECOMPOSE_offset0_length29.682_runs250_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat',
+        'data/Alessandros Daten sEMG/Train and Val/ESAN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400SaEnRo171205164509 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length30_runs100_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Train and Val/ESAN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400SaEnRo171128171409 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length30_runs250_FINISHED_ANDREA.mat',
+        'data/Alessandros Daten sEMG/Train and Val/LRUM_DECOMP_PROX_35-50-70_FINISHED/POST/400RuLoRo171026112715 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Train and Val/LRUM_DECOMP_PROX_35-50-70_FINISHED/PRE/400RuLoRo171019122211 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length29.993_runs250_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Train and Val/LSEB_DECOMP_PROX_35-50-70_FINISHED/POST/400SeLuRo171212105809 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length28.224_runs100_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Train and Val/LSEB_DECOMP_PROX_35-50-70_FINISHED/PRE/400SeLuRo171206114409 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs10_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MCAC_DECOMP_PROX_35-50-70_FINISHED/POST/400CaMARo171027153608 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MCAC_DECOMP_PROX_35-50-70_FINISHED/PRE/400CaMARo171017190803 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length28.602_runs250_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MCIAN_DECOMP_PROX_35-50-70_FINISHED/POST/400CiMaRo180116151710 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MCIAN_DECOMP_PROX_35-50-70_FINISHED/PRE/400CiMaRo171222104608 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED_ANDREA.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MGIR_DECOMP_PROX_35-50-70_FINISHED/POST/400GiMiRo171207102708 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30.212_runs100_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MGIR_DECOMP_PROX_35-50-70_FINISHED/PRE/400GiMiRo171130110703 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length28.771_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MIZZO_DECOMP_PROX_35-50-70_FINISHED/POST/400IzMaRo171019160209 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MIZZO_DECOMP_PROX_35-50-70_FINISHED/PRE/400IzMaRo171012113009 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs250_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MMAGN_DECOMP_PROX_35-50-70_FINISHED/POST/400MaMiRo171130170007 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length29.317_runs100_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MMAGN_DECOMP_PROX_35-50-70_FINISHED/PRE/400MaMiRo171123105508 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MMAND_DECOMP_PROX_35_50_70_FINISHED/POST/400MaMaRo180115175709 Rampa_35MVC_5MVCs_1_TODECOMPOSE_offset0_length30_runs100_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Train and Val/MMAND_DECOMP_PROX_35_50_70_FINISHED/PRE/400MaMaRo171220163607 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED_MATTEO.mat']
 
-    test_paths = ['data/Alessandros Daten sEMG/Test/RPAR_DECOMP_PROX_35-50-70_FINISHED/POST/400PaRiRo170628134308 Rampa_35MVC_5MVCs_2acontrazione_TODECOMPOSE_offset0_length30_runs250_EDITED_MATTEO.mat',
-                  'data/Alessandros Daten sEMG/Test/RPAR_DECOMP_PROX_35-50-70_FINISHED/PRE/400PaRifd170606133208 Rampa_35MVC_5MVCs_2acontrazione_TODECOMPOSE_offset0_length27_runs250_FINISHED_MATTEO.mat',
-                  'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/POST/400NuStRo171221103923 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length29.665_runs100_FINISHED.mat',
-                  'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/PRE/400NuStRo171215104010 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED.mat']
+    test_paths = [
+        'data/Alessandros Daten sEMG/Test/RPAR_DECOMP_PROX_35-50-70_FINISHED/POST/400PaRiRo170628134308 Rampa_35MVC_5MVCs_2acontrazione_TODECOMPOSE_offset0_length30_runs250_EDITED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Test/RPAR_DECOMP_PROX_35-50-70_FINISHED/PRE/400PaRifd170606133208 Rampa_35MVC_5MVCs_2acontrazione_TODECOMPOSE_offset0_length27_runs250_FINISHED_MATTEO.mat',
+        'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/POST/400NuStRo171221103923 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length29.665_runs100_FINISHED.mat',
+        'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/PRE/400NuStRo171215104010 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED.mat']
 
     dataset_creator_alessandro_13x5(train_paths, test_paths)
 

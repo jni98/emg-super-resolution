@@ -1,7 +1,8 @@
 """
 Author: Janina Kloos (janina.kloos@gmx.de)
 Date created: 02.02.2024
-File description: This file contains the class Trainer. It is used to train the GAN and to generate super resolution data.
+File description: This file contains the class Trainer. It is used to train the GAN and to generate super resolution
+data.
 
 The code is called from the train.py file which is started by the main function.
 """
@@ -123,7 +124,7 @@ class Trainer:
         # Ensure the directory exists
         print("Creating folder")
         print(self.run_folder + self.unique_folder)
-        os.makedirs(self.run_folder +self.unique_folder, exist_ok=True)
+        os.makedirs(self.run_folder + self.unique_folder, exist_ok=True)
 
         # Save the dictionary to a file
         with open(self.run_folder + self.unique_folder + '/hyperparameter.json', 'w') as file:
@@ -374,8 +375,6 @@ class Trainer:
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
 
-
-
                 if val_batch_idx == 0:
                     ############################## Log Plots given channel########################################
                     print("Logging plots for batch index 0 given channel")
@@ -423,7 +422,8 @@ class Trainer:
                     x_values = range(val_hr.shape[4])
 
                     # log absolute difference for one channel
-                    axs1[0].plot(x_values, torch.abs(val_hr_destandardized[0][0][6][1] - val_sr_emg_destandardized[0][0][6][1]).squeeze().to('cpu'))
+                    axs1[0].plot(x_values, torch.abs(
+                        val_hr_destandardized[0][0][6][1] - val_sr_emg_destandardized[0][0][6][1]).squeeze().to('cpu'))
                     axs1[0].set_title('Absolute difference predicted channel')
 
                     # Log one channel in the middle of the grid

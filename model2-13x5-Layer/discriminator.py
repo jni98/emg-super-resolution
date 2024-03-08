@@ -75,57 +75,57 @@ class Discriminator(nn.Module):
         out: torch.tensor
              Output tensor of the network.
         """
-        #print("Discriminator input", x.shape)
+        # print("Discriminator input", x.shape)
 
         out = self.conv1(x)
         out = self.leaky_relu1(out)
-        #print("Discriminator after conv1", out.shape)
+        # print("Discriminator after conv1", out.shape)
 
         out = self.conv2(out)
         out = self.batch_norm2(out)
         out = self.leaky_relu2(out)
-        #print("Discriminator after conv2", out.shape)
+        # print("Discriminator after conv2", out.shape)
 
         out = self.conv3(out)
         out = self.batch_norm3(out)
         out = self.leaky_relu3(out)
-        #print("Discriminator after conv3", out.shape)
+        # print("Discriminator after conv3", out.shape)
 
         out = self.conv4(out)
         out = self.batch_norm4(out)
         out = self.leaky_relu4(out)
-        #print("Discriminator after conv4", out.shape)
+        # print("Discriminator after conv4", out.shape)
 
         out = self.conv5(out)
         out = self.batch_norm5(out)
         out = self.leaky_relu5(out)
-        #print("Discriminator after conv5", out.shape)
+        # print("Discriminator after conv5", out.shape)
 
         out = self.conv6(out)
         out = self.batch_norm6(out)
         out = self.leaky_relu6(out)
-        #print("Discriminator after conv6", out.shape)
+        # print("Discriminator after conv6", out.shape)
 
         out = self.conv7(out)
         out = self.batch_norm7(out)
         out = self.leaky_relu7(out)
-        #print("Discriminator after conv7", out.shape)
+        # print("Discriminator after conv7", out.shape)
 
         out = self.conv8(out)
         out = self.batch_norm8(out)
         out = self.leaky_relu8(out)
-        #print("Discriminator after conv8", out.shape)
+        # print("Discriminator after conv8", out.shape)
 
         out = self.flatten(out)
-        #print("Discriminator after flatte",out.shape)
+        # print("Discriminator after flatte",out.shape)
 
         out = self.dense1(out)
         out = self.leaky_relu9(out)
-        #print("Discriminator after dense1", out.shape)
+        # print("Discriminator after dense1", out.shape)
 
         out = self.dense2(out)
-        #print("Discriminator after dense2", out.shape)
+        # print("Discriminator after dense2", out.shape)
 
         out = self.activation(out)
-        #print("Discriminator after activation", out.shape)
+        # print("Discriminator after activation", out.shape)
         return out

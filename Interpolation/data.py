@@ -17,6 +17,7 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
 
     """
+
     def __init__(self, data, directory, mean: float, std: float) -> None:
         super().__init__()
         self.data = data
@@ -53,7 +54,7 @@ class Custom_Dataset(Dataset):
         lr_emg_path = self.data.iloc[index]['lr_filename']
         hr_emg_path = self.data.iloc[index]['hr_filename']
 
-        lr_emg = np.load(self.directory +'/'+ self.data.iloc[index, 0])
+        lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
 
         # bandpass filter
         lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=5)
@@ -77,7 +78,7 @@ class Custom_Dataset(Dataset):
         # bandpass filter
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=5)
         #  Standardize using mean and std values of the complete dataset
-        hr_emg_standardized = self.standardization(hr_emg,self.mean,self.std)
+        hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std)
         # unsqueeze to add a one channel dimension at the beginning
         hr_emg_standardized = torch.tensor(hr_emg_standardized).unsqueeze(0).to(torch.float32)
 
@@ -102,7 +103,7 @@ class Custom_Dataset(Dataset):
         """
 
         # Min-max normalization using precalculated min and max values
-        standardized_data = (data - mean)/std
+        standardized_data = (data - mean) / std
         return standardized_data
 
     def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=5):
