@@ -181,6 +181,8 @@ class Trainer:
         val_loss = []
         psnr = []
         best_val_loss = float('inf')
+        epochs_without_improvement = 0
+        patience = 10  # Define patience threshold
 
         # Add wandb.watch() here to start tracking gradients and parameters
         wandb.watch(self.generator, criterion='mse', log='all')
@@ -203,14 +205,19 @@ class Trainer:
             val_loss.append(avg_val_loss)
             psnr.append(avg_psnr)
 
-            # Save best model based on validation loss or other metrics
+            # Save best model based on validation loss
             if avg_val_loss < best_val_loss:
                 best_val_loss = avg_val_loss
+                epochs_without_improvement = 0  # Reset patience counter
+                self._save_final_models()  # Save the final models when a new best model is found
+            else:
+                epochs_without_improvement += 1
 
-                # Save the final models when a new best model is found
-                self._save_final_models()
+            # Check for early stopping
+            if epochs_without_improvement >= patience:
+                print("Early stopping: No improvement for", patience, "epochs.")
+                break
 
-            # self._save_checkpoint(epoch)
             # Clear unnecessary variables to release memory
             del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
 
@@ -375,8 +382,8 @@ class Trainer:
 
 
                 if val_batch_idx == 0:
-                    ############################## Log Plots########################################
-                    print("Logging plots for batch index 0")
+                    ############################## Log Plots given channel########################################
+                    print("Logging plots for batch index 0 given channel")
 
                     # x-axis for the following logs
                     fig, axs = plt.subplots(4, 1, figsize=(8, 10))
@@ -384,7 +391,7 @@ class Trainer:
 
                     # log absolute difference for one channel
                     axs[0].plot(x_values, abs_diff)
-                    axs[0].set_title('Absolute difference')
+                    axs[0].set_title('Absolute difference given channel')
 
                     # Log one channel in the middle of the grid
                     val_channel = val_hr_destandardized[0][0][6][2]
@@ -413,6 +420,44 @@ class Trainer:
                     # Close the figure
                     plt.close(fig)
 
+                    ############################## Log Plots predicted channel########################################
+                    print("Logging plots for batch index 0 predicted channel")
+
+                    # x-axis for the following logs
+                    fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
+                    x_values = range(val_hr.shape[4])
+
+                    # log absolute difference for one channel
+                    axs1[0].plot(x_values, torch.abs(val_hr_destandardized[0][0][6][1] - val_sr_emg_destandardized[0][0][6][1]).squeeze().to('cpu'))
+                    axs1[0].set_title('Absolute difference predicted channel')
+
+                    # Log one channel in the middle of the grid
+                    val_channel = val_hr_destandardized[0][0][6][1]
+                    val_channel = val_channel.to('cpu')
+                    val_channel = np.asarray(val_channel)
+                    axs1[1].plot(x_values, val_channel)
+                    axs1[1].set_title('Validation channel [6][1]')
+
+                    # Log one channel in the middle of the grid
+                    sr_channel = val_sr_emg_destandardized[0][0][6][1]
+                    sr_channel = sr_channel.to('cpu')
+                    sr_channel = np.asarray(sr_channel)
+                    axs1[2].plot(x_values, sr_channel)
+                    axs1[2].set_title('Super-resolution channel [6][1]')
+
+                    # log cross correlation
+                    auto_correlation = np.correlate(val_channel, val_channel, mode='full')
+                    cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
+                    cross_correlation = cross_correlation.squeeze()
+                    axs1[3].plot(range(len(cross_correlation)), cross_correlation)
+                    axs1[3].set_title('Cross Correlation channel [6][1]')
+
+                    plt.tight_layout()
+                    wandb.log({"Logged plots": [wandb.Image(fig1)]})
+
+                    # Close the figure
+                    plt.close(fig1)
+
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
@@ -421,15 +466,15 @@ class Trainer:
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
-            fig1, axs1 = plt.subplots(1, 1, figsize=(8, 10))
-            axs1.plot(range(len(avg_abs_diff)), avg_abs_diff)
-            axs1.set_title('Average absolute difference')
+            fig2, axs2 = plt.subplots(1, 1, figsize=(8, 10))
+            axs2.plot(range(len(avg_abs_diff)), avg_abs_diff)
+            axs2.set_title('Average absolute difference')
             plt.tight_layout()
-            wandb.log({"Average absolute difference": [wandb.Image(fig1)]})
+            wandb.log({"Average absolute difference": [wandb.Image(fig2)]})
             wandb.log({'Mean absolute difference': np.mean(avg_abs_diff)})
 
             # Close the figure
-            plt.close(fig1)
+            plt.close(fig2)
 
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
 
@@ -569,11 +614,11 @@ class Trainer:
                 hr_emg = hr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
-                lr_sr_emg = self.generator(lr_emg).cpu().numpy().squeeze()
+                lr_sr_emg = self.generator(lr_emg).to('cpu').numpy().squeeze()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
                 # Generate super-resolved data (SR) from HR data
-                hr_sr_emg = self.generator(hr_emg).cpu().numpy().squeeze()
+                hr_sr_emg = self.generator(hr_emg).to('cpu').numpy().squeeze()
                 hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
                 # Save signal from lr to sr and hr to sr
