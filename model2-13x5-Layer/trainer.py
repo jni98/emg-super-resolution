@@ -29,7 +29,6 @@ from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 
 
-
 class Trainer:
     """
     Class to train the model.
@@ -144,9 +143,11 @@ class Trainer:
         self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
         self.discriminator = Discriminator()
 
-        # Inside your Trainer class __init__ method, wrap your model with nn.DataParallel
-        self.generator = nn.DataParallel(self.generator)
-        self.discriminator = nn.DataParallel(self.discriminator)
+        if torch.cuda.device_count() > 1:
+            print("Let's use", torch.cuda.device_count(), "GPUs!")
+            # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
+            self.generator = nn.DataParallel(self.generator)
+            self.discriminator = nn.DataParallel(self.discriminator)
 
         # Ensure that your model and data are moved to the appropriate device
         self.generator.to(self.device)
