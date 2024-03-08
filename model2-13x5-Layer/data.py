@@ -64,7 +64,7 @@ class Custom_Dataset(Dataset):
         # plt.savefig('lr_emg.png')
 
         # Standardize using mean and std values of the complete dataset
-        lr_emg_standardized = self.standardization(self.mean, self.std, )
+        lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
 
         # plt.figure()
         # plt.plot(lr_emg_standardized[0][0])
@@ -78,14 +78,13 @@ class Custom_Dataset(Dataset):
         # bandpass filter
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=5)
         #  Standardize using mean and std values of the complete dataset
-        hr_emg_standardized = self.standardization(self.mean, self.std, )
+        hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std )
         # unsqueeze to add a one channel dimension at the beginning
         hr_emg_standardized = torch.tensor(hr_emg_standardized).unsqueeze(0).to(torch.float32)
 
         return lr_emg_standardized, hr_emg_standardized, lr_emg_path, hr_emg_path
 
-    @staticmethod
-    def standardization(data: np.array, mean: float, std: float) -> np.array:
+    def standardization(self, data: np.array, mean: float, std: float) -> np.array:
         """
         Standardize the data using the mean and std values
         Parameters
@@ -107,8 +106,7 @@ class Custom_Dataset(Dataset):
         standardized_data = (data - mean) / std
         return standardized_data
 
-    @staticmethod
-    def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
+    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=5):
         """
         Apply a bandpass filter to the data
         Parameters
