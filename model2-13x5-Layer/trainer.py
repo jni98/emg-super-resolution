@@ -598,7 +598,10 @@ class Trainer:
         -------
 
         """
+        # free memory
+        del self.discriminator
         torch.cuda.empty_cache()
+
         print("Starting to generate SR data")
         # load the final generator
         self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))

@@ -142,12 +142,17 @@ class Trainer:
         self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
         self.discriminator = Discriminator()
 
-        # move to gpu in case it's possible
+        # Inside your Trainer class __init__ method, wrap your model with nn.DataParallel
+        self.generator = nn.DataParallel(self.generator)
+        self.discriminator = nn.DataParallel(self.discriminator)
+
+        # Ensure that your model and data are moved to the appropriate device
         self.generator.to(self.device)
+        self.discriminator.to(self.device)
+
         # print("Generator summary")
         # print(str(summary(self.generator, (1, 7,3,2048))))
 
-        self.discriminator.to(self.device)
         # print("Discriminator summary")
         # print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
@@ -593,6 +598,10 @@ class Trainer:
         -------
 
         """
+        # free memory
+        del self.discriminator
+        torch.cuda.empty_cache()
+
         print("Starting to generate SR data")
         # load the final generator
         self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
