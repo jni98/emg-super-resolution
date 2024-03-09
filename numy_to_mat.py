@@ -62,7 +62,7 @@ if __name__ == '__main__':
         print(file)
         print("Done")
 
-    # for file, test_path_mat in zip(files_model2, test_paths_mat):
-    #     numpy_to_mat(file, test_path_mat)
-    #     print(file)
-    #     print("Done")
+    for file, test_path_mat in zip(files_model2, test_paths_mat):
+        numpy_to_mat(file, test_path_mat)
+        print(file)
+        print("Done")

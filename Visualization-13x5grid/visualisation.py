@@ -40,7 +40,7 @@ class Visualizer:
         # Load your data (already normalized)
         inter_spline_lr_sr = np.load(
             self.file_path + 'linear_Interpolation/path0-lr.npy')
-        model1_lr_sr = np.load(self.file_path + 'groundtruth/path0-hr.npy')
+        model1_lr_sr = np.load(self.file_path + 'model 2/path0-lr.npy')
 
         # Load original data and normalize it
         origin_hr = np.load(self.file_path + 'groundtruth/path0-hr.npy')
@@ -505,9 +505,9 @@ if __name__ == '__main__':
 
     visualize = Visualizer(file_path)
 
-    # visualize.plot_emg_channels()
+    visualize.plot_emg_channels()
     visualize.plot_emg_channels_difference()
-    # visualize.plot_heat_maps()
-    # visualize.plot_correlations()
-    # visualize.plot_pearson_coefficient()
-    # visualize.plot_pearson_coefficient_grid()
+    visualize.plot_heat_maps()
+    visualize.plot_correlations()
+    visualize.plot_pearson_coefficient()
+    visualize.plot_pearson_coefficient_grid()
