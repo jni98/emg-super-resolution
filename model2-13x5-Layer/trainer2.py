@@ -556,6 +556,16 @@ class Trainer:
         -------
 
         """
+        # free memory
+        del self.discriminator
+        del self.optimizer_G
+        del self.optimizer_D
+        del self.adversarial_loss
+        del self.mse
+        del self.training
+        del self.validation
+        torch.cuda.empty_cache()
+
         print("Starting to generate SR data")
         # load the final generator
         self.generator.load_state_dict(
@@ -565,21 +575,21 @@ class Trainer:
         with torch.no_grad():
             for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
                 lr_emg = lr_emg.to(self.device)
-                hr_emg = hr_emg.to(self.device)
+                #hr_emg = hr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
                 lr_sr_emg = self.generator(lr_emg).cpu().numpy().squeeze()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
                 # Generate super-resolved data (SR) from HR data
-                hr_sr_emg = self.generator(hr_emg).cpu().numpy().squeeze()
-                hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
+                #hr_sr_emg = self.generator(hr_emg).cpu().numpy().squeeze()
+                #hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
                 # Save signal from lr to sr and hr to sr
                 model_path = '/home/hpc/iwso/iwso124h/model2-13x5-Layer-781033/20240305154059' + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
-                np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
+                #np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
 
