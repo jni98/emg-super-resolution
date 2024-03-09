@@ -573,7 +573,7 @@ class Trainer:
 
         with torch.no_grad():
             for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-                print(model_path + lr_emg_paths[0])
+                print(lr_emg_paths[0])
 
                 lr_emg = lr_emg.to(self.device)
 
