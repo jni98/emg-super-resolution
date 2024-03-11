@@ -18,7 +18,7 @@ from trainer import Trainer
 def setup_sweep():
     # Define the sweep config
     sweep_config = {
-        'method': 'grid',
+        'method': 'bayes',
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
@@ -28,7 +28,7 @@ def setup_sweep():
                 'values': [0.0001, 0.00001]
             },
             'num_res_blocks_last': {
-                'values': [3]
+                'values': [3,4,5]
             },
             'num_res_blocks': {
                 'values': [5]
