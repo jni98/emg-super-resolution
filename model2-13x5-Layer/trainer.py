@@ -257,10 +257,8 @@ class Trainer:
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
 
-            with torch.no_grad():  # Disable gradient calculation within this block
-                # Move data to CUDA device during training or validation loops
-                lr_emg = lr_emg.to(self.device)
-                hr_emg = hr_emg.to(self.device)
+            lr_emg = lr_emg.to(self.device)
+            hr_emg = hr_emg.to(self.device)
 
             # Train Discriminator
             self.optimizer_D.zero_grad()

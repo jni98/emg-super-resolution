@@ -422,14 +422,6 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         plt.savefig('emg_hr_reshaped.png')
         plt.close()
 
-        # Reshape arrays to channel x samples, counting channels from top to bottom
-        # emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
-        # emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
-
-        # transpose for samples x channels shape
-        # emg_lr_final = emg_lr_windowed.transpose()
-        # emg_hr_final = emg_hr_windowed.transpose()
-
         # save high resolution data and add file name to list
         hr_file_location = dataset_path + f'path{i}-hr.npy'
         np.save(hr_file_location, emg_hr_reshaped)
@@ -479,7 +471,7 @@ if __name__ == '__main__':
     #
     # dataset_creator_dominik(data_paths)
 
-    # TODO: use 10 subjects for the dataset and 2 subjects for the testset
+    # use 10 subjects for the dataset and 2 subjects for the testset
     train_paths = [
         'data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/POST/400InAnfd170619145709 Rampa_35MVC_5MVCs_1acontrazione_TODECOMPOSE_offset0_length29.682_runs250_EDITED_MATTEO.mat',
         'data/Alessandros Daten sEMG/Train and Val/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE/400InAnfd170605141107 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length27_runs250_FINISHED_ANDREA.mat',
