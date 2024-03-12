@@ -676,6 +676,12 @@ class Trainer:
                 lr_sr_emg = self.generator(lr_emg).to('cpu').numpy().squeeze()
                 lr_sr_emg = self._delete_row_column(lr_sr_emg)
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
+                lr_sr_emg_shape = lr_sr_emg.shape
+
+                # 2D to 3D
+                lr_sr_emg = lr_sr_emg.reshape(5, 13, lr_sr_emg_shape[0]).transpose(1, 0, 2)
+                lr_sr_emg = np.flipud(lr_sr_emg)
+                lr_sr_emg[:, 1::2, :] = np.flipud(lr_sr_emg[:, 1::2, :])
 
                 # Save signal from lr to sr and hr to sr
                 model_path = self.run_folder + self.unique_folder + '/results/'
