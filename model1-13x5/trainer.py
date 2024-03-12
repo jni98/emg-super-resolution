@@ -268,6 +268,7 @@ class Trainer:
             # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
             # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
             sr_emg = self.generator(lr_emg).detach().to(self.device)
+            sr_emg = self._delete_row_column(sr_emg)
 
             # Create real and fake labels to train discriminator for both cases
             real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
@@ -293,7 +294,6 @@ class Trainer:
 
             # Generate SR data from LR data
             sr_emg = self.generator(lr_emg).to(self.device)
-
             sr_emg = self._delete_row_column(sr_emg)
 
             output = self.discriminator(sr_emg)
@@ -408,6 +408,7 @@ class Trainer:
 
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
+                val_sr_emg = self._delete_row_column(val_sr_emg)
 
                 # Calculate validation loss
                 val_loss = self.mse(val_sr_emg, val_hr)
@@ -673,6 +674,7 @@ class Trainer:
 
                 # Generate super-resolved data (SR) from LR data
                 lr_sr_emg = self.generator(lr_emg).to('cpu').numpy().squeeze()
+                lr_sr_emg = self._delete_row_column(lr_sr_emg)
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
                 # Save signal from lr to sr and hr to sr
