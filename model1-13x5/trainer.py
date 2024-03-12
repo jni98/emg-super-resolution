@@ -425,7 +425,10 @@ class Trainer:
                 val_sr_emg_destandardized = self.destandardize_data(val_sr_emg)
 
                 # log absolute difference for one channel absolute difference
-                abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_emg_destandardized[0][0][6][2])
+                val_hr_destandardized = val_hr_destandardized.permute(0,1,3,2)
+                val_sr_emg_destandardized = val_sr_emg_destandardized.permute(0,1,3,2)
+
+                abs_diff = torch.abs(val_hr_destandardized[0][0][32] - val_sr_emg_destandardized[0][0][32])
                 abs_diff = abs_diff.squeeze().to('cpu')
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
@@ -436,32 +439,32 @@ class Trainer:
 
                     # x-axis for the following logs
                     fig, axs = plt.subplots(4, 1, figsize=(8, 10))
-                    x_values = range(val_hr.shape[4])
+                    x_values = range(val_hr.shape[2])
 
                     # log absolute difference for one channel
                     axs[0].plot(x_values, abs_diff)
                     axs[0].set_title('Absolute difference given channel')
 
                     # Log one channel in the middle of the grid
-                    val_channel = val_hr_destandardized[0][0][6][2]
+                    val_channel = val_hr_destandardized[0][0][32]
                     val_channel = val_channel.to('cpu')
                     val_channel = np.asarray(val_channel)
                     axs[1].plot(x_values, val_channel)
-                    axs[1].set_title('Validation channel [6][2]')
+                    axs[1].set_title('Validation channel [32]')
 
                     # Log one channel in the middle of the grid
-                    sr_channel = val_sr_emg_destandardized[0][0][6][2]
+                    sr_channel = val_sr_emg_destandardized[0][0][32]
                     sr_channel = sr_channel.to('cpu')
                     sr_channel = np.asarray(sr_channel)
                     axs[2].plot(x_values, sr_channel)
-                    axs[2].set_title('Super-resolution channel [6][2]')
+                    axs[2].set_title('Super-resolution channel [32]')
 
                     # log cross correlation
                     auto_correlation = np.correlate(val_channel, val_channel, mode='full')
                     cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
                     cross_correlation = cross_correlation.squeeze()
                     axs[3].plot(range(len(cross_correlation)), cross_correlation)
-                    axs[3].set_title('Cross Correlation channel [6][2]')
+                    axs[3].set_title('Cross Correlation channel [32]')
 
                     plt.tight_layout()
                     wandb.log({"Logged plots": [wandb.Image(fig)]})
@@ -474,33 +477,33 @@ class Trainer:
 
                     # x-axis for the following logs
                     fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
-                    x_values = range(val_hr.shape[4])
+                    x_values = range(val_hr.shape[2])
 
                     # log absolute difference for one channel
                     axs1[0].plot(x_values, torch.abs(
-                        val_hr_destandardized[0][0][6][1] - val_sr_emg_destandardized[0][0][6][1]).squeeze().to('cpu'))
+                        val_hr_destandardized[0][0][32] - val_sr_emg_destandardized[0][0][32]).squeeze().to('cpu'))
                     axs1[0].set_title('Absolute difference predicted channel')
 
                     # Log one channel in the middle of the grid
-                    val_channel = val_hr_destandardized[0][0][6][1]
+                    val_channel = val_hr_destandardized[0][0][32]
                     val_channel = val_channel.to('cpu')
                     val_channel = np.asarray(val_channel)
                     axs1[1].plot(x_values, val_channel)
-                    axs1[1].set_title('Validation channel [6][1]')
+                    axs1[1].set_title('Validation channel [32]')
 
                     # Log one channel in the middle of the grid
-                    sr_channel = val_sr_emg_destandardized[0][0][6][1]
+                    sr_channel = val_sr_emg_destandardized[0][0][32]
                     sr_channel = sr_channel.to('cpu')
                     sr_channel = np.asarray(sr_channel)
                     axs1[2].plot(x_values, sr_channel)
-                    axs1[2].set_title('Super-resolution channel [6][1]')
+                    axs1[2].set_title('Super-resolution channel [32]')
 
                     # log cross correlation
                     auto_correlation = np.correlate(val_channel, val_channel, mode='full')
                     cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
                     cross_correlation = cross_correlation.squeeze()
                     axs1[3].plot(range(len(cross_correlation)), cross_correlation)
-                    axs1[3].set_title('Cross Correlation channel [6][1]')
+                    axs1[3].set_title('Cross Correlation channel [32]')
 
                     plt.tight_layout()
                     wandb.log({"Logged plots": [wandb.Image(fig1)]})
@@ -516,15 +519,7 @@ class Trainer:
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
-            fig2, axs2 = plt.subplots(1, 1, figsize=(8, 10))
-            axs2.plot(range(len(avg_abs_diff)), avg_abs_diff)
-            axs2.set_title('Average absolute difference')
-            plt.tight_layout()
-            wandb.log({"Average absolute difference": [wandb.Image(fig2)]})
             wandb.log({'Mean absolute difference': np.mean(avg_abs_diff)})
-
-            # Close the figure
-            plt.close(fig2)
 
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
 
