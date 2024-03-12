@@ -347,10 +347,10 @@ class Trainer:
         sr_emg_move_axis = sr_emg.permute(0, 1, 3, 2)
 
         # Reshape to grid shape (batch, 1,6,14,2048)
-        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, 6, 14, 2048)
+        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, 6, 14, sr_emg_shape[2])
 
         # Create array for the new shape where the last row and column are deleted
-        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, 2048, 65, dtype=torch.float32,
+        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, sr_emg_shape[2], 65, dtype=torch.float32,
                                    device=self.device)
 
         for i in range(sr_emg_shape[0]):
@@ -370,7 +370,7 @@ class Trainer:
             grid_new[:, 1::2, :] = torch.flip(grid_new[:, 1::2, :], dims=[0])
             grid_new = torch.flip(grid_new, dims=[0])
             grid_new = grid_new.permute(1, 0, 2)
-            grid_new = grid_new.reshape(65, 2048)
+            grid_new = grid_new.reshape(65, sr_emg_shape[2])
             grid_new = grid_new.permute(1, 0)
 
             sr_emg_final[i][0][:][:] = grid_new
