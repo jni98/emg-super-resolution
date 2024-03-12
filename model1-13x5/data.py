@@ -5,11 +5,11 @@ File description: This file contains the class Custom_Dataset, which is a custom
 
 The code is called from every file that is loading a dataset.
 """
-
+from matplotlib import pyplot as plt
+from scipy.signal import butter, filtfilt
 from torch.utils.data import Dataset
 import torch
 import numpy as np
-from scipy.signal import butter, filtfilt
 
 
 class Custom_Dataset(Dataset):
@@ -17,13 +17,14 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
 
     """
-    def __init__(self, data, mean: float, std: float) -> None:
+
+    def __init__(self, data, directory, mean: float, std: float) -> None:
         super().__init__()
         self.data = data
+        self.directory = directory
 
         self.mean = mean
         self.std = std
-
 
     def __len__(self) -> int:
         return len(self.data)
@@ -53,23 +54,36 @@ class Custom_Dataset(Dataset):
         lr_emg_path = self.data.iloc[index]['lr_filename']
         hr_emg_path = self.data.iloc[index]['hr_filename']
 
-        lr_emg = np.load(self.data.iloc[index, 0])
-        lr_emg = self.reshape_3D_to_2D(lr_emg)
+        lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
 
-        # bandpass filter the signal
-        lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048)
+        # bandpass filter
+        lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=5)
+
+        lr_emg = self.reshape(lr_emg)
+
+        # plt.figure()
+        # plt.plot(lr_emg[0][0])
+        # plt.savefig('lr_emg.png')
+
         # Standardize using mean and std values of the complete dataset
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
+
+        # plt.figure()
+        # plt.plot(lr_emg_standardized[0][0])
+        # plt.savefig('lr_emg_standardized.png')
+
         # unsqueeze to add a one channel dimension at the beginning
         lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
 
-        hr_emg = np.load(self.data.iloc[index, 1])
-        hr_emg = self.reshape_3D_to_2D(hr_emg)
+        hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
-        # bandpass filter the signal
-        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048)
+        # bandpass filter
+        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=5)
+
+        hr_emg = self.reshape(hr_emg)
+
         #  Standardize using mean and std values of the complete dataset
-        hr_emg_standardized = self.standardization(hr_emg,self.mean,self.std)
+        hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std )
         # unsqueeze to add a one channel dimension at the beginning
         hr_emg_standardized = torch.tensor(hr_emg_standardized).unsqueeze(0).to(torch.float32)
 
@@ -94,7 +108,7 @@ class Custom_Dataset(Dataset):
         """
 
         # Min-max normalization using precalculated min and max values
-        standardized_data = (data - mean)/std
+        standardized_data = (data - mean) / std
         return standardized_data
 
     def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=5):
@@ -123,23 +137,27 @@ class Custom_Dataset(Dataset):
         high = highcut / nyq
         b, a = butter(order, [low, high], btype='band')
         filtered_signal = filtfilt(b, a, data)
-        print("Signal filtered")
+
         return filtered_signal
 
-    def reshape_3D_to_2D(self, data: np.array) -> np.array:
+    def reshape(self, data: np.array) -> np.array:
         """
-        Reshape the 3D data to 2D
+        Reshape the data to the correct shape
         Parameters
         ----------
         data: np.array
-            3D data
+            Data to be reshaped
 
         Returns
         -------
         reshaped_data: np.array
-            2D data
+            Reshaped data
         """
-        data_shape = data.shape
+        # 3D to 2D
         data[:, 1::2, :] = np.flipud(data[:, 1::2, :])
-        reshaped_data = np.flipud(data).transpose(1, 0, 2).reshape(65, data_shape[2])
+        reshaped_data = np.flipud(data).transpose(1, 0, 2).reshape(data.shape[0]*data.shape[1], data.shape[2])
+
+        # Permute to have samples x channel
+        reshaped_data = reshaped_data.transpose()
+
         return reshaped_data
