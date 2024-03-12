@@ -663,13 +663,14 @@ class Trainer:
         self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
-        with torch.no_grad():
+        with (torch.no_grad()):
             for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
                 lr_emg = lr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
-                lr_sr_emg = self.generator(lr_emg).to('cpu').numpy().squeeze()
+                lr_sr_emg = self.generator(lr_emg).to('cpu')
                 lr_sr_emg = self._delete_row_column(lr_sr_emg)
+                lr_sr_emg = lr_sr_emg.numpy().squeeze()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
                 lr_sr_emg_shape = lr_sr_emg.shape
 
