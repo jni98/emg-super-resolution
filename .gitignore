@@ -165,3 +165,4 @@ dmypy.json
 /model2-13x5-Layer-DropOut-ImprDisc/wandb/
 /results/
 /results_mat/
+/results_decomposed/

@@ -10,23 +10,23 @@ The code is called from the train.py file which is started by the main function.
 import json
 import os
 from datetime import datetime
-
 import matplotlib
 import wandb
+import torch
+import pandas as pd
+from generator import Generator
+from discriminator import Discriminator
+from data import Custom_Dataset
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
 
 import numpy as np
-import torch
+
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
-import pandas as pd
-from generator import Generator
-from discriminator import Discriminator
-from data import Custom_Dataset
 
 
 class Trainer:
@@ -143,9 +143,11 @@ class Trainer:
         self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
         self.discriminator = Discriminator()
 
-        # Inside your Trainer class __init__ method, wrap your model with nn.DataParallel
-        self.generator = nn.DataParallel(self.generator)
-        self.discriminator = nn.DataParallel(self.discriminator)
+        if torch.cuda.device_count() > 1:
+            print("Let's use", torch.cuda.device_count(), "GPUs!")
+            # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
+            self.generator = nn.DataParallel(self.generator)
+            self.discriminator = nn.DataParallel(self.discriminator)
 
         # Ensure that your model and data are moved to the appropriate device
         self.generator.to(self.device)
@@ -255,10 +257,8 @@ class Trainer:
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
 
-            with torch.no_grad():  # Disable gradient calculation within this block
-                # Move data to CUDA device during training or validation loops
-                lr_emg = lr_emg.to(self.device)
-                hr_emg = hr_emg.to(self.device)
+            lr_emg = lr_emg.to(self.device)
+            hr_emg = hr_emg.to(self.device)
 
             # Train Discriminator
             self.optimizer_D.zero_grad()
@@ -598,7 +598,7 @@ class Trainer:
         -------
 
         """
-        #free memory
+        # free memory
         del self.discriminator
         del self.optimizer_G
         del self.optimizer_D
@@ -616,21 +616,15 @@ class Trainer:
         with torch.no_grad():
             for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
                 lr_emg = lr_emg.to(self.device)
-                hr_emg = hr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
                 lr_sr_emg = self.generator(lr_emg).to('cpu').numpy().squeeze()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
 
-                # Generate super-resolved data (SR) from HR data
-                hr_sr_emg = self.generator(hr_emg).to('cpu').numpy().squeeze()
-                hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
-
                 # Save signal from lr to sr and hr to sr
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
-                np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
 
