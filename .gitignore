@@ -166,3 +166,4 @@ dmypy.json
 /results/
 /results_mat/
 /results_decomposed/
+/Visualization-13x5grid/plot_pearsonr_heatmap_oneChannel/
