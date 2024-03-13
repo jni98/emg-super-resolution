@@ -670,21 +670,29 @@ class Trainer:
                 # Generate super-resolved data (SR) from LR data
                 lr_sr_emg = self.generator(lr_emg).to('cpu')
                 lr_sr_emg = self._delete_row_column(lr_sr_emg)
-                lr_sr_emg = lr_sr_emg.to('cpu').numpy().squeeze()
+
+                # Reshape to 3D
+                lr_sr_emg = lr_sr_emg.squeeze()
+                lr_sr_emg = lr_sr_emg.permute(1,0)
+                lr_sr_emg = lr_sr_emg.view(5, 13, lr_emg.shape[2])
+                lr_sr_emg = lr_sr_emg.transpose(0, 1)
+                lr_sr_emg = torch.flip(lr_sr_emg, dims=[0])
+                lr_sr_emg[:, 1::2] = torch.flip(lr_sr_emg[:, 1::2], dims=[0])
+
+                lr_sr_emg = lr_sr_emg.to('cpu').numpy()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
-                lr_sr_emg_shape = lr_sr_emg.shape
 
                 # 2D to 3D
-                lr_sr_emg_destandardized = lr_sr_emg_destandardized.reshape(5, 13, lr_sr_emg_shape[0]).transpose(1, 0, 2)
-                lr_sr_emg_destandardized = np.flipud(lr_sr_emg_destandardized)
-                lr_sr_emg_destandardized[:, 1::2, :] = np.flipud(lr_sr_emg_destandardized[:, 1::2, :])
+                # lr_sr_emg_destandardized = lr_sr_emg_destandardized.reshape(5, 13, lr_sr_emg_shape[0]).transpose(1, 0, 2)
+                # lr_sr_emg_destandardized = np.flipud(lr_sr_emg_destandardized)
+                # lr_sr_emg_destandardized[:, 1::2, :] = np.flipud(lr_sr_emg_destandardized[:, 1::2, :])
 
                 # Save signal from lr to sr and hr to sr
                 model_path = '/home/hpc/iwso/iwso124h/model1-13x5-785145/20240312152014' + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
 
-        torch.cuda.empty_cache()
+        print("Successfully generated LR to SR data")
 
         # TODO: Generate from HR
         # print("Starting to generate SR data")
