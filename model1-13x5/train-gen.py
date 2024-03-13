@@ -12,7 +12,7 @@ import argparse
 import torch
 import wandb  # Import wandb library
 
-from trainer import Trainer
+from trainer2 import Trainer
 
 
 def setup_sweep():
