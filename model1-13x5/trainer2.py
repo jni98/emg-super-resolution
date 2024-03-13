@@ -670,7 +670,7 @@ class Trainer:
                 # Generate super-resolved data (SR) from LR data
                 lr_sr_emg = self.generator(lr_emg).to('cpu')
                 lr_sr_emg = self._delete_row_column(lr_sr_emg)
-                lr_sr_emg = lr_sr_emg.numpy().squeeze()
+                lr_sr_emg = lr_sr_emg.to('cpu').numpy().squeeze()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
                 lr_sr_emg_shape = lr_sr_emg.shape
 
@@ -699,7 +699,7 @@ class Trainer:
                 # Generate super-resolved data (SR) from LR data
                 hr_sr_emg = self.generator(hr_emg).to('cpu')
                 hr_sr_emg = self._delete_row_column(hr_sr_emg)
-                hr_sr_emg = hr_sr_emg.numpy().squeeze()
+                hr_sr_emg = hr_sr_emg.to('cpu').numpy().squeeze()
                 hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
                 hr_sr_emg_shape =hr_sr_emg.shape
 
