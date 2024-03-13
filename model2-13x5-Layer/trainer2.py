@@ -588,13 +588,6 @@ class Trainer:
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
 
         # free memory
-        del self.discriminator
-        del self.optimizer_G
-        del self.optimizer_D
-        del self.adversarial_loss
-        del self.mse
-        del self.training
-        del self.validation
         torch.cuda.empty_cache()
 
         print("Starting to generate SR data")
