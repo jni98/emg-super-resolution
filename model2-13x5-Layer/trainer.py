@@ -64,6 +64,7 @@ class Trainer:
 
         self.lr = config.learning_rate
         self.batch_size = config.batch_size
+        self.adv_loss_weight = config.adv_loss_weight
 
         self.unique_folder = '/' + datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -299,7 +300,7 @@ class Trainer:
 
             loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
 
-            loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
+            loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content)
 
             loss_generator.backward()
 
