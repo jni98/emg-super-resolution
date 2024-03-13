@@ -675,9 +675,9 @@ class Trainer:
                 lr_sr_emg_shape = lr_sr_emg.shape
 
                 # 2D to 3D
-                lr_sr_emg = lr_sr_emg.reshape(5, 13, lr_sr_emg_shape[0]).transpose(1, 0, 2)
-                lr_sr_emg = np.flipud(lr_sr_emg)
-                lr_sr_emg[:, 1::2, :] = np.flipud(lr_sr_emg[:, 1::2, :])
+                lr_sr_emg_destandardized = lr_sr_emg_destandardized.reshape(5, 13, lr_sr_emg_shape[0]).transpose(1, 0, 2)
+                lr_sr_emg_destandardized = np.flipud(lr_sr_emg_destandardized)
+                lr_sr_emg_destandardized[:, 1::2, :] = np.flipud(lr_sr_emg_destandardized[:, 1::2, :])
 
                 # Save signal from lr to sr and hr to sr
                 model_path = '/home/hpc/iwso/iwso124h/model1-13x5-785145/20240312152014' + '/results/'
@@ -686,32 +686,33 @@ class Trainer:
 
         torch.cuda.empty_cache()
 
-        print("Starting to generate SR data")
-        # load the final generator
-        self.generator.load_state_dict(
-            torch.load('/home/hpc/iwso/iwso124h/model1-13x5-785145/20240312152014/final_generator.pt'))
-        self.generator.eval()  # Set the generator to evaluation mode
-
-        with (torch.no_grad()):
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-                hr_emg = hr_emg.to(self.device)
-
-                # Generate super-resolved data (SR) from LR data
-                hr_sr_emg = self.generator(hr_emg).to('cpu')
-                hr_sr_emg = self._delete_row_column(hr_sr_emg)
-                hr_sr_emg = hr_sr_emg.to('cpu').numpy().squeeze()
-                hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
-                hr_sr_emg_shape =hr_sr_emg.shape
-
-                # 2D to 3D
-                hr_sr_emg = hr_sr_emg.reshape(5, 13, hr_sr_emg_shape[0]).transpose(1, 0, 2)
-                hr_sr_emg = np.flipud(hr_sr_emg)
-                hr_sr_emg[:, 1::2, :] = np.flipud(hr_sr_emg[:, 1::2, :])
-
-                # Save signal from hr to sr and hr to sr
-                model_path = '/home/hpc/iwso/iwso124h/model1-13x5-785145/20240312152014' + '/results/'
-                os.makedirs(model_path, exist_ok=True)
-                np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
+        # TODO: Generate from HR
+        # print("Starting to generate SR data")
+        # # load the final generator
+        # self.generator.load_state_dict(
+        #     torch.load('/home/hpc/iwso/iwso124h/model1-13x5-785145/20240312152014/final_generator.pt'))
+        # self.generator.eval()  # Set the generator to evaluation mode
+        #
+        # with (torch.no_grad()):
+        #     for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+        #         hr_emg = hr_emg.to(self.device)
+        #
+        #         # Generate super-resolved data (SR) from LR data
+        #         hr_sr_emg = self.generator(hr_emg).to('cpu')
+        #         hr_sr_emg = self._delete_row_column(hr_sr_emg)
+        #         hr_sr_emg = hr_sr_emg.to('cpu').numpy().squeeze()
+        #         hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
+        #         hr_sr_emg_shape =hr_sr_emg.shape
+        #
+        #         # 2D to 3D
+        #         hr_sr_emg_destandardized = hr_sr_emg_destandardized.reshape(5, 13, hr_sr_emg_shape[0]).transpose(1, 0, 2)
+        #         hr_sr_emg_destandardized = np.flipud(hr_sr_emg_destandardized)
+        #         hr_sr_emg_destandardized[:, 1::2, :] = np.flipud(hr_sr_emg_destandardized[:, 1::2, :])
+        #
+        #         # Save signal from hr to sr and hr to sr
+        #         model_path = '/home/hpc/iwso/iwso124h/model1-13x5-785145/20240312152014' + '/results/'
+        #         os.makedirs(model_path, exist_ok=True)
+        #         np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
 
