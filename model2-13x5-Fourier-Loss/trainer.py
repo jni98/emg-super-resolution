@@ -261,77 +261,76 @@ class Trainer:
         total_loss_d = 0.0
         total_fourier_loss = 0.0
 
-        with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
-                print("batch index", batch_idx)
+        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
+            print("batch index", batch_idx)
 
-                lr_emg = lr_emg.to(self.device)
-                hr_emg = hr_emg.to(self.device)
+            lr_emg = lr_emg.to(self.device)
+            hr_emg = hr_emg.to(self.device)
 
-                # Train Discriminator
-                self.optimizer_D.zero_grad()
+            # Train Discriminator
+            self.optimizer_D.zero_grad()
 
-                # Generate super-resolved data (SR) from LR data
-                # detaching sr_emg prevents gradients from flowing back through the generator network when computing
-                # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
-                # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
-                sr_emg = self.generator(lr_emg).detach().to(self.device)
+            # Generate super-resolved data (SR) from LR data
+            # detaching sr_emg prevents gradients from flowing back through the generator network when computing
+            # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
+            # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
+            sr_emg = self.generator(lr_emg).detach().to(self.device)
 
-                # Create real and fake labels to train discriminator for both cases
-                real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
-                fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
+            # Create real and fake labels to train discriminator for both cases
+            real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
+            fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
 
-                # calculate loss for discriminator receiving real data
-                output_discriminator_real = self.discriminator(hr_emg).to(self.device)
-                loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
+            # calculate loss for discriminator receiving real data
+            output_discriminator_real = self.discriminator(hr_emg).to(self.device)
+            loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
 
-                # calculate loss for discriminator receiving fake data
-                output_discriminator_fake = self.discriminator(sr_emg)
-                loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
+            # calculate loss for discriminator receiving fake data
+            output_discriminator_fake = self.discriminator(sr_emg)
+            loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
-                # calculate total loss for discriminator
-                loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
+            # calculate total loss for discriminator
+            loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
 
-                loss_discriminator.backward()
+            loss_discriminator.backward()
 
-                self.optimizer_D.step()
+            self.optimizer_D.step()
 
-                # Train Generator
-                self.optimizer_G.zero_grad()
+            # Train Generator
+            self.optimizer_G.zero_grad()
 
-                # Generate SR data from LR data
-                sr_emg = self.generator(lr_emg).to(self.device)
+            # Generate SR data from LR data
+            sr_emg = self.generator(lr_emg).to(self.device)
 
-                output = self.discriminator(sr_emg)
-                loss_generator_adv = self.adversarial_loss(output, real_labels)
+            output = self.discriminator(sr_emg)
+            loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-                loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
+            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
 
-                sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(sr_emg)
-                hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(hr_emg)
+            sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(sr_emg)
+            hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(hr_emg)
 
-                loss_generator_fourier_real = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)  # Fourier loss
-                loss_generator_fourier_imag = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag)  # Fourier loss
+            loss_generator_fourier_real = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)  # Fourier loss
+            loss_generator_fourier_imag = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag)  # Fourier loss
 
-                combined_fourier_loss = loss_generator_fourier_real + loss_generator_fourier_imag
+            combined_fourier_loss = loss_generator_fourier_real + loss_generator_fourier_imag
 
-                loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
-                                  self.fourier_loss_weight * combined_fourier_loss)
+            loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
+                              self.fourier_loss_weight * combined_fourier_loss)
 
-                print("loss_generator", loss_generator)
-                print("loss_generator_adv", loss_generator_adv)
-                print("loss_generator_content", loss_generator_content)
-                print("loss_generator_fourier", combined_fourier_loss)
+            print("loss_generator", loss_generator)
+            print("loss_generator_adv", loss_generator_adv)
+            print("loss_generator_content", loss_generator_content)
+            print("loss_generator_fourier", combined_fourier_loss)
 
-                loss_generator.backward()
+            loss_generator.backward()
 
-                self.optimizer_G.step()
+            self.optimizer_G.step()
 
-                total_loss_g += loss_generator.item()
-                total_loss_d += loss_discriminator.item()
-                total_loss_d_real += loss_discriminator_real.item()
-                total_loss_d_fake += loss_discriminator_fake.item()
-                total_fourier_loss += combined_fourier_loss.item()
+            total_loss_g += loss_generator.item()
+            total_loss_d += loss_discriminator.item()
+            total_loss_d_real += loss_discriminator_real.item()
+            total_loss_d_fake += loss_discriminator_fake.item()
+            total_fourier_loss += combined_fourier_loss.item()
 
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
@@ -553,6 +552,7 @@ class Trainer:
         mse_combined = mse_real + mse_imag
 
         return mse_combined
+
     def _save_checkpoint(self, epoch: int) -> None:
         """
         Saves the Generator and Discriminator at a given epoch.
