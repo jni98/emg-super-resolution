@@ -64,7 +64,7 @@ class Custom_Dataset(Dataset):
         if self.bandpass_filter:
             lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=2)
         if self.spatial_whitening:
-            lr_emg = self.spatial_whitening(lr_emg)
+            lr_emg = self.spatial_whitening_function(lr_emg)
 
         # plt.figure()
         # plt.plot(lr_emg[0][0])
@@ -86,7 +86,7 @@ class Custom_Dataset(Dataset):
         if self.bandpass_filter:
             hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
         if self.spatial_whitening:
-            hr_emg = self.spatial_whitening(hr_emg)
+            hr_emg = self.spatial_whitening_function(hr_emg)
 
         #  Standardize using mean and std values of the complete dataset
         hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std )
@@ -146,7 +146,7 @@ class Custom_Dataset(Dataset):
 
         return filtered_signal
 
-    def spatial_whitening(self, data):
+    def spatial_whitening_function(self, data):
         """
         Apply spatial whitening to the data
         Parameters
