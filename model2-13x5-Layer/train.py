@@ -34,7 +34,13 @@ def setup_sweep():
                 'values': [5]
             },
             'adv_loss_weight': {
-                'values': [0.1, 0.01, 0.001, 0.0001]
+                'values': [0.001]
+            },
+            'spatial_whitening': {
+                'values': [True, False]
+            },
+            'bandpass_filter': {
+                'values': [True, False]
             },
 
         }

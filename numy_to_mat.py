@@ -14,12 +14,8 @@ def numpy_to_mat(file, file_path_mat):
 
     mat_ref_signal = mat['ref_signal']
 
-    # Gain factor to convert the EMG data back to original data
-    gain_factor = 5 / (2 ** 16) / 150 * 1000
-
     # Load numpy file to be converted
     emg = np.load('results/' + file + '.npy')
-    emg = emg * gain_factor
 
     # Fill the cell_variable with the data from the NumPy array
     for i in range(13):

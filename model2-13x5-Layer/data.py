@@ -5,6 +5,7 @@ File description: This file contains the class Custom_Dataset, which is a custom
 
 The code is called from every file that is loading a dataset.
 """
+import scipy
 from matplotlib import pyplot as plt
 from scipy.signal import butter, filtfilt
 from torch.utils.data import Dataset
@@ -18,13 +19,16 @@ class Custom_Dataset(Dataset):
 
     """
 
-    def __init__(self, data, directory, mean: float, std: float) -> None:
+    def __init__(self, data, directory, mean: float, std: float, spatial_whitening: str, bandpass_filter: bool) -> None:
         super().__init__()
         self.data = data
         self.directory = directory
 
         self.mean = mean
         self.std = std
+
+        self.spatial_whitening = spatial_whitening
+        self.bandpass_filter = bandpass_filter
 
     def __len__(self) -> int:
         return len(self.data)
@@ -57,7 +61,10 @@ class Custom_Dataset(Dataset):
         lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
 
         # bandpass filter
-        lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=5)
+        if self.bandpass_filter:
+            lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=2)
+        if self.spatial_whitening:
+            lr_emg = self.spatial_whitening(lr_emg)
 
         # plt.figure()
         # plt.plot(lr_emg[0][0])
@@ -76,7 +83,11 @@ class Custom_Dataset(Dataset):
         hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
         # bandpass filter
-        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=5)
+        if self.bandpass_filter:
+            hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
+        if self.spatial_whitening:
+            hr_emg = self.spatial_whitening(hr_emg)
+
         #  Standardize using mean and std values of the complete dataset
         hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std )
         # unsqueeze to add a one channel dimension at the beginning
@@ -106,7 +117,7 @@ class Custom_Dataset(Dataset):
         standardized_data = (data - mean) / std
         return standardized_data
 
-    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=5):
+    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
         """
         Apply a bandpass filter to the data
         Parameters
@@ -133,24 +144,34 @@ class Custom_Dataset(Dataset):
         b, a = butter(order, [low, high], btype='band')
         filtered_signal = filtfilt(b, a, data)
 
-        # # Compute the frequency spectrum using FFT along the samples axis
-        # spectrum_original = np.fft.fftn(data, axes=(2,))
-        # spectrum_filtered = np.fft.fftn(filtered_signal, axes=(2,))
-        #
-        # # Frequency values
-        # freq = np.fft.fftfreq(data.shape[2], d=1/fs)  # Assuming uniform sampling, adjust if needed
-        #
-        # # Plot the frequency spectra
-        # plt.figure(figsize=(10, 6))
-        # plt.plot(freq, np.abs(np.mean(spectrum_original, axis=(0, 1))), label='Original Signal')
-        # plt.plot(freq, np.abs(np.mean(spectrum_filtered, axis=(0, 1))), label='Filtered Signal')
-        # plt.xlabel('Frequency (Hz)')
-        # plt.ylabel('Magnitude')
-        # plt.title('Frequency Spectrum')
-        # plt.legend()
-        # plt.grid(True)
-        # plt.savefig('frequency_spectrum.png')
-        #
-        # print("Signal filtered")
-
         return filtered_signal
+
+    def spatial_whitening(self, data):
+        """
+        Apply spatial whitening to the data
+        Parameters
+        ----------
+        data: np.array
+            Data to be filtered
+
+        Returns
+        -------
+        data: np.array
+            Filtered data
+        """
+        # Reshape data for covariance matrix computation
+        height, width, samples = data.shape
+        reshaped_data = np.reshape(data, (height * width, samples))
+
+        # Compute covariance matrix
+        cov_matrix = np.cov(reshaped_data, rowvar=False)
+
+        # Compute whitening transformation matrix
+        eig_vals, eig_vecs = np.linalg.eigh(cov_matrix)
+        whitening_matrix = np.dot(np.dot(eig_vecs, np.diag(1.0 / np.sqrt(eig_vals + 1e-5))), eig_vecs.T)
+
+        # Apply whitening transformation
+        whitened_data = np.dot(reshaped_data, whitening_matrix).reshape((height, width, samples))
+
+        return whitened_data
+
