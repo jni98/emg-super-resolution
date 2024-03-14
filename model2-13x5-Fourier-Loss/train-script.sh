@@ -7,8 +7,8 @@
 #SBATCH --job-name=model2-13x5-Layer
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
-#SBATCH --gres=gpu:a100:1
-#SBATCH --partition=a100
+#SBATCH --gres=gpu:v100:1
+#SBATCH --partition=v100
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV
@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=50
+EPOCHS=30
 
 ############    params   ###############
 
