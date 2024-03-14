@@ -25,13 +25,25 @@ def setup_sweep():
                 'values': [12],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [0.000001]
+                'values': [0.00001]
             },
             'num_res_blocks_last': {
-                'values': [3,4,5]
+                'values': [4]
             },
             'num_res_blocks': {
                 'values': [5]
+            },
+            'adv_loss_weight': {
+                'values': [0.001]
+            },
+            'fourier_loss_weight': {
+                'values': [1, 0.1, 0.01, 0.001, 0]
+            },
+            'spatial_whitening': {
+                'values': [True, False]
+            },
+            'bandpass_filter': {
+                'values': [True, False]
             },
 
         }
@@ -80,17 +92,17 @@ def parse_args():
 if __name__ == "__main__":
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
-    # Parse arguments
-    args = parse_args()
-    data_directory = args.data
-    test_data_directory = args.testdata
-    results_directory = args.results
-    num_epochs = args.epochs
+    # # Parse arguments
+    # args = parse_args()
+    # data_directory = args.data
+    # test_data_directory = args.testdata
+    # results_directory = args.results
+    # num_epochs = args.epochs
 
-    # data_directory = '../dataset/train'
-    # test_data_directory ='../dataset/test'
-    # results_directory = 'runs/'
-    # num_epochs = 50
+    data_directory = '../dataset/train'
+    test_data_directory ='../dataset/test'
+    results_directory = 'runs/'
+    num_epochs = 50
 
     # Run the sweep
     wandb.agent(sweep_id,

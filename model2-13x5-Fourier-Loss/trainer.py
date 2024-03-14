@@ -14,6 +14,8 @@ import matplotlib
 import wandb
 import torch
 import pandas as pd
+from torch.fft import fft
+
 from generator import Generator
 from discriminator import Discriminator
 from data import Custom_Dataset
@@ -64,6 +66,8 @@ class Trainer:
 
         self.lr = config.learning_rate
         self.batch_size = config.batch_size
+        self.adv_loss_weight = config.adv_loss_weight
+        self.fourier_loss_weight = config.fourier_loss_weight
 
         self.unique_folder = '/' + datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -104,18 +108,19 @@ class Trainer:
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], self.config.spatial_whitening, self.config.bandpass_filter),
             batch_size=self.batch_size, pin_memory=True
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], self.config.spatial_whitening, self.config.bandpass_filter),
             batch_size=self.batch_size, pin_memory=True
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']), pin_memory=True)
+                           self.mean_std_dict['std'], self.config.spatial_whitening, self.config.bandpass_filter),
+            pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
@@ -143,6 +148,7 @@ class Trainer:
         self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
         self.discriminator = Discriminator()
 
+        # In case multiple GPUs are available, use DataParallel
         if torch.cuda.device_count() > 1:
             print("Let's use", torch.cuda.device_count(), "GPUs!")
             # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
@@ -253,70 +259,88 @@ class Trainer:
         total_loss_d_real = 0.0
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
+        total_fourier_loss = 0.0
 
-        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
-            print("batch index", batch_idx)
+        with torch.no_grad():
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
+                print("batch index", batch_idx)
 
-            lr_emg = lr_emg.to(self.device)
-            hr_emg = hr_emg.to(self.device)
+                lr_emg = lr_emg.to(self.device)
+                hr_emg = hr_emg.to(self.device)
 
-            # Train Discriminator
-            self.optimizer_D.zero_grad()
+                # Train Discriminator
+                self.optimizer_D.zero_grad()
 
-            # Generate super-resolved data (SR) from LR data
-            # detaching sr_emg prevents gradients from flowing back through the generator network when computing
-            # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
-            # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
-            sr_emg = self.generator(lr_emg).detach().to(self.device)
+                # Generate super-resolved data (SR) from LR data
+                # detaching sr_emg prevents gradients from flowing back through the generator network when computing
+                # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
+                # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
+                sr_emg = self.generator(lr_emg).detach().to(self.device)
 
-            # Create real and fake labels to train discriminator for both cases
-            real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
-            fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
+                # Create real and fake labels to train discriminator for both cases
+                real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
+                fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
 
-            # calculate loss for discriminator receiving real data
-            output_discriminator_real = self.discriminator(hr_emg).to(self.device)
-            loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
+                # calculate loss for discriminator receiving real data
+                output_discriminator_real = self.discriminator(hr_emg).to(self.device)
+                loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
 
-            # calculate loss for discriminator receiving fake data
-            output_discriminator_fake = self.discriminator(sr_emg)
-            loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
+                # calculate loss for discriminator receiving fake data
+                output_discriminator_fake = self.discriminator(sr_emg)
+                loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
-            # calculate total loss for discriminator
-            loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
+                # calculate total loss for discriminator
+                loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
 
-            loss_discriminator.backward()
+                loss_discriminator.backward()
 
-            self.optimizer_D.step()
+                self.optimizer_D.step()
 
-            # Train Generator
-            self.optimizer_G.zero_grad()
+                # Train Generator
+                self.optimizer_G.zero_grad()
 
-            # Generate SR data from LR data
-            sr_emg = self.generator(lr_emg).to(self.device)
+                # Generate SR data from LR data
+                sr_emg = self.generator(lr_emg).to(self.device)
 
-            output = self.discriminator(sr_emg)
-            loss_generator_adv = self.adversarial_loss(output, real_labels)
+                output = self.discriminator(sr_emg)
+                loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
+                loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
 
-            loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
+                sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(sr_emg)
+                hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(hr_emg)
 
-            loss_generator.backward()
+                loss_generator_fourier_real = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)  # Fourier loss
+                loss_generator_fourier_imag = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag)  # Fourier loss
 
-            self.optimizer_G.step()
+                combined_fourier_loss = loss_generator_fourier_real + loss_generator_fourier_imag
 
-            total_loss_g += loss_generator.item()
-            total_loss_d += loss_discriminator.item()
-            total_loss_d_real += loss_discriminator_real.item()
-            total_loss_d_fake += loss_discriminator_fake.item()
+                loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
+                                  self.fourier_loss_weight * combined_fourier_loss)
+
+                print("loss_generator", loss_generator)
+                print("loss_generator_adv", loss_generator_adv)
+                print("loss_generator_content", loss_generator_content)
+                print("loss_generator_fourier", combined_fourier_loss)
+
+                loss_generator.backward()
+
+                self.optimizer_G.step()
+
+                total_loss_g += loss_generator.item()
+                total_loss_d += loss_discriminator.item()
+                total_loss_d_real += loss_discriminator_real.item()
+                total_loss_d_fake += loss_discriminator_fake.item()
+                total_fourier_loss += combined_fourier_loss.item()
 
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
         avg_loss_d_fake = total_loss_d_fake / len(self.training)
         avg_loss_d = total_loss_d / len(self.training)
+        avg_fourier_loss = total_fourier_loss / len(self.training)
 
         wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real,
-                   'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d})
+                   'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d, 'avg_fourier_loss': avg_fourier_loss})
 
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
@@ -344,6 +368,7 @@ class Trainer:
         total_validation_loss = 0.0
         total_psnr = 0.0
         total_abs_diff = 0.0
+        total_fourier_loss = 0.0
 
         with torch.no_grad():
             for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
@@ -364,6 +389,17 @@ class Trainer:
                 psnr = 20 * torch.log10(1.0 / torch.sqrt(val_loss))
 
                 total_psnr += psnr.item()
+
+                # Fourier loss
+                sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(val_sr_emg)
+                hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(val_hr)
+
+                loss_generator_fourier_real = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)  # Fourier loss
+                loss_generator_fourier_imag = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag)  # Fourier loss
+
+                combined_fourier_loss = loss_generator_fourier_real + loss_generator_fourier_imag
+
+                total_fourier_loss += combined_fourier_loss.item()
 
                 # destacndardize the data for the logged plots
                 val_hr_destandardized = self.destandardize_data(val_hr)
@@ -455,9 +491,11 @@ class Trainer:
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
+            avg_validation_fourier_loss = total_fourier_loss / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
             wandb.log({'val_loss': avg_validation_loss})
             wandb.log({'psnr': avg_psnr})
+            wandb.log({'fourier_loss': avg_validation_fourier_loss})
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
@@ -478,6 +516,43 @@ class Trainer:
 
         return avg_validation_loss, avg_psnr
 
+    def compute_fourier_transform(self, data):
+        # Get the shape of the data
+        batches, channels, height, width, samples = data.shape
+
+        # Reshape the data to combine batches and channels
+        combined_shape = (batches * channels, height, width, samples)
+        reshaped_data = data.view(combined_shape)
+
+        # Compute the Fourier transform along the time dimension
+        fourier_transformed_data = torch.fft.fftn(reshaped_data, dim=-1)
+
+        # Reshape the Fourier transformed data back to the original shape
+        fourier_transformed_data = fourier_transformed_data.view((batches, channels, height, width, samples))
+
+        # Split the real and imaginary parts of the Fourier transformed data
+        fourier_transformed_data_real = fourier_transformed_data.real
+        fourier_transformed_data_imag = fourier_transformed_data.imag
+
+        return fourier_transformed_data_real, fourier_transformed_data_imag
+
+    def complex_mse_loss(self, sr_data, hr_data):
+        # Get the real and imaginary parts of the input and target
+        input_real, input_imag = torch.unbind(sr_data, dim=-1)
+        target_real, target_imag = torch.unbind(hr_data, dim=-1)
+
+        # Compute the squared difference for the real and imaginary parts separately
+        real_diff = input_real - target_real
+        imag_diff = input_imag - target_imag
+
+        # Compute the Mean Squared Error (MSE) for the real and imaginary parts separately
+        mse_real = torch.mean(real_diff ** 2)
+        mse_imag = torch.mean(imag_diff ** 2)
+
+        # Combine the MSE values for real and imaginary parts
+        mse_combined = mse_real + mse_imag
+
+        return mse_combined
     def _save_checkpoint(self, epoch: int) -> None:
         """
         Saves the Generator and Discriminator at a given epoch.

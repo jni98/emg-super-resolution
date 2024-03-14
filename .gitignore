@@ -167,3 +167,4 @@ dmypy.json
 /results_mat/
 /results_decomposed/
 /Visualization-13x5grid/plot_pearsonr_heatmap_oneChannel/
+/model2-13x5-Fourier-Loss/runs/
