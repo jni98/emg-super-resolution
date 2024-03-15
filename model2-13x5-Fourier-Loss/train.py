@@ -34,9 +34,12 @@ def setup_sweep():
                 'values': [5]
             },
             'adv_loss_weight': {
-                'values': [0.001]
+                'values': [1, 0.1, 0.01, 0.001, 0]
             },
             'fourier_loss_weight': {
+                'values': [1, 0.1, 0.01, 0.001, 0]
+            },
+            'wavelet_loss_weight': {
                 'values': [1, 0.1, 0.01, 0.001, 0]
             },
             'spatial_whitening': {

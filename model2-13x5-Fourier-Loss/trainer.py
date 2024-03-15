@@ -24,6 +24,7 @@ matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
 
 import numpy as np
+import pywt
 
 import torch.nn as nn
 import torch.optim as optim
@@ -68,6 +69,7 @@ class Trainer:
         self.batch_size = config.batch_size
         self.adv_loss_weight = config.adv_loss_weight
         self.fourier_loss_weight = config.fourier_loss_weight
+        self.wavelet_loss_weight = config.wavelet_loss_weight
 
         self.unique_folder = '/' + datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -260,6 +262,7 @@ class Trainer:
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
         total_fourier_loss = 0.0
+        total_wavelet_loss = 0.0
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
@@ -301,26 +304,39 @@ class Trainer:
             # Generate SR data from LR data
             sr_emg = self.generator(lr_emg).to(self.device)
 
+            # discriminator output for fake data
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
+            # generator content loss
+            loss_generator_content = self.mse(sr_emg, hr_emg)
 
+            # Fourier transform of generated and groundtruth data
             sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(sr_emg)
             hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(hr_emg)
 
-            loss_generator_fourier_real = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)  # Fourier loss
-            loss_generator_fourier_imag = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag)  # Fourier loss
-
+            # Fourier loss
+            loss_generator_fourier_real = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)
+            loss_generator_fourier_imag = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag)
             combined_fourier_loss = loss_generator_fourier_real + loss_generator_fourier_imag
 
+            # Wavelet transform of generated and groundtruth data
+            sr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(sr_emg)
+            hr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(hr_emg)
+
+            # Wavelet loss
+            loss_generator_wavelet = self.mse(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
+
+            # Generator loss: adversarial loss + content loss + fourier loss + wavelet loss
             loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
-                              self.fourier_loss_weight * combined_fourier_loss)
+                              self.fourier_loss_weight * combined_fourier_loss +
+                              self.wavelet_loss_weight * loss_generator_wavelet)
 
             print("loss_generator", loss_generator)
             print("loss_generator_adv", loss_generator_adv)
             print("loss_generator_content", loss_generator_content)
             print("loss_generator_fourier", combined_fourier_loss)
+            print("loss_generator_wavelet", loss_generator_wavelet)
 
             loss_generator.backward()
 
@@ -331,15 +347,18 @@ class Trainer:
             total_loss_d_real += loss_discriminator_real.item()
             total_loss_d_fake += loss_discriminator_fake.item()
             total_fourier_loss += combined_fourier_loss.item()
+            total_wavelet_loss += loss_generator_wavelet.item()
 
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
         avg_loss_d_fake = total_loss_d_fake / len(self.training)
         avg_loss_d = total_loss_d / len(self.training)
         avg_fourier_loss = total_fourier_loss / len(self.training)
+        avg_wavelet_loss = total_wavelet_loss / len(self.training)
 
         wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real,
-                   'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d, 'avg_fourier_loss': avg_fourier_loss})
+                   'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d, 'avg_fourier_loss': avg_fourier_loss,
+                   'avg_wavelet_loss': avg_wavelet_loss})
 
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
@@ -415,7 +434,7 @@ class Trainer:
                     print("Logging plots for batch index 0 given channel")
 
                     # x-axis for the following logs
-                    fig, axs = plt.subplots(4, 1, figsize=(8, 10))
+                    fig, axs = plt.subplots(5, 1, figsize=(8, 10))
                     x_values = range(val_hr.shape[4])
 
                     # log absolute difference for one channel
@@ -443,8 +462,13 @@ class Trainer:
                     axs[3].plot(range(len(cross_correlation)), cross_correlation)
                     axs[3].set_title('Cross Correlation channel [6][2]')
 
+                    axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
+                    axs[4].plot(val_channel, label='Validation channel [6][1]')
+                    axs[4].set_title('Super-resolution vs Validation channel [6][1]')
+                    axs[4].legend()
+
                     plt.tight_layout()
-                    wandb.log({"Logged plots": [wandb.Image(fig)]})
+                    wandb.log({"Logged plots given Channel": [wandb.Image(fig)]})
 
                     # Close the figure
                     plt.close(fig)
@@ -482,8 +506,13 @@ class Trainer:
                     axs1[3].plot(range(len(cross_correlation)), cross_correlation)
                     axs1[3].set_title('Cross Correlation channel [6][1]')
 
+                    axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
+                    axs[4].plot(val_channel, label='Validation channel [6][1]')
+                    axs[4].set_title('Super-resolution vs Validation channel [6][1]')
+                    axs[4].legend()
+
                     plt.tight_layout()
-                    wandb.log({"Logged plots": [wandb.Image(fig1)]})
+                    wandb.log({"Logged plots predicted Channel": [wandb.Image(fig1)]})
 
                     # Close the figure
                     plt.close(fig1)
@@ -535,23 +564,19 @@ class Trainer:
 
         return fourier_transformed_data_real, fourier_transformed_data_imag
 
-    def complex_mse_loss(self, sr_data, hr_data):
-        # Get the real and imaginary parts of the input and target
-        input_real, input_imag = torch.unbind(sr_data, dim=-1)
-        target_real, target_imag = torch.unbind(hr_data, dim=-1)
+    def compute_wavelet_transform_coeffs(self, data):
+        data = data.to('cpu').numpy()
 
-        # Compute the squared difference for the real and imaginary parts separately
-        real_diff = input_real - target_real
-        imag_diff = input_imag - target_imag
+        # Get the shape of the data
+        batches, channels, height, width, samples = data.shape
 
-        # Compute the Mean Squared Error (MSE) for the real and imaginary parts separately
-        mse_real = torch.mean(real_diff ** 2)
-        mse_imag = torch.mean(imag_diff ** 2)
+        # Compute the wavelet transform along the time dimension
+        coeffs = pywt.dwt(data, 'db4')
 
-        # Combine the MSE values for real and imaginary parts
-        mse_combined = mse_real + mse_imag
+        # Put coeffs into torch array for mse loss
+        coeffs = torch.tensor(coeffs)
 
-        return mse_combined
+        return coeffs
 
     def _save_checkpoint(self, epoch: int) -> None:
         """
