@@ -320,9 +320,13 @@ class Trainer:
             loss_generator_fourier_imag = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag)
             combined_fourier_loss = loss_generator_fourier_real + loss_generator_fourier_imag
 
+            print('requires grad before wavelet', sr_emg.requires_grad)
+
             # Wavelet transform of generated and groundtruth data
             sr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(sr_emg)
             hr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(hr_emg)
+
+            print('requires grad after wavelet', sr_emg.requires_grad)
 
             # Wavelet loss
             loss_generator_wavelet = self.mse(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
@@ -565,12 +569,13 @@ class Trainer:
         return fourier_transformed_data_real, fourier_transformed_data_imag
 
     def compute_wavelet_transform_coeffs(self, data):
-        data_numpy = data.detach().numpy()
+        data_numpy = data.detach().cpu().numpy()
 
         # Compute the wavelet transform along the time dimension
         coeffs = pywt.dwt(data_numpy, 'db4')
 
         # Put coeffs into torch array for mse loss
+        coeffs = np.array(coeffs)
         coeffs = torch.tensor(coeffs)
 
         return coeffs
