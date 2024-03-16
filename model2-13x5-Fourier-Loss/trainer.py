@@ -565,13 +565,10 @@ class Trainer:
         return fourier_transformed_data_real, fourier_transformed_data_imag
 
     def compute_wavelet_transform_coeffs(self, data):
-        data = data.to('cpu').numpy()
-
-        # Get the shape of the data
-        batches, channels, height, width, samples = data.shape
+        data_numpy = data.to('cpu').numpy()
 
         # Compute the wavelet transform along the time dimension
-        coeffs = pywt.dwt(data, 'db4')
+        coeffs = pywt.dwt(data_numpy, 'db4')
 
         # Put coeffs into torch array for mse loss
         coeffs = torch.tensor(coeffs)
