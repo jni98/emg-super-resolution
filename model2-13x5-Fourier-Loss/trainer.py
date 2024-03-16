@@ -565,7 +565,7 @@ class Trainer:
         return fourier_transformed_data_real, fourier_transformed_data_imag
 
     def compute_wavelet_transform_coeffs(self, data):
-        data_numpy = data.to('cpu').numpy()
+        data_numpy = data.detach().numpy()
 
         # Compute the wavelet transform along the time dimension
         coeffs = pywt.dwt(data_numpy, 'db4')
