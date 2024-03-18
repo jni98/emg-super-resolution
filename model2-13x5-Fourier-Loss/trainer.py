@@ -731,24 +731,24 @@ class Trainer:
         print("Successfully generated LR to SR data")
 
         torch.cuda.empty_cache()
-
-        print("Starting to generate HR to SR data")
-        # load the final generator
-        self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
-        self.generator.eval()  # Set the generator to evaluation mode
-
-        with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-                hr_emg = hr_emg.to(self.device)
-
-                # Generate super-resolved data (SR) from LR data
-                hr_sr_emg = self.generator(hr_emg).to('cpu').numpy().squeeze()
-                hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
-
-                # Save signal from lr to sr and hr to sr
-                model_path = self.run_folder + self.unique_folder + '/results/'
-                os.makedirs(model_path, exist_ok=True)
-                np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
+        #
+        # print("Starting to generate HR to SR data")
+        # # load the final generator
+        # self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
+        # self.generator.eval()  # Set the generator to evaluation mode
+        #
+        # with torch.no_grad():
+        #     for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+        #         hr_emg = hr_emg.to(self.device)
+        #
+        #         # Generate super-resolved data (SR) from LR data
+        #         hr_sr_emg = self.generator(hr_emg).to('cpu').numpy().squeeze()
+        #         hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
+        #
+        #         # Save signal from lr to sr and hr to sr
+        #         model_path = self.run_folder + self.unique_folder + '/results/'
+        #         os.makedirs(model_path, exist_ok=True)
+        #         np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
 
