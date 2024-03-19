@@ -38,6 +38,7 @@ if __name__ == '__main__':
     files_groundtruth = ['groundtruth/path0-hr', 'groundtruth/path1-hr', 'groundtruth/path2-hr', 'groundtruth/path3-hr']
     files_model2 = ['model_2/path0-lr', 'model_2/path1-lr', 'model_2/path2-lr', 'model_2/path3-lr']
     files_model1 = ['model_1/path0-lr', 'model_1/path1-lr', 'model_1/path2-lr', 'model_1/path3-lr']
+    files_model2_Fourier = ['model_2_Fourier/path0-lr', 'model_2_Fourier/path1-lr', 'model_2_Fourier/path2-lr', 'model_2_Fourier/path3-lr']
 
     test_paths_mat = [
         'data/Alessandros Daten sEMG/Test/RPAR_DECOMP_PROX_35-50-70_FINISHED/POST/400PaRiRo170628134308 Rampa_35MVC_5MVCs_2acontrazione_TODECOMPOSE_offset0_length30_runs250_EDITED_MATTEO.mat',
@@ -49,22 +50,27 @@ if __name__ == '__main__':
     os.makedirs('results_mat/groundtruth', exist_ok=True)
     os.makedirs('results_mat/model_2', exist_ok=True)
 
-    for file, test_path_mat in zip(files_interpolation, test_paths_mat):
-        numpy_to_mat(file, test_path_mat)
-        print(file)
-        print("Done")
+    # for file, test_path_mat in zip(files_interpolation, test_paths_mat):
+    #     numpy_to_mat(file, test_path_mat)
+    #     print(file)
+    #     print("Done")
+    #
+    # for file, test_path_mat in zip(files_groundtruth, test_paths_mat):
+    #     numpy_to_mat(file, test_path_mat)
+    #     print(file)
+    #     print("Done")
+    #
+    # for file, test_path_mat in zip(files_model2, test_paths_mat):
+    #     numpy_to_mat(file, test_path_mat)
+    #     print(file)
+    #     print("Done")
+    #
+    # for file, test_path_mat in zip(files_model1, test_paths_mat):
+    #     numpy_to_mat(file, test_path_mat)
+    #     print(file)
+    #     print("Done")
 
-    for file, test_path_mat in zip(files_groundtruth, test_paths_mat):
-        numpy_to_mat(file, test_path_mat)
-        print(file)
-        print("Done")
-
-    for file, test_path_mat in zip(files_model2, test_paths_mat):
-        numpy_to_mat(file, test_path_mat)
-        print(file)
-        print("Done")
-
-    for file, test_path_mat in zip(files_model1, test_paths_mat):
+    for file, test_path_mat in zip(files_model2_Fourier, test_paths_mat):
         numpy_to_mat(file, test_path_mat)
         print(file)
         print("Done")
