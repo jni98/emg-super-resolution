@@ -65,7 +65,8 @@ class Trainer:
         self.config = config
         self.sweep_id = sweep_id
 
-        self.lr = config.learning_rate
+        self.lr_gen = config.learning_rate_gen
+        self.lr_disc = config.learning_rate_disc
         self.batch_size = config.batch_size
         self.adv_loss_weight = config.adv_loss_weight
         self.fourier_loss_weight = config.fourier_loss_weight
@@ -79,7 +80,8 @@ class Trainer:
         self.hyperparameter = {
             "num_epochs": self.num_epochs,
             "batch_size": self.batch_size,
-            "learning_rate": self.lr
+            "learning_rate_gen": self.lr_gen,
+            "learning_rate_disc": self.lr_disc
         }
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -170,8 +172,8 @@ class Trainer:
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
-        self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
-        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
+        self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr_gen, betas=self.betas)
+        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr_disc, betas=self.betas)
 
         print("Successfully initialized the models")
 
@@ -268,6 +270,7 @@ class Trainer:
             print("batch index", batch_idx)
 
             lr_emg = lr_emg.to(self.device)
+            print(lr_emg.dtype)
             hr_emg = hr_emg.to(self.device)
 
             # Train Discriminator
@@ -576,7 +579,7 @@ class Trainer:
 
         # Put coeffs into torch array for mse loss
         coeffs = np.array(coeffs)
-        coeffs = torch.tensor(coeffs)
+        coeffs = torch.tensor(coeffs, dtype=data.dtype, device=data.device, requires_grad=True)
 
         return coeffs
 
