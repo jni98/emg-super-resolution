@@ -5,9 +5,9 @@ import scipy.io
 import numpy as np
 
 
-def numpy_to_mat(file, file_path_mat):
+def numpy_to_mat(file, file_path_mat, shape):
     # Create a NumPy array filled with None to represent the cell variable
-    cell_variable = np.empty((13, 5), dtype=object)
+    cell_variable = np.empty(shape, dtype=object)
 
     # Load corresbonding mat file
     mat = scipy.io.loadmat(file_path_mat)
@@ -18,8 +18,8 @@ def numpy_to_mat(file, file_path_mat):
     emg = np.load('results/' + file + '.npy')
 
     # Fill the cell_variable with the data from the NumPy array
-    for i in range(13):
-        for j in range(5):
+    for i in range(shape[0]):
+        for j in range(shape[1]):
             cell = emg[i, j]
             # Adding a new dimension at the beginning using np.expand_dims
             cell_new = np.expand_dims(cell, axis=0)
@@ -36,6 +36,8 @@ if __name__ == '__main__':
     files_interpolation = ['linear_Interpolation/path0-lr', 'linear_Interpolation/path1-lr',
                            'linear_Interpolation/path2-lr', 'linear_Interpolation/path3-lr']
     files_groundtruth = ['groundtruth/path0-hr', 'groundtruth/path1-hr', 'groundtruth/path2-hr', 'groundtruth/path3-hr']
+    files_groundtruth_lr = ['groundtruth/path0-lr', 'groundtruth/path1-lr', 'groundtruth/path2-lr', 'groundtruth/path3-lr']
+
     files_model2 = ['model_2/path0-lr', 'model_2/path1-lr', 'model_2/path2-lr', 'model_2/path3-lr']
     files_model1 = ['model_1/path0-lr', 'model_1/path1-lr', 'model_1/path2-lr', 'model_1/path3-lr']
     files_model2_Fourier = ['model_2_Fourier/path0-lr', 'model_2_Fourier/path1-lr', 'model_2_Fourier/path2-lr', 'model_2_Fourier/path3-lr']
@@ -51,26 +53,31 @@ if __name__ == '__main__':
     os.makedirs('results_mat/model_2', exist_ok=True)
 
     # for file, test_path_mat in zip(files_interpolation, test_paths_mat):
-    #     numpy_to_mat(file, test_path_mat)
+    #     numpy_to_mat(file, test_path_mat, (13,5))
     #     print(file)
     #     print("Done")
     #
     # for file, test_path_mat in zip(files_groundtruth, test_paths_mat):
-    #     numpy_to_mat(file, test_path_mat)
+    #     numpy_to_mat(file, test_path_mat,(13,5))
     #     print(file)
     #     print("Done")
     #
     # for file, test_path_mat in zip(files_model2, test_paths_mat):
-    #     numpy_to_mat(file, test_path_mat)
+    #     numpy_to_mat(file, test_path_mat,(13,5))
     #     print(file)
     #     print("Done")
     #
     # for file, test_path_mat in zip(files_model1, test_paths_mat):
-    #     numpy_to_mat(file, test_path_mat)
+    #     numpy_to_mat(file, test_path_mat,(13,5))
     #     print(file)
     #     print("Done")
 
-    for file, test_path_mat in zip(files_model2_Fourier, test_paths_mat):
-        numpy_to_mat(file, test_path_mat)
+    # for file, test_path_mat in zip(files_model2_Fourier, test_paths_mat):
+    #     numpy_to_mat(file, test_path_mat,(13,5))
+    #     print(file)
+    #     print("Done")
+
+    for file, test_path_mat in zip(files_groundtruth_lr, test_paths_mat):
+        numpy_to_mat(file, test_path_mat, (7,3))
         print(file)
         print("Done")

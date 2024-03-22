@@ -60,6 +60,9 @@ class Custom_Dataset(Dataset):
 
         lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
 
+        # Standardize using mean and std values of the complete dataset
+        lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
+
         # bandpass filter
         if self.bandpass_filter:
             lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=2)
@@ -70,9 +73,6 @@ class Custom_Dataset(Dataset):
         # plt.plot(lr_emg[0][0])
         # plt.savefig('lr_emg.png')
 
-        # Standardize using mean and std values of the complete dataset
-        lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
-
         # plt.figure()
         # plt.plot(lr_emg_standardized[0][0])
         # plt.savefig('lr_emg_standardized.png')
@@ -82,14 +82,16 @@ class Custom_Dataset(Dataset):
 
         hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
+        #  Standardize using mean and std values of the complete dataset
+        hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std)
+
         # bandpass filter
         if self.bandpass_filter:
             hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
         if self.spatial_whitening:
             hr_emg = self.spatial_whitening_function(hr_emg)
 
-        #  Standardize using mean and std values of the complete dataset
-        hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std )
+
         # unsqueeze to add a one channel dimension at the beginning
         hr_emg_standardized = torch.tensor(hr_emg_standardized).unsqueeze(0).to(torch.float32)
 

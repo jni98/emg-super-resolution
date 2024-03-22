@@ -574,8 +574,9 @@ class Trainer:
     def compute_wavelet_transform_coeffs(self, data):
         data_numpy = data.detach().cpu().numpy()
 
+        # TODO: Debug to check how many levels of decomposition make sense
         # Compute the wavelet transform along the time dimension
-        coeffs = pywt.dwt(data_numpy, 'db4')
+        coeffs = pywt.dwt(data_numpy, 'db7')
 
         # Put coeffs into torch array for mse loss
         coeffs = np.array(coeffs)
