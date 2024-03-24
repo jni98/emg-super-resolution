@@ -67,33 +67,32 @@ class UpConvolutionBlock(nn.Module):
     add the skip connection.
     """
 
-    def __init__(self, in_channels, out_channels, stride) -> None:
+    def __init__(self, wavelet) -> None:
         super(UpConvolutionBlock, self).__init__()
-        self.upConv = nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
-                                         stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1))
-        self.bn1 = nn.BatchNorm3d(out_channels)
-        self.prelu1 = nn.PReLU()
-
-        self.conv = nn.Conv3d(in_channels=out_channels + out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
-                              stride=(1, 1, 1), padding=(1, 1, 1))
-        self.bn2 = nn.BatchNorm3d(out_channels)
-        self.prelu2 = nn.PReLU()
+        self.wavelet = wavelet
 
     def forward(self, x: torch.tensor, skip: torch.tensor) -> torch.tensor:
-        # TODO: replace with wavelet transform
+        # Calculate the midpoint along the second dimension
+        midpoint = x.shape[1] // 2
+
+        # Split the tensor into two parts at the midpoint
+        coeff1 = x[:, :midpoint]
+        coeff2 = x[:, midpoint:]
+
+        # Add the tensors to a list
+        coeff_list = [coeff1, coeff2]
+
         # upsample
-        out = self.upConv(x)
-        out = self.bn1(out)
-        out = self.prelu1(out)
+        up = ptwt.waverec(coeff_list, self.wavelet)
 
         # sum up with skip connection
-        out = out + skip
+        out = up + skip
 
         # TODO: Add convolutions here
         # convolve to get channel number as before the torch.cat
-        #out = self.conv(out)
-        #out = self.bn2(out)
-        #out = self.prelu2(out)
+        # out = self.conv(out)
+        # out = self.bn2(out)
+        # out = self.prelu2(out)
 
         return out
 
@@ -111,48 +110,59 @@ class Generator(nn.Module):
         self.wavelet = wavelet
 
         # Convolution
-        self.conv1 = nn.Conv3d(in_channels, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
+        self.conv1 = nn.Conv3d(in_channels, out_channels=64, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
         self.bn1 = nn.BatchNorm3d(64)
         self.prelu1 = nn.PReLU()
 
         # Upsampling of the residual and residual block 1
-        self.residualUp1 = nn.ConvTranspose3d(64, 64, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
+        #TODO: Change convolution so that skip connection fits result from inverse wavelet
+        self.residualUp1 = nn.ConvTranspose3d(in_channels=64, out_channels=64, kernel_size=(3, 3, 2), stride=(2, 2, 1),
+                                              padding=(1, 1, 0))
         self.res_blocks1 = nn.Sequential(*[ResidualBlock(in_channels=64) for _ in range(num_res_blocks)])
 
         # DownConvolution 1
-        self.downConv1 = DownConvolutionBlock(wavelet = self.wavelet)
+        self.downConv1 = DownConvolutionBlock(wavelet=self.wavelet)
 
         # Upsampling of the residual and residual block 2
-        self.residualUp2 = nn.ConvTranspose3d(128, 128, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
+        self.residualUp2 = nn.ConvTranspose3d(in_channels=128, out_channels=128, kernel_size=(3, 3, 3),
+                                              stride=(2, 2, 1), padding=(1, 1, 0))
         self.res_blocks2 = nn.Sequential(*[ResidualBlock(in_channels=128) for _ in range(num_res_blocks)])
 
         # DownConvolution 2
-        self.downConv2 = DownConvolutionBlock(wavelet = self.wavelet)
+        self.downConv2 = DownConvolutionBlock(wavelet=self.wavelet)
 
         # Upsampling of the residual and residual block 3
-        self.residualUp3 = nn.ConvTranspose3d(256, 256, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
+        self.residualUp3 = nn.ConvTranspose3d(256, 256, kernel_size=(3, 3, 2), stride=(2, 2, 1), padding=(1, 1, 0))
         self.res_blocks3 = nn.Sequential(*[ResidualBlock(in_channels=256) for _ in range(num_res_blocks)])
 
         # DownConvolution 3
-        self.downConv3 = DownConvolutionBlock(wavelet = self.wavelet)
+        self.downConv3 = DownConvolutionBlock(wavelet=self.wavelet)
 
         # Upsampling of the residual and residual block 4
-        self.residualUp4 = nn.ConvTranspose3d(512, 512, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
+
         self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=512) for _ in range(num_res_blocks_last)])
 
+        # Upconv of spatial dimension
+        self.upConv = nn.ConvTranspose3d(in_channels=512, out_channels=512, kernel_size=(3,3,3),
+                                         stride=(2,2,1), padding=(1,1,1))
+        self.bn2 = nn.BatchNorm3d(512)
+        self.prelu2 = nn.PReLU()
+
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
+        self.upConv1 = UpConvolutionBlock(wavelet=self.wavelet)
 
         # Upsampling 2
-        self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
+        self.upConv2 = UpConvolutionBlock(wavelet=self.wavelet)
 
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
+        self.upConv3 = UpConvolutionBlock(wavelet=self.wavelet)
 
         # Finale Convolution für Channel 1
-        self.finalConv = nn.Conv3d(64, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
+        self.finalConv = nn.Conv3d(in_channels=64, out_channels=1, kernel_size=(3, 3, 3), stride=(1, 1, 1),
+                                   padding=(1, 1, 1))
 
     def forward(self, x: torch.tensor) -> torch.tensor:
+        x = torch.randn(torch.Size([1, 1, 7, 3, 2048])).to('cuda')
         conv1 = self.conv1(x)
         conv1 = self.bn1(conv1)
         conv1 = self.prelu1(conv1)
@@ -174,7 +184,11 @@ class Generator(nn.Module):
         down3 = self.res_blocks4(down3)
         # print("Generator output after DownConv 3", down3.shape)
 
-        up1 = self.upConv1(down3, skip3)
+        up = self.upConv(down3)
+        up = self.bn2(up)
+        up = self.prelu2(up)
+
+        up1 = self.upConv1(up, skip3)
         # print("Generator output after upsample1", up1.shape)
         up2 = self.upConv2(up1, skip2)
         # print("Generator output after upsample2", up2.shape)
