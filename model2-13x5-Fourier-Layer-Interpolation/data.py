@@ -7,6 +7,7 @@ The code is called from every file that is loading a dataset.
 """
 import scipy
 from matplotlib import pyplot as plt
+from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import butter, filtfilt
 from torch.utils.data import Dataset
 import torch
@@ -60,14 +61,18 @@ class Custom_Dataset(Dataset):
 
         lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
 
+        # TODO: Checken, dass Eckpunkte übernommen werden
+        # Perform linear interpolation
+        interpolated_lr = self.grid_interpolation(lr_emg, (13, 5, lr_emg.shape[2]), 'linear')
+
         # Standardize using mean and std values of the complete dataset
-        lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
+        lr_emg_standardized = self.standardization(interpolated_lr, self.mean, self.std)
 
         # bandpass filter
         if self.bandpass_filter:
-            lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=2)
+            lr_emg_standardized = self.butter_bandpass_filter(lr_emg_standardized, 20, 500, 2048, order=2)
         if self.spatial_whitening:
-            lr_emg = self.spatial_whitening_function(lr_emg)
+            lr_emg_standardized = self.spatial_whitening_function(lr_emg_standardized)
 
         # plt.figure()
         # plt.plot(lr_emg[0][0])
@@ -78,7 +83,8 @@ class Custom_Dataset(Dataset):
         # plt.savefig('lr_emg_standardized.png')
 
         # unsqueeze to add a one channel dimension at the beginning
-        lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
+        lr_emg_standardized_copy = lr_emg_standardized.copy()
+        lr_emg_standardized_tensor = torch.tensor(lr_emg_standardized_copy).unsqueeze(0).to(torch.float32)
 
         hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
@@ -87,15 +93,16 @@ class Custom_Dataset(Dataset):
 
         # bandpass filter
         if self.bandpass_filter:
-            hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
+            hr_emg_standardized = self.butter_bandpass_filter(hr_emg_standardized, 20, 500, 2048, order=2)
         if self.spatial_whitening:
-            hr_emg = self.spatial_whitening_function(hr_emg)
+            hr_emg_standardized = self.spatial_whitening_function(hr_emg_standardized)
 
 
         # unsqueeze to add a one channel dimension at the beginning
-        hr_emg_standardized = torch.tensor(hr_emg_standardized).unsqueeze(0).to(torch.float32)
+        hr_emg_standardized_copy = hr_emg_standardized.copy()
+        hr_emg_standardized_tensor = torch.tensor(hr_emg_standardized_copy).unsqueeze(0).to(torch.float32)
 
-        return lr_emg_standardized, hr_emg_standardized, lr_emg_path, hr_emg_path
+        return lr_emg_standardized_tensor, hr_emg_standardized_tensor, lr_emg_path, hr_emg_path
 
     def standardization(self, data: np.array, mean: float, std: float) -> np.array:
         """
@@ -176,4 +183,43 @@ class Custom_Dataset(Dataset):
         whitened_data = np.dot(reshaped_data, whitening_matrix).reshape((height, width, samples))
 
         return whitened_data
+
+    def grid_interpolation(self, lr_emg: np.ndarray, hr_emg_shape: tuple, method: str) -> np.ndarray:
+        """
+        Performs cubic interpolation on the low resolution data to get high resolution data.
+        Parameters
+        ----------
+        lr_emg: numpy.ndarray
+                Low resolution emg data.
+        hr_emg_shape: tuple
+                Shape of the high resolution emg data.
+        method: str
+                Method of interpolation. On default set to linear.
+
+        Returns
+        -------
+        interpolated_signal: numpy.ndarray
+                High resolution emg data.
+        """
+        # Create a grid for the original signal
+        x = np.linspace(0, 1, lr_emg.shape[0])
+        y = np.linspace(0, 1, lr_emg.shape[1])
+        z = np.linspace(0, 1, lr_emg.shape[2])
+
+        # Create a new grid for the desired interpolated signal
+        new_x = np.linspace(0, 1, hr_emg_shape[0])
+        new_y = np.linspace(0, 1, hr_emg_shape[1])
+        new_z = np.linspace(0, 1, hr_emg_shape[2])
+
+        # Create meshgrid from new grid
+        mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
+
+        # Create interpolator
+        interpolator = RegularGridInterpolator((x, y, z), lr_emg, method=method)
+        print("Created the interpolater")
+
+        # Interpolate
+        interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
+        print("Finished the interpolator")
+        return interpolated_signal
 

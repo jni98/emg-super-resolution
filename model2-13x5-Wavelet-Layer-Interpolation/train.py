@@ -31,10 +31,10 @@ def setup_sweep():
                 'values': [0.001, 0.0001, 0.00001]
             },
             'num_res_blocks_last': {
-                'values': [3]
+                'values': [2, 3]
             },
             'num_res_blocks': {
-                'values': [3]
+                'values': [2, 3]
             },
             'adv_loss_weight': {
                 'values': [1, 0.1, 0.01, 0.001]

@@ -11,10 +11,10 @@ import json
 import os
 from datetime import datetime
 import matplotlib
+import ptwt
 import wandb
 import torch
 import pandas as pd
-from torch.fft import fft
 
 from generator import Generator
 from discriminator import Discriminator
@@ -24,7 +24,6 @@ matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
 
 import numpy as np
-import pywt
 
 import torch.nn as nn
 import torch.optim as optim
@@ -45,17 +44,17 @@ class Trainer:
         Parameters
         ----------
         data_directory: str
-                    Path to the directory where the training data is stored
+                        The directory where the training data is stored
         test_data_directory: str
-                    Path to the directory where the testing data is stored
+                        The directory where the testing data is stored
         results_directory: str
-                    Path to the directory where the results should be saved
+                        The directory where the results are stored
         num_epochs: int
-                    Number of epochs to train the model
-        batch_size: int
-                    Batch size to use during training
-        learning_rate: float
-                    Learning rate to use during training
+                        The number of epochs to train the model
+        config: Config
+                        The configuration object to run weights and biases sweeps
+        sweep_id: str
+                        The sweep id to run weights and biases sweeps
         """
 
         self.data_directory = data_directory
@@ -70,7 +69,6 @@ class Trainer:
         self.batch_size = config.batch_size
         self.adv_loss_weight = config.adv_loss_weight
         self.fourier_loss_weight = config.fourier_loss_weight
-        self.wavelet_loss_weight = config.wavelet_loss_weight
 
         self.unique_folder = '/' + datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -149,7 +147,8 @@ class Trainer:
         -------
         None
         """
-        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
+        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, wavelet='db7',
+                                   in_channels=1)
         self.discriminator = Discriminator()
 
         # In case multiple GPUs are available, use DataParallel
@@ -170,7 +169,8 @@ class Trainer:
         # print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
-        self.mse = nn.MSELoss()  # Mean Squared error Loss
+        self.mse_content = nn.MSELoss()  # Mean Squared error Loss
+        self.mse_fourier = nn.MSELoss()  # Mean Squared error Loss
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr_gen, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr_disc, betas=self.betas)
@@ -264,13 +264,11 @@ class Trainer:
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
         total_fourier_loss = 0.0
-        total_wavelet_loss = 0.0
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
 
             lr_emg = lr_emg.to(self.device)
-            print(lr_emg.dtype)
             hr_emg = hr_emg.to(self.device)
 
             # Train Discriminator
@@ -312,38 +310,22 @@ class Trainer:
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
             # generator content loss
-            loss_generator_content = self.mse(sr_emg, hr_emg)
+            loss_generator_content = self.mse_content(sr_emg, hr_emg)
 
-            # Fourier transform of generated and groundtruth data
+            # compute fourier transform
             sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(sr_emg)
             hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(hr_emg)
 
-            # Fourier loss
-            loss_generator_fourier_real = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)
-            loss_generator_fourier_imag = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag)
-            combined_fourier_loss = loss_generator_fourier_real + loss_generator_fourier_imag
+            loss_generator_fourier = self.mse_fourier(sr_emg_fourier_real, hr_emg_fourier_real) + self.mse_fourier(
+                sr_emg_fourier_imag, hr_emg_fourier_imag)
 
-            print('requires grad before wavelet', sr_emg.requires_grad)
-
-            # Wavelet transform of generated and groundtruth data
-            sr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(sr_emg)
-            hr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(hr_emg)
-
-            print('requires grad after wavelet', sr_emg.requires_grad)
-
-            # Wavelet loss
-            loss_generator_wavelet = self.mse(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
-
-            # Generator loss: adversarial loss + content loss + fourier loss + wavelet loss
-            loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
-                              self.fourier_loss_weight * combined_fourier_loss +
-                              self.wavelet_loss_weight * loss_generator_wavelet)
+            # Generator loss: adversarial loss + content loss + fourier loss
+            loss_generator = (
+                        self.adv_loss_weight * loss_generator_adv + loss_generator_content + self.fourier_loss_weight * loss_generator_fourier)
 
             print("loss_generator", loss_generator)
             print("loss_generator_adv", loss_generator_adv)
             print("loss_generator_content", loss_generator_content)
-            print("loss_generator_fourier", combined_fourier_loss)
-            print("loss_generator_wavelet", loss_generator_wavelet)
 
             loss_generator.backward()
 
@@ -353,19 +335,17 @@ class Trainer:
             total_loss_d += loss_discriminator.item()
             total_loss_d_real += loss_discriminator_real.item()
             total_loss_d_fake += loss_discriminator_fake.item()
-            total_fourier_loss += combined_fourier_loss.item()
-            total_wavelet_loss += loss_generator_wavelet.item()
+            total_fourier_loss += loss_generator_fourier.item()
 
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
         avg_loss_d_fake = total_loss_d_fake / len(self.training)
         avg_loss_d = total_loss_d / len(self.training)
         avg_fourier_loss = total_fourier_loss / len(self.training)
-        avg_wavelet_loss = total_wavelet_loss / len(self.training)
 
         wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real,
-                   'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d, 'avg_fourier_loss': avg_fourier_loss,
-                   'avg_wavelet_loss': avg_wavelet_loss})
+                   'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d,
+                   'avg_fourier_loss': avg_fourier_loss})
 
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
@@ -393,7 +373,6 @@ class Trainer:
         total_validation_loss = 0.0
         total_psnr = 0.0
         total_abs_diff = 0.0
-        total_fourier_loss = 0.0
 
         with torch.no_grad():
             for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
@@ -406,7 +385,7 @@ class Trainer:
                 val_sr_emg = self.generator(val_lr).to(self.device)
 
                 # Calculate validation loss
-                val_loss = self.mse(val_sr_emg, val_hr)
+                val_loss = self.mse_content(val_sr_emg, val_hr)
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
@@ -414,17 +393,6 @@ class Trainer:
                 psnr = 20 * torch.log10(1.0 / torch.sqrt(val_loss))
 
                 total_psnr += psnr.item()
-
-                # Fourier loss
-                sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(val_sr_emg)
-                hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(val_hr)
-
-                loss_generator_fourier_real = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)  # Fourier loss
-                loss_generator_fourier_imag = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag)  # Fourier loss
-
-                combined_fourier_loss = loss_generator_fourier_real + loss_generator_fourier_imag
-
-                total_fourier_loss += combined_fourier_loss.item()
 
                 # destacndardize the data for the logged plots
                 val_hr_destandardized = self.destandardize_data(val_hr)
@@ -526,11 +494,9 @@ class Trainer:
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
-            avg_validation_fourier_loss = total_fourier_loss / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
             wandb.log({'val_loss': avg_validation_loss})
             wandb.log({'psnr': avg_psnr})
-            wandb.log({'fourier_loss': avg_validation_fourier_loss})
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
@@ -552,37 +518,15 @@ class Trainer:
         return avg_validation_loss, avg_psnr
 
     def compute_fourier_transform(self, data):
-        # Get the shape of the data
-        batches, channels, height, width, samples = data.shape
-
-        # Reshape the data to combine batches and channels
-        combined_shape = (batches * channels, height, width, samples)
-        reshaped_data = data.view(combined_shape)
 
         # Compute the Fourier transform along the time dimension
-        fourier_transformed_data = torch.fft.fftn(reshaped_data, dim=-1)
-
-        # Reshape the Fourier transformed data back to the original shape
-        fourier_transformed_data = fourier_transformed_data.view((batches, channels, height, width, samples))
+        fourier_transformed_data = torch.fft.fftn(data, dim=-1)
 
         # Split the real and imaginary parts of the Fourier transformed data
         fourier_transformed_data_real = fourier_transformed_data.real
         fourier_transformed_data_imag = fourier_transformed_data.imag
 
         return fourier_transformed_data_real, fourier_transformed_data_imag
-
-    def compute_wavelet_transform_coeffs(self, data):
-        data_numpy = data.detach().cpu().numpy()
-
-        # TODO: Debug to check how many levels of decomposition make sense
-        # Compute the wavelet transform along the time dimension
-        coeffs = pywt.dwt(data_numpy, 'db7')
-
-        # Put coeffs into torch array for mse loss
-        coeffs = np.array(coeffs)
-        coeffs = torch.tensor(coeffs, dtype=data.dtype, device=data.device, requires_grad=True)
-
-        return coeffs
 
     def _save_checkpoint(self, epoch: int) -> None:
         """
@@ -709,7 +653,8 @@ class Trainer:
         del self.optimizer_G
         del self.optimizer_D
         del self.adversarial_loss
-        del self.mse
+        del self.mse_content
+        del self.mse_fourier
         del self.training
         del self.validation
         torch.cuda.empty_cache()
@@ -754,8 +699,7 @@ class Trainer:
         #         os.makedirs(model_path, exist_ok=True)
         #         np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
 
-    def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
-
+    def destandardize_data(self, standardized_data: torch.tensor) -> torch.tensor:
         """
         De-standardizes the data with the mean and standard deviation from the training set.
 

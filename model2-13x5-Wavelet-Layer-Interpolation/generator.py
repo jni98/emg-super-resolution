@@ -77,6 +77,17 @@ class UpConvolutionBlock(nn.Module):
             nn.BatchNorm3d(in_channels),
             nn.PReLU())
 
+        self.conv1 = nn.Sequential(
+            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3),
+                      stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(in_channels),
+            nn.PReLU(),
+            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3),
+                      stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(in_channels),
+            nn.PReLU()
+        )
+
     def forward(self, x: torch.tensor, skip: torch.tensor) -> torch.tensor:
         # Calculate the midpoint along the second dimension
         midpoint = x.shape[1] // 2
@@ -97,7 +108,7 @@ class UpConvolutionBlock(nn.Module):
         # sum up with skip connection
         out = up + skip
 
-        # TODO: add convolution here
+        out = self.conv1(out)
 
         return out
 

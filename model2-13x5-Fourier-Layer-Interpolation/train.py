@@ -31,18 +31,15 @@ def setup_sweep():
                 'values': [0.001, 0.0001, 0.00001]
             },
             'num_res_blocks_last': {
-                'values': [4]
+                'values': [2,3]
             },
             'num_res_blocks': {
-                'values': [5]
+                'values': [2,3]
             },
             'adv_loss_weight': {
                 'values': [1, 0.1, 0.01, 0.001]
             },
             'fourier_loss_weight': {
-                'values': [1, 0.1, 0.01, 0.001]
-            },
-            'wavelet_loss_weight': {
                 'values': [100, 10, 1, 0.1, 0.01]
             },
             'spatial_whitening': {
