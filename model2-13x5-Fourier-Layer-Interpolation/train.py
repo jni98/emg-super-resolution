@@ -102,10 +102,10 @@ if __name__ == "__main__":
     results_directory = args.results
     num_epochs = args.epochs
 
-    data_directory = '../dataset/train'
-    test_data_directory ='../dataset/test'
-    results_directory = 'runs/'
-    num_epochs = 50
+    # data_directory = '../dataset/train'
+    # test_data_directory ='../dataset/test'
+    # results_directory = 'runs/'
+    # num_epochs = 50
 
     # Run the sweep
     wandb.agent(sweep_id,
