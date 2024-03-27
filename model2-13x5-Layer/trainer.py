@@ -80,7 +80,7 @@ class Trainer:
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
 
-        #wandb.init(project="emg-super-resolution", entity="masterthesis-sr")
+        wandb.init(project="emg-super-resolution", entity="masterthesis-sr")
 
         print("init done")
 
