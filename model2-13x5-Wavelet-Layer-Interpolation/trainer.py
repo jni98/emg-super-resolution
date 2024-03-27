@@ -169,8 +169,7 @@ class Trainer:
         # print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
-        self.mse_content = nn.MSELoss()  # Mean Squared error Loss
-        self.mse_wavelet = nn.MSELoss()  # Mean Squared error Loss
+        self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr_gen, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr_disc, betas=self.betas)
@@ -312,14 +311,14 @@ class Trainer:
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
             # generator content loss
-            loss_generator_content = self.mse_content(sr_emg, hr_emg)
+            loss_generator_content = self.mse(sr_emg, hr_emg)
 
             # Wavelet transform of generated and groundtruth data
             sr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(sr_emg)
             hr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(hr_emg)
 
             # Wavelet loss
-            loss_generator_wavelet = self.mse_wavelet(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
+            loss_generator_wavelet = self.mse(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
 
             # Generator loss: adversarial loss + content loss + wavelet loss
             loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
@@ -393,14 +392,14 @@ class Trainer:
                 loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
 
                 # Calculate content loss
-                loss_generator_content = self.mse_content(val_sr_emg, val_hr)
+                loss_generator_content = self.mse(val_sr_emg, val_hr)
 
                 # Compute wavelet transform coefficients
                 sr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(val_sr_emg)
                 hr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(val_hr)
 
                 # Calculate wavelet loss
-                loss_generator_wavelet = self.mse_wavelet(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
+                loss_generator_wavelet = self.mse(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
 
                 # Total loss for validation
                 val_loss = (self.adv_loss_weight * loss_generator_adv +
@@ -678,8 +677,7 @@ class Trainer:
         del self.optimizer_G
         del self.optimizer_D
         del self.adversarial_loss
-        del self.mse_content
-        del self.mse_wavelet
+        del self.mse
         del self.training
         del self.validation
         torch.cuda.empty_cache()
@@ -705,24 +703,6 @@ class Trainer:
         print("Successfully generated LR to SR data")
 
         torch.cuda.empty_cache()
-        #
-        # print("Starting to generate HR to SR data")
-        # # load the final generator
-        # self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
-        # self.generator.eval()  # Set the generator to evaluation mode
-        #
-        # with torch.no_grad():
-        #     for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-        #         hr_emg = hr_emg.to(self.device)
-        #
-        #         # Generate super-resolved data (SR) from LR data
-        #         hr_sr_emg = self.generator(hr_emg).to('cpu').numpy().squeeze()
-        #         hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
-        #
-        #         # Save signal from lr to sr and hr to sr
-        #         model_path = self.run_folder + self.unique_folder + '/results/'
-        #         os.makedirs(model_path, exist_ok=True)
-        #         np.save(model_path + hr_emg_paths[0], hr_sr_emg_destandardized)
 
     def destandardize_data(self, standardized_data: torch.tensor) -> torch.tensor:
         """

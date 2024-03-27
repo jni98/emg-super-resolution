@@ -169,8 +169,7 @@ class Trainer:
         # print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
-        self.mse_content = nn.MSELoss()  # Mean Squared error Loss
-        self.mse_fourier = nn.MSELoss()  # Mean Squared error Loss
+        self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr_gen, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr_disc, betas=self.betas)
@@ -310,13 +309,13 @@ class Trainer:
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
             # generator content loss
-            loss_generator_content = self.mse_content(sr_emg, hr_emg)
+            loss_generator_content = self.mse(sr_emg, hr_emg)
 
             # compute fourier transform
             sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(sr_emg)
             hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(hr_emg)
 
-            loss_generator_fourier = self.mse_fourier(sr_emg_fourier_real, hr_emg_fourier_real) + self.mse_fourier(
+            loss_generator_fourier = self.mse(sr_emg_fourier_real, hr_emg_fourier_real) + self.mse(
                 sr_emg_fourier_imag, hr_emg_fourier_imag)
 
             # Generator loss: adversarial loss + content loss + fourier loss
@@ -375,7 +374,7 @@ class Trainer:
         total_abs_diff = 0.0
         total_val_gen_adv = 0.0
         total_val_gen_content = 0.0
-        total_val_gen_wavelet = 0.0
+        total_val_gen_fourier = 0.0
 
         with torch.no_grad():
             for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
@@ -393,14 +392,14 @@ class Trainer:
                 loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
 
                 # Calculate content loss
-                loss_generator_content = self.mse_content(val_sr_emg, val_hr)
+                loss_generator_content = self.mse(val_sr_emg, val_hr)
 
                 # Compute Fourier transform coefficients
                 sr_emg_fourier_coeffs = self.compute_fourier_transform(val_sr_emg)
                 hr_emg_fourier_coeffs = self.compute_fourier_transform(val_hr)
 
                 # Calculate Fourier loss
-                loss_generator_fourier = self.mse_fourier(sr_emg_fourier_coeffs, hr_emg_fourier_coeffs)
+                loss_generator_fourier = self.mse(sr_emg_fourier_coeffs, hr_emg_fourier_coeffs)
 
                 # Total loss for validation
                 val_loss = (self.adv_loss_weight * loss_generator_adv +
@@ -411,7 +410,7 @@ class Trainer:
                 total_validation_loss += val_loss.item()
                 total_val_gen_adv += loss_generator_adv.item()
                 total_val_gen_content += loss_generator_content.item()
-                total_val_gen_wavelet += loss_generator_wavelet.item()
+                total_val_gen_fourier += loss_generator_fourier.item()
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
@@ -431,97 +430,12 @@ class Trainer:
                 total_abs_diff += abs_diff
 
                 if val_batch_idx == 0:
-                    ############################## Log Plots given channel########################################
-                    print("Logging plots for batch index 0 given channel")
-
-                    # x-axis for the following logs
-                    fig, axs = plt.subplots(5, 1, figsize=(8, 10))
-                    x_values = range(val_hr.shape[4])
-
-                    # log absolute difference for one channel
-                    axs[0].plot(x_values, abs_diff)
-                    axs[0].set_title('Absolute difference given channel')
-
-                    # Log one channel in the middle of the grid
-                    val_channel = val_hr_destandardized[0][0][6][2]
-                    val_channel = val_channel.to('cpu')
-                    val_channel = np.asarray(val_channel)
-                    axs[1].plot(x_values, val_channel)
-                    axs[1].set_title('Validation channel [6][2]')
-
-                    # Log one channel in the middle of the grid
-                    sr_channel = val_sr_emg_destandardized[0][0][6][2]
-                    sr_channel = sr_channel.to('cpu')
-                    sr_channel = np.asarray(sr_channel)
-                    axs[2].plot(x_values, sr_channel)
-                    axs[2].set_title('Super-resolution channel [6][2]')
-
-                    # log cross correlation
-                    auto_correlation = np.correlate(val_channel, val_channel, mode='full')
-                    cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
-                    cross_correlation = cross_correlation.squeeze()
-                    axs[3].plot(range(len(cross_correlation)), cross_correlation)
-                    axs[3].set_title('Cross Correlation channel [6][2]')
-
-                    axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
-                    axs[4].plot(val_channel, label='Validation channel [6][1]')
-                    axs[4].set_title('Super-resolution vs Validation channel [6][1]')
-                    axs[4].legend()
-
-                    plt.tight_layout()
-                    wandb.log({"Logged plots given Channel": [wandb.Image(fig)]})
-
-                    # Close the figure
-                    plt.close(fig)
-
-                    ############################## Log Plots predicted channel########################################
-                    print("Logging plots for batch index 0 predicted channel")
-
-                    # x-axis for the following logs
-                    fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
-                    x_values = range(val_hr.shape[4])
-
-                    # log absolute difference for one channel
-                    axs1[0].plot(x_values, torch.abs(
-                        val_hr_destandardized[0][0][6][1] - val_sr_emg_destandardized[0][0][6][1]).squeeze().to('cpu'))
-                    axs1[0].set_title('Absolute difference predicted channel')
-
-                    # Log one channel in the middle of the grid
-                    val_channel = val_hr_destandardized[0][0][6][1]
-                    val_channel = val_channel.to('cpu')
-                    val_channel = np.asarray(val_channel)
-                    axs1[1].plot(x_values, val_channel)
-                    axs1[1].set_title('Validation channel [6][1]')
-
-                    # Log one channel in the middle of the grid
-                    sr_channel = val_sr_emg_destandardized[0][0][6][1]
-                    sr_channel = sr_channel.to('cpu')
-                    sr_channel = np.asarray(sr_channel)
-                    axs1[2].plot(x_values, sr_channel)
-                    axs1[2].set_title('Super-resolution channel [6][1]')
-
-                    # log cross correlation
-                    auto_correlation = np.correlate(val_channel, val_channel, mode='full')
-                    cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
-                    cross_correlation = cross_correlation.squeeze()
-                    axs1[3].plot(range(len(cross_correlation)), cross_correlation)
-                    axs1[3].set_title('Cross Correlation channel [6][1]')
-
-                    axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
-                    axs[4].plot(val_channel, label='Validation channel [6][1]')
-                    axs[4].set_title('Super-resolution vs Validation channel [6][1]')
-                    axs[4].legend()
-
-                    plt.tight_layout()
-                    wandb.log({"Logged plots predicted Channel": [wandb.Image(fig1)]})
-
-                    # Close the figure
-                    plt.close(fig1)
+                    self.validation_plots_logging(val_hr_destandardized,val_sr_emg_destandardized, abs_diff)
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
             avg_val_content = total_val_gen_content / len(self.validation)
-            avg_val_wavelet = total_val_gen_wavelet / len(self.validation)
+            avg_val_wavelet = total_val_gen_fourier / len(self.validation)
             avg_val_adv = total_val_gen_adv / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
 
@@ -546,6 +460,108 @@ class Trainer:
         self.discriminator.train()  # Set the discriminator back to training mode if needed
 
         return avg_validation_loss, avg_psnr
+
+    def validation_plots_logging(self, val_hr_destandardized, val_sr_emg_destandardized, abs_diff):
+        """
+
+        Parameters
+        ----------
+        val_hr_destandardized
+        val_sr_emg_destandardized
+        abs_diff
+
+        Returns
+        -------
+
+        """
+
+        ############################## Log Plots given channel########################################
+        print("Logging plots for batch index 0 given channel")
+
+        # x-axis for the following logs
+        fig, axs = plt.subplots(5, 1, figsize=(8, 10))
+        x_values = range(val_hr_destandardized.shape[4])
+
+        # log absolute difference for one channel
+        axs[0].plot(x_values, abs_diff)
+        axs[0].set_title('Absolute difference given channel')
+
+        # Log one channel in the middle of the grid
+        val_channel = val_hr_destandardized[0][0][6][2]
+        val_channel = val_channel.to('cpu')
+        val_channel = np.asarray(val_channel)
+        axs[1].plot(x_values, val_channel)
+        axs[1].set_title('Validation channel [6][2]')
+
+        # Log one channel in the middle of the grid
+        sr_channel = val_sr_emg_destandardized[0][0][6][2]
+        sr_channel = sr_channel.to('cpu')
+        sr_channel = np.asarray(sr_channel)
+        axs[2].plot(x_values, sr_channel)
+        axs[2].set_title('Super-resolution channel [6][2]')
+
+        # log cross correlation
+        auto_correlation = np.correlate(val_channel, val_channel, mode='full')
+        cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
+        cross_correlation = cross_correlation.squeeze()
+        axs[3].plot(range(len(cross_correlation)), cross_correlation)
+        axs[3].set_title('Cross Correlation channel [6][2]')
+
+        axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
+        axs[4].plot(val_channel, label='Validation channel [6][1]')
+        axs[4].set_title('Super-resolution vs Validation channel [6][1]')
+        axs[4].legend()
+
+        plt.tight_layout()
+        wandb.log({"Logged plots given Channel": [wandb.Image(fig)]})
+
+        # Close the figure
+        plt.close(fig)
+
+        ############################## Log Plots predicted channel########################################
+        print("Logging plots for batch index 0 predicted channel")
+
+        # x-axis for the following logs
+        fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
+        x_values = range(val_hr_destandardized.shape[4])
+
+        # log absolute difference for one channel
+        axs1[0].plot(x_values, torch.abs(
+            val_hr_destandardized[0][0][6][1] - val_sr_emg_destandardized[0][0][6][1]).squeeze().to('cpu'))
+        axs1[0].set_title('Absolute difference predicted channel')
+
+        # Log one channel in the middle of the grid
+        val_channel = val_hr_destandardized[0][0][6][1]
+        val_channel = val_channel.to('cpu')
+        val_channel = np.asarray(val_channel)
+        axs1[1].plot(x_values, val_channel)
+        axs1[1].set_title('Validation channel [6][1]')
+
+        # Log one channel in the middle of the grid
+        sr_channel = val_sr_emg_destandardized[0][0][6][1]
+        sr_channel = sr_channel.to('cpu')
+        sr_channel = np.asarray(sr_channel)
+        axs1[2].plot(x_values, sr_channel)
+        axs1[2].set_title('Super-resolution channel [6][1]')
+
+        # log cross correlation
+        auto_correlation = np.correlate(val_channel, val_channel, mode='full')
+        cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
+        cross_correlation = cross_correlation.squeeze()
+        axs1[3].plot(range(len(cross_correlation)), cross_correlation)
+        axs1[3].set_title('Cross Correlation channel [6][1]')
+
+        axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
+        axs[4].plot(val_channel, label='Validation channel [6][1]')
+        axs[4].set_title('Super-resolution vs Validation channel [6][1]')
+        axs[4].legend()
+
+        plt.tight_layout()
+        wandb.log({"Logged plots predicted Channel": [wandb.Image(fig1)]})
+
+        # Close the figure
+        plt.close(fig1)
+
 
     def compute_fourier_transform(self, data):
 
@@ -683,8 +699,7 @@ class Trainer:
         del self.optimizer_G
         del self.optimizer_D
         del self.adversarial_loss
-        del self.mse_content
-        del self.mse_fourier
+        del self.mse
         del self.training
         del self.validation
         torch.cuda.empty_cache()

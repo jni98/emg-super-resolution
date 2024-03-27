@@ -216,10 +216,8 @@ class Custom_Dataset(Dataset):
 
         # Create interpolator
         interpolator = RegularGridInterpolator((x, y, z), lr_emg, method=method)
-        print("Created the interpolater")
 
         # Interpolate
         interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
-        print("Finished the interpolator")
         return interpolated_signal
 

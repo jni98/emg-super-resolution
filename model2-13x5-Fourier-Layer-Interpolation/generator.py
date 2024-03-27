@@ -160,18 +160,9 @@ class Generator(nn.Module):
         self.finalConv = nn.Conv3d(in_channels=32, out_channels=1, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                                    padding=(1, 1, 1))
 
-    def forward(self, x: torch.tensor) -> torch.tensor:
-        conv1 = self.conv1(x)
-        conv1 = self.res_blocks1(conv1)
-        skip1 = conv1
-        print("Generator output after conv1", conv1.shape)
-
-        down1 = self.downConv1(conv1)
-        down1 = self.res_blocks2(down1)
-        print("Generator output after DownConv 1", down1.shape)
-
+    def fft(self, x: torch.tensor) -> torch.tensor:
         # Calculate FFT of the signal
-        fft_signal = torch.fft.fft(down1, dim=-1)
+        fft_signal = torch.fft.fft(x, dim=-1)
 
         # Extract real and imaginary parts
         real_part = torch.real(fft_signal)
@@ -179,31 +170,16 @@ class Generator(nn.Module):
 
         # Concatenate real and imaginary parts along the channel axis
         down1_fft = torch.cat([real_part, imaginary_part], dim=1)
-        print("Generator output after FFT", down1_fft.shape)
 
-        skip2 = down1_fft
+        return down1_fft
 
-        down2 = self.downConv2(down1_fft)
-        down2 = self.res_blocks3(down2)
-        skip3 = down2
-        print("Generator output after DownConv 2", down2.shape)
-
-        down3 = self.downConv3(down2)
-        down3 = self.res_blocks4(down3)
-        print("Generator output after DownConv 3", down3.shape)
-
-        up1 = self.upConv1(down3, skip3)
-        print("Generator output after upsample1", up1.shape)
-
-        up2 = self.upConv2(up1, skip2)
-        print("Generator output after upsample2", up2.shape)
-
+    def ifft(self, x: torch.tensor) -> torch.tensor:
         # Split the concatenated tensor into real and imaginary parts
-        num_channels = up2.shape[1] // 2
-        real_part = up2[:, :num_channels, :, :]
-        imaginary_part = up2[:, num_channels:, :, :]
+        num_channels = x.shape[1] // 2
+        real_part = x[:, :num_channels, :, :]
+        imaginary_part = x[:, num_channels:, :, :]
 
-        # Step 2: Combine real and imaginary parts to form a complex tensor
+        # Combine real and imaginary parts to form a complex tensor
         complex_signal = torch.complex(real_part, imaginary_part)
 
         # Perform inverse FFT
@@ -218,13 +194,47 @@ class Generator(nn.Module):
         up2_ifft = torch.cat([real_part, imaginary_part], dim=1)
         print("Generator output after iFFT", up2_ifft.shape)
 
+        return up2_ifft
+
+    def forward(self, x: torch.tensor) -> torch.tensor:
+        conv1 = self.conv1(x)
+        conv1 = self.res_blocks1(conv1)
+        skip1 = conv1
+        #print("Generator output after conv1", conv1.shape)
+
+        down1 = self.downConv1(conv1)
+        down1 = self.res_blocks2(down1)
+        #print("Generator output after DownConv 1", down1.shape)
+
+        down1_fft= self.fft(down1)
+        #print("Generator output after FFT", down1_fft.shape)
+
+        skip2 = down1_fft
+
+        down2 = self.downConv2(down1_fft)
+        down2 = self.res_blocks3(down2)
+        skip3 = down2
+        #print("Generator output after DownConv 2", down2.shape)
+
+        down3 = self.downConv3(down2)
+        down3 = self.res_blocks4(down3)
+        #print("Generator output after DownConv 3", down3.shape)
+
+        up1 = self.upConv1(down3, skip3)
+        #print("Generator output after upsample1", up1.shape)
+
+        up2 = self.upConv2(up1, skip2)
+        #print("Generator output after upsample2", up2.shape)
+
+        up2_ifft = self.ifft(up2)
+
         channel_down = self.channel_down(up2_ifft)
 
         up3 = self.upConv3(channel_down, skip1)
-        print("Generator output after upsample3", up3.shape)
+        #print("Generator output after upsample3", up3.shape)
 
         out = self.finalConv(up3)
 
-        print("Generator output", out.shape)
+        #print("Generator output", out.shape)
 
         return out

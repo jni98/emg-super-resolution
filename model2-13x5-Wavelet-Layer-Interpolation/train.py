@@ -37,7 +37,7 @@ def setup_sweep():
                 'values': [2]
             },
             'adv_loss_weight': {
-                'values': [0.1, 0.01]
+                'values': [1, 0.1, 0.01]
             },
             'wavelet_loss_weight': {
                 'values': [100, 10, 1]

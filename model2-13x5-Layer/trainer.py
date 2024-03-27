@@ -645,18 +645,18 @@ class Trainer:
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
 
-    def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
+    def destandardize_data(self, standardized_data: torch.tensor) -> torch.tensor:
 
         """
         De-standardizes the data with the mean and standard deviation from the training set.
 
         Parameters
         ----------
-        standardized_data: numpy array
+        standardized_data
 
         Returns
         -------
-        destandardized_data: numpy array
+        destandardized_data
         """
 
         return standardized_data * self.mean_std_dict['std'] + self.mean_std_dict['mean']
