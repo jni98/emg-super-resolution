@@ -80,7 +80,7 @@ class Trainer:
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
 
-        wandb.init(project="emg-super-resolution", entity="masterthesis-sr")
+        #wandb.init(project="emg-super-resolution", entity="masterthesis-sr")
 
         print("init done")
 
@@ -194,8 +194,8 @@ class Trainer:
         best_val_loss = float('inf')
 
         # Add wandb.watch() here to start tracking gradients and parameters
-        wandb.watch(self.generator, criterion='mse', log='all')
-        wandb.watch(self.discriminator, criterion='mse', log='all')
+        #wandb.watch(self.generator, criterion='mse', log='all')
+        #wandb.watch(self.discriminator, criterion='mse', log='all')
 
         for epoch in range(1, self.num_epochs + 1):
             print("epoch", epoch)
