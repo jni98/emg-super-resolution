@@ -41,6 +41,8 @@ if __name__ == '__main__':
     files_model2 = ['model_2/path0-lr', 'model_2/path1-lr', 'model_2/path2-lr', 'model_2/path3-lr']
     files_model1 = ['model_1/path0-lr', 'model_1/path1-lr', 'model_1/path2-lr', 'model_1/path3-lr']
     files_model2_Fourier = ['model_2_Fourier/path0-lr', 'model_2_Fourier/path1-lr', 'model_2_Fourier/path2-lr', 'model_2_Fourier/path3-lr']
+    files_model2_Fourier_Layer = ['model_2_Fourier_Layer/path0-lr', 'model_2_Fourier_Layer/path1-lr', 'model_2_Fourier_Layer/path2-lr', 'model_2_Fourier_Layer/path3-lr']
+    files_model2_Wavelet_Layer= ['model_2_Wavelet_Layer/path0-lr', 'model_2_Wavelet_Layer/path1-lr', 'model_2_Wavelet_Layer/path2-lr', 'model_2_Wavelet_Layer/path3-lr']
 
     test_paths_mat = [
         'data/Alessandros Daten sEMG/Test/RPAR_DECOMP_PROX_35-50-70_FINISHED/POST/400PaRiRo170628134308 Rampa_35MVC_5MVCs_2acontrazione_TODECOMPOSE_offset0_length30_runs250_EDITED_MATTEO.mat',
@@ -51,6 +53,8 @@ if __name__ == '__main__':
     os.makedirs('results_mat/linear_Interpolation', exist_ok=True)
     os.makedirs('results_mat/groundtruth', exist_ok=True)
     os.makedirs('results_mat/model_2', exist_ok=True)
+    os.makedirs('results_mat/model_2_Fourier_Layer', exist_ok=True)
+    os.makedirs('results_mat/model_2_Wavelet_Layer', exist_ok=True)
 
     # for file, test_path_mat in zip(files_interpolation, test_paths_mat):
     #     numpy_to_mat(file, test_path_mat, (13,5))
@@ -77,7 +81,12 @@ if __name__ == '__main__':
     #     print(file)
     #     print("Done")
 
-    for file, test_path_mat in zip(files_groundtruth_lr, test_paths_mat):
-        numpy_to_mat(file, test_path_mat, (7,3))
+    for file, test_path_mat in zip(files_model2_Fourier_Layer, test_paths_mat):
+        numpy_to_mat(file, test_path_mat, (13,5))
+        print(file)
+        print("Done")
+
+    for file, test_path_mat in zip(files_model2_Wavelet_Layer, test_paths_mat):
+        numpy_to_mat(file, test_path_mat, (13,5))
         print(file)
         print("Done")
