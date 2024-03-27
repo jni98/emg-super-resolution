@@ -410,6 +410,8 @@ class Trainer:
                 val_sr_emg = self.generator(val_lr).to(self.device)
                 val_sr_emg = self._delete_row_column(val_sr_emg)
 
+                # TODO: Adversarial Loss hinzufügen
+
                 # Calculate validation loss
                 val_loss = self.mse(val_sr_emg, val_hr)
 

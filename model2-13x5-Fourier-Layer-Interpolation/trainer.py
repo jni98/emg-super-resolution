@@ -373,6 +373,9 @@ class Trainer:
         total_validation_loss = 0.0
         total_psnr = 0.0
         total_abs_diff = 0.0
+        total_val_gen_adv = 0.0
+        total_val_gen_content = 0.0
+        total_val_gen_wavelet = 0.0
 
         with torch.no_grad():
             for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
@@ -384,8 +387,31 @@ class Trainer:
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
 
-                # Calculate validation loss
-                val_loss = self.mse_content(val_sr_emg, val_hr)
+                # Calculate adversarial loss
+                real_labels = torch.ones(val_hr.size(0), 1).to(self.device)
+                output_disc = self.discriminator(val_sr_emg)
+                loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
+
+                # Calculate content loss
+                loss_generator_content = self.mse_content(val_sr_emg, val_hr)
+
+                # Compute Fourier transform coefficients
+                sr_emg_fourier_coeffs = self.compute_fourier_transform(val_sr_emg)
+                hr_emg_fourier_coeffs = self.compute_fourier_transform(val_hr)
+
+                # Calculate Fourier loss
+                loss_generator_fourier = self.mse_fourier(sr_emg_fourier_coeffs, hr_emg_fourier_coeffs)
+
+                # Total loss for validation
+                val_loss = (self.adv_loss_weight * loss_generator_adv +
+                            loss_generator_content +
+                            self.fourier_loss_weight * loss_generator_fourier)
+
+                # Accumulate validation loss
+                total_validation_loss += val_loss.item()
+                total_val_gen_adv += loss_generator_adv.item()
+                total_val_gen_content += loss_generator_content.item()
+                total_val_gen_wavelet += loss_generator_wavelet.item()
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
@@ -494,9 +520,13 @@ class Trainer:
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
+            avg_val_content = total_val_gen_content / len(self.validation)
+            avg_val_wavelet = total_val_gen_wavelet / len(self.validation)
+            avg_val_adv = total_val_gen_adv / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
-            wandb.log({'val_loss': avg_validation_loss})
-            wandb.log({'psnr': avg_psnr})
+
+            wandb.log({'val_loss': avg_validation_loss, 'val_content': avg_val_content,
+                       'val_wavelet': avg_val_wavelet, 'val_adv': avg_val_adv, 'val_psnr': avg_psnr})
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)

@@ -264,6 +264,8 @@ class Trainer:
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
         total_wavelet_loss = 0.0
+        total_content_loss =0.0
+        total_gen_adversarial_loss = 0.0
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
@@ -323,11 +325,6 @@ class Trainer:
             loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
                               self.wavelet_loss_weight * loss_generator_wavelet)
 
-            print("loss_generator", loss_generator)
-            print("loss_generator_adv", loss_generator_adv)
-            print("loss_generator_content", loss_generator_content)
-            print("loss_generator_wavelet", loss_generator_wavelet)
-
             loss_generator.backward()
 
             self.optimizer_G.step()
@@ -337,6 +334,8 @@ class Trainer:
             total_loss_d_real += loss_discriminator_real.item()
             total_loss_d_fake += loss_discriminator_fake.item()
             total_wavelet_loss += loss_generator_wavelet.item()
+            total_content_loss += loss_generator_content.item()
+            total_gen_adversarial_loss += loss_generator_adv.item()
 
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
@@ -372,6 +371,9 @@ class Trainer:
         self.discriminator.eval()  # Set the discriminator to evaluation mode if needed
 
         total_validation_loss = 0.0
+        total_val_gen_adv = 0.0
+        total_val_gen_content = 0.0
+        total_val_gen_wavelet = 0.0
         total_psnr = 0.0
         total_abs_diff = 0.0
 
@@ -385,11 +387,31 @@ class Trainer:
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
 
-                # Calculate validation loss
-                val_loss = self.mse_content(val_sr_emg, val_hr)
+                # Calculate adversarial loss
+                real_labels = torch.ones(val_hr.size(0), 1).to(self.device)
+                output_disc = self.discriminator(val_sr_emg)
+                loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
+
+                # Calculate content loss
+                loss_generator_content = self.mse_content(val_sr_emg, val_hr)
+
+                # Compute wavelet transform coefficients
+                sr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(val_sr_emg)
+                hr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(val_hr)
+
+                # Calculate wavelet loss
+                loss_generator_wavelet = self.mse_wavelet(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
+
+                # Total loss for validation
+                val_loss = (self.adv_loss_weight * loss_generator_adv +
+                            loss_generator_content +
+                            self.wavelet_loss_weight * loss_generator_wavelet)
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
+                total_val_gen_adv += loss_generator_adv.item()
+                total_val_gen_content += loss_generator_content.item()
+                total_val_gen_wavelet += loss_generator_wavelet.item()
 
                 psnr = 20 * torch.log10(1.0 / torch.sqrt(val_loss))
 
@@ -495,9 +517,13 @@ class Trainer:
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
+            avg_val_content = total_val_gen_content / len(self.validation)
+            avg_val_wavelet = total_val_gen_wavelet / len(self.validation)
+            avg_val_adv = total_val_gen_adv / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
-            wandb.log({'val_loss': avg_validation_loss})
-            wandb.log({'psnr': avg_psnr})
+
+            wandb.log({'val_loss': avg_validation_loss, 'val_content': avg_val_content,
+                       'val_wavelet': avg_val_wavelet, 'val_adv': avg_val_adv, 'val_psnr': avg_psnr})
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)

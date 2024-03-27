@@ -345,6 +345,8 @@ class Trainer:
         self.discriminator.eval()  # Set the discriminator to evaluation mode if needed
 
         total_validation_loss = 0.0
+        total_val_gen_adv = 0.0
+        total_val_gen_content = 0.0
         total_psnr = 0.0
         total_abs_diff = 0.0
 
@@ -358,11 +360,22 @@ class Trainer:
                 # Generate SR data from LR data using the generator
                 val_sr_emg = self.generator(val_lr).to(self.device)
 
-                # Calculate validation loss
-                val_loss = self.mse(val_sr_emg, val_hr)
+                # Calculate adversarial loss
+                real_labels = torch.ones(val_hr.size(0), 1).to(self.device)
+                output_disc = self.discriminator(val_sr_emg)
+                loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
+
+                # Calculate content loss
+                loss_generator_content = self.mse(val_sr_emg, val_hr)
+
+                # Total loss for validation
+                val_loss = (self.adv_loss_weight * loss_generator_adv +
+                            loss_generator_content)
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
+                total_val_gen_adv += loss_generator_adv.item()
+                total_val_gen_content += loss_generator_content.item()
 
                 psnr = 20 * torch.log10(1.0 / torch.sqrt(val_loss))
 
@@ -458,9 +471,12 @@ class Trainer:
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
+            avg_val_content = total_val_gen_content / len(self.validation)
+            avg_val_adv = total_val_gen_adv / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
-            wandb.log({'val_loss': avg_validation_loss})
-            wandb.log({'psnr': avg_psnr})
+
+            wandb.log({'val_loss': avg_validation_loss, 'val_content': avg_val_content,
+                       'val_adv': avg_val_adv, 'val_psnr': avg_psnr})
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
