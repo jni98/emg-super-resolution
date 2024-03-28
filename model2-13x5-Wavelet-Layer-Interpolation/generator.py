@@ -112,6 +112,50 @@ class UpConvolutionBlock(nn.Module):
 
         return out
 
+class UpConvolutionBlockLast(nn.Module):
+    """
+    This class is used to create an up convolution block, which is used in the generator to upsample the data and also
+    add the skip connection.
+    """
+
+    def __init__(self, wavelet, in_channels, kernel_size, stride, padding) -> None:
+        super(UpConvolutionBlockLast, self).__init__()
+        self.wavelet = wavelet
+
+        self.conv = nn.Sequential(
+            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=kernel_size, stride=stride,
+                      padding=padding),
+            nn.BatchNorm3d(in_channels),
+            nn.PReLU(),
+            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3),
+                      stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(in_channels),
+            nn.PReLU(),
+            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3),
+                      stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(in_channels),
+            nn.PReLU()
+        )
+
+    def forward(self, x: torch.tensor) -> torch.tensor:
+        # Calculate the midpoint along the second dimension
+        midpoint = x.shape[1] // 2
+
+        # Split the tensor into two parts at the midpoint
+        coeff1 = x[:, :midpoint]
+        coeff2 = x[:, midpoint:]
+
+        # Add the tensors to a list
+        coeff_list = [coeff1, coeff2]
+
+        # upsample
+        up = ptwt.waverec(coeff_list, self.wavelet)
+
+        # Make length of signal fit the skip connection
+        out = self.conv(up)
+
+        return out
+
 
 class Generator(nn.Module):
     """
@@ -161,7 +205,7 @@ class Generator(nn.Module):
         self.upConv2 = UpConvolutionBlock(wavelet=self.wavelet, in_channels=128, kernel_size= (3,3,3), stride=(1,1,1), padding=(1,1,1))
 
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlock(wavelet=self.wavelet, in_channels=64, kernel_size= (3,3,3), stride=(1,1,1), padding=(1,1,1))
+        self.upConv3 = UpConvolutionBlockLast(wavelet=self.wavelet, in_channels=64, kernel_size= (3,3,3), stride=(1,1,1), padding=(1,1,1))
 
         # Finale Convolution für Channel 1
         self.finalConv = nn.Conv3d(in_channels=64, out_channels=1, kernel_size=(3, 3, 3), stride=(1, 1, 1),
@@ -191,7 +235,7 @@ class Generator(nn.Module):
         # print("Generator output after upsample1", up1.shape)
         up2 = self.upConv2(up1, skip2)
         # print("Generator output after upsample2", up2.shape)
-        up3 = self.upConv3(up2, skip1)
+        up3 = self.upConv3(up2)
         # print("Generator output after upsample3", up3.shape)
 
         out = self.finalConv(up3)

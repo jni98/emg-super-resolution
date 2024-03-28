@@ -101,6 +101,37 @@ class UpConvolutionBlock(nn.Module):
 
         return out
 
+class UpConvolutionBlockLast(nn.Module):
+    """
+    This class is used to create an up convolution block, which is used in the generator to upsample the data and also
+    add the skip connection.
+    """
+
+    def __init__(self, in_channels, out_channels, stride) -> None:
+        super(UpConvolutionBlockLast, self).__init__()
+        self.upConv = nn.Sequential(
+            nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                                         stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1)),
+            nn.BatchNorm3d(out_channels),
+            nn.PReLU(),
+            nn.Conv3d(in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                      stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(out_channels),
+            nn.PReLU(),
+            nn.Conv3d(in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                      stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(out_channels),
+            nn.PReLU()
+        )
+
+
+
+    def forward(self, x: torch.tensor) -> torch.tensor:
+        # upsample
+        out = self.upConv(x)
+
+        return out
+
 
 class Generator(nn.Module):
     """
@@ -154,7 +185,7 @@ class Generator(nn.Module):
         )
 
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlock(64, 32, stride=(1, 1, 2))
+        self.upConv3 = UpConvolutionBlockLast(64, 32, stride=(1, 1, 2))
 
         # Finale Convolution für Channel 1
         self.finalConv = nn.Conv3d(in_channels=32, out_channels=1, kernel_size=(3, 3, 3), stride=(1, 1, 1),
@@ -230,7 +261,7 @@ class Generator(nn.Module):
 
         channel_down = self.channel_down(up2_ifft)
 
-        up3 = self.upConv3(channel_down, skip1)
+        up3 = self.upConv3(channel_down)
         #print("Generator output after upsample3", up3.shape)
 
         out = self.finalConv(up3)
