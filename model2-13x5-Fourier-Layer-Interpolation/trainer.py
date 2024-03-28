@@ -200,8 +200,8 @@ class Trainer:
         best_val_loss = float('inf')
 
         # Add wandb.watch() here to start tracking gradients and parameters
-        #wandb.watch(self.generator, criterion='mse', log='all')
-        #wandb.watch(self.discriminator, criterion='mse', log='all')
+        # wandb.watch(self.generator, criterion='mse', log='all')
+        # wandb.watch(self.discriminator, criterion='mse', log='all')
 
         for epoch in range(1, self.num_epochs + 1):
             print("epoch", epoch)
@@ -320,7 +320,7 @@ class Trainer:
 
             # Generator loss: adversarial loss + content loss + fourier loss
             loss_generator = (
-                        self.adv_loss_weight * loss_generator_adv + loss_generator_content + self.fourier_loss_weight * loss_generator_fourier)
+                    self.adv_loss_weight * loss_generator_adv + loss_generator_content + self.fourier_loss_weight * loss_generator_fourier)
 
             print("loss_generator", loss_generator)
             print("loss_generator_adv", loss_generator_adv)
@@ -394,12 +394,13 @@ class Trainer:
                 # Calculate content loss
                 loss_generator_content = self.mse(val_sr_emg, val_hr)
 
-                # Compute Fourier transform coefficients
-                sr_emg_fourier_coeffs = self.compute_fourier_transform(val_sr_emg)
-                hr_emg_fourier_coeffs = self.compute_fourier_transform(val_hr)
+                # compute fourier transform
+                sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(val_sr_emg)
+                hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(val_hr)
 
                 # Calculate Fourier loss
-                loss_generator_fourier = self.mse(sr_emg_fourier_coeffs, hr_emg_fourier_coeffs)
+                loss_generator_fourier = self.mse(sr_emg_fourier_imag, hr_emg_fourier_imag) + self.mse(
+                    sr_emg_fourier_real, hr_emg_fourier_real)
 
                 # Total loss for validation
                 val_loss = (self.adv_loss_weight * loss_generator_adv +
@@ -430,7 +431,7 @@ class Trainer:
                 total_abs_diff += abs_diff
 
                 if val_batch_idx == 0:
-                    self.validation_plots_logging(val_hr_destandardized,val_sr_emg_destandardized, abs_diff)
+                    self.validation_plots_logging(val_hr_destandardized, val_sr_emg_destandardized, abs_diff)
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
@@ -561,7 +562,6 @@ class Trainer:
 
         # Close the figure
         plt.close(fig1)
-
 
     def compute_fourier_transform(self, data):
 
