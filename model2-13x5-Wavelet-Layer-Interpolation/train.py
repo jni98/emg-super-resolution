@@ -40,7 +40,7 @@ def setup_sweep():
                 'values': [0.001]
             },
             'wavelet_loss_weight': {
-                'values': [100, 10, 1]
+                'values': [100, 10]
             },
             'spatial_whitening': {
                 'values': [False]
