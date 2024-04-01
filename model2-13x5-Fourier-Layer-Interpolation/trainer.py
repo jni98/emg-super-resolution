@@ -436,12 +436,12 @@ class Trainer:
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
             avg_val_content = total_val_gen_content / len(self.validation)
-            avg_val_wavelet = total_val_gen_fourier / len(self.validation)
+            avg_val_fourier = total_val_gen_fourier / len(self.validation)
             avg_val_adv = total_val_gen_adv / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
 
             wandb.log({'val_loss': avg_validation_loss, 'val_content': avg_val_content,
-                       'val_wavelet': avg_val_wavelet, 'val_adv': avg_val_adv, 'val_psnr': avg_psnr})
+                       'val_fourier': avg_val_fourier, 'val_adv': avg_val_adv, 'val_psnr': avg_psnr})
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)

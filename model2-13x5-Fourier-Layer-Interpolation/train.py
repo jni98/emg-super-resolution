@@ -37,10 +37,10 @@ def setup_sweep():
                 'values': [2]
             },
             'adv_loss_weight': {
-                'values': [1, 0.1, 0.01]
+                'values': [0.001]
             },
             'fourier_loss_weight': {
-                'values': [10, 1, 0.1, 0.01]
+                'values': [0.0001]
             },
             'spatial_whitening': {
                 'values': [False]
