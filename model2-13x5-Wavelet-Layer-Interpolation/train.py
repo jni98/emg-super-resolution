@@ -25,10 +25,10 @@ def setup_sweep():
                 'values': [10,12],  # Add the batch sizes you want to include
             },
             'learning_rate_gen': {
-                'values': [0.0001, 0.00001]
+                'values': [0.00001]
             },
             'learning_rate_disc': {
-                'values': [0.0001, 0.00001]
+                'values': [0.00001]
             },
             'num_res_blocks_last': {
                 'values': [2]
@@ -40,7 +40,7 @@ def setup_sweep():
                 'values': [0.01]
             },
             'wavelet_loss_weight': {
-                'values': [1]
+                'values': [10]
             },
             'spatial_whitening': {
                 'values': [False]
