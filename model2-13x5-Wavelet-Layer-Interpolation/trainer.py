@@ -147,7 +147,7 @@ class Trainer:
         -------
         None
         """
-        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, wavelet='db7',
+        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks, wavelet='db7',
                                    in_channels=1)
         self.discriminator = Discriminator()
 
