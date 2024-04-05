@@ -5,7 +5,7 @@ import scipy.io
 import numpy as np
 
 
-def numpy_to_mat(file, file_path_mat, shape):
+def numpy_to_mat(file, file_path_mat, shape, whiten):
     # Create a NumPy array filled with None to represent the cell variable
     cell_variable = np.empty(shape, dtype=object)
 
@@ -16,6 +16,26 @@ def numpy_to_mat(file, file_path_mat, shape):
 
     # Load numpy file to be converted
     emg = np.load('results/' + file + '.npy')
+
+    if whiten:
+        # Assuming emg_data is your EMG data of shape (13, 5, 60000)
+        emg_data_shape = emg.shape
+
+        # Reshape the data to 2D
+        emg_data_2d = np.reshape(emg, (np.prod(emg_data_shape[:2]), emg_data_shape[2]))
+
+        # Compute the covariance matrix
+        cov_matrix = np.cov(emg_data_2d)
+
+        # Compute the whitening transformation
+        _, S, V = np.linalg.svd(cov_matrix)
+        whitening_matrix = np.dot(np.dot(V.T, np.diag(1.0 / np.sqrt(S + 1e-5))), V)
+
+        # Apply the whitening transformation
+        whitened_data_2d = np.dot(whitening_matrix, emg_data_2d)
+
+        # Reshape the whitened data back to its original shape
+        emg = np.reshape(whitened_data_2d, emg_data_shape)
 
     # Fill the cell_variable with the data from the NumPy array
     for i in range(shape[0]):
@@ -82,11 +102,11 @@ if __name__ == '__main__':
     #     print("Done")
 
     for file, test_path_mat in zip(files_model2_Fourier_Layer, test_paths_mat):
-        numpy_to_mat(file, test_path_mat, (13,5))
+        numpy_to_mat(file, test_path_mat, (13,5), whiten =True)
         print(file)
         print("Done")
 
     for file, test_path_mat in zip(files_model2_Wavelet_Layer, test_paths_mat):
-        numpy_to_mat(file, test_path_mat, (13,5))
+        numpy_to_mat(file, test_path_mat, (13,5), whiten =True)
         print(file)
         print("Done")

@@ -175,7 +175,7 @@ class Generator(nn.Module):
         self.upConv1 = UpConvolutionBlock(512, 256, stride=(1,1, 2))
 
         # Upsampling 2
-        self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
+        self.upConv2 = UpConvolutionBlockLast(256, 128, stride=(1, 1, 2))
 
         # Convolution to divide channel size by half due to ifft
         self.channel_down = nn.Sequential(
@@ -230,7 +230,6 @@ class Generator(nn.Module):
     def forward(self, x: torch.tensor) -> torch.tensor:
         conv1 = self.conv1(x)
         conv1 = self.res_blocks1(conv1)
-        skip1 = conv1
         #print("Generator output after conv1", conv1.shape)
 
         down1 = self.downConv1(conv1)
@@ -239,8 +238,6 @@ class Generator(nn.Module):
 
         down1_fft= self.fft(down1)
         #print("Generator output after FFT", down1_fft.shape)
-
-        skip2 = down1_fft
 
         down2 = self.downConv2(down1_fft)
         down2 = self.res_blocks3(down2)
@@ -254,7 +251,7 @@ class Generator(nn.Module):
         up1 = self.upConv1(down3, skip3)
         #print("Generator output after upsample1", up1.shape)
 
-        up2 = self.upConv2(up1, skip2)
+        up2 = self.upConv2(up1)
         #print("Generator output after upsample2", up2.shape)
 
         up2_ifft = self.ifft(up2)
