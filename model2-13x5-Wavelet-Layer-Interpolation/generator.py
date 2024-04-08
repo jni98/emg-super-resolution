@@ -199,7 +199,7 @@ class Generator(nn.Module):
         self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=512) for _ in range(num_res_blocks_last)])
 
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlockLast(wavelet=self.wavelet, in_channels=256, kernel_size= (3,3,2), stride=(1,1,1), padding=(1,1,0))
+        self.upConv1 = UpConvolutionBlock(wavelet=self.wavelet, in_channels=256, kernel_size= (3,3,2), stride=(1,1,1), padding=(1,1,0))
 
         # Upsampling 2
         self.upConv2 = UpConvolutionBlockLast(wavelet=self.wavelet, in_channels=128, kernel_size= (3,3,3), stride=(1,1,1), padding=(1,1,1))
@@ -214,13 +214,11 @@ class Generator(nn.Module):
     def forward(self, x: torch.tensor) -> torch.tensor:
         conv1 = self.conv1(x)
         conv1 = self.res_blocks1(conv1)
-        skip1 = conv1
-        # print("Generator output after conv1", conv1.shape)
+        #print("Generator output after conv1", conv1.shape)
 
         down1 = self.downConv1(conv1)
         down1 = self.res_blocks2(down1)
-        skip2 = down1
-        # print("Generator output after DownConv 1", down1.shape)
+        #print("Generator output after DownConv 1", down1.shape)
 
         down2 = self.downConv2(down1)
         down2 = self.res_blocks3(down2)
@@ -229,17 +227,17 @@ class Generator(nn.Module):
 
         down3 = self.downConv3(down2)
         down3 = self.res_blocks4(down3)
-        # print("Generator output after DownConv 3", down3.shape)
+        #print("Generator output after DownConv 3", down3.shape)
 
         up1 = self.upConv1(down3, skip3)
-        # print("Generator output after upsample1", up1.shape)
-        up2 = self.upConv2(up1, skip2)
-        # print("Generator output after upsample2", up2.shape)
+        #print("Generator output after upsample1", up1.shape)
+        up2 = self.upConv2(up1)
+        #print("Generator output after upsample2", up2.shape)
         up3 = self.upConv3(up2)
-        # print("Generator output after upsample3", up3.shape)
+        #print("Generator output after upsample3", up3.shape)
 
         out = self.finalConv(up3)
 
-        # print("Generator output", out.shape)
+        #print("Generator output", out.shape)
 
         return out
