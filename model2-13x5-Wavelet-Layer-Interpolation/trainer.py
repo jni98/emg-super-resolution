@@ -563,13 +563,15 @@ class Trainer:
         plt.close(fig1)
 
     def compute_wavelet_transform_coeffs(self, data):
-        # TODO: Check multilevel here
-        # Compute the wavelet transform along the time dimension
-        coeffs = ptwt.wavedec(data, 'db7', mode='zero', level=1)
+        input = data
 
-        concatenated_tensor = torch.cat(coeffs, dim=1)
+        for level in range(3):
+            coeffs = ptwt.wavedec(input, 'db7', mode='zero', level=1)
+            input = torch.cat(coeffs, dim=1)
 
-        return concatenated_tensor
+        print("Computed loss of 3 wavelet levels")
+
+        return input
 
     def _save_checkpoint(self, epoch: int) -> None:
         """
