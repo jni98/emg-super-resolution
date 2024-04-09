@@ -565,7 +565,7 @@ class Trainer:
     def compute_wavelet_transform_coeffs(self, data):
         input = data
 
-        for level in range(3):
+        for level in range(self.config.loss_level):
             coeffs = ptwt.wavedec(input, 'db7', mode='zero', level=1)
             input = torch.cat(coeffs, dim=1)
 
