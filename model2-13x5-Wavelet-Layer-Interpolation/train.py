@@ -45,7 +45,7 @@ def setup_sweep():
             'bandpass_filter': {
                 'values': [True]
             },
-            'Loss_level': {
+            'loss_level': {
                 'values': [1,2,3]
             },
 
