@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Wavelet-Layer-Interpolation-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=1
+EPOCHS=30
 
 ############    params   ###############
 
@@ -61,7 +61,7 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 # start training
-python -m torch.utils.bottleneck train.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS > "$RESULTS_DIR"/summary.txt
+python train3.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"
