@@ -194,8 +194,8 @@ class Trainer:
         best_val_loss = float('inf')
 
         # Add wandb.watch() here to start tracking gradients and parameters
-        #wandb.watch(self.generator, criterion='mse', log='all')
-        #wandb.watch(self.discriminator, criterion='mse', log='all')
+        # wandb.watch(self.generator, criterion='mse', log='all')
+        # wandb.watch(self.discriminator, criterion='mse', log='all')
 
         for epoch in range(1, self.num_epochs + 1):
             print("epoch", epoch)
@@ -257,7 +257,6 @@ class Trainer:
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
 
-
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
 
@@ -298,12 +297,20 @@ class Trainer:
             # Generate SR data from LR data
             sr_emg = self.generator(lr_emg).to(self.device)
 
+            # discriminator output for fake data
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
 
-            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
+            # generator content loss
+            loss_generator_content = self.mse(sr_emg, hr_emg)
 
-            loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content)
+            # Generator loss: adversarial loss + content loss + fourier loss
+            loss_generator = (
+                    self.adv_loss_weight * loss_generator_adv + loss_generator_content)
+
+            print("loss_generator", loss_generator)
+            print("loss_generator_adv", loss_generator_adv)
+            print("loss_generator_content", loss_generator_content)
 
             loss_generator.backward()
 
