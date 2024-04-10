@@ -28,7 +28,7 @@ def setup_sweep():
                 'values': [0.00001]
             },
             'num_res_blocks': {
-                'values': [4]
+                'values': [2]
             },
             'adv_loss_weight': {
                 'values': [0.1]

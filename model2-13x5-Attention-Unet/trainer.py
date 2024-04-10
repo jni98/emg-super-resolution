@@ -304,7 +304,7 @@ class Trainer:
             # generator content loss
             loss_generator_content = self.mse(sr_emg, hr_emg)
 
-            # Generator loss: adversarial loss + content loss + fourier loss
+            # Generator loss: adversarial loss + content loss
             loss_generator = (
                     self.adv_loss_weight * loss_generator_adv + loss_generator_content)
 

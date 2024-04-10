@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Attention-Unet-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=15
+EPOCHS=30
 
 ############    params   ###############
 
