@@ -180,7 +180,7 @@ class Generator(nn.Module):
         # Just a normal convolution, since changing of channels is not necessary when only taking real part
         self.channel_down = nn.Sequential(
             nn.Conv3d(in_channels=128, out_channels=128, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1)),
-            nn.BatchNorm3d(64),
+            nn.BatchNorm3d(128),
             nn.PReLU()
         )
 
