@@ -207,15 +207,15 @@ class Generator(nn.Module):
 
     def ifft(self, x: torch.tensor) -> torch.tensor:
         # Split the concatenated tensor into real and imaginary parts
-        num_channels = x.shape[1] // 2
-        real_part = x[:, :num_channels, :, :]
-        imaginary_part = x[:, num_channels:, :, :]
+        #num_channels = x.shape[1] // 2
+        #real_part = x[:, :num_channels, :, :]
+        #imaginary_part = x[:, num_channels:, :, :]
 
         # Combine real and imaginary parts to form a complex tensor
-        complex_signal = torch.complex(real_part, imaginary_part)
+        #complex_signal = torch.complex(real_part, imaginary_part)
 
         # Perform inverse FFT
-        ifft_signal = torch.fft.ifftn(complex_signal, dim=-1)
+        ifft_signal = torch.fft.ifftn(x, dim=-1)
         print("Generator output after ifft", ifft_signal.shape)
 
         # Extract real and imaginary parts

@@ -142,7 +142,7 @@ class Trainer:
         -------
         None
         """
-        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks, in_channels=1)
+        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks, wavelet='db7', in_channels=1)
         self.discriminator = Discriminator()
 
         # In case multiple GPUs are available, use DataParallel
