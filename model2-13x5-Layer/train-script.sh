@@ -1,28 +1,28 @@
 #!/bin/bash -l
 
-## Usage:  sbatch.tinygpu train-script.sh
+## Usage:  sbatch.tinygpu train-script3-1.sh
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model2-13x5-Wavelet-Layer-Interpolation
+#SBATCH --job-name=model2-13x5-Layer
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
-#SBATCH --gres=gpu:v100:2
-#SBATCH --partition=v100
+#SBATCH --gres=gpu:a100:2
+#SBATCH --partition=a100
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV
 
 ############    paths    ###############
 
-SRC_DIR=$HOME/code/model2-13x5-Wavelet-Layer-Interpolation
-RESULTS_DIR=$HOME/model2-13x5-Wavelet-Layer-Interpolation-$SLURM_JOB_ID
+SRC_DIR=$HOME/code/model2-13x5-Layer
+RESULTS_DIR=$HOME/model2-13x5-Layer-$SLURM_JOB_ID
 DATA_ARCHIVE=$HPCVAULT/dataset.tar
-FAST_DATA_DIR=$TMPDIR/model2-13x5-Wavelet-Layer-Interpolation-$SLURM_JOB_ID
+FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=30
+EPOCHS=50
 
 ############    params   ###############
 
@@ -61,7 +61,7 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 # start training
-python train2.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS
+python train.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"

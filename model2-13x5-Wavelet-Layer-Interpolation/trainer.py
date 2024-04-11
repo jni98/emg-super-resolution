@@ -64,8 +64,7 @@ class Trainer:
         self.config = config
         self.sweep_id = sweep_id
 
-        self.lr_gen = config.learning_rate_gen
-        self.lr_disc = config.learning_rate_disc
+        self.lr = config.learning_rate
         self.batch_size = config.batch_size
         self.adv_loss_weight = config.adv_loss_weight
         self.wavelet_loss_weight = config.wavelet_loss_weight
@@ -78,8 +77,7 @@ class Trainer:
         self.hyperparameter = {
             "num_epochs": self.num_epochs,
             "batch_size": self.batch_size,
-            "learning_rate_gen": self.lr_gen,
-            "learning_rate_disc": self.lr_disc
+            "learning_rate_gen": self.lr
         }
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -171,8 +169,8 @@ class Trainer:
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
-        self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr_gen, betas=self.betas)
-        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr_disc, betas=self.betas)
+        self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
+        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
 
         print("Successfully initialized the models")
 
@@ -313,12 +311,8 @@ class Trainer:
             # generator content loss
             loss_generator_content = self.mse(sr_emg, hr_emg)
 
-            # Wavelet transform of generated and groundtruth data
-            sr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(sr_emg)
-            hr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(hr_emg)
-
             # Wavelet loss
-            loss_generator_wavelet = self.mse(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
+            loss_generator_wavelet = self.compute_wavelet_transform_loss(hr_emg, sr_emg)
 
             # Generator loss: adversarial loss + content loss + wavelet loss
             loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
@@ -397,12 +391,8 @@ class Trainer:
                 # Calculate content loss
                 loss_generator_content = self.mse(val_sr_emg, val_hr)
 
-                # Compute wavelet transform coefficients
-                sr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(val_sr_emg)
-                hr_emg_wavelet_coeffs = self.compute_wavelet_transform_coeffs(val_hr)
-
-                # Calculate wavelet loss
-                loss_generator_wavelet = self.mse(sr_emg_wavelet_coeffs, hr_emg_wavelet_coeffs)
+                # Wavelet loss
+                loss_generator_wavelet = self.compute_wavelet_transform_loss(val_hr, val_sr_emg)
 
                 # Total loss for validation
                 val_loss = (self.adv_loss_weight * loss_generator_adv +
@@ -507,9 +497,10 @@ class Trainer:
         axs[3].plot(range(len(cross_correlation)), cross_correlation)
         axs[3].set_title('Cross Correlation channel [6][2]')
 
-        axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
-        axs[4].plot(val_channel, label='Validation channel [6][1]')
-        axs[4].set_title('Super-resolution vs Validation channel [6][1]')
+        # Log both into one plot
+        axs[4].plot(sr_channel, label='Super-resolution channel [6][2]', alpha=0.5)
+        axs[4].plot(val_channel, label='Validation channel [6][2]', alpha=0.5)
+        axs[4].set_title('Super-resolution vs Validation channel [6][2]')
         axs[4].legend()
 
         plt.tight_layout()
@@ -522,7 +513,7 @@ class Trainer:
         print("Logging plots for batch index 0 predicted channel")
 
         # x-axis for the following logs
-        fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
+        fig1, axs1 = plt.subplots(5, 1, figsize=(8, 10))
         x_values = range(val_hr_destandardized.shape[4])
 
         # log absolute difference for one channel
@@ -551,8 +542,9 @@ class Trainer:
         axs1[3].plot(range(len(cross_correlation)), cross_correlation)
         axs1[3].set_title('Cross Correlation channel [6][1]')
 
-        axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
-        axs[4].plot(val_channel, label='Validation channel [6][1]')
+        # Log both into one plot
+        axs[4].plot(sr_channel, label='Super-resolution channel [6][1]', alpha=0.5)
+        axs[4].plot(val_channel, label='Validation channel [6][1]', alpha=0.5)
         axs[4].set_title('Super-resolution vs Validation channel [6][1]')
         axs[4].legend()
 
@@ -562,16 +554,40 @@ class Trainer:
         # Close the figure
         plt.close(fig1)
 
-    def compute_wavelet_transform_coeffs(self, data):
-        input = data
+        # Log freuqency histogram of both, val_hr destandardized and val_sr destandardized
+        fig3, axs3 = plt.subplots(1, 2, figsize=(8, 10))
+        axs3[0].hist(val_hr_destandardized.squeeze().to('cpu'), bins=100)
+        axs3[0].set_title('Validation channel histogram')
+        axs3[1].hist(val_sr_emg_destandardized.squeeze().to('cpu'), bins=100)
+        axs3[1].set_title('Super-resolution channel histogram')
+        plt.tight_layout()
+        wandb.log({"Histograms": [wandb.Image(fig3)]})
+        plt.close(fig3)
 
-        for level in range(self.config.loss_level):
-            coeffs = ptwt.wavedec(input, 'db7', mode='zero', level=1)
-            input = torch.cat(coeffs, dim=1)
+    def compute_wavelet_transform_loss(self, groundtruth, superresolution):
 
-        print("Computed loss of 3 wavelet levels")
+        # compute first level loss
+        coeffs1_gr = ptwt.wavedec(groundtruth, 'db7', mode='zero', level=1)
+        coeffs1_gr_cat = torch.cat(coeffs1_gr, dim=1)
+        coeffs1_sr = ptwt.wavedec(superresolution, 'db7', mode='zero', level=1)
+        coeffs1_sr_cat = torch.cat(coeffs1_sr, dim=1)
+        mse = self.mse(coeffs1_gr_cat, coeffs1_sr_cat)
 
-        return input
+        # compute second level loss
+        coeffs2_gr = ptwt.wavedec(coeffs1_gr_cat, 'db7', mode='zero', level=1)
+        coeffs2_gr_cat = torch.cat(coeffs2_gr, dim=1)
+        coeffs2_sr = ptwt.wavedec(coeffs1_sr_cat, 'db7', mode='zero', level=1)
+        coeffs2_sr_cat = torch.cat(coeffs2_sr, dim=1)
+        mse += self.mse(coeffs2_gr_cat, coeffs2_sr_cat)
+
+        # compute third level loss
+        coeffs3_gr = ptwt.wavedec(coeffs2_gr_cat, 'db7', mode='zero', level=1)
+        coeffs3_gr_cat = torch.cat(coeffs3_gr, dim=1)
+        coeffs3_sr = ptwt.wavedec(coeffs2_sr_cat, 'db7', mode='zero', level=1)
+        coeffs3_sr_cat = torch.cat(coeffs3_sr, dim=1)
+        mse += self.mse(coeffs3_gr_cat, coeffs3_sr_cat)
+
+        return mse
 
     def _save_checkpoint(self, epoch: int) -> None:
         """

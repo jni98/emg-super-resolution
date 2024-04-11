@@ -64,32 +64,19 @@ class DownConvolutionBlock(nn.Module):
 class UpConvolutionBlock(nn.Module):
     """
     This class is used to create an up convolution block, which is used in the generator to upsample the data and also
-    add the skip connection. Before the skip connection is added, a attention mechanism is applied.
+    add the skip connection.
     """
 
     def __init__(self, in_channels, out_channels, stride) -> None:
         super(UpConvolutionBlock, self).__init__()
-        self.conv_input = nn.Conv3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(1,1,1),
-                                         stride=(1,1,1))
-        self.conv_skip = nn.Conv3d(in_channels=out_channels, out_channels=out_channels, kernel_size=(1,1,1),
-                                            stride=(1,1,2))
+        self.upConv = nn.Sequential(
+            nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                                         stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1)),
+            nn.BatchNorm3d(out_channels),
+            nn.PReLU()
+        )
 
-        self.relu = nn.ReLU()
-
-        self.conv3 = nn.Conv3d(in_channels=out_channels, out_channels=1, kernel_size=(1,1,1),
-                                            stride=(1,1,1))
-
-        self.sigmoid = nn.Sigmoid()
-
-        self.upsample_skip = nn.ConvTranspose3d(in_channels=1, out_channels=out_channels, kernel_size=(3, 3, 3),
-                                          stride=stride, padding=(1, 1, 1),output_padding=(0, 0, 1))
-
-        self.upsample_input = nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
-                                                stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1))
-
-        self.bn = nn.BatchNorm3d(out_channels)
-
-        self.conv_last = nn.Sequential(
+        self.conv = nn.Sequential(
             nn.Conv3d(in_channels=out_channels + out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                       stride=(1, 1, 1), padding=(1, 1, 1)),
             nn.BatchNorm3d(out_channels),
@@ -101,40 +88,51 @@ class UpConvolutionBlock(nn.Module):
         )
 
 
+
     def forward(self, x: torch.tensor, skip: torch.tensor) -> torch.tensor:
-        # go down in channels
-        input = self.conv_input(x)
+        # upsample
+        out = self.upConv(x)
 
-        # go down in time
-        input_skip = self.conv_skip(skip)
+        # concatenate with skip connection
+        out = torch.cat((out, skip), dim=1)
 
-        # add both
-        attention = input+input_skip
-
-        attention = self.relu(attention)
-
-        # Go down in channels
-        attention = self.conv3(attention)
-
-        # Sigmoid for rearranging values
-        attention = self.sigmoid(attention)
-
-        # Upsample to skip connection shape
-        attention = self.upsample_skip(attention)
-
-        # elementwise multiplication with skip connection
-        attention = attention*skip
-
-        attention = self.bn(attention)
-
-        # Upsample input
-        x = self.upsample_input(x)
-
-        out = torch.cat((x, attention), dim=1)
-
-        out = self.conv_last(out)
+        # convolve to get channel number as before the torch.cat
+        out = self.conv(out)
 
         return out
+
+class UpConvolutionBlockLast(nn.Module):
+    """
+    This class is used to create an up convolution block, which is used in the generator to upsample the data and also
+    add the skip connection.
+    """
+
+    def __init__(self, in_channels, out_channels, stride) -> None:
+        super(UpConvolutionBlockLast, self).__init__()
+        self.upConv = nn.Sequential(
+            nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                                         stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1)),
+            nn.BatchNorm3d(out_channels),
+            nn.PReLU(),
+            nn.Conv3d(in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                      stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(out_channels),
+            nn.PReLU(),
+            nn.Conv3d(in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+                      stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(out_channels),
+            nn.PReLU()
+        )
+
+
+
+    def forward(self, x: torch.tensor) -> torch.tensor:
+        # upsample
+        out = self.upConv(x)
+
+        return out
+
+
 class Generator(nn.Module):
     """
     This class is used to create the generator, which is a convolutional neural network that is used to generate high
@@ -146,19 +144,19 @@ class Generator(nn.Module):
 
         # Convolution
         self.conv1 = nn.Sequential(
-            nn.Conv3d(in_channels, out_channels=64, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1)),
-            nn.BatchNorm3d(64),
+            nn.Conv3d(in_channels, out_channels=32, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(32),
             nn.PReLU()
             )
 
         # residual block 1
-        self.res_blocks1 = nn.Sequential(*[ResidualBlock(in_channels=64) for _ in range(num_res_blocks)])
+        self.res_blocks1 = nn.Sequential(*[ResidualBlock(in_channels=32) for _ in range(num_res_blocks)])
 
         # DownConvolution 1
-        self.downConv1 = DownConvolutionBlock(in_channels=64, out_channels=128)
+        self.downConv1 = DownConvolutionBlock(in_channels=32, out_channels=64)
 
         # residual block 2
-        self.res_blocks2 = nn.Sequential(*[ResidualBlock(in_channels=128) for _ in range(num_res_blocks)])
+        self.res_blocks2 = nn.Sequential(*[ResidualBlock(in_channels=64) for _ in range(num_res_blocks)])
 
         # DownConvolution 2
         self.downConv2 = DownConvolutionBlock(in_channels=128, out_channels=256)
@@ -179,13 +177,55 @@ class Generator(nn.Module):
         # Upsampling 2
         self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
 
+        # Convolution to divide channel size by half due to ifft
+        self.channel_down = nn.Sequential(
+            nn.Conv3d(in_channels=128, out_channels=64, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1)),
+            nn.BatchNorm3d(64),
+            nn.PReLU()
+        )
+
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
+        self.upConv3 = UpConvolutionBlockLast(64, 32, stride=(1, 1, 2))
 
         # Finale Convolution für Channel 1
-        self.finalConv = nn.Conv3d(in_channels=64, out_channels=1, kernel_size=(3, 3, 3), stride=(1, 1, 1),
+        self.finalConv = nn.Conv3d(in_channels=32, out_channels=1, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                                    padding=(1, 1, 1))
 
+    def fft(self, x: torch.tensor) -> torch.tensor:
+        # Calculate FFT of the signal
+        fft_signal = torch.fft.fft(x, dim=-1)
+
+        # Extract real and imaginary parts
+        real_part = torch.real(fft_signal)
+        imaginary_part = torch.imag(fft_signal)
+
+        # Concatenate real and imaginary parts along the channel axis
+        down1_fft = torch.cat([real_part, imaginary_part], dim=1)
+
+        return down1_fft
+
+    def ifft(self, x: torch.tensor) -> torch.tensor:
+        # Split the concatenated tensor into real and imaginary parts
+        num_channels = x.shape[1] // 2
+        real_part = x[:, :num_channels, :, :]
+        imaginary_part = x[:, num_channels:, :, :]
+
+        # Combine real and imaginary parts to form a complex tensor
+        complex_signal = torch.complex(real_part, imaginary_part)
+
+        # Perform inverse FFT
+        ifft_signal = torch.fft.ifftn(complex_signal, dim=-1)
+        print("Generator output after ifft", ifft_signal.shape)
+
+        # Extract real and imaginary parts
+        real_part = torch.real(ifft_signal)
+        imaginary_part = torch.imag(ifft_signal)
+
+        # Concatenate real and imaginary parts along the channel axis
+        up2_ifft = torch.cat([real_part, imaginary_part], dim=1)
+        print("Generator output after iFFT", up2_ifft.shape)
+
+        return up2_ifft
 
     def forward(self, x: torch.tensor) -> torch.tensor:
         conv1 = self.conv1(x)
@@ -197,9 +237,12 @@ class Generator(nn.Module):
         down1 = self.res_blocks2(down1)
         #print("Generator output after DownConv 1", down1.shape)
 
-        skip2 = down1
+        down1_fft= self.fft(down1)
+        #print("Generator output after FFT", down1_fft.shape)
 
-        down2 = self.downConv2(down1)
+        skip2 = down1_fft
+
+        down2 = self.downConv2(down1_fft)
         down2 = self.res_blocks3(down2)
         skip3 = down2
         #print("Generator output after DownConv 2", down2.shape)
@@ -214,7 +257,11 @@ class Generator(nn.Module):
         up2 = self.upConv2(up1, skip2)
         #print("Generator output after upsample2", up2.shape)
 
-        up3 = self.upConv3(up2, skip1)
+        up2_ifft = self.ifft(up2)
+
+        channel_down = self.channel_down(up2_ifft)
+
+        up3 = self.upConv3(channel_down)
         #print("Generator output after upsample3", up3.shape)
 
         out = self.finalConv(up3)

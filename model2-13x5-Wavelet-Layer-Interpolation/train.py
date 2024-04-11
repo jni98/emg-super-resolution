@@ -24,11 +24,8 @@ def setup_sweep():
             'batch_size': {
                 'values': [12],  # Add the batch sizes you want to include
             },
-            'learning_rate_gen': {
-                "distribution": "uniform", "max": 0.0001, "min": 0.0000099
-            },
-            'learning_rate_disc': {
-                "distribution": "uniform", "max": 0.0001, "min": 0.0000099
+            'learning_rate': {
+                'values': [0.00001, 0.00002, 0.00004, 0.00006, 0.00008]
             },
             'num_res_blocks': {
                 'values': [2,3]
@@ -46,7 +43,7 @@ def setup_sweep():
                 'values': [True]
             },
             'loss_level': {
-                'values': [1,2,3]
+                'values': [3]
             },
 
         }

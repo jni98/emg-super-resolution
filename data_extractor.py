@@ -302,15 +302,15 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         else:
             combined_data = np.concatenate((combined_data, emg_hr_reshaped.flatten()))
 
-        windows = emg_length - 2048
+        windows = emg_length - 20480
 
         # window the signal to 2048 samples
         # 51 samples equals 25ms which is approximately 1 action potential --> 2AP overlapping
-        for window in range(0, windows, (2048 - 102)):
+        for window in range(0, windows, (20480 - 1024)):
             print("window", window)
             # The length of one sample is 2048 which is equal to 1 second
-            emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 2048)]
-            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 2048)]
+            emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 20480)]
+            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 20480)]
 
             # transpose for samples x channels shape
             # emg_lr_final = emg_lr_windowed.transpose()

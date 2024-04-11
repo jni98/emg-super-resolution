@@ -78,7 +78,7 @@ class UpConvolutionBlock(nn.Module):
             nn.PReLU())
 
         self.conv1 = nn.Sequential(
-            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3),
+            nn.Conv3d(in_channels=in_channels+in_channels, out_channels=in_channels, kernel_size=(3, 3, 3),
                       stride=(1, 1, 1), padding=(1, 1, 1)),
             nn.BatchNorm3d(in_channels),
             nn.PReLU(),
@@ -106,7 +106,7 @@ class UpConvolutionBlock(nn.Module):
         up = self.conv(up)
 
         # sum up with skip connection
-        out = up + skip
+        out = torch.cat((up, skip), dim=1)
 
         out = self.conv1(out)
 

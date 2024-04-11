@@ -64,8 +64,7 @@ class Trainer:
         self.config = config
         self.sweep_id = sweep_id
 
-        self.lr_gen = config.learning_rate_gen
-        self.lr_disc = config.learning_rate_disc
+        self.lr = config.learning_rate
         self.batch_size = config.batch_size
         self.adv_loss_weight = config.adv_loss_weight
         self.fourier_loss_weight = config.fourier_loss_weight
@@ -78,8 +77,7 @@ class Trainer:
         self.hyperparameter = {
             "num_epochs": self.num_epochs,
             "batch_size": self.batch_size,
-            "learning_rate_gen": self.lr_gen,
-            "learning_rate_disc": self.lr_disc
+            "learning_rate": self.lr
         }
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -171,8 +169,8 @@ class Trainer:
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
-        self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr_gen, betas=self.betas)
-        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr_disc, betas=self.betas)
+        self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
+        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
 
         print("Successfully initialized the models")
 
@@ -508,9 +506,10 @@ class Trainer:
         axs[3].plot(range(len(cross_correlation)), cross_correlation)
         axs[3].set_title('Cross Correlation channel [6][2]')
 
-        axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
-        axs[4].plot(val_channel, label='Validation channel [6][1]')
-        axs[4].set_title('Super-resolution vs Validation channel [6][1]')
+        # Log both into one plot
+        axs[4].plot(sr_channel, label='Super-resolution channel [6][2]', alpha=0.5)
+        axs[4].plot(val_channel, label='Validation channel [6][2]', alpha=0.5)
+        axs[4].set_title('Super-resolution vs Validation channel [6][2]')
         axs[4].legend()
 
         plt.tight_layout()
@@ -523,7 +522,7 @@ class Trainer:
         print("Logging plots for batch index 0 predicted channel")
 
         # x-axis for the following logs
-        fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
+        fig1, axs1 = plt.subplots(5, 1, figsize=(8, 10))
         x_values = range(val_hr_destandardized.shape[4])
 
         # log absolute difference for one channel
@@ -552,8 +551,9 @@ class Trainer:
         axs1[3].plot(range(len(cross_correlation)), cross_correlation)
         axs1[3].set_title('Cross Correlation channel [6][1]')
 
-        axs[4].plot(sr_channel, label='Super-resolution channel [6][1]')
-        axs[4].plot(val_channel, label='Validation channel [6][1]')
+        # Log both into one plot
+        axs[4].plot(sr_channel, label='Super-resolution channel [6][1]', alpha=0.5)
+        axs[4].plot(val_channel, label='Validation channel [6][1]', alpha=0.5)
         axs[4].set_title('Super-resolution vs Validation channel [6][1]')
         axs[4].legend()
 
@@ -562,6 +562,16 @@ class Trainer:
 
         # Close the figure
         plt.close(fig1)
+
+        # Log freuqency histogram of both, val_hr destandardized and val_sr destandardized
+        fig3, axs3 = plt.subplots(1, 2, figsize=(8, 10))
+        axs3[0].hist(val_hr_destandardized.squeeze().to('cpu'), bins=100)
+        axs3[0].set_title('Validation channel histogram')
+        axs3[1].hist(val_sr_emg_destandardized.squeeze().to('cpu'), bins=100)
+        axs3[1].set_title('Super-resolution channel histogram')
+        plt.tight_layout()
+        wandb.log({"Histograms": [wandb.Image(fig3)]})
+        plt.close(fig3)
 
     def compute_fourier_transform(self, data):
 
