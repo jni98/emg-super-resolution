@@ -498,8 +498,8 @@ class Trainer:
         axs[3].set_title('Cross Correlation channel [6][2]')
 
         # Log both into one plot
-        axs[4].plot(sr_channel, label='Super-resolution channel [6][2]', alpha=0.5)
-        axs[4].plot(val_channel, label='Validation channel [6][2]', alpha=0.5)
+        axs[4].plot(sr_channel[:1024], label='Super-resolution channel [6][2]', alpha=0.5)
+        axs[4].plot(val_channel[:1024], label='Validation channel [6][2]', alpha=0.5)
         axs[4].set_title('Super-resolution vs Validation channel [6][2]')
         axs[4].legend()
 
@@ -543,8 +543,8 @@ class Trainer:
         axs1[3].set_title('Cross Correlation channel [6][1]')
 
         # Log both into one plot
-        axs[4].plot(sr_channel, label='Super-resolution channel [6][1]', alpha=0.5)
-        axs[4].plot(val_channel, label='Validation channel [6][1]', alpha=0.5)
+        axs[4].plot(sr_channel[:1024], label='Super-resolution channel [6][1]', alpha=0.5)
+        axs[4].plot(val_channel[:1024], label='Validation channel [6][1]', alpha=0.5)
         axs[4].set_title('Super-resolution vs Validation channel [6][1]')
         axs[4].legend()
 
