@@ -36,9 +36,6 @@ def setup_sweep():
             'wavelet_loss_weight': {
                 'values': [10]
             },
-            'spatial_whitening': {
-                'values': [False]
-            },
             'bandpass_filter': {
                 'values': [True]
             },

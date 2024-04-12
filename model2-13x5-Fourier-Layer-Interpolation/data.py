@@ -12,7 +12,7 @@ from scipy.signal import butter, filtfilt
 from torch.utils.data import Dataset
 import torch
 import numpy as np
-
+from emg_augmentations import GaussianNoise
 
 
 class Custom_Dataset(Dataset):
@@ -21,7 +21,7 @@ class Custom_Dataset(Dataset):
 
     """
 
-    def __init__(self, data, directory, mean: float, std: float, spatial_whitening: str, bandpass_filter: bool) -> None:
+    def __init__(self, data, directory, mean: float, std: float, bandpass_filter: bool) -> None:
         super().__init__()
         self.data = data
         self.directory = directory
@@ -29,8 +29,10 @@ class Custom_Dataset(Dataset):
         self.mean = mean
         self.std = std
 
-        self.spatial_whitening = spatial_whitening
         self.bandpass_filter = bandpass_filter
+
+        # Instantiate the augmentation class with optional parameters
+        self.gaussian_noise_augmentor = GaussianNoise(target_snr__db=5.0)  # Adjust parameters as needed
 
     def __len__(self) -> int:
         return len(self.data)
@@ -66,14 +68,40 @@ class Custom_Dataset(Dataset):
         # Perform linear interpolation
         interpolated_lr = self.grid_interpolation(lr_emg, (13, 5, lr_emg.shape[2]), 'linear')
 
+        # # Plot histogram of interpolated
+        # # Flatten the 3D array to 1D
+        # data_flat = interpolated_lr.flatten()
+        # # Plot the histogram
+        # plt.hist(data_flat, bins=100)  # Adjust the number of bins as needed
+        # plt.title('Frequency Histogram of 3D Array')
+        # plt.xlabel('Value')
+        # plt.ylabel('Frequency')
+        # plt.grid(True)
+        # # Save the plot as an image file (e.g., PNG)
+        # plt.savefig('histogram-interpolated-before.png')
+        # plt.close()
+
+        interpolated_lr = self.gaussian_noise_augmentor._augment(interpolated_lr)
+
+        # Plot histogram of interpolated
+        # Flatten the 3D array to 1D
+        # data_flat = interpolated_lr.flatten()
+        # # Plot the histogram
+        # plt.hist(data_flat, bins=100)  # Adjust the number of bins as needed
+        # plt.title('Frequency Histogram of 3D Array')
+        # plt.xlabel('Value')
+        # plt.ylabel('Frequency')
+        # plt.grid(True)
+        # # Save the plot as an image file (e.g., PNG)
+        # plt.savefig('histogram-interpolated-after.png')
+        # plt.close()
+
         # Standardize using mean and std values of the complete dataset
         lr_emg_standardized = self.standardization(interpolated_lr, self.mean, self.std)
 
         # bandpass filter
         if self.bandpass_filter:
             lr_emg_standardized = self.butter_bandpass_filter(lr_emg_standardized, 20, 500, 2048, order=2)
-        if self.spatial_whitening:
-            lr_emg_standardized = self.spatial_whitening_function(lr_emg_standardized)
 
         # plt.figure()
         # plt.plot(lr_emg[0][0])
@@ -89,14 +117,40 @@ class Custom_Dataset(Dataset):
 
         hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
+        # # Plot histogram of interpolated
+        # # Flatten the 3D array to 1D
+        # data_flat = hr_emg.flatten()
+        # # Plot the histogram
+        # plt.hist(data_flat, bins=10)  # Adjust the number of bins as needed
+        # plt.title('Frequency Histogram')
+        # plt.xlabel('Value')
+        # plt.ylabel('Frequency')
+        # plt.grid(True)
+        # # Save the plot as an image file (e.g., PNG)
+        # plt.savefig('histogram-hr-before.png')
+        # plt.close()
+
+        hr_emg = self.gaussian_noise_augmentor._augment(hr_emg)
+
+        # # Plot histogram of interpolated
+        # # Flatten the 3D array to 1D
+        # data_flat = hr_emg.flatten()
+        # # Plot the histogram
+        # plt.hist(data_flat, bins=100)  # Adjust the number of bins as needed
+        # plt.title('Frequency Histogram')
+        # plt.xlabel('Value')
+        # plt.ylabel('Frequency')
+        # plt.grid(True)
+        # # Save the plot as an image file (e.g., PNG)
+        # plt.savefig('histogram-hr-after.png')
+        # plt.close()
+
         #  Standardize using mean and std values of the complete dataset
         hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std)
 
         # bandpass filter
         if self.bandpass_filter:
             hr_emg_standardized = self.butter_bandpass_filter(hr_emg_standardized, 20, 500, 2048, order=2)
-        if self.spatial_whitening:
-            hr_emg_standardized = self.spatial_whitening_function(hr_emg_standardized)
 
 
         # unsqueeze to add a one channel dimension at the beginning
@@ -155,35 +209,6 @@ class Custom_Dataset(Dataset):
         filtered_signal = filtfilt(b, a, data)
 
         return filtered_signal
-
-    def spatial_whitening_function(self, data):
-        """
-        Apply spatial whitening to the data
-        Parameters
-        ----------
-        data: np.array
-            Data to be filtered
-
-        Returns
-        -------
-        data: np.array
-            Filtered data
-        """
-        # Reshape data for covariance matrix computation
-        height, width, samples = data.shape
-        reshaped_data = np.reshape(data, (height * width, samples))
-
-        # Compute covariance matrix
-        cov_matrix = np.cov(reshaped_data, rowvar=False)
-
-        # Compute whitening transformation matrix
-        eig_vals, eig_vecs = np.linalg.eigh(cov_matrix)
-        whitening_matrix = np.dot(np.dot(eig_vecs, np.diag(1.0 / np.sqrt(eig_vals + 1e-5))), eig_vecs.T)
-
-        # Apply whitening transformation
-        whitened_data = np.dot(reshaped_data, whitening_matrix).reshape((height, width, samples))
-
-        return whitened_data
 
     def grid_interpolation(self, lr_emg: np.ndarray, hr_emg_shape: tuple, method: str) -> np.ndarray:
         """

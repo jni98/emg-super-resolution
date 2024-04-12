@@ -28,16 +28,13 @@ def setup_sweep():
                 'values': [0.00001, 0.00002, 0.00004, 0.00006, 0.00008]
             },
             'num_res_blocks': {
-                'values': [2,3,4]
+                'values': [2,3]
             },
             'adv_loss_weight': {
                 'values': [0.1]
             },
             'fourier_loss_weight': {
                 'values': [0.001]
-            },
-            'spatial_whitening': {
-                'values': [False]
             },
             'bandpass_filter': {
                 'values': [True]

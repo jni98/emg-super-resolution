@@ -305,10 +305,10 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         windows = emg_length - 20480
 
         # window the signal to 2048 samples
-        # 51 samples equals 25ms which is approximately 1 action potential --> 2AP overlapping
+        # 51 samples equals 25ms which is approximately 1 action potential
         for window in range(0, windows, (20480 - 1024)):
             print("window", window)
-            # The length of one sample is 2048 which is equal to 1 second
+            # The length of one sample is 20480 which is equal to 10 second
             emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 20480)]
             emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 20480)]
 
