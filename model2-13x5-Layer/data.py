@@ -20,15 +20,13 @@ class Custom_Dataset(Dataset):
 
     """
 
-    def __init__(self, data, directory, mean: float, std: float, bandpass_filter: bool) -> None:
+    def __init__(self, data, directory, mean: float, std: float) -> None:
         super().__init__()
         self.data = data
         self.directory = directory
 
         self.mean = mean
         self.std = std
-
-        self.bandpass_filter = bandpass_filter
 
         # Instantiate the augmentation class with optional parameters
         self.gaussian_noise_augmentor = GaussianNoise(target_snr__db=5.0)  # Adjust parameters as needed
@@ -58,45 +56,42 @@ class Custom_Dataset(Dataset):
         if torch.is_tensor(index):
             index = index.tolist()
 
+        # load file paths
         lr_emg_path = self.data.iloc[index]['lr_filename']
         hr_emg_path = self.data.iloc[index]['hr_filename']
 
+        # load and preprocess lr data
         lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
 
-        interpolated_lr = self.gaussian_noise_augmentor._augment(lr_emg)
+        lr_emg = self.gaussian_noise_augmentor(lr_emg)
+        print("augmentation done")
 
         # bandpass filter
-        if self.bandpass_filter:
-            lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=2)
-
-        # plt.figure()
-        # plt.plot(lr_emg[0][0])
-        # plt.savefig('lr_emg.png')
+        lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=2)
 
         # Standardize using mean and std values of the complete dataset
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
 
-        # plt.figure()
-        # plt.plot(lr_emg_standardized[0][0])
-        # plt.savefig('lr_emg_standardized.png')
-
         # unsqueeze to add a one channel dimension at the beginning
-        lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
+        lr_emg_standardized_copy = lr_emg_standardized.copy()
+        lr_emg_standardized_tensor = torch.tensor(lr_emg_standardized_copy).unsqueeze(0).to(torch.float32)
 
+        # load and preprocess hr data
         hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
-        hr_emg = self.gaussian_noise_augmentor._augment(hr_emg)
+        hr_emg = self.gaussian_noise_augmentor(hr_emg)
 
         # bandpass filter
-        if self.bandpass_filter:
-            hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
+        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
 
         #  Standardize using mean and std values of the complete dataset
-        hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std )
-        # unsqueeze to add a one channel dimension at the beginning
-        hr_emg_standardized = torch.tensor(hr_emg_standardized).unsqueeze(0).to(torch.float32)
+        hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std)
 
-        return lr_emg_standardized, hr_emg_standardized, lr_emg_path, hr_emg_path
+        # unsqueeze to add a one channel dimension at the beginning
+        hr_emg_standardized_copy = hr_emg_standardized.copy()
+        hr_emg_standardized_tensor = torch.tensor(hr_emg_standardized_copy).unsqueeze(0).to(torch.float32)
+
+        return lr_emg_standardized_tensor, hr_emg_standardized_tensor, lr_emg_path, hr_emg_path
 
     def standardization(self, data: np.array, mean: float, std: float) -> np.array:
         """

@@ -36,9 +36,6 @@ def setup_sweep():
             'wavelet_loss_weight': {
                 'values': [10]
             },
-            'bandpass_filter': {
-                'values': [True]
-            },
             'loss_level': {
                 'values': [3]
             },

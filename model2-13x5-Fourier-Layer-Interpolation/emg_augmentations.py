@@ -1,4 +1,4 @@
-#import numba
+import numba
 import numpy as np
 import pywt
 from scipy import interpolate
@@ -29,7 +29,7 @@ class EMGAugmentation:
         raise NotImplementedError()
 
 
-#@numba.njit(nogil=True, fastmath=True)
+@numba.njit(nogil=True, fastmath=True)
 def _gaussian_noise(chunk: np.ndarray, target_snr__db: float = 5.0) -> np.ndarray:
     squared_chunk = np.square(chunk.astype(np.float64))
     mean_squared_chunk = np.zeros((chunk.shape[0], chunk.shape[1]))

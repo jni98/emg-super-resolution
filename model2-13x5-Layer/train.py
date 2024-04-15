@@ -35,11 +35,7 @@ def setup_sweep():
             },
             'adv_loss_weight': {
                 'values': [0.001]
-            },
-            'bandpass_filter': {
-                'values': [True, False]
-            },
-
+            }
         }
     }
 
