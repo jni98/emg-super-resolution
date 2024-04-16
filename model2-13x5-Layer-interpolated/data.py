@@ -5,9 +5,6 @@ File description: This file contains the class Custom_Dataset, which is a custom
 
 The code is called from every file that is loading a dataset.
 """
-import scipy
-from matplotlib import pyplot as plt
-from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import butter, filtfilt
 from torch.utils.data import Dataset
 import torch
@@ -65,18 +62,15 @@ class Custom_Dataset(Dataset):
         # load and preprocess lr data
         lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
 
-        # Perform linear interpolation
-        interpolated_lr = self.grid_interpolation(lr_emg, (13, 5, lr_emg.shape[2]), 'linear')
-
         if self.gaussian_noise:
-            interpolated_lr = self.gaussian_noise_augmentor(interpolated_lr)
+            lr_emg = self.gaussian_noise_augmentor(lr_emg)
             print("augmentation done")
 
         # bandpass filter
-        interpolated_lr = self.butter_bandpass_filter(interpolated_lr, 20, 500, 2048, order=2)
+        lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=2)
 
         # Standardize using mean and std values of the complete dataset
-        lr_emg_standardized = self.standardization(interpolated_lr, self.mean, self.std)
+        lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
 
         # unsqueeze to add a one channel dimension at the beginning
         lr_emg_standardized_copy = lr_emg_standardized.copy()
