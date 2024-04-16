@@ -21,13 +21,14 @@ class Custom_Dataset(Dataset):
 
     """
 
-    def __init__(self, data, directory, mean: float, std: float) -> None:
+    def __init__(self, data, directory, mean: float, std: float, gaussian_noise: bool) -> None:
         super().__init__()
         self.data = data
         self.directory = directory
 
         self.mean = mean
         self.std = std
+        self.gaussian_noise = gaussian_noise
 
         # Instantiate the augmentation class with optional parameters
         self.gaussian_noise_augmentor = GaussianNoise(target_snr__db=5.0)  # Adjust parameters as needed
@@ -67,8 +68,9 @@ class Custom_Dataset(Dataset):
         # Perform linear interpolation
         interpolated_lr = self.grid_interpolation(lr_emg, (13, 5, lr_emg.shape[2]), 'linear')
 
-        interpolated_lr = self.gaussian_noise_augmentor(interpolated_lr)
-        print("augmentation done")
+        if self.gaussian_noise:
+            interpolated_lr = self.gaussian_noise_augmentor(interpolated_lr)
+            print("augmentation done")
 
         # bandpass filter
         interpolated_lr = self.butter_bandpass_filter(interpolated_lr, 20, 500, 2048, order=2)
@@ -83,7 +85,8 @@ class Custom_Dataset(Dataset):
         # load and preprocess hr data
         hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
-        hr_emg = self.gaussian_noise_augmentor(hr_emg)
+        if self.gaussian_noise:
+            hr_emg = self.gaussian_noise_augmentor(hr_emg)
 
         # bandpass filter
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)

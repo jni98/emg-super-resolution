@@ -108,18 +108,18 @@ class Trainer:
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], gaussian_noise=True),
             batch_size=self.batch_size, pin_memory=True
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], gaussian_noise = False),
             batch_size=self.batch_size, pin_memory=True
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], gaussian_noise = False),
             pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
@@ -498,7 +498,7 @@ class Trainer:
         axs[3].set_title('Cross Correlation channel [6][2]')
 
         # Log both into one plot
-        axs[4].plot(sr_channel[:1024], label='Super-resolution channel [6][2]', alpha=0.5)
+        axs[4].plot(sr_channel[:1024], label='Super-resolution channel [6][2]')
         axs[4].plot(val_channel[:1024], label='Validation channel [6][2]', alpha=0.5)
         axs[4].set_title('Super-resolution vs Validation channel [6][2]')
         axs[4].legend()
@@ -543,10 +543,10 @@ class Trainer:
         axs1[3].set_title('Cross Correlation channel [6][1]')
 
         # Log both into one plot
-        axs[4].plot(sr_channel[:1024], label='Super-resolution channel [6][1]', alpha=0.5)
-        axs[4].plot(val_channel[:1024], label='Validation channel [6][1]', alpha=0.5)
-        axs[4].set_title('Super-resolution vs Validation channel [6][1]')
-        axs[4].legend()
+        axs1[4].plot(sr_channel[:1024], label='Super-resolution channel [6][1]')
+        axs1[4].plot(val_channel[:1024], label='Validation channel [6][1]', alpha=0.5)
+        axs1[4].set_title('Super-resolution vs Validation channel [6][1]')
+        axs1[4].legend()
 
         plt.tight_layout()
         wandb.log({"Logged plots predicted Channel": [wandb.Image(fig1)]})
@@ -560,7 +560,6 @@ class Trainer:
         axs3[0].set_title('Validation channel histogram')
         axs3[1].hist(val_sr_emg_destandardized.reshape(-1).to('cpu'), bins=100)
         axs3[1].set_title('Super-resolution channel histogram')
-        plt.tight_layout()
         wandb.log({"Histograms": [wandb.Image(fig3)]})
         plt.close(fig3)
 

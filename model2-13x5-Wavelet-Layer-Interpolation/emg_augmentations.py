@@ -53,12 +53,12 @@ def _gaussian_noise(chunk: np.ndarray, target_snr__db: float = 5.0) -> np.ndarra
 
 
 class GaussianNoise(EMGAugmentation):
-    """Adds Gaussian noise to the input EMG data. This augmentation is based on the paper [1].
+    """Adds Gaussian gaussian_noise to the input EMG data. This augmentation is based on the paper [1].
     
     Parameters
     ----------
     target_snr__db : float, optional
-        The target signal to noise ratio in decibels, by default 5.0.
+        The target signal to gaussian_noise ratio in decibels, by default 5.0.
         
     Methods
     -------
