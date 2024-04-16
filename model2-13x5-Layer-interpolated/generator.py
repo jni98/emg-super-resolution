@@ -109,32 +109,28 @@ class Generator(nn.Module):
         self.prelu1 = nn.PReLU()
 
         # Upsampling of the residual and residual block 1
-        self.residualUp1 = nn.ConvTranspose3d(64, 64, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
         self.res_blocks1 = nn.Sequential(*[ResidualBlock(in_channels=64) for _ in range(num_res_blocks)])
 
         # DownConvolution 1
         self.downConv1 = DownConvolutionBlock(in_channels=64, out_channels=128)
 
         # Upsampling of the residual and residual block 2
-        self.residualUp2 = nn.ConvTranspose3d(128, 128, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
         self.res_blocks2 = nn.Sequential(*[ResidualBlock(in_channels=128) for _ in range(num_res_blocks)])
 
         # DownConvolution 2
         self.downConv2 = DownConvolutionBlock(in_channels=128, out_channels=256)
 
         # Upsampling of the residual and residual block 3
-        self.residualUp3 = nn.ConvTranspose3d(256, 256, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
         self.res_blocks3 = nn.Sequential(*[ResidualBlock(in_channels=256) for _ in range(num_res_blocks)])
 
         # DownConvolution 3
         self.downConv3 = DownConvolutionBlock(in_channels=256, out_channels=512)
 
         # Upsampling of the residual and residual block 4
-        self.residualUp4 = nn.ConvTranspose3d(512, 512, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
         self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=512) for _ in range(num_res_blocks_last)])
 
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
+        self.upConv1 = UpConvolutionBlock(512, 256, stride=(1,1, 2))
 
         # Upsampling 2
         self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
@@ -150,17 +146,17 @@ class Generator(nn.Module):
         conv1 = self.bn1(conv1)
         conv1 = self.prelu1(conv1)
         conv1 = self.res_blocks1(conv1)
-        skip1 = self.residualUp1(conv1)
+        skip1 = conv1
         # print("Generator output after conv1", conv1.shape)
 
         down1 = self.downConv1(conv1)
         down1 = self.res_blocks2(down1)
-        skip2 = self.residualUp2(down1)
+        skip2 = down1
         # print("Generator output after DownConv 1", down1.shape)
 
         down2 = self.downConv2(down1)
         down2 = self.res_blocks3(down2)
-        skip3 = self.residualUp3(down2)
+        skip3 = down2
         # print("Generator output after DownConv 2", down2.shape)
 
         down3 = self.downConv3(down2)

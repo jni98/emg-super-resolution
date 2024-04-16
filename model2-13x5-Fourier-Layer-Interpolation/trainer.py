@@ -583,24 +583,6 @@ class Trainer:
 
         return fourier_transformed_data_real, fourier_transformed_data_imag
 
-    def _save_checkpoint(self, epoch: int) -> None:
-        """
-        Saves the Generator and Discriminator at a given epoch.
-
-        Parameters
-        ----------
-        epoch: int
-
-        Returns
-        -------
-        None
-        """
-        if epoch % 10 == 0:
-            torch.save(self.generator.state_dict(),
-                       self.run_folder + f'/generator_epoch_{epoch}.pt')
-            torch.save(self.discriminator.state_dict(),
-                       self.run_folder + f'/discriminator_epoch_{epoch}.pt')
-
     def _save_final_models(self) -> None:
         """
         Saves the final Generator and Discriminator.
