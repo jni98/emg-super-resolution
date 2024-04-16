@@ -16,6 +16,7 @@ import pickle
 import tarfile
 
 import matplotlib
+from scipy.interpolate import RegularGridInterpolator
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
@@ -220,6 +221,46 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
             writer.writerow([lr_filename + ';' + hr_filename])
 
 
+def grid_interpolation(lr_emg: np.ndarray, hr_emg_shape: tuple, method: str) -> np.ndarray:
+    """
+    Performs cubic interpolation on the low resolution data to get high resolution data.
+    Parameters
+    ----------
+    lr_emg: numpy.ndarray
+            Low resolution emg data.
+    hr_emg_shape: tuple
+            Shape of the high resolution emg data.
+    method: str
+            Method of interpolation. On default set to linear.
+
+    Returns
+    -------
+    interpolated_signal: numpy.ndarray
+            High resolution emg data.
+    """
+    # Create a grid for the original signal
+    x = np.linspace(0, 1, lr_emg.shape[0])
+    y = np.linspace(0, 1, lr_emg.shape[1])
+    z = np.linspace(0, 1, lr_emg.shape[2])
+
+    # Create a new grid for the desired interpolated signal
+    new_x = np.linspace(0, 1, hr_emg_shape[0])
+    new_y = np.linspace(0, 1, hr_emg_shape[1])
+    new_z = np.linspace(0, 1, hr_emg_shape[2])
+
+    # Create meshgrid from new grid
+    mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
+
+    # Create interpolator
+    interpolator = RegularGridInterpolator((x, y, z), lr_emg, method=method)
+    # print("Created the interpolater")
+
+    # Interpolate
+    interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
+    # print("Finished the interpolator")
+    return interpolated_signal
+
+
 def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str]) -> None:
     """
 
@@ -312,9 +353,8 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
             emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 20480)]
             emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 20480)]
 
-            # transpose for samples x channels shape
-            # emg_lr_final = emg_lr_windowed.transpose()
-            # emg_hr_final = emg_hr_windowed.transpose()
+            # interpolate lr data to have it already in correct shape
+            emg_lr_windowed = grid_interpolation(emg_lr_windowed, (13, 5, emg_lr_windowed.shape[2]), 'linear')
 
             # save high resolution data and add file name to list
             hr_file_location = dataset_path + f'path{i}-window{window}-hr.npy'
@@ -416,6 +456,9 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         # In case that last dimension is not divisible by 6 delete samples so that generator works
         if emg_lr_reshaped.shape[2] % 8 != 0:
             emg_lr_reshaped = emg_lr_reshaped[:, :, :-(emg_lr_reshaped.shape[2] % 8)]
+
+        # interpolate lr data to have it already in correct shape
+        emg_lr_reshaped = grid_interpolation(emg_lr_reshaped, (13, 5, emg_lr_reshaped.shape[2]), 'linear')
 
         plt.figure()
         plt.plot(emg_hr_reshaped[0, 0])
