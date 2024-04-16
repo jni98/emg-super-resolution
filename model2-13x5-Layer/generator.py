@@ -133,14 +133,24 @@ class Generator(nn.Module):
         self.residualUp4 = nn.ConvTranspose3d(512, 512, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
         self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=512) for _ in range(num_res_blocks_last)])
 
+        # DownConvolution 3
+        self.downConv4 = DownConvolutionBlock(in_channels=512, out_channels=1024)
+
+        # Upsampling of the residual and residual block 4
+        self.residualUp5 = nn.ConvTranspose3d(1024, 1024, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
+        self.res_blocks5 = nn.Sequential(*[ResidualBlock(in_channels=1024) for _ in range(num_res_blocks_last)])
+
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
+        self.upConv1 = UpConvolutionBlock(1024, 512, stride=(2, 2, 2))
 
         # Upsampling 2
-        self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
+        self.upConv2 = UpConvolutionBlock(512, 256, stride=(1,1,2))
 
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
+        self.upConv3 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
+
+        # Upsampling 4
+        self.upConv4 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
 
         # Finale Convolution für Channel 1
         self.finalConv = nn.Conv3d(64, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
@@ -165,17 +175,28 @@ class Generator(nn.Module):
 
         down3 = self.downConv3(down2)
         down3 = self.res_blocks4(down3)
+        skip4= self.residualUp4(down3)
         # print("Generator output after DownConv 3", down3.shape)
 
-        up1 = self.upConv1(down3, skip3)
+        down4 = self.downConv4(down3)
+        down4 = self.res_blocks5(down4)
+
+        up1 = self.upConv1(down4, skip4)
+        up2 = self.upConv2(up1, skip3)
         # print("Generator output after upsample1", up1.shape)
-        up2 = self.upConv2(up1, skip2)
+        up3 = self.upConv3(up2, skip2)
         # print("Generator output after upsample2", up2.shape)
-        up3 = self.upConv3(up2, skip1)
+        up4 = self.upConv4(up3, skip1)
         # print("Generator output after upsample3", up3.shape)
 
-        out = self.finalConv(up3)
+        out = self.finalConv(up4)
 
         # print("Generator output", out.shape)
 
         return out
+# if __name__ == '__main__':
+#     arr = torch.randn(1, 1,7,3,2048)
+#     generator = Generator(num_res_blocks=1, num_res_blocks_last=1,in_channels=1)
+#
+#     x = generator(arr)
+
