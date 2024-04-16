@@ -343,11 +343,11 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         else:
             combined_data = np.concatenate((combined_data, emg_hr_reshaped.flatten()))
 
-        windows = emg_length - 20480
+        windows = emg_length - 10240
 
         # window the signal to 2048 samples
         # 51 samples equals 25ms which is approximately 1 action potential
-        for window in range(0, windows, (20480 - 1024)):
+        for window in range(0, windows, (10240 - 512)):
             print("window", window)
             # The length of one sample is 20480 which is equal to 10 second
             emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 20480)]
