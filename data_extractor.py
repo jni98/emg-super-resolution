@@ -350,8 +350,8 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         for window in range(0, windows, (10240 - 512)):
             print("window", window)
             # The length of one sample is 20480 which is equal to 10 second
-            emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 20480)]
-            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 20480)]
+            emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 10240)]
+            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 10240)]
 
             # interpolate lr data to have it already in correct shape
             emg_lr_windowed = grid_interpolation(emg_lr_windowed, (13, 5, emg_lr_windowed.shape[2]), 'linear')
