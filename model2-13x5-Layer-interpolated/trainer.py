@@ -469,8 +469,8 @@ class Trainer:
         axs[3].set_title('Cross Correlation channel [6][2]')
 
         # Log both into one plot
-        axs[4].plot(sr_channel[15000:16024], label='Super-resolution channel [6][2]')
-        axs[4].plot(val_channel[15000:16024], label='Validation channel [6][2]', alpha=0.5)
+        axs[4].plot(sr_channel[18000:19024], label='Super-resolution channel [6][1]')
+        axs[4].plot(val_channel[18000:19024], label='Validation channel [6][1]', alpha=0.5)
         axs[4].set_title('Super-resolution vs Validation channel [6][2]')
         axs[4].legend()
 
@@ -514,8 +514,8 @@ class Trainer:
         axs1[3].set_title('Cross Correlation channel [6][1]')
 
         # Log both into one plot
-        axs1[4].plot(sr_channel[15000:16024], label='Super-resolution channel [6][1]')
-        axs1[4].plot(val_channel[15000:16024], label='Validation channel [6][1]', alpha=0.5)
+        axs1[4].plot(sr_channel[18000:19024], label='Super-resolution channel [6][1]')
+        axs1[4].plot(val_channel[18000:19024], label='Validation channel [6][1]', alpha=0.5)
         axs1[4].set_title('Super-resolution vs Validation channel [6][1]')
         axs1[4].legend()
 
@@ -527,9 +527,9 @@ class Trainer:
 
         # Log freuqency histogram of both, val_hr destandardized and val_sr destandardized
         fig3, axs3 = plt.subplots(1, 2, figsize=(8, 10))
-        axs3[0].hist(val_hr_destandardized.reshape(-1).to('cpu'), bins=100)
+        axs3[0].hist(val_hr_destandardized.reshape(-1).to('cpu'), bins=300)
         axs3[0].set_title('Validation channel histogram')
-        axs3[1].hist(val_sr_emg_destandardized.reshape(-1).to('cpu'), bins=100)
+        axs3[1].hist(val_sr_emg_destandardized.reshape(-1).to('cpu'), bins=300)
         axs3[1].set_title('Super-resolution channel histogram')
         wandb.log({"Histograms": [wandb.Image(fig3)]})
         plt.close(fig3)
