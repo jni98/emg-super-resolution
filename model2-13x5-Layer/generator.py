@@ -134,7 +134,7 @@ class Generator(nn.Module):
         self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=512) for _ in range(num_res_blocks_last)])
 
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlock(512, 256, stride=(1,1,2))
+        self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
 
         # Upsampling 2
         self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
