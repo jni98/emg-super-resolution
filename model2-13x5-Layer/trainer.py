@@ -527,9 +527,9 @@ class Trainer:
 
         # Log freuqency histogram of both, val_hr destandardized and val_sr destandardized
         fig3, axs3 = plt.subplots(1, 2, figsize=(8, 10))
-        axs3[0].hist(val_hr_destandardized.squeeze().to('cpu'), bins=100)
+        axs3[0].hist(val_hr_destandardized.reshape(-1).to('cpu'), bins=100)
         axs3[0].set_title('Validation channel histogram')
-        axs3[1].hist(val_sr_emg_destandardized.squeeze().to('cpu'), bins=100)
+        axs3[1].hist(val_sr_emg_destandardized.reshape(-1).to('cpu'), bins=100)
         axs3[1].set_title('Super-resolution channel histogram')
         plt.tight_layout()
         wandb.log({"Histograms": [wandb.Image(fig3)]})
