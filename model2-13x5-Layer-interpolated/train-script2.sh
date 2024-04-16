@@ -4,7 +4,7 @@
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model2-13x5-Layer
+#SBATCH --job-name=model2-13x5-Layer-interpolated
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:v100:1
@@ -15,10 +15,10 @@ unset SLURM_EXPORT_ENV
 
 ############    paths    ###############
 
-SRC_DIR=$HOME/code/model2-13x5-Layer
-RESULTS_DIR=$HOME/model2-13x5-Layer-$SLURM_JOB_ID
+SRC_DIR=$HOME/code/model2-13x5-Layer-interpolated
+RESULTS_DIR=$HOME/model2-13x5-Layer-interpolated-$SLURM_JOB_ID
 DATA_ARCHIVE=$HPCVAULT/dataset.tar
-FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-$SLURM_JOB_ID
+FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-interpolated-$SLURM_JOB_ID
 
 ############    params   ###############
 
