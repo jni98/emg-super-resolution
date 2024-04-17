@@ -10,6 +10,7 @@ You can run this file by running the main function.
 import argparse
 
 import torch
+import torch.utils.bottleneck as bottleneck
 import wandb  # Import wandb library
 
 from trainer import Trainer
@@ -83,6 +84,7 @@ def parse_args():
 
 
 if __name__ == "__main__":
+    bottleneck.enable()
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
     # Parse arguments
@@ -101,3 +103,5 @@ if __name__ == "__main__":
     wandb.agent(sweep_id,
                 function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
                                        sweep_id))
+
+    bottleneck.disable()
