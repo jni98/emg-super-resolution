@@ -25,7 +25,7 @@ def setup_sweep():
                 'values': [4],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [0.00001, 0.00002]
+                'values': [0.00001]
             },
             'num_res_blocks_last': {
                 'values': [3]
@@ -37,7 +37,7 @@ def setup_sweep():
                 'values': [0.1]
             },
             'gaussian_noise': {
-                'values': [True, False]
+                'values': [False]
             }
         }
     }
