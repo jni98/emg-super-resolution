@@ -338,10 +338,12 @@ class Trainer:
         avg_content_loss = total_content_loss / len(self.training)
         avg_gen_adversarial_loss = total_gen_adversarial_loss / len(self.training)
 
-        wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real,
-                   'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d,
-                   'avg_wavelet_loss': avg_wavelet_loss, 'avg_content_loss': avg_content_loss,
-                   'avg_gen_adversarial_loss': avg_gen_adversarial_loss})
+        # wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real,
+        #            'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d,
+        #            'avg_wavelet_loss': avg_wavelet_loss, 'avg_content_loss': avg_content_loss,
+        #            'avg_gen_adversarial_loss': avg_gen_adversarial_loss})
+
+        wandb.log({'epoch':epoch})
 
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
@@ -429,8 +431,10 @@ class Trainer:
             avg_val_adv = total_val_gen_adv / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
 
-            wandb.log({'val_loss': avg_validation_loss, 'val_content': avg_val_content,
-                       'val_wavelet': avg_val_wavelet, 'val_adv': avg_val_adv, 'val_psnr': avg_psnr})
+            # wandb.log({'val_loss': avg_validation_loss, 'val_content': avg_val_content,
+            #            'val_wavelet': avg_val_wavelet, 'val_adv': avg_val_adv, 'val_psnr': avg_psnr})
+
+            wandb.log({'val_loss': avg_validation_loss})
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
@@ -438,8 +442,8 @@ class Trainer:
             axs2.plot(range(len(avg_abs_diff)), avg_abs_diff)
             axs2.set_title('Average absolute difference')
             plt.tight_layout()
-            wandb.log({"Average absolute difference": [wandb.Image(fig2)]})
-            wandb.log({'Mean absolute difference': np.mean(avg_abs_diff)})
+            #wandb.log({"Average absolute difference": [wandb.Image(fig2)]})
+            #wandb.log({'Mean absolute difference': np.mean(avg_abs_diff)})
 
             # Close the figure
             plt.close(fig2)
@@ -504,7 +508,7 @@ class Trainer:
         axs[4].legend()
 
         plt.tight_layout()
-        wandb.log({"Logged plots given Channel": [wandb.Image(fig)]})
+        #wandb.log({"Logged plots given Channel": [wandb.Image(fig)]})
 
         # Close the figure
         plt.close(fig)
@@ -549,7 +553,7 @@ class Trainer:
         axs1[4].legend()
 
         plt.tight_layout()
-        wandb.log({"Logged plots predicted Channel": [wandb.Image(fig1)]})
+        #wandb.log({"Logged plots predicted Channel": [wandb.Image(fig1)]})
 
         # Close the figure
         plt.close(fig1)
@@ -560,7 +564,7 @@ class Trainer:
         axs3[0].set_title('Validation channel histogram')
         axs3[1].hist(val_sr_emg_destandardized.reshape(-1).to('cpu'), bins=300)
         axs3[1].set_title('Super-resolution channel histogram')
-        wandb.log({"Histograms": [wandb.Image(fig3)]})
+        #wandb.log({"Histograms": [wandb.Image(fig3)]})
         plt.close(fig3)
 
     def compute_wavelet_transform_loss(self, groundtruth, superresolution):
