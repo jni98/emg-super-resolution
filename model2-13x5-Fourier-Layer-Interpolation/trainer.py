@@ -108,7 +108,7 @@ class Trainer:
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], gaussian_noise = True),
+                           self.mean_std_dict['std'], gaussian_noise = self.config.gaussian_noise),
             batch_size=self.batch_size, pin_memory=True
         )
 
