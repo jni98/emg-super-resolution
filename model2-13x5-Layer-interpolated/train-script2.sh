@@ -5,10 +5,10 @@
 ############    slurm    ###############
 
 #SBATCH --job-name=model2-13x5-Layer-interpolated
-#SBATCH --time=24:00:00
+#SBATCH --time=2:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
-#SBATCH --gres=gpu:v100:2
-#SBATCH --partition=v100
+#SBATCH --gres=gpu:a100:2
+#SBATCH --partition=a100
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV
@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-interpolated-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=200
+EPOCHS=10
 
 ############    params   ###############
 
@@ -61,7 +61,7 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 # start training
-python train.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS
+python -m torch.utils.bottleneck train.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"
