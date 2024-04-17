@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-interpolated-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=10
+EPOCHS=2
 
 ############    params   ###############
 
