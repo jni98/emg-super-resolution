@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 import csv
 import numpy as np
 from scipy.io import loadmat
+from emg_augmentations import GaussianNoise
 
 
 def plot_emg_data(emg_data: np.ndarray) -> None:
@@ -284,6 +285,8 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
     lr_filenames_training = []
     hr_filenames_training = []
 
+    gaussian_noise_generator = GaussianNoise(target_snr__db=5.0)
+
     for i in range(len(train_paths)):
         # extract data path
         data_path = train_paths[i]
@@ -304,69 +307,62 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         # Create the folder if it doesn't exist
         os.makedirs(dataset_path, exist_ok=True)
 
-        emg_lr = emg_data[::2, ::2]
+        for augment in range(2):
+            # 0: no augmentation
+            # 1: Gaussian noise 5 db
 
-        emg_length = emg_lr[0][0][0].shape[0]
-        emg_hr_reshaped = np.zeros((emg_data.shape[0], emg_data.shape[1], emg_length))
-        emg_lr_reshaped = np.zeros((emg_lr.shape[0], emg_lr.shape[1], emg_length))
-        print("shape emg_lr_reshaped:", np.shape(emg_lr_reshaped))
+            emg_length = emg_data[0][0][0].shape[0]
+            emg_hr_reshaped = np.zeros((emg_data.shape[0], emg_data.shape[1], emg_length))
 
-        # Reshape HR data into 3D
-        for row in range(emg_data.shape[0]):
-            for col in range(emg_data.shape[1]):
-                if (row == (emg_data.shape[0] - 1) and col == 0):
-                    continue
-                else:
-                    sub_array = emg_data[row][col]
-                    emg_hr_reshaped[row, col] = sub_array
+            # Reshape HR data into 3D
+            for row in range(emg_data.shape[0]):
+                for col in range(emg_data.shape[1]):
+                    if (row == (emg_data.shape[0] - 1) and col == 0):
+                        continue
+                    else:
+                        sub_array = emg_data[row][col]
+                        emg_hr_reshaped[row, col] = sub_array
 
-        # Reshape LR data into 3D
-        for row in range(emg_lr.shape[0]):
-            for col in range(emg_lr.shape[1]):
-                if (row == (emg_lr.shape[0] - 1) and col == 0):
-                    continue
-                else:
-                    sub_array = emg_lr[row][col]
-                    emg_lr_reshaped[row, col] = sub_array
+            if augment == 1:
+                emg_hr_reshaped = gaussian_noise_generator(emg_hr_reshaped)
 
-        plt.figure()
-        plt.plot(emg_hr_reshaped[0, 0])
-        plt.savefig('emg_hr_reshaped.png')
-        plt.close()
+            # Create LR data from HR data
+            emg_lr = emg_hr_reshaped[::2, ::2]
 
-        # Reshape arrays to channel x samples, counting channels from top to bottom
-        # emg_lr_reshaped_final = np.flipud(emg_lr_reshaped).transpose(1, 0, 2).reshape(-1, emg_lr_reshaped.shape[-1])
-        # emg_hr_reshaped_final = np.flipud(emg_hr_reshaped).transpose(1, 0, 2).reshape(-1, emg_hr_reshaped.shape[-1])
+            plt.figure()
+            plt.plot(emg_hr_reshaped[0, 0])
+            plt.savefig('emg_hr_reshaped.png')
+            plt.close()
 
-        if i == 0:
-            combined_data = emg_hr_reshaped.flatten()
-        else:
-            combined_data = np.concatenate((combined_data, emg_hr_reshaped.flatten()))
+            if i == 0:
+                combined_data = emg_hr_reshaped.flatten()
+            else:
+                combined_data = np.concatenate((combined_data, emg_hr_reshaped.flatten()))
 
-        windows = emg_length - 10240
+            windows = emg_length - 10240
 
-        # window the signal to 2048 samples
-        # 51 samples equals 25ms which is approximately 1 action potential
-        for window in range(0, windows, (10240 - 512)):
-            print("window", window)
-            # The length of one sample is 20480 which is equal to 10 second
-            emg_lr_windowed = emg_lr_reshaped[:, :, window:(window + 10240)]
-            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 10240)]
+            # window the signal to 2048 samples
+            # 51 samples equals 25ms which is approximately 1 action potential
+            for window in range(0, windows, (10240 - 512)):
+                print("window", window)
+                # The length of one sample is 20480 which is equal to 10 second
+                emg_lr_windowed = emg_lr[:, :, window:(window + 10240)]
+                emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 10240)]
 
-            # interpolate lr data to have it already in correct shape
-            emg_lr_windowed = grid_interpolation(emg_lr_windowed, (13, 5, emg_lr_windowed.shape[2]), 'linear')
+                # interpolate lr data to have it already in correct shape
+                emg_lr_windowed = grid_interpolation(emg_lr_windowed, (13, 5, emg_lr_windowed.shape[2]), 'linear')
 
-            # save high resolution data and add file name to list
-            hr_file_location = dataset_path + f'path{i}-window{window}-hr.npy'
-            np.save(hr_file_location, emg_hr_windowed)
-            hr_filename = f'path{i}-window{window}-hr.npy'
-            hr_filenames_training.append(hr_filename)
+                # save high resolution data and add file name to list
+                hr_file_location = dataset_path + f'path{i}-augment{augment}-window{window}-hr.npy'
+                np.save(hr_file_location, emg_hr_windowed)
+                hr_filename = f'path{i}-augment{augment}-window{window}-hr.npy'
+                hr_filenames_training.append(hr_filename)
 
-            # save low resolution data and add file name to list
-            lr_file_location = dataset_path + f'path{i}-window{window}-lr.npy'
-            np.save(lr_file_location, emg_lr_windowed)
-            lr_filename = f'path{i}-window{window}-lr.npy'
-            lr_filenames_training.append(lr_filename)
+                # save low resolution data and add file name to list
+                lr_file_location = dataset_path + f'path{i}-augment{augment}-window{window}-lr.npy'
+                np.save(lr_file_location, emg_lr_windowed)
+                lr_filename = f'path{i}-augment{augment}-window{window}-lr.npy'
+                lr_filenames_training.append(lr_filename)
 
     # Get mean and std for standardization
     mean = np.mean(combined_data)

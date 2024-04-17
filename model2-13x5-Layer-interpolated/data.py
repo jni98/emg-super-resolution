@@ -62,9 +62,9 @@ class Custom_Dataset(Dataset):
         # load and preprocess lr data
         lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
 
-        if self.gaussian_noise:
-            lr_emg = self.gaussian_noise_augmentor(lr_emg)
-            print("augmentation done")
+        # if self.gaussian_noise:
+        #     lr_emg = self.gaussian_noise_augmentor(lr_emg)
+        #     print("augmentation done")
 
         # bandpass filter
         lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=2)
@@ -79,8 +79,8 @@ class Custom_Dataset(Dataset):
         # load and preprocess hr data
         hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
-        if self.gaussian_noise:
-            hr_emg = self.gaussian_noise_augmentor(hr_emg)
+        # if self.gaussian_noise:
+        #     hr_emg = self.gaussian_noise_augmentor(hr_emg)
 
         # bandpass filter
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
