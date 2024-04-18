@@ -22,7 +22,7 @@ def setup_sweep():
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-                'values': [4],  # Add the batch sizes you want to include
+                'values': [8,10,12],  # Add the batch sizes you want to include
             },
             'learning_rate': {
                 'values': [0.00001]
@@ -35,9 +35,6 @@ def setup_sweep():
             },
             'adv_loss_weight': {
                 'values': [0.1]
-            },
-            'gaussian_noise': {
-                'values': [False]
             }
         }
     }

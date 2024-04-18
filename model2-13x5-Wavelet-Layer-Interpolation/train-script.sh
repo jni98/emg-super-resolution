@@ -5,10 +5,10 @@
 ############    slurm    ###############
 
 #SBATCH --job-name=model2-13x5-Wavelet-Layer-Interpolation
-#SBATCH --time=15:00:00
+#SBATCH --time=20:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
-#SBATCH --gres=gpu:v100:2
-#SBATCH --partition=v100
+#SBATCH --gres=gpu:a100:1
+#SBATCH --partition=a100
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV

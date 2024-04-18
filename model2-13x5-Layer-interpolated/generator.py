@@ -136,10 +136,10 @@ class Generator(nn.Module):
         self.upConv2 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
 
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlock(64, 32, stride=(1, 1, 2))
+        self.upConv3 = UpConvolutionBlock(64, 64, stride=(1, 1, 2))
 
         # Finale Convolution für Channel 1
-        self.finalConv = nn.Conv3d(32, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
+        self.finalConv = nn.Conv3d(64, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
 
     def forward(self, x: torch.tensor) -> torch.tensor:
         conv1 = self.conv1(x)

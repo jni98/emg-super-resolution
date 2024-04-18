@@ -14,16 +14,13 @@ import json
 import os
 import pickle
 import tarfile
-
+import csv
 import matplotlib
-from scipy.interpolate import RegularGridInterpolator
+import numpy as np
+from scipy.io import loadmat
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
-import csv
-import numpy as np
-from scipy.io import loadmat
-from emg_augmentations import GaussianNoise
 
 
 def plot_emg_data(emg_data: np.ndarray) -> None:
@@ -63,7 +60,7 @@ def plot_emg_data(emg_data: np.ndarray) -> None:
     plt.close()
 
 
-def open_emg_data_Dominik(file_path: str) -> np.ndarray:
+def open_emg_data_dominik(file_path: str) -> np.ndarray:
     """
     Opens the emg signal of from a pickle file in a given directory
     Parameters
@@ -120,7 +117,7 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
         os.makedirs(dataset_path, exist_ok=True)
 
         # get the emg data of that pickle file
-        emg_data_complete = open_emg_data_Dominik(data_path)
+        emg_data_complete = open_emg_data_dominik(data_path)
 
         plt.figure(i)
 
@@ -145,8 +142,6 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
             # Transpose and flip to get to correct grid numbering
             emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
             emg_data_grid = np.flipud(emg_data_transposed)
-
-            windows = emg_data.shape[1] - 512
 
             # window the signal to 512 samples
             for window in range(0, 3000, 50):
@@ -222,46 +217,6 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
             writer.writerow([lr_filename + ';' + hr_filename])
 
 
-def grid_interpolation(lr_emg: np.ndarray, hr_emg_shape: tuple, method: str) -> np.ndarray:
-    """
-    Performs cubic interpolation on the low resolution data to get high resolution data.
-    Parameters
-    ----------
-    lr_emg: numpy.ndarray
-            Low resolution emg data.
-    hr_emg_shape: tuple
-            Shape of the high resolution emg data.
-    method: str
-            Method of interpolation. On default set to linear.
-
-    Returns
-    -------
-    interpolated_signal: numpy.ndarray
-            High resolution emg data.
-    """
-    # Create a grid for the original signal
-    x = np.linspace(0, 1, lr_emg.shape[0])
-    y = np.linspace(0, 1, lr_emg.shape[1])
-    z = np.linspace(0, 1, lr_emg.shape[2])
-
-    # Create a new grid for the desired interpolated signal
-    new_x = np.linspace(0, 1, hr_emg_shape[0])
-    new_y = np.linspace(0, 1, hr_emg_shape[1])
-    new_z = np.linspace(0, 1, hr_emg_shape[2])
-
-    # Create meshgrid from new grid
-    mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
-
-    # Create interpolator
-    interpolator = RegularGridInterpolator((x, y, z), lr_emg, method=method)
-    # print("Created the interpolater")
-
-    # Interpolate
-    interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
-    # print("Finished the interpolator")
-    return interpolated_signal
-
-
 def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str]) -> None:
     """
 
@@ -282,10 +237,7 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
     EMGGainFactor = 5 / (2 ** 16) / 150 * 1000
 
     # List of LR and HR filenames (replace this with your filenames)
-    lr_filenames_training = []
     hr_filenames_training = []
-
-    gaussian_noise_generator = GaussianNoise(target_snr__db=5.0)
 
     for i in range(len(train_paths)):
         # extract data path
@@ -307,62 +259,42 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         # Create the folder if it doesn't exist
         os.makedirs(dataset_path, exist_ok=True)
 
-        for augment in range(2):
-            # 0: no augmentation
-            # 1: Gaussian noise 5 db
+        emg_length = emg_data[0][0][0].shape[0]
+        emg_hr_reshaped = np.zeros((emg_data.shape[0], emg_data.shape[1], emg_length))
 
-            emg_length = emg_data[0][0][0].shape[0]
-            emg_hr_reshaped = np.zeros((emg_data.shape[0], emg_data.shape[1], emg_length))
+        # Reshape HR data into 3D
+        for row in range(emg_data.shape[0]):
+            for col in range(emg_data.shape[1]):
+                if (row == (emg_data.shape[0] - 1) and col == 0):
+                    continue
+                else:
+                    sub_array = emg_data[row][col]
+                    emg_hr_reshaped[row, col] = sub_array
 
-            # Reshape HR data into 3D
-            for row in range(emg_data.shape[0]):
-                for col in range(emg_data.shape[1]):
-                    if (row == (emg_data.shape[0] - 1) and col == 0):
-                        continue
-                    else:
-                        sub_array = emg_data[row][col]
-                        emg_hr_reshaped[row, col] = sub_array
+        plt.figure()
+        plt.plot(emg_hr_reshaped[0, 0])
+        plt.savefig('emg_hr_reshaped.png')
+        plt.close()
 
-            if augment == 1:
-                emg_hr_reshaped = gaussian_noise_generator(emg_hr_reshaped)
+        if i == 0:
+            combined_data = emg_hr_reshaped.flatten()
+        else:
+            combined_data = np.concatenate((combined_data, emg_hr_reshaped.flatten()))
 
-            # Create LR data from HR data
-            emg_lr = emg_hr_reshaped[::2, ::2]
+        windows = emg_length - 2048
 
-            plt.figure()
-            plt.plot(emg_hr_reshaped[0, 0])
-            plt.savefig('emg_hr_reshaped.png')
-            plt.close()
+        # window the signal to 2048 samples
+        # 51 samples equals 25ms which is approximately 1 action potential
+        for window in range(0, windows, (2048 - 51)):
+            print("window", window)
+            # The length of one sample is 20480 which is equal to 10 second
+            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 2048)]
 
-            if i == 0:
-                combined_data = emg_hr_reshaped.flatten()
-            else:
-                combined_data = np.concatenate((combined_data, emg_hr_reshaped.flatten()))
-
-            windows = emg_length - 10240
-
-            # window the signal to 2048 samples
-            # 51 samples equals 25ms which is approximately 1 action potential
-            for window in range(0, windows, (10240 - 512)):
-                print("window", window)
-                # The length of one sample is 20480 which is equal to 10 second
-                emg_lr_windowed = emg_lr[:, :, window:(window + 10240)]
-                emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 10240)]
-
-                # interpolate lr data to have it already in correct shape
-                emg_lr_windowed = grid_interpolation(emg_lr_windowed, (13, 5, emg_lr_windowed.shape[2]), 'linear')
-
-                # save high resolution data and add file name to list
-                hr_file_location = dataset_path + f'path{i}-augment{augment}-window{window}-hr.npy'
-                np.save(hr_file_location, emg_hr_windowed)
-                hr_filename = f'path{i}-augment{augment}-window{window}-hr.npy'
-                hr_filenames_training.append(hr_filename)
-
-                # save low resolution data and add file name to list
-                lr_file_location = dataset_path + f'path{i}-augment{augment}-window{window}-lr.npy'
-                np.save(lr_file_location, emg_lr_windowed)
-                lr_filename = f'path{i}-augment{augment}-window{window}-lr.npy'
-                lr_filenames_training.append(lr_filename)
+            # save high resolution data and add file name to list
+            hr_file_location = dataset_path + f'path{i}-window{window}-hr.npy'
+            np.save(hr_file_location, emg_hr_windowed)
+            hr_filename = f'path{i}-window{window}-hr.npy'
+            hr_filenames_training.append(hr_filename)
 
     # Get mean and std for standardization
     mean = np.mean(combined_data)
@@ -377,8 +309,6 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
     with open('dataset/train' + '/mean_std.json', 'w') as file:
         json.dump(mean_std_dict, file)
 
-    # Combine LR and HR filenames row-wise
-    data = zip(lr_filenames_training, hr_filenames_training)
     # File path for the CSV file
     csv_file = 'data.csv'
 
@@ -388,16 +318,15 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
 
         # Add a header if the file is empty
         if file.tell() == 0:
-            writer.writerow(['lr_filename;hr_filename'])
+            writer.writerow(['hr_filename'])
 
-        # Add each LR/HR pair as a row in the CSV file
-        for lr_filename, hr_filename in data:
-            writer.writerow([lr_filename + ';' + hr_filename])
+        # Add each HR filename as a row in the CSV file
+        for hr_filename_training in hr_filenames_training:
+            writer.writerow([hr_filename_training])
 
     ######################## Test ########################
 
-    # List of LR and HR filenames (replace this with your filenames)
-    lr_filenames_test = []
+    # List of HR filenames (replace this with your filenames)
     hr_filenames_test = []
 
     for i in range(len(test_paths)):
@@ -420,12 +349,8 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         # Create the folder if it doesn't exist
         os.makedirs(dataset_path, exist_ok=True)
 
-        emg_lr = emg_data[::2, ::2]
-
-        emg_length = emg_lr[0][0][0].shape[0]
+        emg_length = emg_data[0][0][0].shape[0]
         emg_hr_reshaped = np.zeros((emg_data.shape[0], emg_data.shape[1], emg_length))
-        emg_lr_reshaped = np.zeros((emg_lr.shape[0], emg_lr.shape[1], emg_length))
-        print("shape emg_lr_reshaped:", np.shape(emg_lr_reshaped))
 
         # Reshape HR data into 3D
         for row in range(emg_data.shape[0]):
@@ -440,22 +365,6 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         if emg_hr_reshaped.shape[2] % 8 != 0:
             emg_hr_reshaped = emg_hr_reshaped[:, :, :-(emg_hr_reshaped.shape[2] % 8)]
 
-        # Reshape LR data into 3D
-        for row in range(emg_lr.shape[0]):
-            for col in range(emg_lr.shape[1]):
-                if (row == (emg_lr.shape[0] - 1) and col == 0):
-                    continue
-                else:
-                    sub_array = emg_lr[row][col]
-                    emg_lr_reshaped[row, col] = sub_array
-
-        # In case that last dimension is not divisible by 6 delete samples so that generator works
-        if emg_lr_reshaped.shape[2] % 8 != 0:
-            emg_lr_reshaped = emg_lr_reshaped[:, :, :-(emg_lr_reshaped.shape[2] % 8)]
-
-        # interpolate lr data to have it already in correct shape
-        emg_lr_reshaped = grid_interpolation(emg_lr_reshaped, (13, 5, emg_lr_reshaped.shape[2]), 'linear')
-
         plt.figure()
         plt.plot(emg_hr_reshaped[0, 0])
         plt.savefig('emg_hr_reshaped.png')
@@ -467,14 +376,6 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         hr_filename = f'path{i}-hr.npy'
         hr_filenames_test.append(hr_filename)
 
-        # save low resolution data and add file name to list
-        lr_file_location = dataset_path + f'path{i}-lr.npy'
-        np.save(lr_file_location, emg_lr_reshaped)
-        lr_filename = f'path{i}-lr.npy'
-        lr_filenames_test.append(lr_filename)
-
-    # Combine LR and HR filenames row-wise
-    data = zip(lr_filenames_test, hr_filenames_test)
     # File path for the CSV file
     csv_file = 'data.csv'
 
@@ -484,11 +385,11 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
 
         # Add a header if the file is empty
         if file.tell() == 0:
-            writer.writerow(['lr_filename;hr_filename'])
+            writer.writerow(['hr_filename'])
 
-        # Add each LR/HR pair as a row in the CSV file
-        for lr_filename_test, hr_filename_test in data:
-            writer.writerow([lr_filename_test + ';' + hr_filename_test])
+        # Add each HR filename as a row in the CSV file
+        for hr_filename_test in hr_filenames_test:
+            writer.writerow([hr_filename_test])
 
 
 def create_tar_from_folder(folder_path, tar_filename):
