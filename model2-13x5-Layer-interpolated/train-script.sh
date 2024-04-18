@@ -7,7 +7,7 @@
 #SBATCH --job-name=model2-13x5-Layer-interpolated
 #SBATCH --time=2:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
-#SBATCH --gres=gpu:v100:1
+#SBATCH --gres=gpu:v100:2
 #SBATCH --partition=v100
 #SBATCH --export=NONE
 
