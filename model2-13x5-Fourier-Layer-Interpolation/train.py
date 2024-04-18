@@ -37,7 +37,7 @@ def setup_sweep():
                 'values': [0.001]
             },
             'gaussian_noise': {
-                'values': [True, False]
+                'values': [False]
             }
         }
     }

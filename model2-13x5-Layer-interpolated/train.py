@@ -10,7 +10,6 @@ You can run this file by running the main function.
 import argparse
 
 import torch
-import torch.utils.bottleneck as bottleneck
 import wandb  # Import wandb library
 
 from trainer import Trainer
