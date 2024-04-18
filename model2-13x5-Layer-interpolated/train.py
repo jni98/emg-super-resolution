@@ -84,7 +84,6 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    bottleneck.enable()
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
     # Parse arguments
@@ -103,5 +102,3 @@ if __name__ == "__main__":
     wandb.agent(sweep_id,
                 function=lambda: train(data_directory, test_data_directory, results_directory, num_epochs, sweep_config,
                                        sweep_id))
-
-    bottleneck.disable()
