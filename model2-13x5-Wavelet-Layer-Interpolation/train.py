@@ -25,7 +25,7 @@ def setup_sweep():
                 'values': [2],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [0.00001, 0.00002]
+                'values': [0.00001]
             },
             'num_res_blocks': {
                 'values': [2]
