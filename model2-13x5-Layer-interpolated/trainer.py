@@ -440,7 +440,7 @@ class Trainer:
         print("Logging plots for batch index 0 given channel")
 
         # x-axis for the following logs
-        fig, axs = plt.subplots(5, 1, figsize=(8, 10))
+        fig, axs = plt.subplots(4, 1, figsize=(8, 10))
         x_values = range(val_hr_destandardized.shape[4])
 
         # log absolute difference for one channel
@@ -468,23 +468,40 @@ class Trainer:
         axs[3].plot(range(len(cross_correlation)), cross_correlation)
         axs[3].set_title('Cross Correlation channel [6][2]')
 
-        # Log both into one plot
-        axs[4].plot(sr_channel[-1024:], label='Super-resolution channel [6][1]')
-        axs[4].plot(val_channel[-1024:], label='Validation channel [6][1]', alpha=0.5)
-        axs[4].set_title('Super-resolution vs Validation channel [6][2]')
-        axs[4].legend()
-
         plt.tight_layout()
         wandb.log({"Logged plots given Channel": [wandb.Image(fig)]})
 
         # Close the figure
         plt.close(fig)
 
+        # New figure for plots of channels
+        plt.figure()
+        # Plot both channels
+        plt.plot(sr_channel[-1024:], label='Super-resolution channel [6][2]')
+        plt.plot(val_channel[-1024:], label='Validation channel [6][2]', alpha=0.5)
+        # Set title (corrected)
+        plt.title('Super-resolution vs Validation - given Channel')
+        # Add legend
+        plt.legend()
+        # Convert Matplotlib plot to Plotly figure
+        plotly_fig = go.Figure()
+        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[0].get_xdata(),
+                                        y=plt.gca().get_lines()[0].get_ydata(),
+                                        name='Super-resolution channel [6][2]'))
+        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[1].get_xdata(),
+                                        y=plt.gca().get_lines()[1].get_ydata(),
+                                        name='Validation channel [6][2]', opacity=0.5))
+        plotly_fig.update_layout(title="Super-resolution vs Validation channel - given Channel", showlegend=True)
+        # Log the Plotly figure to W&B
+        wandb.log({"SR vs Val - given Channel": plotly_fig})
+        # Close the Matplotlib plot
+        plt.close()
+
         ############################## Log Plots predicted channel########################################
         print("Logging plots for batch index 0 predicted channel")
 
         # x-axis for the following logs
-        fig1, axs1 = plt.subplots(5, 1, figsize=(8, 10))
+        fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
         x_values = range(val_hr_destandardized.shape[4])
 
         # log absolute difference for one channel
@@ -513,17 +530,34 @@ class Trainer:
         axs1[3].plot(range(len(cross_correlation)), cross_correlation)
         axs1[3].set_title('Cross Correlation channel [6][1]')
 
-        # Log both into one plot
-        axs1[4].plot(sr_channel[-1024:], label='Super-resolution channel [6][1]')
-        axs1[4].plot(val_channel[-1024:], label='Validation channel [6][1]', alpha=0.5)
-        axs1[4].set_title('Super-resolution vs Validation channel [6][1]')
-        axs1[4].legend()
-
         plt.tight_layout()
         wandb.log({"Logged plots predicted Channel": [wandb.Image(fig1)]})
 
         # Close the figure
         plt.close(fig1)
+
+        # New figure for plots of channels
+        plt.figure()
+        # Plot both channels
+        plt.plot(sr_channel[-1024:], label='Super-resolution channel [6][1]')
+        plt.plot(val_channel[-1024:], label='Validation channel [6][1]', alpha=0.5)
+        # Set title (corrected)
+        plt.title('Super-resolution vs Validation - predicted Channel')
+        # Add legend
+        plt.legend()
+        # Convert Matplotlib plot to Plotly figure
+        plotly_fig = go.Figure()
+        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[0].get_xdata(),
+                                        y=plt.gca().get_lines()[0].get_ydata(),
+                                        name='Super-resolution channel [6][1]'))
+        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[1].get_xdata(),
+                                        y=plt.gca().get_lines()[1].get_ydata(),
+                                        name='Validation channel [6][1]', opacity=0.5))
+        plotly_fig.update_layout(title="Super-resolution vs Validation - predicted Channel", showlegend=True)
+        # Log the Plotly figure to W&B
+        wandb.log({"SR vs Val - predicted Channel": plotly_fig})
+        # Close the Matplotlib plot
+        plt.close()
 
         # Log freuqency histogram of both, val_hr destandardized and val_sr destandardized
         fig3, axs3 = plt.subplots(1, 2, figsize=(8, 10))

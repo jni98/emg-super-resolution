@@ -510,7 +510,7 @@ class Trainer:
         plt.plot(sr_channel[-1024:], label='Super-resolution channel [6][2]')
         plt.plot(val_channel[-1024:], label='Validation channel [6][2]', alpha=0.5)
         # Set title (corrected)
-        plt.title('Super-resolution vs Validation channel [6][2]')
+        plt.title('Super-resolution vs Validation - given Channel')
         # Add legend
         plt.legend()
         # Convert Matplotlib plot to Plotly figure
@@ -521,9 +521,9 @@ class Trainer:
         plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[1].get_xdata(),
                                         y=plt.gca().get_lines()[1].get_ydata(),
                                         name='Validation channel [6][2]', opacity=0.5))
-        plotly_fig.update_layout(title="Super-resolution vs Validation channel [6][2]", showlegend=True)
+        plotly_fig.update_layout(title="Super-resolution vs Validation channel - given Channel", showlegend=True)
         # Log the Plotly figure to W&B
-        wandb.log({"SR vs Val [6][2]": plotly_fig})
+        wandb.log({"SR vs Val - given Channel": plotly_fig})
         # Close the Matplotlib plot
         plt.close()
 
@@ -531,7 +531,7 @@ class Trainer:
         print("Logging plots for batch index 0 predicted channel")
 
         # x-axis for the following logs
-        fig1, axs1 = plt.subplots(5, 1, figsize=(8, 10))
+        fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
         x_values = range(val_hr_destandardized.shape[4])
 
         # log absolute difference for one channel
@@ -572,7 +572,7 @@ class Trainer:
         plt.plot(sr_channel[-1024:], label='Super-resolution channel [6][1]')
         plt.plot(val_channel[-1024:], label='Validation channel [6][1]', alpha=0.5)
         # Set title (corrected)
-        plt.title('Super-resolution vs Validation channel [6][1]')
+        plt.title('Super-resolution vs Validation - predicted Channel')
         # Add legend
         plt.legend()
         # Convert Matplotlib plot to Plotly figure
@@ -583,9 +583,9 @@ class Trainer:
         plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[1].get_xdata(),
                                         y=plt.gca().get_lines()[1].get_ydata(),
                                         name='Validation channel [6][1]', opacity=0.5))
-        plotly_fig.update_layout(title="Super-resolution vs Validation channel [6][1]", showlegend=True)
+        plotly_fig.update_layout(title="Super-resolution vs Validation - predicted Channel", showlegend=True)
         # Log the Plotly figure to W&B
-        wandb.log({"SR vs Val [6][1]": plotly_fig})
+        wandb.log({"SR vs Val - predicted Channel": plotly_fig})
         # Close the Matplotlib plot
         plt.close()
 
