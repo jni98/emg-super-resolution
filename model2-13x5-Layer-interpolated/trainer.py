@@ -27,6 +27,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
+import plotly.graph_objects as go
 
 
 class Trainer:
@@ -477,8 +478,8 @@ class Trainer:
         # New figure for plots of channels
         plt.figure()
         # Plot both channels
-        plt.plot(sr_channel[-1024:], label='Super-resolution channel [6][2]')
-        plt.plot(val_channel[-1024:], label='Validation channel [6][2]', alpha=0.5)
+        plt.plot(sr_channel, label='Super-resolution channel [6][2]')
+        plt.plot(val_channel, label='Validation channel [6][2]', alpha=0.5)
         # Set title (corrected)
         plt.title('Super-resolution vs Validation - given Channel')
         # Add legend
@@ -539,8 +540,8 @@ class Trainer:
         # New figure for plots of channels
         plt.figure()
         # Plot both channels
-        plt.plot(sr_channel[-1024:], label='Super-resolution channel [6][1]')
-        plt.plot(val_channel[-1024:], label='Validation channel [6][1]', alpha=0.5)
+        plt.plot(sr_channel, label='Super-resolution channel [6][1]')
+        plt.plot(val_channel, label='Validation channel [6][1]', alpha=0.5)
         # Set title (corrected)
         plt.title('Super-resolution vs Validation - predicted Channel')
         # Add legend
