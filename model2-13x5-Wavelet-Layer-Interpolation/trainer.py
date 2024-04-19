@@ -194,6 +194,7 @@ class Trainer:
         train_d_loss_real = []
         train_d_loss_fake = []
         train_g_loss = []
+        train_wavelet_loss = []
         val_loss = []
         psnr = []
         best_val_loss = float('inf')
@@ -209,13 +210,14 @@ class Trainer:
             initial_allocated = torch.cuda.memory_allocated()
             initial_cached = torch.cuda.memory_cached()
 
-            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d = self._train_epoch(epoch)
+            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, epoch_wavelet_loss = self._train_epoch(epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
 
             train_g_loss.append(epoch_loss_g)
             train_d_loss.append(epoch_loss_d)
             train_d_loss_real.append(epoch_loss_d_real)
             train_d_loss_fake.append(epoch_loss_d_fake)
+            train_wavelet_loss.append(epoch_wavelet_loss)
             val_loss.append(avg_val_loss)
             psnr.append(avg_psnr)
 
@@ -234,7 +236,7 @@ class Trainer:
             print(f"After epoch {epoch}, GPU memory allocated increased by: {allocated_diff} bytes")
             print(f"After epoch {epoch}, GPU memory cached increased by: {cached_diff} bytes")
 
-        return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, val_loss, psnr
+        return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, train_wavelet_loss, val_loss, psnr
 
     def _train_epoch(self, epoch: int) -> tuple:
         """
@@ -263,7 +265,6 @@ class Trainer:
         total_loss_d = 0.0
         total_wavelet_loss = 0.0
         total_content_loss = 0.0
-        total_gen_adversarial_loss = 0.0
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
@@ -329,7 +330,6 @@ class Trainer:
             total_loss_d_fake += loss_discriminator_fake.item()
             total_wavelet_loss += loss_generator_wavelet.item()
             total_content_loss += loss_generator_content.item()
-            total_gen_adversarial_loss += loss_generator_adv.item()
 
         avg_loss_g = total_loss_g / len(self.training)
         avg_loss_d_real = total_loss_d_real / len(self.training)
@@ -337,17 +337,15 @@ class Trainer:
         avg_loss_d = total_loss_d / len(self.training)
         avg_wavelet_loss = total_wavelet_loss / len(self.training)
         avg_content_loss = total_content_loss / len(self.training)
-        avg_gen_adversarial_loss = total_gen_adversarial_loss / len(self.training)
 
         wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real,
                    'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d,
-                   'avg_wavelet_loss': avg_wavelet_loss, 'avg_content_loss': avg_content_loss,
-                   'avg_gen_adversarial_loss': avg_gen_adversarial_loss})
+                   'avg_wavelet_loss': avg_wavelet_loss, 'avg_content_loss': avg_content_loss})
 
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
 
-        return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
+        return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d, avg_wavelet_loss
 
     def _validate(self, epoch: int) -> tuple:
         """
@@ -635,7 +633,7 @@ class Trainer:
         torch.save(self.discriminator.state_dict(), self.run_folder + self.unique_folder + '/final_discriminator.pt')
 
     def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list,
-                            train_d_loss: list, val_loss: list, psnr: list) -> None:
+                            train_d_loss: list, train_wavelet_loss: list, val_loss: list, psnr: list) -> None:
         """
         Plots the Generator and Discriminator loss over the epochs and the validation loss and PSNR over the epochs.
 
@@ -658,6 +656,7 @@ class Trainer:
         train_d_loss_np = np.array(train_d_loss)
         train_d_loss_real_np = np.array(train_d_loss_real)
         train_d_loss_fake_np = np.array(train_d_loss_fake)
+        train_wavelet_loss_np = np.array(train_wavelet_loss)
         val_loss_np = np.array(val_loss)
         psnr_np = np.array(psnr)
 
@@ -666,6 +665,8 @@ class Trainer:
         np.save(self.run_folder + self.unique_folder + '/train_d_loss.npy', train_d_loss_np)
         np.save(self.run_folder + self.unique_folder + '/train_d_loss_real.npy', train_d_loss_real_np)
         np.save(self.run_folder + self.unique_folder + '/train_d_loss_fake.npy', train_d_loss_fake_np)
+        np.save(self.run_folder + self.unique_folder + '/train_wavelet_loss.npy', train_wavelet_loss_np)
+
         np.save(self.run_folder + self.unique_folder + '/val_loss.npy', val_loss_np)
         np.save(self.run_folder + self.unique_folder + '/psnr.npy', psnr_np)
 

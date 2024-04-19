@@ -193,6 +193,7 @@ class Trainer:
         train_d_loss_real = []
         train_d_loss_fake = []
         train_g_loss = []
+        train_fourier_loss = []
         val_loss = []
         psnr = []
         best_val_loss = float('inf')
@@ -208,13 +209,14 @@ class Trainer:
             initial_allocated = torch.cuda.memory_allocated()
             initial_cached = torch.cuda.memory_cached()
 
-            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d = self._train_epoch(epoch)
+            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, epoch_fourier_loss = self._train_epoch(epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
 
             train_g_loss.append(epoch_loss_g)
             train_d_loss.append(epoch_loss_d)
             train_d_loss_real.append(epoch_loss_d_real)
             train_d_loss_fake.append(epoch_loss_d_fake)
+            train_fourier_loss.append(epoch_fourier_loss)
             val_loss.append(avg_val_loss)
             psnr.append(avg_psnr)
 
@@ -233,7 +235,7 @@ class Trainer:
             print(f"After epoch {epoch}, GPU memory allocated increased by: {allocated_diff} bytes")
             print(f"After epoch {epoch}, GPU memory cached increased by: {cached_diff} bytes")
 
-        return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, val_loss, psnr
+        return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, train_fourier_loss, val_loss, psnr
 
     def _train_epoch(self, epoch: int) -> tuple:
         """
@@ -347,7 +349,7 @@ class Trainer:
         # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
 
-        return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
+        return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d, avg_fourier_loss
 
     def _validate(self, epoch: int) -> tuple:
         """
@@ -629,7 +631,7 @@ class Trainer:
         torch.save(self.discriminator.state_dict(), self.run_folder + self.unique_folder + '/final_discriminator.pt')
 
     def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list,
-                            train_d_loss: list, val_loss: list, psnr: list) -> None:
+                            train_d_loss: list, train_fourier_loss: list, val_loss: list, psnr: list) -> None:
         """
         Plots the Generator and Discriminator loss over the epochs and the validation loss and PSNR over the epochs.
 
@@ -652,6 +654,7 @@ class Trainer:
         train_d_loss_np = np.array(train_d_loss)
         train_d_loss_real_np = np.array(train_d_loss_real)
         train_d_loss_fake_np = np.array(train_d_loss_fake)
+        train_fourier_loss_np = np.array(train_fourier_loss)
         val_loss_np = np.array(val_loss)
         psnr_np = np.array(psnr)
 
@@ -660,6 +663,7 @@ class Trainer:
         np.save(self.run_folder + self.unique_folder + '/train_d_loss.npy', train_d_loss_np)
         np.save(self.run_folder + self.unique_folder + '/train_d_loss_real.npy', train_d_loss_real_np)
         np.save(self.run_folder + self.unique_folder + '/train_d_loss_fake.npy', train_d_loss_fake_np)
+        np.save(self.run_folder + self.unique_folder + '/train_fourier_loss.npy', train_fourier_loss_np)
         np.save(self.run_folder + self.unique_folder + '/val_loss.npy', val_loss_np)
         np.save(self.run_folder + self.unique_folder + '/psnr.npy', psnr_np)
 
