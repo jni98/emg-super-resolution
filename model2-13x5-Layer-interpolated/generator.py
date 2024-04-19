@@ -65,16 +65,16 @@ class UpConvolutionBlock(nn.Module):
     add the skip connection.
     """
 
-    def __init__(self, in_channels, out_channels, stride) -> None:
+    def __init__(self, in_channels, out_channels1, out_channels2, stride) -> None:
         super(UpConvolutionBlock, self).__init__()
-        self.upConv = nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+        self.upConv = nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels1, kernel_size=(3, 3, 3),
                                          stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1))
-        self.bn1 = nn.BatchNorm3d(out_channels)
+        self.bn1 = nn.BatchNorm3d(out_channels1)
         self.prelu1 = nn.PReLU()
 
-        self.conv = nn.Conv3d(in_channels=out_channels + out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
+        self.conv = nn.Conv3d(in_channels=out_channels1 + out_channels1, out_channels=out_channels2, kernel_size=(3, 3, 3),
                               stride=(1, 1, 1), padding=(1, 1, 1))
-        self.bn2 = nn.BatchNorm3d(out_channels)
+        self.bn2 = nn.BatchNorm3d(out_channels2)
         self.prelu2 = nn.PReLU()
 
     def forward(self, x: torch.tensor, skip: torch.tensor) -> torch.tensor:
@@ -130,13 +130,13 @@ class Generator(nn.Module):
         self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=256) for _ in range(num_res_blocks_last)])
 
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlock(256, 128, stride=(1,1, 2))
+        self.upConv1 = UpConvolutionBlock(256, 128, 128,stride=(1,1, 2))
 
         # Upsampling 2
-        self.upConv2 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
+        self.upConv2 = UpConvolutionBlock(128, 64,64, stride=(1, 1, 2))
 
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlock(64, 64, stride=(1, 1, 2))
+        self.upConv3 = UpConvolutionBlock(64, 32,64, stride=(1, 1, 2))
 
         # Finale Convolution für Channel 1
         self.finalConv = nn.Conv3d(64, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))

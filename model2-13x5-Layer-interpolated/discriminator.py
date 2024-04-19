@@ -56,7 +56,7 @@ class Discriminator(nn.Module):
         self.flatten = nn.Flatten()
 
         # Adapt dense layer to output size of flatten()
-        self.dense1 = nn.Linear(327680, 1024)
+        self.dense1 = nn.Linear(65536, 1024)
         self.leaky_relu9 = nn.LeakyReLU(0.2, inplace=True)
         self.dense2 = nn.Linear(1024, 1)
         self.activation = nn.Sigmoid()
@@ -129,3 +129,8 @@ class Discriminator(nn.Module):
         out = self.activation(out)
         # print("Discriminator after activation", out.shape)
         return out
+
+if __name__ == '__main__':
+    x = torch.rand((1, 1, 13, 5, 2048))
+    model = Discriminator()
+    print(model(x).shape)
