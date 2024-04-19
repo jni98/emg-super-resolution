@@ -12,13 +12,13 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
     """
 
-    def __init__(self, data, directory, mean: float, std: float, gaussian_noise: bool) -> None:
+    def __init__(self, data, directory, mean: float, std: float, augment: bool) -> None:
         super().__init__()
         self.data = data
         self.directory = directory
         self.mean = mean
         self.std = std
-        self.gaussian_noise = gaussian_noise
+        self.augment = augment
 
         self.gaussian_noise_generator = GaussianNoise(target_snr__db=5.0)
         self.wavelet_decomposition = WaveletDecomposition(b=0.25, wavelet="db7", level=5, nr_of_grids=1)
@@ -36,7 +36,7 @@ class Custom_Dataset(Dataset):
         # Load and preprocess HR data
         hr_emg = np.load(f"{self.directory}/{hr_emg_path}")
 
-        if self.gaussian_noise:
+        if self.augment:
             # Randomly choose whether to augment the data or not
             augmentation_method = random.choice(
                 [self.no_augmentation, self.apply_gaussian_noise, self.apply_wavelet_decomposition])

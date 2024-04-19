@@ -108,18 +108,18 @@ class Trainer:
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], gaussian_noise = self.config.gaussian_noise),
+                           self.mean_std_dict['std'], augment= self.config.augment),
             batch_size=self.batch_size, pin_memory=True
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], gaussian_noise=False),
+                           self.mean_std_dict['std'], augment=False),
             batch_size=self.batch_size, pin_memory=True
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], gaussian_noise = False),
+                           self.mean_std_dict['std'], augment= False),
             pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
@@ -507,8 +507,8 @@ class Trainer:
         axs[3].set_title('Cross Correlation channel [6][2]')
 
         # Log both into one plot
-        axs[4].plot(sr_channel[8976:10000], label='Super-resolution channel [6][1]')
-        axs[4].plot(val_channel[8976:10000], label='Validation channel [6][1]', alpha=0.5)
+        axs[4].plot(sr_channel[-1024:], label='Super-resolution channel [6][1]')
+        axs[4].plot(val_channel[-1024:], label='Validation channel [6][1]', alpha=0.5)
         axs[4].set_title('Super-resolution vs Validation channel [6][2]')
         axs[4].legend()
 
@@ -552,8 +552,8 @@ class Trainer:
         axs1[3].set_title('Cross Correlation channel [6][1]')
 
         # Log both into one plot
-        axs1[4].plot(sr_channel[8976:10000], label='Super-resolution channel [6][1]')
-        axs1[4].plot(val_channel[8976:10000], label='Validation channel [6][1]', alpha=0.5)
+        axs1[4].plot(sr_channel[-1024:], label='Super-resolution channel [6][1]')
+        axs1[4].plot(val_channel[-1024:], label='Validation channel [6][1]', alpha=0.5)
         axs1[4].set_title('Super-resolution vs Validation channel [6][1]')
         axs1[4].legend()
 

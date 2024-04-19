@@ -35,6 +35,9 @@ def setup_sweep():
             },
             'fourier_loss_weight': {
                 'values': [0.001]
+            },
+            'augment':{
+                'value':[True]
             }
         }
     }

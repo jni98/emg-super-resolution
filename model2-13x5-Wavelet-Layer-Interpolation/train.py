@@ -38,6 +38,9 @@ def setup_sweep():
             },
             'loss_level': {
                 'values': [3]
+            },
+            'augment':{
+                'value':[True]
             }
 
         }
