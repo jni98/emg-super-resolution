@@ -6,9 +6,9 @@ generate high resolution data from low resolution data.
 
 The code is called from the trainer.py file which is started by the train.py.
 """
-import torch.nn as nn
 import torch
-import numpy as np
+import torch.nn as nn
+from torchscan import summary
 
 
 class ResidualBlock(nn.Module):
@@ -174,3 +174,9 @@ class Generator(nn.Module):
         # print("Generator output", out.shape)
 
         return out
+
+if __name__ == '__main__':
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # PyTorch v0.4.0
+    model = Generator(num_res_blocks=2, num_res_blocks_last=2, in_channels=1).to(device)
+
+    summary(model, (1,13,5,2048), receptive_field=True,max_depth=1)
