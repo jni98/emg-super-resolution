@@ -104,39 +104,39 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
 
         # Convolution
-        self.conv1 = nn.Conv3d(in_channels, 32, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
-        self.bn1 = nn.BatchNorm3d(32)
+        self.conv1 = nn.Conv3d(in_channels, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
+        self.bn1 = nn.BatchNorm3d(64)
         self.prelu1 = nn.PReLU()
 
         # Upsampling of the residual and residual block 1
-        self.res_blocks1 = nn.Sequential(*[ResidualBlock(in_channels=32) for _ in range(num_res_blocks)])
+        self.res_blocks1 = nn.Sequential(*[ResidualBlock(in_channels=64) for _ in range(num_res_blocks)])
 
         # DownConvolution 1
-        self.downConv1 = DownConvolutionBlock(in_channels=32, out_channels=64)
+        self.downConv1 = DownConvolutionBlock(in_channels=64, out_channels=128)
 
         # Upsampling of the residual and residual block 2
-        self.res_blocks2 = nn.Sequential(*[ResidualBlock(in_channels=64) for _ in range(num_res_blocks)])
+        self.res_blocks2 = nn.Sequential(*[ResidualBlock(in_channels=128) for _ in range(num_res_blocks)])
 
         # DownConvolution 2
-        self.downConv2 = DownConvolutionBlock(in_channels=64, out_channels=128)
+        self.downConv2 = DownConvolutionBlock(in_channels=128, out_channels=256)
 
         # Upsampling of the residual and residual block 3
-        self.res_blocks3 = nn.Sequential(*[ResidualBlock(in_channels=128) for _ in range(num_res_blocks)])
+        self.res_blocks3 = nn.Sequential(*[ResidualBlock(in_channels=256) for _ in range(num_res_blocks)])
 
         # DownConvolution 3
-        self.downConv3 = DownConvolutionBlock(in_channels=128, out_channels=256)
+        self.downConv3 = DownConvolutionBlock(in_channels=256, out_channels=512)
 
         # Upsampling of the residual and residual block 4
-        self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=256) for _ in range(num_res_blocks_last)])
+        self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=512) for _ in range(num_res_blocks_last)])
 
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlock(256, 128, 128,stride=(1,1, 2))
+        self.upConv1 = UpConvolutionBlock(512, 256, 256,stride=(1,1, 2))
 
         # Upsampling 2
-        self.upConv2 = UpConvolutionBlock(128, 64,64, stride=(1, 1, 2))
+        self.upConv2 = UpConvolutionBlock(256, 128,128, stride=(1, 1, 2))
 
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlock(64, 32,64, stride=(1, 1, 2))
+        self.upConv3 = UpConvolutionBlock(128, 64,64, stride=(1, 1, 2))
 
         # Finale Convolution für Channel 1
         self.finalConv = nn.Conv3d(64, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
