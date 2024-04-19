@@ -29,6 +29,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
+import plotly.graph_objects as go
 
 
 class Trainer:
@@ -504,13 +505,26 @@ class Trainer:
         plt.close(fig)
 
         # New figure for plots of channels
-        # Log both into one plot
         plt.figure()
+        # Plot both channels
         plt.plot(sr_channel[-1024:], label='Super-resolution channel [6][2]')
         plt.plot(val_channel[-1024:], label='Validation channel [6][2]', alpha=0.5)
-        plt.set_title('Super-resolution vs Validation channel [6][2]')
+        # Set title (corrected)
+        plt.title('Super-resolution vs Validation channel [6][2]')
+        # Add legend
         plt.legend()
-        wandb.log({'Super-resolution vs Validation channel [6][2]': plt})
+        # Convert Matplotlib plot to Plotly figure
+        plotly_fig = go.Figure()
+        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[0].get_xdata(),
+                                        y=plt.gca().get_lines()[0].get_ydata(),
+                                        name='Super-resolution channel [6][2]'))
+        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[1].get_xdata(),
+                                        y=plt.gca().get_lines()[1].get_ydata(),
+                                        name='Validation channel [6][2]', opacity=0.5))
+        plotly_fig.update_layout(title="Super-resolution vs Validation channel [6][2]", showlegend=True)
+        # Log the Plotly figure to W&B
+        wandb.log({"SR vs Val [6][2]": plotly_fig})
+        # Close the Matplotlib plot
         plt.close()
 
         ############################## Log Plots predicted channel########################################
@@ -553,13 +567,26 @@ class Trainer:
         plt.close(fig1)
 
         # New figure for plots of channels
-        # Log both into one plot
         plt.figure()
+        # Plot both channels
         plt.plot(sr_channel[-1024:], label='Super-resolution channel [6][1]')
         plt.plot(val_channel[-1024:], label='Validation channel [6][1]', alpha=0.5)
-        plt.set_title('Super-resolution vs Validation channel [6][1]')
+        # Set title (corrected)
+        plt.title('Super-resolution vs Validation channel [6][1]')
+        # Add legend
         plt.legend()
-        wandb.log({'Super-resolution vs Validation channel [6][1]': plt})
+        # Convert Matplotlib plot to Plotly figure
+        plotly_fig = go.Figure()
+        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[0].get_xdata(),
+                                        y=plt.gca().get_lines()[0].get_ydata(),
+                                        name='Super-resolution channel [6][1]'))
+        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[1].get_xdata(),
+                                        y=plt.gca().get_lines()[1].get_ydata(),
+                                        name='Validation channel [6][1]', opacity=0.5))
+        plotly_fig.update_layout(title="Super-resolution vs Validation channel [6][1]", showlegend=True)
+        # Log the Plotly figure to W&B
+        wandb.log({"SR vs Val [6][1]": plotly_fig})
+        # Close the Matplotlib plot
         plt.close()
 
         # Log freuqency histogram of both, val_hr destandardized and val_sr destandardized
