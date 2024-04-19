@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Wavelet-Layer-Interpolation-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=200
+EPOCHS=100
 
 ############    params   ###############
 
