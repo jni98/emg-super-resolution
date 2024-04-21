@@ -8,7 +8,7 @@ The code is called from the trainer.py file which is started by the train.py.
 """
 import torch
 import torch.nn as nn
-from torchscan import summary
+#from torchscan import summary
 
 
 class ResidualBlock(nn.Module):
