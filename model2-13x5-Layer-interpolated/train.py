@@ -28,13 +28,13 @@ def setup_sweep():
                 'values': [0.00001]
             },
             'num_res_blocks': {
-                'values': [3,4,5]
+                'values': [1,2,3]
             },
             'adv_loss_weight': {
                 'values': [0.1]
             },
             'augment':{
-                'value':[True, False]
+                'value':[False]
             }
         }
     }
