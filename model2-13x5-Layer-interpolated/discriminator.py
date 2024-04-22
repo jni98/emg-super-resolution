@@ -130,7 +130,7 @@ class Discriminator(nn.Module):
         # print("Discriminator after activation", out.shape)
         return out
 
-if __name__ == '__main__':
-    x = torch.rand((1, 1, 13, 5, 2048))
-    model = Discriminator()
-    print(model(x).shape)
+# if __name__ == '__main__':
+#     x = torch.rand((1, 1, 13, 5, 2048))
+#     model = Discriminator()
+#     print(model(x).shape)

@@ -34,7 +34,7 @@ def setup_sweep():
                 'values': [0.01, 0.1]
             },
             'augment':{
-                'value':[False]
+                'value':[True]
             }
         }
     }
