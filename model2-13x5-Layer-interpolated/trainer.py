@@ -14,7 +14,7 @@ import matplotlib
 import wandb
 import torch
 import pandas as pd
-from generator import Generator
+from generator_old import Generator
 from discriminator import Discriminator
 from data import Custom_Dataset
 

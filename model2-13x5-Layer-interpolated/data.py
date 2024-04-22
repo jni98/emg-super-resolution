@@ -51,7 +51,7 @@ class Custom_Dataset(Dataset):
         lr_emg = hr_emg[::2, ::2]
 
         # interpolate for hr shape
-        lr_emg = self.grid_interpolation(lr_emg, hr_emg.shape, method='linear')
+        #lr_emg = self.grid_interpolation(lr_emg, hr_emg.shape, method='linear')
 
         # Create lr file path
         lr_emg_path = hr_emg_path.replace("hr", "lr")
