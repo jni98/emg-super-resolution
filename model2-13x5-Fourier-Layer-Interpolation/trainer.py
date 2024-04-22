@@ -199,8 +199,8 @@ class Trainer:
         best_val_loss = float('inf')
 
         # Add wandb.watch() here to start tracking gradients and parameters
-        # wandb.watch(self.generator, criterion='mse', log='all')
-        # wandb.watch(self.discriminator, criterion='mse', log='all')
+        wandb.watch(self.generator, log='all')
+        wandb.watch(self.discriminator, log='all')
 
         for epoch in range(1, self.num_epochs + 1):
             print("epoch", epoch)
