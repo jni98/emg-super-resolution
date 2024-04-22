@@ -110,7 +110,7 @@ class Trainer:
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
                            self.mean_std_dict['std'], augment=self.config.augment),
-            batch_size=self.batch_size, pin_memory=True
+            batch_size=self.batch_size, pin_memory=True, shuffle=True
         )
 
         self.validation = torch.utils.data.DataLoader(

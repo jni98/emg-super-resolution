@@ -28,13 +28,13 @@ def setup_sweep():
                 'values': [0.00001, 0.00002, 0.00003]
             },
             'num_res_blocks': {
-                'values': [2]
+                'values': [1,2]
             },
             'adv_loss_weight': {
-                'values': [0.1, 0.2, 0.3]
+                'values': [0.01, 0.1]
             },
             'wavelet_loss_weight': {
-                'values': [10, 20, 30]
+                'values': [30, 40, 50]
             },
             'loss_level': {
                 'values': [3]
