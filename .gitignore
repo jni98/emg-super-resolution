@@ -173,3 +173,4 @@ dmypy.json
 /model2-13x5-Fourier-Layer-Interpolation/results/
 /model2-13x5-Wavelet-Layer-Interpolation/results/
 /model2-13x5-Wavelet-Layer-Interpolation/runs/
+/model2-13x5-Layer-interpolated/results/

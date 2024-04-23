@@ -523,19 +523,36 @@ class Trainer:
         plt.title('Super-resolution vs Validation - given Channel')
         # Add legend
         plt.legend()
+        # Set x and y axis labels
+        plt.xlabel('Time in samples')
+        plt.ylabel('Amplitude in µV')
         # Convert Matplotlib plot to Plotly figure
         plotly_fig = go.Figure()
-        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[0].get_xdata(),
-                                        y=plt.gca().get_lines()[0].get_ydata(),
-                                        name='Super-resolution channel [6][2]'))
-        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[1].get_xdata(),
-                                        y=plt.gca().get_lines()[1].get_ydata(),
-                                        name='Validation channel [6][2]', opacity=0.5))
-        plotly_fig.update_layout(title="Super-resolution vs Validation channel - given Channel", showlegend=True)
+        # Add traces for both channels
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution channel [6][2]'))
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(val_channel)), y=val_channel, name='Validation channel [6][2]', opacity=0.5))
+        # Update layout
+        plotly_fig.update_layout(title="Super-resolution vs Validation - given Channel", showlegend=True,
+                                 xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
         # Log the Plotly figure to W&B
         wandb.log({"SR vs Val - given Channel": plotly_fig})
         # Close the Matplotlib plot
         plt.close()
+
+        # Plot histograms of both signals with Plotly
+        # Histogram for super-resolution channel
+        histogram_sr = go.Histogram(x=sr_channel, name='Super-resolution channel', opacity=0.7, marker_color='blue')
+        # Histogram for validation channel
+        histogram_val = go.Histogram(x=val_channel, name='Validation channel', opacity=0.7, marker_color='green')
+        # Create a subplot figure
+        histogram_plotly_fig = go.Figure(data=[histogram_sr, histogram_val])
+        # Update layout
+        histogram_plotly_fig.update_layout(title="Histogram of Super-resolution vs Validation Channels",
+                                           xaxis_title="Value", yaxis_title="Frequency", barmode='overlay')
+        # Log the Plotly histogram to W&B
+        wandb.log({"Histograms": histogram_plotly_fig})
 
         ############################## Log Plots predicted channel########################################
         print("Logging plots for batch index 0 predicted channel")
@@ -578,35 +595,55 @@ class Trainer:
 
         # New figure for plots of channels
         plt.figure()
+
         # Plot both channels
         plt.plot(sr_channel, label='Super-resolution channel [6][1]')
         plt.plot(val_channel, label='Validation channel [6][1]', alpha=0.5)
+
         # Set title (corrected)
         plt.title('Super-resolution vs Validation - predicted Channel')
+
         # Add legend
         plt.legend()
+
+        # Set x and y axis labels
+        plt.xlabel('Time in samples')
+        plt.ylabel('Amplitude in µV')
+
         # Convert Matplotlib plot to Plotly figure
         plotly_fig = go.Figure()
-        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[0].get_xdata(),
-                                        y=plt.gca().get_lines()[0].get_ydata(),
-                                        name='Super-resolution channel [6][1]'))
-        plotly_fig.add_trace(go.Scatter(x=plt.gca().get_lines()[1].get_xdata(),
-                                        y=plt.gca().get_lines()[1].get_ydata(),
-                                        name='Validation channel [6][1]', opacity=0.5))
-        plotly_fig.update_layout(title="Super-resolution vs Validation - predicted Channel", showlegend=True)
+
+        # Add traces for both channels
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution channel [6][1]'))
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(val_channel)), y=val_channel, name='Validation channel [6][1]', opacity=0.5))
+
+        # Update layout
+        plotly_fig.update_layout(title="Super-resolution vs Validation - predicted Channel", showlegend=True,
+                                 xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
+
         # Log the Plotly figure to W&B
         wandb.log({"SR vs Val - predicted Channel": plotly_fig})
+
         # Close the Matplotlib plot
         plt.close()
 
-        # Log freuqency histogram of both, val_hr destandardized and val_sr destandardized
-        fig3, axs3 = plt.subplots(1, 2, figsize=(8, 10))
-        axs3[0].hist(val_hr_destandardized.reshape(-1).to('cpu'), bins=300)
-        axs3[0].set_title('Validation channel histogram')
-        axs3[1].hist(val_sr_emg_destandardized.reshape(-1).to('cpu'), bins=300)
-        axs3[1].set_title('Super-resolution channel histogram')
-        wandb.log({"Histograms": [wandb.Image(fig3)]})
-        plt.close(fig3)
+        # Plot histograms of both signals with Plotly
+        # Histogram for super-resolution channel
+        histogram_sr = go.Histogram(x=sr_channel, name='Super-resolution channel', opacity=0.7, marker_color='blue')
+        # Histogram for validation channel
+        histogram_val = go.Histogram(x=val_channel, name='Validation channel', opacity=0.7, marker_color='green')
+
+        # Create a subplot figure
+        histogram_plotly_fig = go.Figure(data=[histogram_sr, histogram_val])
+
+        # Update layout
+        histogram_plotly_fig.update_layout(title="Histogram of Super-resolution vs Validation Channels",
+                                           xaxis_title="Value", yaxis_title="Frequency", barmode='overlay')
+
+        # Log the Plotly histogram to W&B
+        wandb.log({"Histograms": histogram_plotly_fig})
 
     def compute_fourier_transform(self, data):
 
