@@ -22,19 +22,19 @@ def setup_sweep():
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-                'values': [8,10],  # Add the batch sizes you want to include
+                'values': [10],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [0.00001, 0.00002, 0.00003]
+                'values': [0.00001]
             },
             'num_res_blocks': {
-                'values': [1,2]
+                'values': [1]
             },
             'adv_loss_weight': {
-                'values': [0.01, 0.1]
+                'values': [0.01]
             },
             'wavelet_loss_weight': {
-                'values': [30, 40, 50]
+                'values': [30]
             },
             'loss_level': {
                 'values': [3]
