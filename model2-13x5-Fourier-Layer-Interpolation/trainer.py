@@ -416,7 +416,7 @@ class Trainer:
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
 
-                psnr = 20 * torch.log10(1.0 / torch.sqrt(val_loss))
+                psnr = 10 * torch.log10(1.0 / loss_generator_content)
 
                 total_psnr += psnr.item()
 

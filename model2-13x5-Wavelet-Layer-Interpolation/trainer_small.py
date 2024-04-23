@@ -404,7 +404,7 @@ class Trainer:
                 total_val_gen_content += loss_generator_content.item()
                 total_val_gen_wavelet += loss_generator_wavelet.item()
 
-                psnr = 20 * torch.log10(1.0 / torch.sqrt(val_loss))
+                psnr = 10 * torch.log10(1.0 / loss_generator_content)
 
                 total_psnr += psnr.item()
 
