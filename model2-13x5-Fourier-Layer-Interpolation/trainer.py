@@ -546,12 +546,12 @@ class Trainer:
         # Histogram for validation channel
         histogram_val = go.Histogram(x=val_channel, name='Validation channel', opacity=0.7, marker_color='green')
         # Create a subplot figure
-        histogram_plotly_fig = go.Figure(data=[histogram_sr, histogram_val])
+        histogram_plotly_fig1 = go.Figure(data=[histogram_sr, histogram_val])
         # Update layout
-        histogram_plotly_fig.update_layout(title="Histogram of Super-resolution vs Validation Channels",
+        histogram_plotly_fig1.update_layout(title="Histogram of Super-resolution vs Validation Channels [6][2]",
                                            xaxis_title="Value", yaxis_title="Frequency", barmode='overlay')
         # Log the Plotly histogram to W&B
-        wandb.log({"Histograms": histogram_plotly_fig})
+        wandb.log({"Histograms": histogram_plotly_fig1})
 
         ############################## Log Plots predicted channel########################################
         print("Logging plots for batch index 0 predicted channel")
@@ -638,7 +638,7 @@ class Trainer:
         histogram_plotly_fig = go.Figure(data=[histogram_sr, histogram_val])
 
         # Update layout
-        histogram_plotly_fig.update_layout(title="Histogram of Super-resolution vs Validation Channels",
+        histogram_plotly_fig.update_layout(title="Histogram of Super-resolution vs Validation Channels [6][1]",
                                            xaxis_title="Value", yaxis_title="Frequency", barmode='overlay')
 
         # Log the Plotly histogram to W&B
