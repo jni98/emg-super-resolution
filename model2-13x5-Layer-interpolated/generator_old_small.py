@@ -137,7 +137,7 @@ class Generator(nn.Module):
         #self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
 
         # Upsampling 2
-        self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
+        self.upConv2 = UpConvolutionBlock(256, 128, stride=(2,2, 2))
 
         # Upsampling 3
         self.upConv3 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
