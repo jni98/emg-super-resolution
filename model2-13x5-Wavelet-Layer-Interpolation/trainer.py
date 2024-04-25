@@ -479,7 +479,7 @@ class Trainer:
         print("Logging plots for batch index 0 given channel")
 
         # x-axis for the following logs
-        histogram_fig, axs = plt.subplots(4, 1, figsize=(8, 10))
+        bar_fig_1, axs = plt.subplots(4, 1, figsize=(8, 10))
         x_values = range(val_hr_destandardized.shape[4])
 
         # log absolute difference for one channel
@@ -502,9 +502,9 @@ class Trainer:
         axs[3].set_title('Cross Correlation channel [6][2]')
 
         plt.tight_layout()
-        wandb.log({"Logged plots given Channel": [wandb.Image(histogram_fig)]})
+        wandb.log({"Logged plots given Channel": [wandb.Image(bar_fig_1)]})
         # Close the figure
-        plt.close(histogram_fig)
+        plt.close(bar_fig_1)
 
         # New figure for plots of channels
         # Create Plotly figure
@@ -543,23 +543,42 @@ class Trainer:
         lr_Y = lr_Y[range(n // 2)]
 
         # Plot
-        histogram_fig = go.Figure()
+        bar_fig_1 = go.Figure()
 
         # Plot val_channel
-        histogram_fig.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation Channel', opacity=0.5))
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation Channel', opacity=0.5))
 
         # Plot val_channel
-        histogram_fig.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution Channel', opacity=0.5))
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution Channel', opacity=1))
 
         # Plot sr_channel
-        histogram_fig.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution Channel', opacity=0.5))
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution Channel', opacity=1))
 
-        histogram_fig.update_layout(title='Frequency Spectrum',
+        bar_fig_1.update_layout(title='Frequency Spectrum',
                                       xaxis_title='Frequency (Hz)',
                                       yaxis_title='Magnitude')
 
         # Log figure to wandb
-        wandb.log({"Frequency Spectrum Histogram - Given channel": histogram_fig})
+        wandb.log({"Frequency Spectrum - Given channel": bar_fig_1})
+
+        #Plot
+        hist_fig_1 = go.Figure()
+
+        # Plot val_channel
+        hist_fig_1.add_trace(go.Histogram(x=frq, y=np.abs(val_Y), nbinsx=500,name='Validation Channel', opacity=0.5))
+
+        # Plot val_channel
+        hist_fig_1.add_trace(go.Histogram(x=frq, y=np.abs(lr_Y), nbinsx=500,name='Low-resolution Channel', opacity=1))
+
+        # Plot sr_channel
+        hist_fig_1.add_trace(go.Histogram(x=frq, y=np.abs(sr_Y), nbinsx=500,name='Super-resolution Channel', opacity=1))
+
+        hist_fig_1.update_layout(title='Frequency Spectrum',
+                                xaxis_title='Frequency (Hz)',
+                                yaxis_title='Magnitude')
+
+        # Log figure to wandb
+        wandb.log({"Frequency Spectrum Histogram - Given channel": hist_fig_1})
 
         ############################## Log Plots predicted channel########################################
         print("Logging plots for batch index 0 predicted channel")
@@ -637,23 +656,43 @@ class Trainer:
         lr_Y = lr_Y[range(n // 2)]
 
         # Plot
-        histogram_fig_2 = go.Figure()
+        bar_fig_2 = go.Figure()
 
         # Plot val_channel
-        histogram_fig_2.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation Channel', opacity=0.5))
+        bar_fig_2.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation Channel', opacity=0.5))
 
         # Plot val_channel
-        histogram_fig_2.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution Channel', opacity=0.5))
+        bar_fig_2.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution Channel', opacity=1))
 
         # Plot sr_channel
-        histogram_fig_2.add_trace(go.Bar(x=frq, y=np.abs(sr_Y),  name='Super-resolution Channel', opacity=0.5))
+        bar_fig_2.add_trace(go.Bar(x=frq, y=np.abs(sr_Y),  name='Super-resolution Channel', opacity=1))
 
-        histogram_fig_2.update_layout(title='Frequency Spectrum',
+        bar_fig_2.update_layout(title='Frequency Spectrum',
                           xaxis_title='Frequency (Hz)',
                           yaxis_title='Magnitude')
 
         # Log figure to wandb
-        wandb.log({"Frequency distribution - predicted Channel": histogram_fig_2})
+        wandb.log({"Frequency distribution - Predicted Channel": bar_fig_2})
+
+        # Plot
+        hist_fig_2 = go.Figure()
+
+        # Plot val_channel
+        hist_fig_2.add_trace(go.Histogram(x=frq, y=np.abs(val_Y), nbinsx=500, name='Validation Channel', opacity=0.5))
+
+        # Plot val_channel
+        hist_fig_2.add_trace(go.Histogram(x=frq, y=np.abs(lr_Y), nbinsx=500, name='Low-resolution Channel', opacity=1))
+
+        # Plot sr_channel
+        hist_fig_2.add_trace(
+            go.Histogram(x=frq, y=np.abs(sr_Y), nbinsx=500, name='Super-resolution Channel', opacity=1))
+
+        hist_fig_2.update_layout(title='Frequency Spectrum',
+                                 xaxis_title='Frequency (Hz)',
+                                 yaxis_title='Magnitude')
+
+        # Log figure to wandb
+        wandb.log({"Frequency Spectrum Histogram - Predicted channel": hist_fig_2})
 
     def compute_wavelet_transform_loss(self, groundtruth, superresolution):
 
