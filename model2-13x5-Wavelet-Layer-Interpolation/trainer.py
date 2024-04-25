@@ -542,25 +542,21 @@ class Trainer:
         lr_Y = np.fft.fft(lr_channel) / n
         lr_Y = lr_Y[range(n // 2)]
 
-        # Define the number of bins
-        num_bins = 50
-
         # Plot
         histogram_fig = go.Figure()
 
-        # Plot histogram for val_channel
-        histogram_fig.add_trace(go.Histogram(x=frq, y=np.abs(val_Y), name='val_channel', opacity=0.5, nbinsx=num_bins))
+        # Plot val_channel
+        histogram_fig.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation Channel', opacity=0.5))
 
-        # Plot histogram for val_channel
-        histogram_fig.add_trace(go.Histogram(x=frq, y=np.abs(lr_Y), name='lr_channel', opacity=0.5, nbinsx=num_bins))
+        # Plot val_channel
+        histogram_fig.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution Channel', opacity=0.5))
 
-        # Plot histogram for sr_channel
-        histogram_fig.add_trace(go.Histogram(x=frq, y=np.abs(sr_Y), name='sr_channel', nbinsx=num_bins))
+        # Plot sr_channel
+        histogram_fig.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution Channel', opacity=0.5))
 
-        histogram_fig.update_layout(title='Frequency Spectrum Histogram',
-                                    xaxis_title='Frequency',
-                                    yaxis_title='Magnitude',
-                                    barmode='overlay')
+        histogram_fig.update_layout(title='Frequency Spectrum',
+                                      xaxis_title='Frequency (Hz)',
+                                      yaxis_title='Magnitude')
 
         # Log figure to wandb
         wandb.log({"Frequency Spectrum Histogram - Given channel": histogram_fig})
@@ -644,13 +640,13 @@ class Trainer:
         histogram_fig_2 = go.Figure()
 
         # Plot val_channel
-        histogram_fig_2.add_trace(go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='val_channel', opacity=0.5))
+        histogram_fig_2.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation Channel', opacity=0.5))
 
         # Plot val_channel
-        histogram_fig_2.add_trace(go.Scatter(x=frq, y=np.abs(lr_Y), mode='lines', name='lr_channel', opacity=0.5))
+        histogram_fig_2.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution Channel', opacity=0.5))
 
         # Plot sr_channel
-        histogram_fig_2.add_trace(go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='sr_channel', opacity=0.5))
+        histogram_fig_2.add_trace(go.Bar(x=frq, y=np.abs(sr_Y),  name='Super-resolution Channel', opacity=0.5))
 
         histogram_fig_2.update_layout(title='Frequency Spectrum',
                           xaxis_title='Frequency (Hz)',
