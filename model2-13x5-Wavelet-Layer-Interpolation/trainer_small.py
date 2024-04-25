@@ -115,12 +115,12 @@ class Trainer:
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], augment = False),
+                           self.mean_std_dict['std'], augment=False),
             batch_size=self.batch_size, pin_memory=True
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], augment = False),
+                           self.mean_std_dict['std'], augment=False),
             pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
@@ -210,7 +210,8 @@ class Trainer:
             initial_allocated = torch.cuda.memory_allocated()
             initial_cached = torch.cuda.memory_cached()
 
-            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, epoch_wavelet_loss = self._train_epoch(epoch)
+            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, epoch_wavelet_loss = self._train_epoch(
+                epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
 
             train_g_loss.append(epoch_loss_g)
@@ -380,18 +381,18 @@ class Trainer:
                 val_hr = val_hr.to(self.device)
 
                 # Generate SR data from LR data using the generator
-                val_sr_emg = self.generator(val_lr).to(self.device)
+                val_sr = self.generator(val_lr).to(self.device)
 
                 # Calculate adversarial loss
                 real_labels = torch.ones(val_hr.size(0), 1).to(self.device)
-                output_disc = self.discriminator(val_sr_emg)
+                output_disc = self.discriminator(val_sr)
                 loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
 
                 # Calculate content loss
-                loss_generator_content = self.mse(val_sr_emg, val_hr)
+                loss_generator_content = self.mse(val_sr, val_hr)
 
                 # Wavelet loss
-                loss_generator_wavelet = self.compute_wavelet_transform_loss(val_hr, val_sr_emg)
+                loss_generator_wavelet = self.compute_wavelet_transform_loss(val_hr, val_sr)
 
                 # Total loss for validation
                 val_loss = (self.adv_loss_weight * loss_generator_adv +
@@ -410,16 +411,18 @@ class Trainer:
 
                 # destacndardize the data for the logged plots
                 val_hr_destandardized = self.destandardize_data(val_hr)
-                val_sr_emg_destandardized = self.destandardize_data(val_sr_emg)
+                val_sr_destandardized = self.destandardize_data(val_sr)
+                val_lr_destandardized = self.destandardize_data(val_lr)
 
                 # log absolute difference for one channel absolute difference
-                abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_emg_destandardized[0][0][6][2])
+                abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_destandardized[0][0][6][2])
                 abs_diff = abs_diff.squeeze().to('cpu')
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
 
                 if val_batch_idx == 0:
-                    self.validation_plots_logging(val_hr_destandardized, val_sr_emg_destandardized, abs_diff)
+                    self.validation_plots_logging(val_lr_destandardized, val_hr_destandardized,
+                                                  val_sr_destandardized, abs_diff)
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
@@ -450,25 +453,35 @@ class Trainer:
 
         return avg_validation_loss, avg_psnr
 
-    def validation_plots_logging(self, val_hr_destandardized, val_sr_emg_destandardized, abs_diff):
+    def validation_plots_logging(self, val_lr_destandardized, val_hr_destandardized, val_sr_destandardized,
+                                 abs_diff):
         """
 
         Parameters
         ----------
         val_hr_destandardized
-        val_sr_emg_destandardized
+        val_sr_destandardized
         abs_diff
 
         Returns
         -------
 
         """
+        # Convert tensors to numpy arrays and move to CPU
+        val_lr_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
+        val_hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
+        val_sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
+
+        # Extract specific channels
+        lr_channel = val_lr_destandardized[0][0][6][2]
+        val_channel = val_hr_destandardized[0][0][6][2]
+        sr_channel = val_sr_destandardized[0][0][6][2]
 
         ############################## Log Plots given channel########################################
         print("Logging plots for batch index 0 given channel")
 
         # x-axis for the following logs
-        fig, axs = plt.subplots(4, 1, figsize=(8, 10))
+        bar_fig_1, axs = plt.subplots(4, 1, figsize=(8, 10))
         x_values = range(val_hr_destandardized.shape[4])
 
         # log absolute difference for one channel
@@ -476,16 +489,10 @@ class Trainer:
         axs[0].set_title('Absolute difference given channel')
 
         # Log one channel in the middle of the grid
-        val_channel = val_hr_destandardized[0][0][6][2]
-        val_channel = val_channel.to('cpu')
-        val_channel = np.asarray(val_channel)
         axs[1].plot(x_values, val_channel)
         axs[1].set_title('Validation channel [6][2]')
 
         # Log one channel in the middle of the grid
-        sr_channel = val_sr_emg_destandardized[0][0][6][2]
-        sr_channel = sr_channel.to('cpu')
-        sr_channel = np.asarray(sr_channel)
         axs[2].plot(x_values, sr_channel)
         axs[2].set_title('Super-resolution channel [6][2]')
 
@@ -497,73 +504,109 @@ class Trainer:
         axs[3].set_title('Cross Correlation channel [6][2]')
 
         plt.tight_layout()
-        wandb.log({"Logged plots given Channel": [wandb.Image(fig)]})
+        wandb.log({"Logged plots given Channel": [wandb.Image(bar_fig_1)]})
         # Close the figure
-        plt.close(fig)
+        plt.close(bar_fig_1)
 
         # New figure for plots of channels
-        plt.figure()
-        # Plot both channels
-        plt.plot(sr_channel, label='Super-resolution channel [6][2]')
-        plt.plot(val_channel, label='Validation channel [6][2]', alpha=0.5)
-        # Set title (corrected)
-        plt.title('Super-resolution vs Validation - given Channel')
-        # Add legend
-        plt.legend()
-        # Set x and y axis labels
-        plt.xlabel('Time in samples')
-        plt.ylabel('Amplitude in µV')
-        # Convert Matplotlib plot to Plotly figure
+        # Create Plotly figure
         plotly_fig = go.Figure()
-        # Add traces for both channels
+        # Add traces for all channels
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution channel [6][2]'))
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(val_channel)), y=val_channel, name='Validation channel [6][2]', opacity=0.5))
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(lr_channel)), y=lr_channel, name='Low-resolution channel [6][2]', opacity=0.5))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - given Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
         # Log the Plotly figure to W&B
         wandb.log({"SR vs Val - given Channel": plotly_fig})
-        # Close the Matplotlib plot
-        plt.close()
 
-        # Plot histograms of both signals with Plotly
-        # Histogram for super-resolution channel
-        histogram_sr = go.Histogram(x=sr_channel, name='Super-resolution channel', opacity=0.7, marker_color='blue')
-        # Histogram for validation channel
-        histogram_val = go.Histogram(x=val_channel, name='Validation channel', opacity=0.7, marker_color='green')
-        # Create a subplot figure
-        histogram_plotly_fig1 = go.Figure(data=[histogram_sr, histogram_val])
-        # Update layout
-        histogram_plotly_fig1.update_layout(title="Histogram of Super-resolution vs Validation Channels [6][2]",
-                                            xaxis_title="Value", yaxis_title="Frequency", barmode='overlay')
-        # Log the Plotly histogram to W&B
-        wandb.log({"Histograms": histogram_plotly_fig1})
+        ############# Plot frequency histogram# #################
+        sampling_freq = 2048
+
+        # Compute FFT for val_channel
+        n = len(val_channel)
+        k = np.arange(n)
+        T = n / sampling_freq
+        frq = k / T  # Two sides frequency range
+        frq = frq[range(n // 2)]  # One side frequency range
+        val_Y = np.fft.fft(val_channel) / n
+        val_Y = val_Y[range(n // 2)]
+
+        # Compute FFT for sr_channel
+        sr_Y = np.fft.fft(sr_channel) / n
+        sr_Y = sr_Y[range(n // 2)]
+
+        # Compute FFT for lr_channel
+        lr_Y = np.fft.fft(lr_channel) / n
+        lr_Y = lr_Y[range(n // 2)]
+
+        # Plot
+        bar_fig_1 = go.Figure()
+
+        # Plot val_channel
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation (HR) channel', opacity=1, offset=0))
+
+        # Plot val_channel
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution channel', opacity=1, offset=0.2))
+
+        # Plot sr_channel
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution channel', opacity=1, offset=0.1))
+
+        bar_fig_1.update_layout(title='Frequency Spectrum - Given channel',
+                                xaxis_title='Frequency (Hz)',
+                                yaxis_title='Magnitude',
+                                barmode='group')
+
+        # Log figure to wandb
+        wandb.log({"Frequency Spectrum - Given channel": bar_fig_1})
+
+        # Plot
+        freq_spec1 = go.Figure()
+
+        # Plot val_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='Validation (HR) channel', opacity=0.5))
+
+        # Plot lr_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(lr_Y), mode='lines', name='Low-resolution channel', opacity=0.5))
+
+        # Plot sr channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution channel', opacity=1))
+
+        freq_spec1.update_layout(title='Frequency Spectrum - Given channel',
+                                 xaxis_title='Frequency (Hz)',
+                                 yaxis_title='Magnitude')
+
+        wandb.log({"Frequency Spectrum - Given channel": freq_spec1})
 
         ############################## Log Plots predicted channel########################################
         print("Logging plots for batch index 0 predicted channel")
+
+        # Select channels
+        val_channel = val_hr_destandardized[0][0][6][1]
+        sr_channel = val_sr_destandardized[0][0][6][1]
+        lr_channel = val_lr_destandardized[0][0][6][1]
 
         # x-axis for the following logs
         fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
         x_values = range(val_hr_destandardized.shape[4])
 
         # log absolute difference for one channel
-        axs1[0].plot(x_values, torch.abs(
-            val_hr_destandardized[0][0][6][1] - val_sr_emg_destandardized[0][0][6][1]).squeeze().to('cpu'))
+        axs1[0].plot(x_values, np.abs(
+            val_channel - sr_channel).squeeze())
         axs1[0].set_title('Absolute difference predicted channel')
 
         # Log one channel in the middle of the grid
-        val_channel = val_hr_destandardized[0][0][6][1]
-        val_channel = val_channel.to('cpu')
-        val_channel = np.asarray(val_channel)
         axs1[1].plot(x_values, val_channel)
         axs1[1].set_title('Validation channel [6][1]')
 
         # Log one channel in the middle of the grid
-        sr_channel = val_sr_emg_destandardized[0][0][6][1]
-        sr_channel = sr_channel.to('cpu')
-        sr_channel = np.asarray(sr_channel)
         axs1[2].plot(x_values, sr_channel)
         axs1[2].set_title('Super-resolution channel [6][1]')
 
@@ -581,31 +624,15 @@ class Trainer:
         plt.close(fig1)
 
         # New figure for plots of channels
-        plt.figure()
-
-        # Plot both channels
-        plt.plot(sr_channel, label='Super-resolution channel [6][1]')
-        plt.plot(val_channel, label='Validation channel [6][1]', alpha=0.5)
-
-        # Set title (corrected)
-        plt.title('Super-resolution vs Validation - predicted Channel')
-
-        # Add legend
-        plt.legend()
-
-        # Set x and y axis labels
-        plt.xlabel('Time in samples')
-        plt.ylabel('Amplitude in µV')
-
-        # Convert Matplotlib plot to Plotly figure
+        # Create Plotly figure
         plotly_fig = go.Figure()
-
-        # Add traces for both channels
+        # Add traces for all channels
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution channel [6][1]'))
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(val_channel)), y=val_channel, name='Validation channel [6][1]', opacity=0.5))
-
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(lr_channel)), y=lr_channel, name='Low-resolution channel [6][1]', opacity=0.5))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - predicted Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
@@ -613,24 +640,66 @@ class Trainer:
         # Log the Plotly figure to W&B
         wandb.log({"SR vs Val - predicted Channel": plotly_fig})
 
-        # Close the Matplotlib plot
-        plt.close()
+        ############# Plot frequency histogram# #################
+        # Generate sample data for demonstration purposes
+        sampling_freq = 2048
 
-        # Plot histograms of both signals with Plotly
-        # Histogram for super-resolution channel
-        histogram_sr = go.Histogram(x=sr_channel, name='Super-resolution channel', opacity=0.7, marker_color='blue')
-        # Histogram for validation channel
-        histogram_val = go.Histogram(x=val_channel, name='Validation channel', opacity=0.7, marker_color='green')
+        # Compute FFT for val_channel
+        n = len(val_channel)
+        k = np.arange(n)
+        T = n / sampling_freq
+        frq = k / T  # Two sides frequency range
+        frq = frq[range(n // 2)]  # One side frequency range
+        val_Y = np.fft.fft(val_channel) / n
+        val_Y = val_Y[range(n // 2)]
 
-        # Create a subplot figure
-        histogram_plotly_fig = go.Figure(data=[histogram_sr, histogram_val])
+        # Compute FFT for sr_channel
+        sr_Y = np.fft.fft(sr_channel) / n
+        sr_Y = sr_Y[range(n // 2)]
+        # Compute FFT for lr_channel
+        lr_Y = np.fft.fft(lr_channel) / n
+        lr_Y = lr_Y[range(n // 2)]
 
-        # Update layout
-        histogram_plotly_fig.update_layout(title="Histogram of Super-resolution vs Validation Channels [6][1]",
-                                           xaxis_title="Value", yaxis_title="Frequency", barmode='overlay')
+        # Plot
+        bar_fig_1 = go.Figure()
 
-        # Log the Plotly histogram to W&B
-        wandb.log({"Histograms": histogram_plotly_fig})
+        # Plot val_channel
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation (HR) channel', opacity=1, offset=0))
+
+        # Plot val_channel
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution channel', opacity=1, offset=0.2))
+
+        # Plot sr_channel
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution channel', opacity=1, offset=0.1))
+
+        bar_fig_1.update_layout(title='Frequency Spectrum - Predicted channel',
+                                xaxis_title='Frequency (Hz)',
+                                yaxis_title='Magnitude',
+                                barmode='group')
+
+        # Log figure to wandb
+        wandb.log({"Frequency Spectrum - Predicted channel": bar_fig_1})
+
+        # Plot
+        freq_spec1 = go.Figure()
+
+        # Plot val_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='Validation (HR) channel', opacity=0.5))
+
+        # Plot lr_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(lr_Y), mode='lines', name='Low-resolution channel', opacity=0.5))
+
+        # Plot sr channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution channel', opacity=1))
+
+        freq_spec1.update_layout(title='Frequency Spectrum - Predicted channel',
+                                 xaxis_title='Frequency (Hz)',
+                                 yaxis_title='Magnitude')
+
+        wandb.log({"Frequency Spectrum - Predicted channel": freq_spec1})
 
     def compute_wavelet_transform_loss(self, groundtruth, superresolution):
 

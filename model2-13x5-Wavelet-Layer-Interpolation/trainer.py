@@ -381,18 +381,18 @@ class Trainer:
                 val_hr = val_hr.to(self.device)
 
                 # Generate SR data from LR data using the generator
-                val_sr_emg = self.generator(val_lr).to(self.device)
+                val_sr = self.generator(val_lr).to(self.device)
 
                 # Calculate adversarial loss
                 real_labels = torch.ones(val_hr.size(0), 1).to(self.device)
-                output_disc = self.discriminator(val_sr_emg)
+                output_disc = self.discriminator(val_sr)
                 loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
 
                 # Calculate content loss
-                loss_generator_content = self.mse(val_sr_emg, val_hr)
+                loss_generator_content = self.mse(val_sr, val_hr)
 
                 # Wavelet loss
-                loss_generator_wavelet = self.compute_wavelet_transform_loss(val_hr, val_sr_emg)
+                loss_generator_wavelet = self.compute_wavelet_transform_loss(val_hr, val_sr)
 
                 # Total loss for validation
                 val_loss = (self.adv_loss_weight * loss_generator_adv +
@@ -411,18 +411,18 @@ class Trainer:
 
                 # destacndardize the data for the logged plots
                 val_hr_destandardized = self.destandardize_data(val_hr)
-                val_sr_emg_destandardized = self.destandardize_data(val_sr_emg)
+                val_sr_destandardized = self.destandardize_data(val_sr)
                 val_lr_destandardized = self.destandardize_data(val_lr)
 
                 # log absolute difference for one channel absolute difference
-                abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_emg_destandardized[0][0][6][2])
+                abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_destandardized[0][0][6][2])
                 abs_diff = abs_diff.squeeze().to('cpu')
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
 
                 if val_batch_idx == 0:
                     self.validation_plots_logging(val_lr_destandardized, val_hr_destandardized,
-                                                  val_sr_emg_destandardized, abs_diff)
+                                                  val_sr_destandardized, abs_diff)
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
@@ -453,14 +453,14 @@ class Trainer:
 
         return avg_validation_loss, avg_psnr
 
-    def validation_plots_logging(self, val_lr_destandardized, val_hr_destandardized, val_sr_emg_destandardized,
+    def validation_plots_logging(self, val_lr_destandardized, val_hr_destandardized, val_sr_destandardized,
                                  abs_diff):
         """
 
         Parameters
         ----------
         val_hr_destandardized
-        val_sr_emg_destandardized
+        val_sr_destandardized
         abs_diff
 
         Returns
@@ -470,12 +470,12 @@ class Trainer:
         # Convert tensors to numpy arrays and move to CPU
         val_lr_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
         val_hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
-        val_sr_emg_destandardized = np.asarray(val_sr_emg_destandardized.to('cpu'))
+        val_sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
 
         # Extract specific channels
         lr_channel = val_lr_destandardized[0][0][6][2]
         val_channel = val_hr_destandardized[0][0][6][2]
-        sr_channel = val_sr_emg_destandardized[0][0][6][2]
+        sr_channel = val_sr_destandardized[0][0][6][2]
 
         ############################## Log Plots given channel########################################
         print("Logging plots for batch index 0 given channel")
@@ -568,7 +568,8 @@ class Trainer:
         freq_spec1 = go.Figure()
 
         # Plot val_channel
-        freq_spec1.add_trace(go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='Validation (HR) channel', opacity=0.5))
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='Validation (HR) channel', opacity=0.5))
 
         # Plot lr_channel
         freq_spec1.add_trace(
@@ -579,7 +580,7 @@ class Trainer:
             go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution channel', opacity=1))
 
         freq_spec1.update_layout(title='Frequency Spectrum - Given channel',
-                                 xaixs_title='Frequency (Hz)',
+                                 xaxis_title='Frequency (Hz)',
                                  yaxis_title='Magnitude')
 
         wandb.log({"Frequency Spectrum - Given channel": freq_spec1})
@@ -589,7 +590,7 @@ class Trainer:
 
         # Select channels
         val_channel = val_hr_destandardized[0][0][6][1]
-        sr_channel = val_sr_emg_destandardized[0][0][6][1]
+        sr_channel = val_sr_destandardized[0][0][6][1]
         lr_channel = val_lr_destandardized[0][0][6][1]
 
         # x-axis for the following logs
@@ -695,7 +696,7 @@ class Trainer:
             go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution channel', opacity=1))
 
         freq_spec1.update_layout(title='Frequency Spectrum - Predicted channel',
-                                 xaixs_title='Frequency (Hz)',
+                                 xaxis_title='Frequency (Hz)',
                                  yaxis_title='Magnitude')
 
         wandb.log({"Frequency Spectrum - Predicted channel": freq_spec1})
