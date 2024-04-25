@@ -565,14 +565,16 @@ class Trainer:
         hist_fig_1 = go.Figure()
 
         # Plot val_channel
-        hist_fig_1.add_trace(go.Histogram(x=frq, y=np.abs(val_Y), nbinsx=500,name='Validation Channel', opacity=0.5))
+        hist_fig_1.add_trace(
+            go.Histogram(np.abs(val_Y), x="Frequencies", name='Validation Channel', opacity=0.5))
 
         # Plot val_channel
-        hist_fig_1.add_trace(go.Histogram(x=frq, y=np.abs(lr_Y), nbinsx=500,name='Low-resolution Channel', opacity=1))
+        hist_fig_1.add_trace(
+            go.Histogram(np.abs(lr_Y), x='Frequencies', name='Low-resolution Channel', opacity=1))
 
         # Plot sr_channel
-        hist_fig_1.add_trace(go.Histogram(x=frq, y=np.abs(sr_Y), nbinsx=500,name='Super-resolution Channel', opacity=1))
-
+        hist_fig_1.add_trace(
+            go.Histogram(np.abs(sr_Y), x='Frequencies',  name='Super-resolution Channel', opacity=1))
         hist_fig_1.update_layout(title='Frequency Spectrum',
                                 xaxis_title='Frequency (Hz)',
                                 yaxis_title='Magnitude')
@@ -678,14 +680,14 @@ class Trainer:
         hist_fig_2 = go.Figure()
 
         # Plot val_channel
-        hist_fig_2.add_trace(go.Histogram(x=frq, y=np.abs(val_Y), nbinsx=500, name='Validation Channel', opacity=0.5))
+        hist_fig_2.add_trace(go.Histogram(np.abs(val_Y), x="Frequencies",  name='Validation Channel', opacity=0.5))
 
         # Plot val_channel
-        hist_fig_2.add_trace(go.Histogram(x=frq, y=np.abs(lr_Y), nbinsx=500, name='Low-resolution Channel', opacity=1))
+        hist_fig_2.add_trace(go.Histogram(np.abs(lr_Y), x='Frequencies',  name='Low-resolution Channel', opacity=1))
 
         # Plot sr_channel
         hist_fig_2.add_trace(
-            go.Histogram(x=frq, y=np.abs(sr_Y), nbinsx=500, name='Super-resolution Channel', opacity=1))
+            go.Histogram(np.abs(sr_Y), x='Frequencies',  name='Super-resolution Channel', opacity=1))
 
         hist_fig_2.update_layout(title='Frequency Spectrum',
                                  xaxis_title='Frequency (Hz)',
