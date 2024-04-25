@@ -523,44 +523,43 @@ class Trainer:
         wandb.log({"SR vs Val - given Channel": plotly_fig})
 
         ############# Plot frequency histogram# #################
-        # Perform Fourier Transform for val_channel
-        fft_result_val = np.fft.fft(val_channel)
-        freqs_val = np.fft.fftfreq(len(val_channel), 1 / 2048)  # Frequency bins
+        sampling_freq = 2048
 
-        # Perform Fourier Transform for sr_channel
-        fft_result_sr = np.fft.fft(sr_channel)
-        freqs_sr = np.fft.fftfreq(len(sr_channel), 1 / 2048)  # Frequency bins
+        # Compute FFT for val_channel
+        n = len(val_channel)
+        val_Y = np.fft.fft(val_channel) / n
+        val_Y = val_Y[range(n // 2)]
 
-        # Calculate Magnitude Spectrum
-        magnitude_spectrum_val = np.abs(fft_result_val)
-        magnitude_spectrum_sr = np.abs(fft_result_sr)
+        # Compute FFT for sr_channel
+        sr_Y = np.fft.fft(sr_channel) / n
+        sr_Y = sr_Y[range(n // 2)]
 
-        # Define number of bins for frequency histogram
-        num_bins = 300
+        # Compute FFT for lr_channel
+        lr_Y = np.fft.fft(lr_channel) / n
+        lr_Y = lr_Y[range(n // 2)]
 
-        # Create histogram-like plot using Plotly
+        # Define the number of bins
+        num_bins = 50
+
+        # Plot
         histogram_fig = go.Figure()
 
-        # Add histogram trace for val_channel
-        histogram_fig.add_trace(
-            go.Histogram(x=freqs_val[:len(freqs_val) // 2], y=magnitude_spectrum_val[:len(freqs_val) // 2],
-                         nbinsx=num_bins, name='val_channel', opacity=0.5))
+        # Plot histogram for val_channel
+        histogram_fig.add_trace(go.Histogram(x=np.abs(val_Y), name='val_channel', opacity=0.5, nbinsx=num_bins))
 
-        # Add histogram trace for sr_channel
-        histogram_fig.add_trace(
-            go.Histogram(x=freqs_sr[:len(freqs_sr) // 2], y=magnitude_spectrum_sr[:len(freqs_sr) // 2], nbinsx=num_bins,
-                         name='sr_channel', opacity=0.5))
+        # Plot histogram for val_channel
+        histogram_fig.add_trace(go.Histogram(x=np.abs(lr_Y), name='lr_channel', opacity=0.5, nbinsx=num_bins))
 
-        histogram_fig.update_layout(
-            title='Frequency Distribution',
-            xaxis_title='Frequency (Hz)',
-            yaxis_title='Magnitude Spectrum',
-            bargap=0.05,
-            barmode='overlay',  # Overlay bars for comparison
-        )
+        # Plot histogram for sr_channel
+        histogram_fig.add_trace(go.Histogram(x=np.abs(sr_Y), name='sr_channel', nbinsx=num_bins))
+
+        histogram_fig.update_layout(title='Frequency Spectrum Histogram',
+                          xaxis_title='Magnitude',
+                          yaxis_title='Count',
+                          barmode='overlay')
 
         # Log figure to wandb
-        wandb.log({"Frequency distribution": histogram_fig})
+        wandb.log({"Frequency Spectrum Histogram - Given channel": histogram_fig})
 
         ############################## Log Plots predicted channel########################################
         print("Logging plots for batch index 0 predicted channel")
@@ -618,44 +617,43 @@ class Trainer:
         wandb.log({"SR vs Val - predicted Channel": plotly_fig})
 
         ############# Plot frequency histogram# #################
-        # Perform Fourier Transform for val_channel
-        fft_result_val = np.fft.fft(val_channel)
-        freqs_val = np.fft.fftfreq(len(val_channel), 1 / 2048)  # Frequency bins
+        # Generate sample data for demonstration purposes
+        sampling_freq = 2048
 
-        # Perform Fourier Transform for sr_channel
-        fft_result_sr = np.fft.fft(sr_channel)
-        freqs_sr = np.fft.fftfreq(len(sr_channel), 1 / 2048)  # Frequency bins
+        # Compute FFT for val_channel
+        n = len(val_channel)
+        k = np.arange(n)
+        T = n / sampling_freq
+        frq = k / T  # Two sides frequency range
+        frq = frq[range(n // 2)]  # One side frequency range
+        val_Y = np.fft.fft(val_channel) / n
+        val_Y = val_Y[range(n // 2)]
 
-        # Calculate Magnitude Spectrum
-        magnitude_spectrum_val = np.abs(fft_result_val)
-        magnitude_spectrum_sr = np.abs(fft_result_sr)
+        # Compute FFT for sr_channel
+        sr_Y = np.fft.fft(sr_channel) / n
+        sr_Y = sr_Y[range(n // 2)]
+        # Compute FFT for lr_channel
+        lr_Y = np.fft.fft(lr_channel) / n
+        lr_Y = lr_Y[range(n // 2)]
 
-        # Define number of bins for frequency histogram
-        num_bins = 300
+        # Plot
+        histogram_fig_2 = go.Figure()
 
-        # Create histogram-like plot using Plotly
-        histogram_fig = go.Figure()
+        # Plot val_channel
+        histogram_fig_2.add_trace(go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='val_channel', opacity=0.5))
 
-        # Add histogram trace for val_channel
-        histogram_fig.add_trace(
-            go.Histogram(x=freqs_val[:len(freqs_val) // 2], y=magnitude_spectrum_val[:len(freqs_val) // 2],
-                         nbinsx=num_bins, name='val_channel', opacity=0.5))
+        # Plot val_channel
+        histogram_fig_2.add_trace(go.Scatter(x=frq, y=np.abs(lr_Y), mode='lines', name='lr_channel', opacity=0.5))
 
-        # Add histogram trace for sr_channel
-        histogram_fig.add_trace(
-            go.Histogram(x=freqs_sr[:len(freqs_sr) // 2], y=magnitude_spectrum_sr[:len(freqs_sr) // 2], nbinsx=num_bins,
-                         name='sr_channel', opacity=0.5))
+        # Plot sr_channel
+        histogram_fig_2.add_trace(go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='sr_channel', opacity=0.5))
 
-        histogram_fig.update_layout(
-            title='Frequency Distribution',
-            xaxis_title='Frequency (Hz)',
-            yaxis_title='Magnitude Spectrum',
-            bargap=0.05,
-            barmode='overlay',  # Overlay bars for comparison
-        )
+        histogram_fig_2.update_layout(title='Frequency Spectrum',
+                          xaxis_title='Frequency (Hz)',
+                          yaxis_title='Magnitude')
 
         # Log figure to wandb
-        wandb.log({"Frequency distribution": histogram_fig})
+        wandb.log({"Frequency distribution - predicted Channel": histogram_fig_2})
 
     def compute_wavelet_transform_loss(self, groundtruth, superresolution):
 
