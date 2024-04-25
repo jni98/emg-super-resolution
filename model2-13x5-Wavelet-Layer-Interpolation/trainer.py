@@ -529,14 +529,18 @@ class Trainer:
         n = len(val_channel)
         k = np.arange(n)
         T = n / sampling_freq
-        frq = np.fft.fftfreq(n, 1 / sampling_freq)  # Full frequency range
+        frq = k / T  # Two sides frequency range
+        frq = frq[range(n // 2)]  # One side frequency range
         val_Y = np.fft.fft(val_channel) / n
+        val_Y = val_Y[range(n // 2)]
 
         # Compute FFT for sr_channel
         sr_Y = np.fft.fft(sr_channel) / n
+        sr_Y = sr_Y[range(n // 2)]
 
         # Compute FFT for lr_channel
         lr_Y = np.fft.fft(lr_channel) / n
+        lr_Y = lr_Y[range(n // 2)]
 
         # Define the number of bins
         num_bins = 50
@@ -547,11 +551,11 @@ class Trainer:
         # Plot histogram for val_channel
         histogram_fig.add_trace(go.Histogram(x=frq, y=np.abs(val_Y), name='val_channel', opacity=0.5, nbinsx=num_bins))
 
-        # Plot histogram for sr_channel
-        histogram_fig.add_trace(go.Histogram(x=frq, y=np.abs(sr_Y), name='sr_channel', opacity=0.5, nbinsx=num_bins))
-
-        # Plot histogram for lr_channel
+        # Plot histogram for val_channel
         histogram_fig.add_trace(go.Histogram(x=frq, y=np.abs(lr_Y), name='lr_channel', opacity=0.5, nbinsx=num_bins))
+
+        # Plot histogram for sr_channel
+        histogram_fig.add_trace(go.Histogram(x=frq, y=np.abs(sr_Y), name='sr_channel', nbinsx=num_bins))
 
         histogram_fig.update_layout(title='Frequency Spectrum Histogram',
                                     xaxis_title='Frequency',
