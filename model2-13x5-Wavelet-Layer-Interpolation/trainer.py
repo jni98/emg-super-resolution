@@ -539,7 +539,7 @@ class Trainer:
         lr_Y = np.fft.fft(lr_channel) / n
 
         # Define the number of bins
-        num_bins = 30
+        num_bins = 1024
 
         # Plot
         histogram_fig = go.Figure()
