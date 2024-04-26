@@ -31,6 +31,9 @@ def setup_sweep():
             'num_res_blocks': {
                 'values': [5]
             },
+            'augment':{
+                'values':[True]
+            }
 
         }
     }
