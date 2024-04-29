@@ -32,7 +32,7 @@ def setup_sweep():
                 'values': [5]
             },
             'augment':{
-                'values':[True]
+                'values':[False]
             },
             'adv_loss_weight': {
                 'values': [0.01]

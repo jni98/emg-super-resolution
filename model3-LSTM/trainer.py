@@ -4,19 +4,19 @@ This is useful for reporting experiment params to experiment tracking software
 '''
 import torch
 from torch import nn
-from data import PowerConsumptionDataModule
+from data import CustomDataModule
 from model import LSTMRegressor
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.loggers.csv_logs import CSVLogger
 
 p = dict(
-    seq_len = 24,
-    batch_size = 70,
+    seq_len = 200,
+    batch_size = 1,
     criterion = nn.MSELoss(),
     max_epochs = 10,
-    n_features = 7,
-    hidden_size = 100,
+    n_features = 21,
+    hidden_size = 65,
     num_layers = 1,
     dropout = 0.2,
     learning_rate = 0.001,
@@ -29,9 +29,9 @@ csv_logger = CSVLogger('./', name='lstm', version='0'),
 trainer = Trainer(
     max_epochs=p['max_epochs'],
     logger=csv_logger,
-    gpus=1,
-    row_log_interval=1,
-    progress_bar_refresh_rate=2,
+    devices=1,
+    accelerator="gpu",
+    deterministic=True
 )
 
 model = LSTMRegressor(
@@ -45,7 +45,7 @@ model = LSTMRegressor(
     learning_rate = p['learning_rate']
 )
 
-dm = PowerConsumptionDataModule(
+dm = CustomDataModule(
     seq_len = p['seq_len'],
     batch_size = p['batch_size']
 )

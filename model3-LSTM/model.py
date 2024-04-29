@@ -33,13 +33,11 @@ class LSTMRegressor(pl.LightningModule):
                             num_layers=num_layers,
                             dropout=dropout,
                             batch_first=True)
-        self.linear = nn.Linear(hidden_size, 1)
 
     def forward(self, x):
         # lstm_out = (batch_size, seq_len, hidden_size)
         lstm_out, _ = self.lstm(x)
-        y_pred = self.linear(lstm_out[:, -1])
-        return y_pred
+        return lstm_out
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
@@ -48,22 +46,22 @@ class LSTMRegressor(pl.LightningModule):
         x, y = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
-        result = pl.TrainResult(loss)
-        result.log('train_loss', loss)
-        return result
+        #result = pl.TrainResult(loss)
+        #result.log('train_loss', loss)
+        return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
-        result = pl.EvalResult(checkpoint_on=loss)
-        result.log('val_loss', loss)
-        return result
+        #result = pl.EvalResult(checkpoint_on=loss)
+        #result.log('val_loss', loss)
+        return loss
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
-        result = pl.EvalResult()
-        result.log('test_loss', loss)
-        return result
+        #result = pl.EvalResult()
+        #result.log('test_loss', loss)
+        return loss

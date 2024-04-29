@@ -1,10 +1,14 @@
+import json
+
 import torch
 import numpy as np
 import pytorch_lightning as pl
 import pandas as pd
+from scipy.signal import butter, filtfilt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import Dataset, DataLoader
+from torchvision.transforms import transforms
 
 
 class TimeseriesDataset(Dataset):
@@ -16,19 +20,73 @@ class TimeseriesDataset(Dataset):
       of `(batch_size, seq_len, n_features)` shape.
     Suitable as an input to RNNs.
     '''
-    def __init__(self, X: np.ndarray, y: np.ndarray, seq_len: int = 1):
-        self.X = torch.tensor(X).float()
-        self.y = torch.tensor(y).float()
-        self.seq_len = seq_len
+    def __init__(self, X: np.ndarray,directory: str, transform=None):
+        self.X = X
+        self.directory = directory
+        self.transform = transform
+    def __len__(self) -> int:
+        return len(self.X)
 
-    def __len__(self):
-        return self.X.__len__() - (self.seq_len-1)
+    def __getitem__(self, index: int) -> tuple:
+        if torch.is_tensor(index):
+            index = index.tolist()
 
-    def __getitem__(self, index):
-        return (self.X[index:index+self.seq_len], self.y[index+self.seq_len-1])
+        # Load file paths
+        hr_emg_path = self.X.iloc[index]['hr_filename']
 
+        # Load and preprocess HR data
+        hr_emg = np.load(f"{self.directory}/{hr_emg_path}")
 
-class PowerConsumptionDataModule(pl.LightningDataModule):
+        # Bandpass filter
+        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
+
+        # extract lr emg
+        lr_emg = hr_emg[::2, ::2]
+
+        hr_emg = hr_emg.reshape(-1, hr_emg.shape[2]).transpose()
+        lr_emg = lr_emg.reshape(-1, lr_emg.shape[2]).transpose()
+
+        # Transform
+        if self.transform:
+            lr_emg = self.transform(lr_emg.copy()).squeeze()
+            hr_emg = self.transform(hr_emg.copy()).squeeze()
+
+        # Convert input data to the same data type as the model parameters
+        lr_emg = lr_emg.to(torch.float32)
+        hr_emg = hr_emg.to(torch.float32)
+
+        return (lr_emg, hr_emg)
+
+    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
+        """
+        Apply a bandpass filter to the data
+        Parameters
+        ----------
+        data: np.array
+            Data to be filtered
+        lowcut: float
+            Lower cut-off frequency
+        highcut: float
+            Higher cut-off frequency
+        fs: int
+            Sampling frequency
+        order: int
+            Order of the filter
+
+        Returns
+        -------
+        y: np.array
+            Filtered data
+        """
+        nyq = 0.5 * fs
+        low = lowcut / nyq
+        high = highcut / nyq
+        b, a = butter(order, [low, high], btype='band')
+        filtered_signal = filtfilt(b, a, data)
+
+        return filtered_signal
+
+class CustomDataModule(pl.LightningDataModule):
     '''
     PyTorch Lighting DataModule subclass:
     https://pytorch-lightning.readthedocs.io/en/latest/datamodules.html
@@ -68,49 +126,40 @@ class PowerConsumptionDataModule(pl.LightningDataModule):
         if stage is None and self.X_train is not None and self.X_test is not None:
             return
 
-        path = '/kaggle/input/electric-power-consumption-data-set/household_power_consumption.txt'
+        self.path_train = '../dataset_lstm/train'
+        self.path_test = '../dataset_lstm/test'
 
-        df = pd.read_csv(
-            path,
-            sep=';',
-            parse_dates={'dt': ['Date', 'Time']},
-            infer_datetime_format=True,
-            low_memory=False,
-            na_values=['nan', '?'],
-            index_col='dt'
-        )
+        # Load the JSON file with values for standardization into a Python dictionary
+        with open(self.path_train + '/mean_std.json', 'r') as file:
+                self.mean_std_dict = json.load(file)
 
-        df_resample = df.resample('h').mean()
+        data_train_val = pd.read_csv(self.path_train + '/data.csv', sep=";")
+        self.X_test = pd.read_csv(self.path_test + '/data.csv', sep=";")
 
-        X = df_resample.dropna().copy()
-        y = X['Global_active_power'].shift(-1).ffill()
-        self.columns = X.columns
+        self.X_train, self.X_val = train_test_split(data_train_val, train_size=0.8, test_size=0.2, shuffle = False)
 
-        X_cv, X_test, y_cv, y_test = train_test_split(
-            X, y, test_size=0.2, shuffle=False
-        )
+        #preprocessing = StandardScaler()
+        #preprocessing.fit(X_train)
 
-        X_train, X_val, y_train, y_val = train_test_split(
-            X_cv, y_cv, test_size=0.25, shuffle=False
-        )
-
-        preprocessing = StandardScaler()
-        preprocessing.fit(X_train)
-
-        if stage == 'fit' or stage is None:
-            self.X_train = preprocessing.transform(X_train)
-            self.y_train = y_train.values.reshape((-1, 1))
-            self.X_val = preprocessing.transform(X_val)
-            self.y_val = y_val.values.reshape((-1, 1))
-
-        if stage == 'test' or stage is None:
-            self.X_test = preprocessing.transform(X_test)
-            self.y_test = y_test.values.reshape((-1, 1))
+        # if stage == 'fit' or stage is None:
+        #     self.X_train = preprocessing.transform(X_train)
+        #     self.y_train = y_train.values.reshape((-1, 1))
+        #     self.X_val = preprocessing.transform(X_val)
+        #     self.y_val = y_val.values.reshape((-1, 1))
+        #
+        # if stage == 'test' or stage is None:
+        #     self.X_test = preprocessing.transform(X_test)
+        #     self.y_test = y_test.values.reshape((-1, 1))
 
     def train_dataloader(self):
-        train_dataset = TimeseriesDataset(self.X_train,
-                                          self.y_train,
-                                          seq_len=self.seq_len)
+
+        # Define your transformations
+        data_transform = transforms.Compose([
+            transforms.ToTensor(),  # Convert data to tensor
+            transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
+        ])
+
+        train_dataset = TimeseriesDataset(self.X_train, self.path_train, transform = data_transform)
         train_loader = DataLoader(train_dataset,
                                   batch_size=self.batch_size,
                                   shuffle=False,
@@ -119,9 +168,14 @@ class PowerConsumptionDataModule(pl.LightningDataModule):
         return train_loader
 
     def val_dataloader(self):
-        val_dataset = TimeseriesDataset(self.X_val,
-                                        self.y_val,
-                                        seq_len=self.seq_len)
+
+        # Define your transformations
+        data_transform = transforms.Compose([
+            transforms.ToTensor(),  # Convert data to tensor
+            transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
+        ])
+
+        val_dataset = TimeseriesDataset(self.X_val,self.path_train, transform = data_transform)
         val_loader = DataLoader(val_dataset,
                                 batch_size=self.batch_size,
                                 shuffle=False,
@@ -130,12 +184,18 @@ class PowerConsumptionDataModule(pl.LightningDataModule):
         return val_loader
 
     def test_dataloader(self):
-        test_dataset = TimeseriesDataset(self.X_test,
-                                         self.y_test,
-                                         seq_len=self.seq_len)
+
+        # Define your transformations
+        data_transform = transforms.Compose([
+            transforms.ToTensor(),  # Convert data to tensor
+            transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
+        ])
+
+        test_dataset = TimeseriesDataset(self.X_test,self.path_test, transform = data_transform)
         test_loader = DataLoader(test_dataset,
                                  batch_size=self.batch_size,
                                  shuffle=False,
                                  num_workers=self.num_workers)
 
         return test_loader
+
