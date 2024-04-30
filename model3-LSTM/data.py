@@ -43,8 +43,8 @@ class TimeseriesDataset(Dataset):
         # extract lr emg
         lr_emg = hr_emg[::2, ::2]
 
-        hr_emg = hr_emg.reshape(-1, hr_emg.shape[2]).transpose()
-        lr_emg = lr_emg.reshape(-1, lr_emg.shape[2]).transpose()
+        hr_emg = hr_emg.reshape(-1, hr_emg.shape[2])
+        lr_emg = lr_emg.reshape(-1, lr_emg.shape[2])
 
         # Transform
         if self.transform:
@@ -95,61 +95,31 @@ class CustomDataModule(pl.LightningDataModule):
       and processing work in one place.
     '''
 
-    def __init__(self, seq_len=1, batch_size=128, num_workers=0):
+    def __init__(self, seq_len=1, batch_size=128, num_workers=0, data_directory: str = None, test_data_directory: str = None):
         super().__init__()
         self.seq_len = seq_len
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.data_directory = data_directory
+        self.test_data_directory = test_data_directory
         self.X_train = None
-        self.y_train = None
         self.X_val = None
-        self.y_val = None
         self.X_test = None
-        self.X_test = None
-        self.columns = None
-        self.preprocessing = None
+        self.mean_std_dict = None
 
     def prepare_data(self):
         pass
 
     def setup(self, stage=None):
-        '''
-        Data is resampled to hourly intervals.
-        Both 'np.nan' and '?' are converted to 'np.nan'
-        'Date' and 'Time' columns are merged into 'dt' index
-        '''
-
-        if stage == 'fit' and self.X_train is not None:
-            return
-        if stage == 'test' and self.X_test is not None:
-            return
-        if stage is None and self.X_train is not None and self.X_test is not None:
-            return
-
-        self.path_train = '../dataset_lstm/train'
-        self.path_test = '../dataset_lstm/test'
 
         # Load the JSON file with values for standardization into a Python dictionary
-        with open(self.path_train + '/mean_std.json', 'r') as file:
+        with open(self.data_directory + '/mean_std.json', 'r') as file:
                 self.mean_std_dict = json.load(file)
 
-        data_train_val = pd.read_csv(self.path_train + '/data.csv', sep=";")
-        self.X_test = pd.read_csv(self.path_test + '/data.csv', sep=";")
+        data_train_val = pd.read_csv(self.data_directory + '/data.csv', sep=";")
+        self.X_test = pd.read_csv(self.test_data_directory + '/data.csv', sep=";")
 
         self.X_train, self.X_val = train_test_split(data_train_val, train_size=0.8, test_size=0.2, shuffle = False)
-
-        #preprocessing = StandardScaler()
-        #preprocessing.fit(X_train)
-
-        # if stage == 'fit' or stage is None:
-        #     self.X_train = preprocessing.transform(X_train)
-        #     self.y_train = y_train.values.reshape((-1, 1))
-        #     self.X_val = preprocessing.transform(X_val)
-        #     self.y_val = y_val.values.reshape((-1, 1))
-        #
-        # if stage == 'test' or stage is None:
-        #     self.X_test = preprocessing.transform(X_test)
-        #     self.y_test = y_test.values.reshape((-1, 1))
 
     def train_dataloader(self):
 
@@ -159,7 +129,7 @@ class CustomDataModule(pl.LightningDataModule):
             transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
         ])
 
-        train_dataset = TimeseriesDataset(self.X_train, self.path_train, transform = data_transform)
+        train_dataset = TimeseriesDataset(self.X_train, self.data_directory, transform = data_transform)
         train_loader = DataLoader(train_dataset,
                                   batch_size=self.batch_size,
                                   shuffle=False,
@@ -175,7 +145,7 @@ class CustomDataModule(pl.LightningDataModule):
             transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
         ])
 
-        val_dataset = TimeseriesDataset(self.X_val,self.path_train, transform = data_transform)
+        val_dataset = TimeseriesDataset(self.X_val,self.data_directory, transform = data_transform)
         val_loader = DataLoader(val_dataset,
                                 batch_size=self.batch_size,
                                 shuffle=False,
@@ -191,9 +161,9 @@ class CustomDataModule(pl.LightningDataModule):
             transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
         ])
 
-        test_dataset = TimeseriesDataset(self.X_test,self.path_test, transform = data_transform)
+        test_dataset = TimeseriesDataset(self.X_test,self.test_data_directory, transform = data_transform)
         test_loader = DataLoader(test_dataset,
-                                 batch_size=self.batch_size,
+                                 batch_size=1,
                                  shuffle=False,
                                  num_workers=self.num_workers)
 
