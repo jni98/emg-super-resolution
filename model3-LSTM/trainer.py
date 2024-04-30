@@ -8,13 +8,19 @@ from data import CustomDataModule
 from model import LSTMRegressor
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.loggers.csv_logs import CSVLogger
+from pytorch_lightning.loggers import TensorBoardLogger
+from lightning.pytorch.loggers import WandbLogger
+
+wandb_logger = WandbLogger(project="emg-super-resolution-LSTM")
+
+#logger = TensorBoardLogger("logs", name="SR LSTM")
+
 
 p = dict(
     seq_len = 200,
     batch_size = 1,
     criterion = nn.MSELoss(),
-    max_epochs = 10,
+    max_epochs = 5,
     n_features = 21,
     hidden_size = 65,
     num_layers = 1,
@@ -24,14 +30,12 @@ p = dict(
 
 seed_everything(1)
 
-csv_logger = CSVLogger('./', name='lstm', version='0'),
-
 trainer = Trainer(
     max_epochs=p['max_epochs'],
-    logger=csv_logger,
     devices=1,
     accelerator="gpu",
-    deterministic=True
+    deterministic=True,
+    logger=wandb_logger
 )
 
 model = LSTMRegressor(

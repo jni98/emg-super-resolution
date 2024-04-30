@@ -217,19 +217,19 @@ def dataset_creator_dominik(data_paths: list[str]) -> None:
             writer.writerow([lr_filename + ';' + hr_filename])
 
 
-def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str]) -> None:
+def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str], dataset_name: str, sequence_length: int) -> None:
     """
 
     Parameters
     ----------
-    train_paths: list of str
-                A list of multiple directories, each containing a matlab file
-    test_paths: list of str
-                A list of multiple directories, each containing a matlab file
+    train_paths
+    test_paths
+    dataset_name
+    sequence_length
 
     Returns
     -------
-    None
+
     """
 
     ######################## Training ########################
@@ -253,7 +253,7 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         emg_data = emg_data / EMGGainFactor
 
         # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
-        dataset_path = 'dataset' + '/train/'
+        dataset_path = dataset_name + '/train/'
         print(dataset_path)
 
         # Create the folder if it doesn't exist
@@ -281,14 +281,14 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         else:
             combined_data = np.concatenate((combined_data, emg_hr_reshaped.flatten()))
 
-        windows = emg_length - 2048
+        windows = emg_length - sequence_length
 
-        # window the signal to 2048 samples
+        # window the signal to sequence_length samples
         # 51 samples equals 25ms which is approximately 1 action potential
-        for window in range(0, windows, (2048 - 51)):
+        for window in range(0, windows, (sequence_length - 51)):
             print("window", window)
-            # The length of one sample is 20480 which is equal to 10 second
-            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + 2048)]
+            # The length of one sample is sequence_length which is equal to 10 second
+            emg_hr_windowed = emg_hr_reshaped[:, :, window:(window + sequence_length)]
 
             # save high resolution data and add file name to list
             hr_file_location = dataset_path + f'path{i}-window{window}-hr.npy'
@@ -306,14 +306,14 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         "std": std,
     }
 
-    with open('dataset/train' + '/mean_std.json', 'w') as file:
+    with open(dataset_name + '/train' + '/mean_std.json', 'w') as file:
         json.dump(mean_std_dict, file)
 
     # File path for the CSV file
     csv_file = 'data.csv'
 
     # Open the CSV file in append mode and write the data
-    with open('dataset/train' + '/' + csv_file, mode='a', newline='') as file:
+    with open(dataset_name + '/train' + '/' + csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
 
         # Add a header if the file is empty
@@ -343,7 +343,7 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         emg_data = emg_data / EMGGainFactor
 
         # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
-        dataset_path = 'dataset' + '/test/'
+        dataset_path = dataset_name + '/test/'
         print(dataset_path)
 
         # Create the folder if it doesn't exist
@@ -380,7 +380,7 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
     csv_file = 'data.csv'
 
     # Open the CSV file in append mode and write the data
-    with open('dataset/test' + '/' + csv_file, mode='a', newline='') as file:
+    with open(dataset_name + '/test' + '/' + csv_file, mode='a', newline='') as file:
         writer = csv.writer(file)
 
         # Add a header if the file is empty
@@ -440,10 +440,18 @@ if __name__ == '__main__':
         'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/POST/400NuStRo171221103923 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length29.665_runs100_FINISHED.mat',
         'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/PRE/400NuStRo171215104010 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED.mat']
 
-    dataset_creator_alessandro_13x5(train_paths, test_paths)
+    dataset_creator_alessandro_13x5(train_paths, test_paths, 'dataset', sequence_length=2048)
 
-    # Define folder path and tar filename
+    #Define folder path and tar filename
     folder_path = 'dataset'
     tar_filename = 'dataset.tar'
+
+    create_tar_from_folder(folder_path, tar_filename)
+
+    dataset_creator_alessandro_13x5(train_paths, test_paths, 'dataset_lstm', sequence_length=200)
+
+    # Define folder path and tar filename
+    folder_path = 'dataset_lstm'
+    tar_filename = 'dataset_lstm.tar'
 
     create_tar_from_folder(folder_path, tar_filename)
