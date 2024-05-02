@@ -43,17 +43,17 @@ class TimeseriesDataset(Dataset):
         # extract lr emg
         lr_emg = hr_emg[::2, ::2]
 
-        hr_emg = hr_emg.reshape(-1, hr_emg.shape[2])
-        lr_emg = lr_emg.reshape(-1, lr_emg.shape[2])
-
         # Transform
         if self.transform:
-            lr_emg = self.transform(lr_emg.copy()).squeeze()
-            hr_emg = self.transform(hr_emg.copy()).squeeze()
+            lr_emg = torch.tensor(lr_emg.copy()).to(torch.float32)
+            hr_emg = torch.tensor(hr_emg.copy()).to(torch.float32)
+
+            lr_emg = self.transform(lr_emg)
+            hr_emg = self.transform(hr_emg)
 
         # Convert input data to the same data type as the model parameters
-        lr_emg = lr_emg.to(torch.float32)
-        hr_emg = hr_emg.to(torch.float32)
+        lr_emg = lr_emg.unsqueeze(0)
+        hr_emg = hr_emg.unsqueeze(0)
 
         return (lr_emg, hr_emg, hr_emg_path)
 
@@ -125,7 +125,6 @@ class CustomDataModule(pl.LightningDataModule):
 
         # Define your transformations
         data_transform = transforms.Compose([
-            transforms.ToTensor(),  # Convert data to tensor
             transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
         ])
 
@@ -141,7 +140,6 @@ class CustomDataModule(pl.LightningDataModule):
 
         # Define your transformations
         data_transform = transforms.Compose([
-            transforms.ToTensor(),  # Convert data to tensor
             transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
         ])
 
@@ -157,7 +155,6 @@ class CustomDataModule(pl.LightningDataModule):
 
         # Define your transformations
         data_transform = transforms.Compose([
-            transforms.ToTensor(),  # Convert data to tensor
             transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
         ])
 

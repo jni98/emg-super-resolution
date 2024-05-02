@@ -63,8 +63,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         criterion=config['criterion'],
         num_layers=config['num_layers'],
         dropout=config['dropout'],
-        learning_rate=config['learning_rate'],
-        kernel_size = config['kernel_size']
+        learning_rate=config['learning_rate']
     )
 
     dm = CustomDataModule(
@@ -74,24 +73,32 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         test_data_directory=config['testdata']
     )
 
+    # Total number of parameters
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f"Total parameters: {total_params}")
+
+    # Total trainable parameters
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Trainable parameters: {trainable_params}")
+
     trainer.fit(model, dm)
     trainer.test(model, datamodule=dm)
 
 
 if __name__ == "__main__":
 
-    # Parse arguments
-    # args = parse_args()
-    # data_directory = args.data
-    # test_data_directory = args.testdata
-    # results_directory = args.results
-    # num_epochs = args.epochs
-    # batch_size = args.batch_size
-    #
-    data_directory = '../dataset/train'
-    test_data_directory ='../dataset/test'
-    results_directory = 'runs/'
-    num_epochs = 1
-    batch_size = 256
+    #Parse arguments
+    args = parse_args()
+    data_directory = args.data
+    test_data_directory = args.testdata
+    results_directory = args.results
+    num_epochs = args.epochs
+    batch_size = args.batch_size
+
+    # data_directory = '../dataset_lstm/train'
+    # test_data_directory ='../dataset_lstm/test'
+    # results_directory = 'runs/'
+    # num_epochs = 1
+    # batch_size = 1
 
     main(data_directory, test_data_directory, results_directory, num_epochs, batch_size)

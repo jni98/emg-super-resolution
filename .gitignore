@@ -175,3 +175,5 @@ dmypy.json
 /model2-13x5-Wavelet-Layer-Interpolation/runs/
 /model2-13x5-Layer-interpolated/results/
 /dataset_lstm/
+/model3-LSTM/runs/
+/model3-LSTM/wandb/

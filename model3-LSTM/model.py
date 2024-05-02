@@ -9,22 +9,165 @@ import plotly.graph_objects as go
 import wandb
 
 
-class LSTMRegressor(pl.LightningModule):
-    '''
-    Standard PyTorch Lightning module:
-    https://pytorch-lightning.readthedocs.io/en/latest/lightning_module.html
-    '''
+class ResidualBlock3D(nn.Module):
+    def __init__(self, channels, kernel_size=3, stride=1, padding=1):
+        super(ResidualBlock3D, self).__init__()
+        self.conv1 = nn.Conv3d(channels, channels, kernel_size, stride, padding)
+        self.bn1 = nn.BatchNorm3d(channels)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = nn.Conv3d(channels, channels, kernel_size, stride, padding)
+        self.bn2 = nn.BatchNorm3d(channels)
 
-    def __init__(self,
-                 n_features,
-                 hidden_size,
-                 seq_len,
-                 batch_size,
-                 num_layers,
-                 dropout,
-                 learning_rate,
-                 kernel_size,
-                 criterion):
+    def forward(self, x):
+        residual = x
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out += residual
+        out = self.relu(out)
+
+        return out
+
+
+class Encoder3D(nn.Module):
+    def __init__(self):
+        super(Encoder3D, self).__init__()
+
+        self.conv2 = nn.Conv3d(1, 16, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn2 = nn.BatchNorm3d(16)
+        self.res2 = ResidualBlock3D(16)
+
+        self.conv3 = nn.Conv3d(16, 32, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn3 = nn.BatchNorm3d(32)
+        self.res3 = ResidualBlock3D(32)
+
+        self.conv4 = nn.Conv3d(32, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn4 = nn.BatchNorm3d(64)
+        self.res4 = ResidualBlock3D(64)
+
+        self.conv5 = nn.Conv3d(64, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn5 = nn.BatchNorm3d(64)
+        self.res5 = ResidualBlock3D(64)
+
+        self.conv6 = nn.Conv3d(64, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn6 = nn.BatchNorm3d(64)
+        self.res6 = ResidualBlock3D(64)
+
+        self.conv7 = nn.Conv3d(64, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn7 = nn.BatchNorm3d(64)
+        self.res7 = ResidualBlock3D(64)
+
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        print("Encoder")
+        # input shape: (batch_size, 1, 7, 3, 20480)
+        print("input shape" + str(x.shape))
+
+        out = self.conv2(x)
+        out = self.bn2(out)
+        out = self.relu(out)
+        out = self.res2(out)
+        # out shape: (batch_size, 16, 7, 3, 10240)
+        print("conv2 shape" + str(out.shape))
+
+        out = self.conv3(out)
+        out = self.bn3(out)
+        out = self.relu(out)
+        out = self.res3(out)
+        # out shape: (batch_size, 32, 7, 3, 5120)
+        print("conv3 shape" + str(out.shape))
+
+        out = self.conv4(out)
+        out = self.bn4(out)
+        out = self.relu(out)
+        out = self.res4(out)
+        # out shape: (batch_size, 64, 7, 3, 2560)
+        print("conv4 shape" + str(out.shape))
+
+        out = self.conv5(out)
+        out = self.bn5(out)
+        out = self.relu(out)
+        out = self.res5(out)
+        # out shape: (batch_size, 64, 7, 3, 1280)
+        print("conv5 shape" + str(out.shape))
+
+        out = self.conv6(out)
+        out = self.bn6(out)
+        out = self.relu(out)
+        out = self.res6(out)
+        # out shape: (batch_size, 64, 7, 3, 640)
+        print("conv6 shape" + str(out.shape))
+
+        out = self.conv7(out)
+        out = self.bn7(out)
+        out = self.relu(out)
+        out = self.res7(out)
+        # out shape: (batch_size, 64, 7, 3, 320)
+        print("conv7 shape" + str(out.shape))
+
+        return out
+
+
+class Decoder3D(nn.Module):
+    def __init__(self):
+        super(Decoder3D, self).__init__()
+
+        self.transConv1 = nn.ConvTranspose3d(64, 64, kernel_size=3, stride=(2, 2, 2), padding=1,
+                                             output_padding=(0, 0, 1))
+        self.transConv2 = nn.ConvTranspose3d(64, 32, kernel_size=3, stride=(1, 1, 2), padding=1,
+                                             output_padding=(0, 0, 1))
+        self.transConv3 = nn.ConvTranspose3d(32, 32, kernel_size=3, stride=(1, 1, 2), padding=1,
+                                             output_padding=(0, 0, 1))
+        self.transConv4 = nn.ConvTranspose3d(32, 16, kernel_size=3, stride=(1, 1, 2), padding=1,
+                                             output_padding=(0, 0, 1))
+        self.transConv5 = nn.ConvTranspose3d(16, 16, kernel_size=3, stride=(1, 1, 2), padding=1,
+                                             output_padding=(0, 0, 1))
+        self.transConv6 = nn.ConvTranspose3d(16, 1, kernel_size=3, stride=(1, 1, 2), padding=1, output_padding=(0, 0, 1))
+
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        # input shape: (batch_size, 64, 7, 3, 320)
+        print("Decoder")
+        print("input shape" + str(x.shape))
+
+        out = self.transConv1(x)
+        out = self.relu(out)
+        # out: (batch_size, 64, 13, 5, 640)
+        print("transConv1 shape" + str(out.shape))
+
+        out = self.transConv2(out)
+        out = self.relu(out)
+        # out shape: (batch_size, 32, 13, 5, 1280)
+        print("transConv2 shape" + str(out.shape))
+
+        out = self.transConv3(out)
+        out = self.relu(out)
+        # out shape: (batch_size, 32, 13, 5, 2560)
+        print("transConv3 shape" + str(out.shape))
+
+        out = self.transConv4(out)
+        out = self.relu(out)
+        # out shape: (batch_size, 16, 13, 5, 5120)
+        print("transConv4 shape" + str(out.shape))
+
+        out = self.transConv5(out)
+        # out shape: (batch_size, 8, 13, 5, 10240)
+        print("transConv5 shape" + str(out.shape))
+
+        out = self.transConv6(out)
+        # out shape: (batch_size, 1, 13, 5, 20480)
+        print("transConv6 shape" + str(out.shape))
+
+        return out
+
+
+class LSTMRegressor(pl.LightningModule):
+    def __init__(self, n_features, hidden_size, seq_len, batch_size, num_layers, dropout, learning_rate, criterion):
         super(LSTMRegressor, self).__init__()
         self.n_features = n_features
         self.hidden_size = hidden_size
@@ -34,46 +177,35 @@ class LSTMRegressor(pl.LightningModule):
         self.dropout = dropout
         self.criterion = criterion
         self.learning_rate = learning_rate
-        self.kernel_size = kernel_size
 
-        if self.kernel_size == 3:
-            self.padding = 1
-        elif self.kernel_size == 5:
-            self.padding = 2
+        # Initialize the encoder and decoder
+        self.encoder = Encoder3D()
+        self.decoder = Decoder3D()
 
-        self.bn = nn.BatchNorm1d(self.n_features)
-
-        self.conv1 = nn.Conv1d(in_channels = self.n_features, out_channels = 64, kernel_size=self.kernel_size, padding=self.padding)
-        self.conv2 = nn.Conv1d(in_channels = 64, out_channels=64, kernel_size=self.kernel_size, padding=self.padding)
-
-        self.relu = nn.ReLU()
-
-        self.lstm = nn.LSTM(input_size=64,
-                            hidden_size=self.hidden_size,
-                            num_layers=self.num_layers,
-                            dropout=self.dropout,
-                            batch_first=True)
-
-        # Transpose convolution layer to upscale to 65 channels
-        # Adjust kernel size and stride to match your specific scaling needs
-        self.deconv = nn.ConvTranspose1d(in_channels=self.hidden_size, out_channels=65, kernel_size=3, stride=1, padding=1)
+        # LSTM layer
+        self.lstm = nn.LSTM(input_size=self.n_features, hidden_size=self.hidden_size, num_layers=self.num_layers,
+                            dropout=self.dropout, batch_first=True)
 
     def forward(self, x):
+        # Encode
+        x = self.encoder(x)
+        # out shape (batch_size, 64, 7, 3, 640)
+        x_shape = x.shape
 
-        #input shape: [batch, channels, seq_len]
-        x = self.bn(x)
-        x = self.relu(self.conv1(x))
-        x = self.relu(self.conv2(x))
+        x = torch.reshape(x, (self.batch_size, -1, x.shape[-1]))
+        x = x.transpose(1,2) # Flatten and prepare dimensions for LSTM
+        # out shape: (batch_size, 320, 1344)
 
-        # Reshape for LSTM to: [batch, seq_len, channels]
-        x = x.transpose(1, 2)
+        # LSTM
         lstm_out, _ = self.lstm(x)
 
-        # Reshape for final result to [batch, channels, seq_len]
-        lstm_out = x.transpose(1, 2)
-        out = self.deconv(lstm_out)
+        # Decode
+        lstm_out = lstm_out.transpose(1,2)
+        lstm_out = torch.reshape(lstm_out,x_shape)# Reshape for decoder
 
-        return out
+        x = self.decoder(lstm_out)
+
+        return x
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
@@ -93,7 +225,7 @@ class LSTMRegressor(pl.LightningModule):
 
         # Log the first validation batch for visualization
         if batch_idx == 0:
-            self.validation_plots(x,y,y_hat, 'Validation')
+            self.validation_plots(x, y, y_hat, 'Validation')
 
         return loss
 
@@ -105,7 +237,7 @@ class LSTMRegressor(pl.LightningModule):
 
         # Log the first test batch for visualization
         if batch_idx == 0:
-            self.validation_plots(x,y,y_hat, 'Test')
+            self.validation_plots(x, y, y_hat, 'Test')
 
         # Save the prediction for each batch individually
         results_dir = self.trainer.logger.save_dir  # or any other directory you have defined
@@ -124,15 +256,15 @@ class LSTMRegressor(pl.LightningModule):
     def validation_plots(self, x, y, y_hat, phase):
 
         # Convert tensors to numpy arrays and move to CPU
-        #val_lr_destandardized = np.asarray(x.to('cpu'))
+        # val_lr_destandardized = np.asarray(x.to('cpu'))
         # TODO: Destandardize
         val_hr_destandardized = np.asarray(y.to('cpu'))
         val_sr_destandardized = np.asarray(y_hat.to('cpu'))
 
         # Extract specific channels
-        #lr_channel = val_lr_destandardized[0][6][2]
-        val_channel = val_hr_destandardized[0][3]
-        sr_channel = val_sr_destandardized[0][3]
+        # lr_channel = val_lr_destandardized[0][6][2]
+        val_channel = val_hr_destandardized[0][0][6][2]
+        sr_channel = val_sr_destandardized[0][0][6][2]
 
         ############################## Log Plots given channel########################################
         print("Logging plots for batch index 0 given channel")
@@ -168,8 +300,8 @@ class LSTMRegressor(pl.LightningModule):
             go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution channel [6][2]'))
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(val_channel)), y=val_channel, name='Validation channel [6][2]', opacity=0.5))
-        #plotly_fig.add_trace(
-            #go.Scatter(x=np.arange(len(lr_channel)), y=lr_channel, name='Low-resolution channel [6][2]', opacity=0.5))
+        # plotly_fig.add_trace(
+        # go.Scatter(x=np.arange(len(lr_channel)), y=lr_channel, name='Low-resolution channel [6][2]', opacity=0.5))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - given Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
@@ -193,8 +325,8 @@ class LSTMRegressor(pl.LightningModule):
         sr_Y = sr_Y[range(n // 2)]
 
         # Compute FFT for lr_channel
-        #lr_Y = np.fft.fft(lr_channel) / n
-        #lr_Y = lr_Y[range(n // 2)]
+        # lr_Y = np.fft.fft(lr_channel) / n
+        # lr_Y = lr_Y[range(n // 2)]
 
         # Plot
         bar_fig_1 = go.Figure()
@@ -203,7 +335,7 @@ class LSTMRegressor(pl.LightningModule):
         bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation (HR) channel', opacity=1, offset=0))
 
         # Plot val_channel
-        #bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution channel', opacity=1, offset=0.2))
+        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution channel', opacity=1, offset=0.2))
 
         # Plot sr_channel
         bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution channel', opacity=1, offset=0.1))
@@ -224,7 +356,7 @@ class LSTMRegressor(pl.LightningModule):
             go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='Validation (HR) channel', opacity=0.5))
 
         # Plot lr_channel
-        #freq_spec1.add_trace(
+        # freq_spec1.add_trace(
         #    go.Scatter(x=frq, y=np.abs(lr_Y), mode='lines', name='Low-resolution channel', opacity=0.5))
 
         # Plot sr channel
@@ -241,9 +373,9 @@ class LSTMRegressor(pl.LightningModule):
         print("Logging plots for batch index 0 predicted channel")
 
         # Select channels
-        val_channel = val_hr_destandardized[0][2]
-        sr_channel = val_sr_destandardized[0][2]
-        #lr_channel = val_lr_destandardized[0][2][6][1]
+        val_channel = val_hr_destandardized[0][0][6][1]
+        sr_channel = val_sr_destandardized[0][0][6][1]
+        # lr_channel = val_lr_destandardized[0][2][6][1]
 
         # x-axis for the following logs
         fig1, axs1 = plt.subplots(3, 1, figsize=(8, 10))
@@ -277,8 +409,8 @@ class LSTMRegressor(pl.LightningModule):
             go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution channel [6][1]'))
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(val_channel)), y=val_channel, name='Validation channel [6][1]', opacity=0.5))
-        #plotly_fig.add_trace(
-            #go.Scatter(x=np.arange(len(lr_channel)), y=lr_channel, name='Low-resolution channel [6][1]', opacity=0.5))
+        # plotly_fig.add_trace(
+        # go.Scatter(x=np.arange(len(lr_channel)), y=lr_channel, name='Low-resolution channel [6][1]', opacity=0.5))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - predicted Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
@@ -304,8 +436,8 @@ class LSTMRegressor(pl.LightningModule):
         sr_Y = sr_Y[range(n // 2)]
 
         # Compute FFT for lr_channel
-        #lr_Y = np.fft.fft(lr_channel) / n
-        #lr_Y = lr_Y[range(n // 2)]
+        # lr_Y = np.fft.fft(lr_channel) / n
+        # lr_Y = lr_Y[range(n // 2)]
 
         # Plot
         bar_fig_1 = go.Figure()
@@ -314,7 +446,7 @@ class LSTMRegressor(pl.LightningModule):
         bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation (HR) channel', opacity=1, offset=0))
 
         # Plot val_channel
-        #bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution channel', opacity=1, offset=0.2))
+        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution channel', opacity=1, offset=0.2))
 
         # Plot sr_channel
         bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution channel', opacity=1, offset=0.1))
@@ -335,7 +467,7 @@ class LSTMRegressor(pl.LightningModule):
             go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='Validation (HR) channel', opacity=0.5))
 
         # Plot lr_channel
-        #freq_spec1.add_trace(
+        # freq_spec1.add_trace(
         #    go.Scatter(x=frq, y=np.abs(lr_Y), mode='lines', name='Low-resolution channel', opacity=0.5))
 
         # Plot sr channel
