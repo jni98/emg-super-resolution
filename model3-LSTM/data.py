@@ -55,7 +55,7 @@ class TimeseriesDataset(Dataset):
         lr_emg = lr_emg.to(torch.float32)
         hr_emg = hr_emg.to(torch.float32)
 
-        return (lr_emg, hr_emg)
+        return (lr_emg, hr_emg, hr_emg_path)
 
     def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
         """
@@ -95,7 +95,7 @@ class CustomDataModule(pl.LightningDataModule):
       and processing work in one place.
     '''
 
-    def __init__(self, seq_len=1, batch_size=128, num_workers=0, data_directory: str = None, test_data_directory: str = None):
+    def __init__(self, seq_len=1, batch_size=128, num_workers=2, data_directory: str = None, test_data_directory: str = None):
         super().__init__()
         self.seq_len = seq_len
         self.batch_size = batch_size

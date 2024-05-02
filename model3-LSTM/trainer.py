@@ -22,12 +22,12 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
     config = get_config(data_directory, test_data_directory, results_directory, num_epochs, batch_size)
 
-    wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=config['results'])
+    wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=config['results'], config=config)
 
     # Define the EarlyStopping callback
     early_stop_callback = EarlyStopping(
         monitor='val_loss',  # Monitor validation loss
-        min_delta=0.0001,  # Minimum change to qualify as an improvement
+        min_delta=0.00001,  # Minimum change to qualify as an improvement
         patience=3,  # Number of epochs to wait for improvement
         verbose=True,  # Print messages when early stopping is triggered
         mode='min',  # Stop when the monitored quantity stops decreasing
@@ -51,7 +51,8 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         deterministic=True,
         logger=wandb_logger,
         callbacks=[early_stop_callback, checkpoint_callback],
-        default_root_dir=config['results']
+        default_root_dir=config['results'],
+        log_every_n_steps=1,
     )
 
     model = LSTMRegressor(
@@ -62,7 +63,8 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         criterion=config['criterion'],
         num_layers=config['num_layers'],
         dropout=config['dropout'],
-        learning_rate=config['learning_rate']
+        learning_rate=config['learning_rate'],
+        kernel_size = config['kernel_size']
     )
 
     dm = CustomDataModule(
@@ -79,17 +81,17 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 if __name__ == "__main__":
 
     # Parse arguments
-    args = parse_args()
-    data_directory = args.data
-    test_data_directory = args.testdata
-    results_directory = args.results
-    num_epochs = args.epochs
-    batch_size = args.batch_size
-
-    # data_directory = '../dataset_lstm/train'
-    # test_data_directory ='../dataset_lstm/test'
-    # results_directory = 'runs/'
-    # num_epochs = 100
-    # batch_size = 512
+    # args = parse_args()
+    # data_directory = args.data
+    # test_data_directory = args.testdata
+    # results_directory = args.results
+    # num_epochs = args.epochs
+    # batch_size = args.batch_size
+    #
+    data_directory = '../dataset/train'
+    test_data_directory ='../dataset/test'
+    results_directory = 'runs/'
+    num_epochs = 1
+    batch_size = 256
 
     main(data_directory, test_data_directory, results_directory, num_epochs, batch_size)

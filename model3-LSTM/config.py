@@ -12,10 +12,11 @@ def get_config(data_directory, test_data_directory, results_directory, num_epoch
         hidden_size=64,
         num_layers=2,
         dropout=0.2,
-        learning_rate=0.001,
+        learning_rate=0.005,
         results=results_directory,
         data=data_directory,
-        testdata=test_data_directory
+        testdata=test_data_directory,
+        kernel_size=3
     )
 
     return config
