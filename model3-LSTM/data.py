@@ -132,7 +132,8 @@ class CustomDataModule(pl.LightningDataModule):
         train_loader = DataLoader(train_dataset,
                                   batch_size=self.batch_size,
                                   shuffle=False,
-                                  num_workers=self.num_workers)
+                                  num_workers=self.num_workers,
+                                  drop_last=True)
 
         return train_loader
 
@@ -147,7 +148,8 @@ class CustomDataModule(pl.LightningDataModule):
         val_loader = DataLoader(val_dataset,
                                 batch_size=self.batch_size,
                                 shuffle=False,
-                                num_workers=self.num_workers)
+                                num_workers=self.num_workers,
+                                drop_last=True)
 
         return val_loader
 
@@ -160,7 +162,7 @@ class CustomDataModule(pl.LightningDataModule):
 
         test_dataset = TimeseriesDataset(self.X_test,self.test_data_directory, transform = data_transform)
         test_loader = DataLoader(test_dataset,
-                                 batch_size=1,
+                                 batch_size=self.batch_size,
                                  shuffle=False,
                                  num_workers=self.num_workers)
 

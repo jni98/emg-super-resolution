@@ -82,7 +82,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
     print(f"Trainable parameters: {trainable_params}")
 
     trainer.fit(model, dm)
-    trainer.test(model, datamodule=dm)
+    #trainer.test(model, datamodule=dm)
 
 
 if __name__ == "__main__":
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     # data_directory = '../dataset_lstm/train'
     # test_data_directory ='../dataset_lstm/test'
     # results_directory = 'runs/'
-    # num_epochs = 1
-    # batch_size = 1
+    # num_epochs = 4
+    # batch_size = 4
 
     main(data_directory, test_data_directory, results_directory, num_epochs, batch_size)
