@@ -25,14 +25,14 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
     wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=config['results'], config=config)
 
     # Define the EarlyStopping callback
-    early_stop_callback = EarlyStopping(
-        monitor='val_loss',  # Monitor validation loss
-        min_delta=0.00001,  # Minimum change to qualify as an improvement
-        patience=3,  # Number of epochs to wait for improvement
-        verbose=True,  # Print messages when early stopping is triggered
-        mode='min',  # Stop when the monitored quantity stops decreasing
-        strict=True  # Error if `monitor` is not found
-    )
+    # early_stop_callback = EarlyStopping(
+    #     monitor='val_loss',  # Monitor validation loss
+    #     min_delta=0.00001,  # Minimum change to qualify as an improvement
+    #     patience=3,  # Number of epochs to wait for improvement
+    #     verbose=True,  # Print messages when early stopping is triggered
+    #     mode='min',  # Stop when the monitored quantity stops decreasing
+    #     strict=True  # Error if `monitor` is not found
+    # )
 
     # Define the ModelCheckpoint callback
     checkpoint_callback = ModelCheckpoint(
@@ -50,7 +50,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         accelerator="gpu",
         deterministic=True,
         logger=wandb_logger,
-        callbacks=[early_stop_callback, checkpoint_callback],
+        callbacks=[checkpoint_callback],
         default_root_dir=config['results'],
         log_every_n_steps=1,
     )
