@@ -83,8 +83,21 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
     print(f"Trainable parameters: {trainable_params}")
 
     trainer.fit(model, dm)
-    #trainer.test(model, datamodule=dm)
 
+    # # Load the trained model with potentially a new batch size for inference
+    # model_for_inference = LSTMRegressor.load_from_checkpoint(
+    #     checkpoint_path=config["results"] + "/best_model.ckpt",
+    #     n_features=config['n_features'],
+    #     hidden_size=config['hidden_size'],
+    #     seq_len=config['seq_len'],
+    #     batch_size=1,  # You can specify a different batch size here if your model supports it
+    #     num_layers=config['num_layers'],
+    #     dropout=config['dropout'],
+    #     learning_rate=config['learning_rate'],
+    #     criterion=config['criterion']
+    # )
+    #
+    # trainer.test(model_for_inference, datamodule=dm)
 
 if __name__ == "__main__":
 
@@ -100,7 +113,8 @@ if __name__ == "__main__":
     # data_directory = '../dataset_lstm/train'
     # test_data_directory ='../dataset_lstm/test'
     # results_directory = 'runs/'
-    # num_epochs = 4
-    # batch_size = 4
+    # num_epochs = 2
+    # batch_size = 10
+    # learning_rate = 0.00001
 
     main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)

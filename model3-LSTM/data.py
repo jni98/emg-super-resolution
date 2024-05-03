@@ -162,7 +162,7 @@ class CustomDataModule(pl.LightningDataModule):
 
         test_dataset = TimeseriesDataset(self.X_test,self.test_data_directory, transform = data_transform)
         test_loader = DataLoader(test_dataset,
-                                 batch_size=self.batch_size,
+                                 batch_size=1,
                                  shuffle=False,
                                  num_workers=self.num_workers)
 

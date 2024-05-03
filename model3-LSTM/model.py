@@ -192,7 +192,7 @@ class LSTMRegressor(pl.LightningModule):
         # out shape (batch_size, 64, 7, 3, 640)
         x_shape = x.shape
 
-        x = torch.reshape(x, (self.batch_size, -1, x.shape[-1]))
+        x = torch.reshape(x, (self.batch_size, x.shape[1]*x.shape[2]*x.shape[3], x.shape[-1]))
         x = x.transpose(1,2) # Flatten and prepare dimensions for LSTM
         # out shape: (batch_size, 320, 1344)
 
@@ -211,6 +211,7 @@ class LSTMRegressor(pl.LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def training_step(self, batch, batch_idx):
+        print("Training step")
         x, y, _ = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
@@ -218,6 +219,7 @@ class LSTMRegressor(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
+        print("Validation step")
         x, y, _ = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
@@ -230,6 +232,7 @@ class LSTMRegressor(pl.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx):
+        print("Test step")
         x, y, y_path = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
