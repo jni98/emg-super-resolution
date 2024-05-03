@@ -14,13 +14,14 @@ def parse_args():
     parser.add_argument('--results', type=str, required=True, help='Path to results directory')
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs')
     parser.add_argument('--batch_size', type=int, default=256, help='Batch size')
+    parser.add_argument('--lr', type=float, default=0.00001, help='Learning rate')
     return parser.parse_args()
 
-def main(data_directory, test_data_directory, results_directory, num_epochs, batch_size):
+def main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate):
 
     seed_everything(1)
 
-    config = get_config(data_directory, test_data_directory, results_directory, num_epochs, batch_size)
+    config = get_config(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
 
     wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=config['results'], config=config)
 
@@ -94,6 +95,7 @@ if __name__ == "__main__":
     results_directory = args.results
     num_epochs = args.epochs
     batch_size = args.batch_size
+    learning_rate = args.lr
 
     # data_directory = '../dataset_lstm/train'
     # test_data_directory ='../dataset_lstm/test'
@@ -101,4 +103,4 @@ if __name__ == "__main__":
     # num_epochs = 4
     # batch_size = 4
 
-    main(data_directory, test_data_directory, results_directory, num_epochs, batch_size)
+    main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)

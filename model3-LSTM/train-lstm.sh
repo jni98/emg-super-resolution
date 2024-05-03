@@ -24,6 +24,7 @@ FAST_DATA_DIR=$TMPDIR/model3-LSTM-$SLURM_JOB_ID
 
 EPOCHS=500
 BATCHSIZE=10
+LR=0.001
 
 ############    params   ###############
 
@@ -62,7 +63,7 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 # start training
-python trainer.py --data "$FAST_DATA_DIR"/dataset_lstm/train --testdata "$FAST_DATA_DIR"/dataset_lstm/test --results "$RESULTS_DIR" --epochs $EPOCHS --batch_size $BATCHSIZE
+python trainer.py --data "$FAST_DATA_DIR"/dataset_lstm/train --testdata "$FAST_DATA_DIR"/dataset_lstm/test --results "$RESULTS_DIR" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"
