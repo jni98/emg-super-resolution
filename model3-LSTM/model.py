@@ -1,3 +1,6 @@
+"""
+Model used with sequence length 20480 compressed to sequence length 320 ( --> c = 64)
+"""
 import os
 
 import pytorch_lightning as pl

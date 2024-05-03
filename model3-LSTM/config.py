@@ -15,7 +15,8 @@ def get_config(data_directory, test_data_directory, results_directory, num_epoch
         learning_rate=learning_rate,
         results=results_directory,
         data=data_directory,
-        testdata=test_data_directory
+        testdata=test_data_directory,
+        model_version = 'model2'
     )
 
     return config

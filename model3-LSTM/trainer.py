@@ -2,7 +2,7 @@ import argparse
 
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from data import CustomDataModule
-from model import LSTMRegressor
+from model2 import LSTMRegressor
 from pytorch_lightning import Trainer, seed_everything
 from lightning.pytorch.loggers import WandbLogger
 from config import get_config
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     # test_data_directory ='../dataset_lstm/test'
     # results_directory = 'runs/'
     # num_epochs = 2
-    # batch_size = 10
+    # batch_size = 16
     # learning_rate = 0.00001
 
     main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
