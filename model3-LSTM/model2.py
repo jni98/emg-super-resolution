@@ -1,5 +1,5 @@
 """
-Model used with sequence length 10240 compressed to sequence length 160 ( --> c = 128)
+Model used with sequence length 10240 compressed to sequence length 160 ( --> c = 64)
 """
 import os
 
@@ -144,26 +144,31 @@ class Decoder3D(nn.Module):
         print("input shape" + str(x.shape))
 
         out = self.transConv1(x)
+        out = self.bn1(out)
         out = self.relu(out)
         # out: (batch_size, 64, 13, 5, 320)
         print("transConv1 shape" + str(out.shape))
 
         out = self.transConv2(out)
+        out = self.bn2(out)
         out = self.relu(out)
         # out shape: (batch_size, 32, 13, 5, 640)
         print("transConv2 shape" + str(out.shape))
 
         out = self.transConv3(out)
+        out = self.bn3(out)
         out = self.relu(out)
         # out shape: (batch_size, 32, 13, 5, 1280)
         print("transConv3 shape" + str(out.shape))
 
         out = self.transConv4(out)
+        out = self.bn4(out)
         out = self.relu(out)
         # out shape: (batch_size, 16, 13, 5, 2560)
         print("transConv4 shape" + str(out.shape))
 
         out = self.transConv5(out)
+        out = self.bn5(out)
         out = self.relu(out)
         # out shape: (batch_size, 8, 13, 5, 5120)
         print("transConv5 shape" + str(out.shape))
