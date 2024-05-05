@@ -63,7 +63,7 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 # start training
-python checkpoint_run.py --data "$FAST_DATA_DIR"/dataset_lstm/train --testdata "$FAST_DATA_DIR"/dataset_lstm/test --results "$RESULTS_DIR" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR
+python trainer.py --data "$FAST_DATA_DIR"/dataset_lstm/train --testdata "$FAST_DATA_DIR"/dataset_lstm/test --results "$RESULTS_DIR" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"
