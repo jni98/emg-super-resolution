@@ -102,19 +102,19 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 if __name__ == "__main__":
 
     #Parse arguments
-    args = parse_args()
-    data_directory = args.data
-    test_data_directory = args.testdata
-    results_directory = args.results
-    num_epochs = args.epochs
-    batch_size = args.batch_size
-    learning_rate = args.lr
+    # args = parse_args()
+    # data_directory = args.data
+    # test_data_directory = args.testdata
+    # results_directory = args.results
+    # num_epochs = args.epochs
+    # batch_size = args.batch_size
+    # learning_rate = args.lr
 
-    # data_directory = '../dataset_lstm/train'
-    # test_data_directory ='../dataset_lstm/test'
-    # results_directory = 'runs/'
-    # num_epochs = 2
-    # batch_size = 16
-    # learning_rate = 0.00001
+    data_directory = '../dataset_lstm/train'
+    test_data_directory ='../dataset_lstm/test'
+    results_directory = 'runs/'
+    num_epochs = 2
+    batch_size = 16
+    learning_rate = 0.00001
 
     main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
