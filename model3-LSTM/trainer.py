@@ -1,11 +1,13 @@
 import argparse
+import json
 
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from data import CustomDataModule
-from model3 import LSTMRegressor
+from model2 import LSTMRegressor
 from pytorch_lightning import Trainer, seed_everything
 from lightning.pytorch.loggers import WandbLogger
 from config import get_config
+import numpy as np
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Training script arguments")
@@ -25,6 +27,10 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
     wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=config['results'], config=config, mode='online', offline=False)
 
+    # Load the JSON file with values for standardization into a Python dictionary
+    with open(data_directory + '/mean_std.json', 'r') as file:
+        mean_std_dict = json.load(file)
+
     # Define the EarlyStopping callback
     # early_stop_callback = EarlyStopping(
     #     monitor='val_loss',  # Monitor validation loss
@@ -34,6 +40,8 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
     #     mode='min',  # Stop when the monitored quantity stops decreasing
     #     strict=True  # Error if `monitor` is not found
     # )
+
+
 
     # Define the ModelCheckpoint callback
     checkpoint_callback = ModelCheckpoint(
@@ -64,7 +72,9 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         criterion=config['criterion'],
         num_layers=config['num_layers'],
         dropout=config['dropout'],
-        learning_rate=config['learning_rate']
+        learning_rate=config['learning_rate'],
+        mean = mean_std_dict['mean'],
+        std = mean_std_dict['std']
     )
 
     dm = CustomDataModule(
@@ -84,37 +94,38 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
     trainer.fit(model, dm)
 
-    # # Load the trained model with potentially a new batch size for inference
-    # model_for_inference = LSTMRegressor.load_from_checkpoint(
-    #     checkpoint_path=config["results"] + "/best_model.ckpt",
-    #     n_features=config['n_features'],
-    #     hidden_size=config['hidden_size'],
-    #     seq_len=config['seq_len'],
-    #     batch_size=1,  # You can specify a different batch size here if your model supports it
-    #     num_layers=config['num_layers'],
-    #     dropout=config['dropout'],
-    #     learning_rate=config['learning_rate'],
-    #     criterion=config['criterion']
-    # )
-    #
-    # trainer.test(model_for_inference, datamodule=dm)
+    model_for_inference = LSTMRegressor.load_from_checkpoint(
+        checkpoint_path=config['results'] + "/best_model.ckpt",
+        n_features=config['n_features'],
+        hidden_size=config['hidden_size'],
+        seq_len=config['seq_len'],
+        batch_size=1,  # Set batch_size to 1 for inference
+        num_layers=config['num_layers'],
+        dropout=config['dropout'],
+        learning_rate=config['learning_rate'],
+        criterion=config['criterion'],
+        mean = mean_std_dict['mean'],
+        std = mean_std_dict['std']
+    )
+
+    trainer.test(model_for_inference, datamodule=dm)
 
 if __name__ == "__main__":
 
     #Parse arguments
-    # args = parse_args()
-    # data_directory = args.data
-    # test_data_directory = args.testdata
-    # results_directory = args.results
-    # num_epochs = args.epochs
-    # batch_size = args.batch_size
-    # learning_rate = args.lr
+    args = parse_args()
+    data_directory = args.data
+    test_data_directory = args.testdata
+    results_directory = args.results
+    num_epochs = args.epochs
+    batch_size = args.batch_size
+    learning_rate = args.lr
 
-    data_directory = '../dataset_lstm/train'
-    test_data_directory ='../dataset_lstm/test'
-    results_directory = 'runs/'
-    num_epochs = 2
-    batch_size = 16
-    learning_rate = 0.00001
+    # data_directory = '../dataset_lstm/train'
+    # test_data_directory ='../dataset_lstm/test'
+    # results_directory = 'runs/'
+    # num_epochs = 2
+    # batch_size = 20
+    # learning_rate = 0.00001
 
     main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)

@@ -20,10 +20,13 @@ class TimeseriesDataset(Dataset):
       of `(batch_size, seq_len, n_features)` shape.
     Suitable as an input to RNNs.
     '''
-    def __init__(self, X: np.ndarray,directory: str, transform=None):
+    def __init__(self, X: np.ndarray,directory: str,mean, std, transform=None):
         self.X = X
         self.directory = directory
         self.transform = transform
+        self.mean = mean
+        self.std = std
+
     def __len__(self) -> int:
         return len(self.X)
 
@@ -40,22 +43,40 @@ class TimeseriesDataset(Dataset):
         # Bandpass filter
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
 
+        # Standardize
+        hr_emg = self.standardize(hr_emg)
+
         # extract lr emg
         lr_emg = hr_emg[::2, ::2]
 
-        # Transform
-        if self.transform:
-            lr_emg = torch.tensor(lr_emg.copy()).to(torch.float32)
-            hr_emg = torch.tensor(hr_emg.copy()).to(torch.float32)
+        lr_emg = torch.tensor(lr_emg.copy()).to(torch.float32)
+        hr_emg = torch.tensor(hr_emg.copy()).to(torch.float32)
 
-            lr_emg = self.transform(lr_emg)
-            hr_emg = self.transform(hr_emg)
+        # Transform
+        # if self.transform:
+        #     lr_emg = self.transform(lr_emg)
+        #     hr_emg = self.transform(hr_emg)
 
         # Convert input data to the same data type as the model parameters
         lr_emg = lr_emg.unsqueeze(0)
         hr_emg = hr_emg.unsqueeze(0)
 
         return (lr_emg, hr_emg, hr_emg_path)
+
+    def standardize(self, X):
+        '''
+        Standardize the input data
+        Parameters
+        ----------
+        X: np.array
+            Input data
+
+        Returns
+        -------
+        X: np.array
+            Standardized data
+        '''
+        return (X - self.mean) / self.std
 
     def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
         """
@@ -124,11 +145,9 @@ class CustomDataModule(pl.LightningDataModule):
     def train_dataloader(self):
 
         # Define your transformations
-        data_transform = transforms.Compose([
-            transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
-        ])
+        data_transform = False
 
-        train_dataset = TimeseriesDataset(self.X_train, self.data_directory, transform = data_transform)
+        train_dataset = TimeseriesDataset(self.X_train, self.data_directory, mean = self.mean_std_dict['mean'], std = self.mean_std_dict['std'], transform = data_transform)
         train_loader = DataLoader(train_dataset,
                                   batch_size=self.batch_size,
                                   shuffle=False,
@@ -140,11 +159,9 @@ class CustomDataModule(pl.LightningDataModule):
     def val_dataloader(self):
 
         # Define your transformations
-        data_transform = transforms.Compose([
-            transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
-        ])
+        data_transform = False
 
-        val_dataset = TimeseriesDataset(self.X_val,self.data_directory, transform = data_transform)
+        val_dataset = TimeseriesDataset(self.X_val,self.data_directory, mean = self.mean_std_dict['mean'], std = self.mean_std_dict['std'], transform = data_transform)
         val_loader = DataLoader(val_dataset,
                                 batch_size=self.batch_size,
                                 shuffle=False,
@@ -156,11 +173,9 @@ class CustomDataModule(pl.LightningDataModule):
     def test_dataloader(self):
 
         # Define your transformations
-        data_transform = transforms.Compose([
-            transforms.Normalize(mean=self.mean_std_dict['mean'], std=self.mean_std_dict['std'])  # Standardize data
-        ])
+        data_transform = False
 
-        test_dataset = TimeseriesDataset(self.X_test,self.test_data_directory, transform = data_transform)
+        test_dataset = TimeseriesDataset(self.X_test,self.test_data_directory, mean = self.mean_std_dict['mean'], std = self.mean_std_dict['std'], transform = data_transform)
         test_loader = DataLoader(test_dataset,
                                  batch_size=1,
                                  shuffle=False,

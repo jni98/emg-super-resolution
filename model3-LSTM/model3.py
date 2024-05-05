@@ -116,7 +116,7 @@ class Decoder3D(nn.Module):
 
 
 class LSTMRegressor(pl.LightningModule):
-    def __init__(self, n_features, hidden_size, seq_len, batch_size, num_layers, dropout, learning_rate, criterion):
+    def __init__(self, n_features, hidden_size, seq_len, batch_size, num_layers, dropout, learning_rate, criterion, mean, std):
         super(LSTMRegressor, self).__init__()
         self.n_features = n_features
         self.hidden_size = hidden_size
@@ -126,6 +126,8 @@ class LSTMRegressor(pl.LightningModule):
         self.dropout = dropout
         self.criterion = criterion
         self.learning_rate = learning_rate
+        self.mean = mean
+        self.std = std
 
         # Initialize the encoder and decoder
         self.encoder = Encoder3D()
@@ -176,6 +178,9 @@ class LSTMRegressor(pl.LightningModule):
 
         # Log the first validation batch for visualization
         if batch_idx == 0:
+            x = self.destandardize(x)
+            y = self.destandardize(y)
+            y_hat = self.destandardize(y_hat)
             self.validation_plots(x, y, y_hat, 'Validation')
 
         return loss
@@ -189,6 +194,9 @@ class LSTMRegressor(pl.LightningModule):
 
         # Log the first test batch for visualization
         if batch_idx == 0:
+            x = self.destandardize(x)
+            y = self.destandardize(y)
+            y_hat = self.destandardize(y_hat)
             self.validation_plots(x, y, y_hat, 'Test')
 
         # Save the prediction for each batch individually
@@ -199,11 +207,15 @@ class LSTMRegressor(pl.LightningModule):
         y_path = y_path[0].replace("hr", "sr")
         # File name with batch index
         file_path = os.path.join(results_dir, y_path)
+        y_hat = self.destandardize(y_hat)
         np.save(file_path, y_hat.cpu().numpy())  # Save as NumPy array
 
         print(f"Saved batch {batch_idx} predictions to {file_path}")
 
         return loss
+
+    def destandardize(self, prediction):
+        return prediction * self.std + self.mean
 
     def validation_plots(self, x, y, y_hat, phase):
 
