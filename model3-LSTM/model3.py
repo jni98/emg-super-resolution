@@ -176,7 +176,7 @@ class LSTMRegressor(pl.LightningModule):
 
     def on_validation_epoch_end(self):
         # Check if it's the 10th epoch
-        if self.current_epoch % 1 == 0:
+        if self.current_epoch % 100 == 0:
             # Assuming 'outputs' contains the data necessary for plotting
             x, y, interpolated, y_hat = self.outputs['x'], self.outputs['y'], self.outputs['interpolated'], self.outputs['y_hat']
             y = self.destandardize(y)
