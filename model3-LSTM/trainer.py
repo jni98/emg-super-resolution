@@ -3,7 +3,7 @@ import json
 
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from data import CustomDataModule
-from model2 import LSTMRegressor
+from model import LSTMRegressor
 from pytorch_lightning import Trainer, seed_everything
 from lightning.pytorch.loggers import WandbLogger
 from config import get_config

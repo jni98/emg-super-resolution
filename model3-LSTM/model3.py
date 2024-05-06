@@ -140,12 +140,12 @@ class LSTMRegressor(pl.LightningModule):
     def forward(self, x):
         # Encode
         x = self.encoder(x)
-        # out shape (batch_size, 64, 7, 3, 160)
+        # out shape (batch_size, 32, 7, 3, 2560)
         x_shape = x.shape
 
         x = torch.reshape(x, (self.batch_size, x.shape[1]*x.shape[2]*x.shape[3], x.shape[-1]))
         x = x.transpose(1,2) # Flatten and prepare dimensions for LSTM
-        # out shape: (batch_size, 160, 1344)
+        # out shape: (batch_size, 2560, 672)
 
         # LSTM
         lstm_out, _ = self.lstm(x)
