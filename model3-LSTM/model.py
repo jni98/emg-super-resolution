@@ -39,29 +39,31 @@ class Encoder3D(nn.Module):
     def __init__(self):
         super(Encoder3D, self).__init__()
 
-        self.conv2 = nn.Conv3d(1, 16, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
-        self.bn2 = nn.BatchNorm3d(16)
-        self.res2 = ResidualBlock3D(16)
+        self.conv1 = nn.Conv3d(1, 32, kernel_size=3, stride=1, padding=1)
 
-        self.conv3 = nn.Conv3d(16, 32, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
-        self.bn3 = nn.BatchNorm3d(32)
-        self.res3 = ResidualBlock3D(32)
+        self.conv2 = nn.Conv3d(32, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn2 = nn.BatchNorm3d(64)
+        self.res2 = ResidualBlock3D(64)
 
-        self.conv4 = nn.Conv3d(32, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
-        self.bn4 = nn.BatchNorm3d(64)
-        self.res4 = ResidualBlock3D(64)
+        self.conv3 = nn.Conv3d(64, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn3 = nn.BatchNorm3d(128)
+        self.res3 = ResidualBlock3D(128)
 
-        self.conv5 = nn.Conv3d(64, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
-        self.bn5 = nn.BatchNorm3d(64)
-        self.res5 = ResidualBlock3D(64)
+        self.conv4 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn4 = nn.BatchNorm3d(128)
+        self.res4 = ResidualBlock3D(128)
 
-        self.conv6 = nn.Conv3d(64, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
-        self.bn6 = nn.BatchNorm3d(64)
-        self.res6 = ResidualBlock3D(64)
+        self.conv5 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn5 = nn.BatchNorm3d(128)
+        self.res5 = ResidualBlock3D(128)
 
-        self.conv7 = nn.Conv3d(64, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
-        self.bn7 = nn.BatchNorm3d(64)
-        self.res7 = ResidualBlock3D(64)
+        self.conv6 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn6 = nn.BatchNorm3d(128)
+        self.res6 = ResidualBlock3D(128)
+
+        self.conv7 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.bn7 = nn.BatchNorm3d(128)
+        self.res7 = ResidualBlock3D(128)
 
         self.relu = nn.PReLU()
 
@@ -69,47 +71,49 @@ class Encoder3D(nn.Module):
         print("Encoder")
         # input shape: (batch_size, 1, 7, 3, 20480)
         print("input shape" + str(x.shape))
+        out = self.conv1(x)
+        # out shape: (batch_size, 32, 7, 3, 20480)
 
-        out = self.conv2(x)
+        out = self.conv2(out)
         out = self.bn2(out)
         out = self.relu(out)
-        out = self.res2(out)
-        # out shape: (batch_size, 16, 7, 3, 10240)
+        #out = self.res2(out)
+        # out shape: (batch_size, 64, 7, 3, 10240)
         print("conv2 shape" + str(out.shape))
 
         out = self.conv3(out)
         out = self.bn3(out)
         out = self.relu(out)
-        out = self.res3(out)
-        # out shape: (batch_size, 32, 7, 3, 5120)
+        #out = self.res3(out)
+        # out shape: (batch_size, 128, 7, 3, 5120)
         print("conv3 shape" + str(out.shape))
 
         out = self.conv4(out)
         out = self.bn4(out)
         out = self.relu(out)
-        out = self.res4(out)
-        # out shape: (batch_size, 64, 7, 3, 2560)
+        #out = self.res4(out)
+        # out shape: (batch_size, 128, 7, 3, 2560)
         print("conv4 shape" + str(out.shape))
 
         out = self.conv5(out)
         out = self.bn5(out)
         out = self.relu(out)
-        out = self.res5(out)
-        # out shape: (batch_size, 64, 7, 3, 1280)
+        #out = self.res5(out)
+        # out shape: (batch_size, 128, 7, 3, 1280)
         print("conv5 shape" + str(out.shape))
 
         out = self.conv6(out)
         out = self.bn6(out)
         out = self.relu(out)
-        out = self.res6(out)
-        # out shape: (batch_size, 64, 7, 3, 640)
+        #out = self.res6(out)
+        # out shape: (batch_size, 128, 7, 3, 640)
         print("conv6 shape" + str(out.shape))
 
         out = self.conv7(out)
         out = self.bn7(out)
         out = self.relu(out)
-        out = self.res7(out)
-        # out shape: (batch_size, 64, 7, 3, 320)
+        #out = self.res7(out)
+        # out shape: (batch_size, 128, 7, 3, 320)
         print("conv7 shape" + str(out.shape))
 
         return out
@@ -122,19 +126,42 @@ class Decoder3D(nn.Module):
         self.transConv1 = nn.ConvTranspose3d(64, 64, kernel_size=3, stride=(2, 2, 2), padding=1,
                                              output_padding=(0, 0, 1))
         self.bn1 = nn.BatchNorm3d(64)
-        self.transConv2 = nn.ConvTranspose3d(64, 32, kernel_size=3, stride=(1, 1, 2), padding=1,
+
+        self.conv1 = nn.Conv3d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn11 = nn.BatchNorm3d(64)
+
+        self.transConv2 = nn.ConvTranspose3d(64, 64, kernel_size=3, stride=(1, 1, 2), padding=1,
                                              output_padding=(0, 0, 1))
-        self.bn2 = nn.BatchNorm3d(32)
-        self.transConv3 = nn.ConvTranspose3d(32, 32, kernel_size=3, stride=(1, 1, 2), padding=1,
+        self.bn2 = nn.BatchNorm3d(64)
+
+        self.conv2 = nn.Conv3d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn22 = nn.BatchNorm3d(64)
+
+        self.transConv3 = nn.ConvTranspose3d(64, 64, kernel_size=3, stride=(1, 1, 2), padding=1,
                                              output_padding=(0, 0, 1))
-        self.bn3 = nn.BatchNorm3d(32)
-        self.transConv4 = nn.ConvTranspose3d(32, 16, kernel_size=3, stride=(1, 1, 2), padding=1,
+        self.bn3 = nn.BatchNorm3d(64)
+
+        self.conv3 = nn.Conv3d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn33 = nn.BatchNorm3d(64)
+
+        self.transConv4 = nn.ConvTranspose3d(64, 64, kernel_size=3, stride=(1, 1, 2), padding=1,
                                              output_padding=(0, 0, 1))
-        self.bn4 = nn.BatchNorm3d(16)
-        self.transConv5 = nn.ConvTranspose3d(16, 16, kernel_size=3, stride=(1, 1, 2), padding=1,
+        self.bn4 = nn.BatchNorm3d(64)
+
+        self.conv4 = nn.Conv3d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn44 = nn.BatchNorm3d(64)
+
+        self.transConv5 = nn.ConvTranspose3d(64, 64, kernel_size=3, stride=(1, 1, 2), padding=1,
                                              output_padding=(0, 0, 1))
-        self.bn5 = nn.BatchNorm3d(16)
-        self.transConv6 = nn.ConvTranspose3d(16, 1, kernel_size=3, stride=(1, 1, 2), padding=1, output_padding=(0, 0, 1))
+        self.bn5 = nn.BatchNorm3d(64)
+
+        self.conv5 = nn.Conv3d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.bn55 = nn.BatchNorm3d(64)
+
+        self.transConv6 = nn.ConvTranspose3d(64, 64, kernel_size=3, stride=(1, 1, 2), padding=1, output_padding=(0, 0, 1))
+        self.bn6 = nn.BatchNorm3d(64)
+
+        self.lastConv = nn.Conv3d(64, 1, kernel_size=3, stride=1, padding=1)
 
         self.relu = nn.PReLU()
 
@@ -149,33 +176,59 @@ class Decoder3D(nn.Module):
         # out: (batch_size, 64, 13, 5, 640)
         print("transConv1 shape" + str(out.shape))
 
+        out = self.conv1(out)
+        out = self.bn11(out)
+        out = self.relu(out)
+
         out = self.transConv2(out)
         out = self.bn2(out)
         out = self.relu(out)
-        # out shape: (batch_size, 32, 13, 5, 1280)
+        # out shape: (batch_size, 64, 13, 5, 1280)
         print("transConv2 shape" + str(out.shape))
+
+        out = self.conv2(out)
+        out = self.bn22(out)
+        out = self.relu(out)
 
         out = self.transConv3(out)
         out = self.bn3(out)
         out = self.relu(out)
-        # out shape: (batch_size, 32, 13, 5, 2560)
+        # out shape: (batch_size, 64, 13, 5, 2560)
         print("transConv3 shape" + str(out.shape))
+
+        out = self.conv3(out)
+        out = self.bn33(out)
+        out = self.relu(out)
 
         out = self.transConv4(out)
         out = self.bn4(out)
         out = self.relu(out)
-        # out shape: (batch_size, 16, 13, 5, 5120)
+        # out shape: (batch_size, 64, 13, 5, 5120)
         print("transConv4 shape" + str(out.shape))
+
+        out = self.conv4(out)
+        out = self.bn44(out)
+        out = self.relu(out)
 
         out = self.transConv5(out)
         out = self.bn5(out)
         out = self.relu(out)
-        # out shape: (batch_size, 8, 13, 5, 10240)
+        # out shape: (batch_size, 64, 13, 5, 10240)
         print("transConv5 shape" + str(out.shape))
 
+        out = self.conv5(out)
+        out = self.bn55(out)
+        out = self.relu(out)
+
         out = self.transConv6(out)
-        # out shape: (batch_size, 1, 13, 5, 20480)
+        out = self.bn6(out)
+        out = self.relu(out)
+        # out shape: (batch_size, 64, 13, 5, 20480)
         print("transConv6 shape" + str(out.shape))
+
+        out = self.lastConv(out)
+        # out shape: (batch_size, 1, 13, 5, 20480)
+
 
         return out
 
@@ -205,19 +258,19 @@ class LSTMRegressor(pl.LightningModule):
     def forward(self, x):
         # Encode
         x = self.encoder(x)
-        # out shape (batch_size, 64, 7, 3, 640)
+        # out shape (batch_size, 128, 7, 3, 320)
         x_shape = x.shape
 
         x = torch.reshape(x, (self.batch_size, x.shape[1]*x.shape[2]*x.shape[3], x.shape[-1]))
         x = x.transpose(1,2) # Flatten and prepare dimensions for LSTM
-        # out shape: (batch_size, 320, 1344)
+        # out shape: (batch_size, 320, 2688)
 
         # LSTM
         lstm_out, _ = self.lstm(x)
 
         # Decode
         lstm_out = lstm_out.transpose(1,2)
-        lstm_out = torch.reshape(lstm_out,x_shape)# Reshape for decoder
+        lstm_out = torch.reshape(lstm_out,(self.batch_size, int(self.hidden_size/21), 7,3,x_shape[-1]))# Reshape for decoder
 
         x = self.decoder(lstm_out)
 
