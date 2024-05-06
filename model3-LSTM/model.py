@@ -194,8 +194,6 @@ class LSTMRegressor(pl.LightningModule):
         self.mean = mean
         self.std = std
 
-        self.current_epoch = 0  # Initialize epoch counter
-
         # Initialize the encoder and decoder
         self.encoder = Encoder3D()
         self.decoder = Decoder3D()
@@ -203,10 +201,6 @@ class LSTMRegressor(pl.LightningModule):
         # LSTM layer
         self.lstm = nn.LSTM(input_size=self.n_features, hidden_size=self.hidden_size, num_layers=self.num_layers,
                             dropout=self.dropout, batch_first=True)
-
-    def on_epoch_start(self):
-        # Increment the epoch counter at the start of each epoch
-        self.current_epoch += 1
 
     def forward(self, x):
         # Encode
