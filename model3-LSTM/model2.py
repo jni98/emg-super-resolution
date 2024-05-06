@@ -194,6 +194,8 @@ class LSTMRegressor(pl.LightningModule):
         self.mean = mean
         self.std = std
 
+        self.current_epoch = 0  # Initialize epoch counter
+
         # Initialize the encoder and decoder
         self.encoder = Encoder3D()
         self.decoder = Decoder3D()
@@ -201,6 +203,10 @@ class LSTMRegressor(pl.LightningModule):
         # LSTM layer
         self.lstm = nn.LSTM(input_size=self.n_features, hidden_size=self.hidden_size, num_layers=self.num_layers,
                             dropout=self.dropout, batch_first=True)
+
+    def on_epoch_start(self):
+        # Increment the epoch counter at the start of each epoch
+        self.current_epoch += 1
 
     def forward(self, x):
         # Encode
@@ -234,21 +240,25 @@ class LSTMRegressor(pl.LightningModule):
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         return loss
 
+    def validation_epoch_end(self, outputs):
+        # Check if it's the 10th epoch
+        if self.current_epoch % 100 == 0:
+            # Assuming 'outputs' contains the data necessary for plotting
+            for output in outputs:
+                x, y, interpolated, y_hat = output['x'], output['y'], output['interpolated'], output['y_hat']
+                y = self.destandardize(y)
+                y_hat = self.destandardize(y_hat)
+                interpolated = self.destandardize(interpolated)
+                self.validation_plots(interpolated, y, y_hat, 'Validation')
+
     def validation_step(self, batch, batch_idx):
-        print("Validation step")
         x, y, _, interpolated = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
+        # Log loss as usual
         self.log('val_loss', loss, on_epoch=True, on_step=False)
-
-        # Log the first validation batch for visualization
-        if batch_idx == 0:
-            interpolated = self.destandardize(interpolated)
-            y = self.destandardize(y)
-            y_hat = self.destandardize(y_hat)
-            self.validation_plots(interpolated, y, y_hat, 'Validation')
-
-        return loss
+        # Return additional data for plotting
+        return {'x': x, 'y': y, 'interpolated': interpolated, 'y_hat': y_hat, 'loss': loss}
 
     def test_step(self, batch, batch_idx):
         print("Test step")
