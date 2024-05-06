@@ -228,7 +228,7 @@ class LSTMRegressor(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         print("Training step")
-        x, y, _ = batch
+        x, y, _, _ = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
         self.log('train_loss', loss, on_epoch=True, on_step=False)
@@ -236,33 +236,33 @@ class LSTMRegressor(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         print("Validation step")
-        x, y, _ = batch
+        x, y, _, interpolated = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
         self.log('val_loss', loss, on_epoch=True, on_step=False)
 
         # Log the first validation batch for visualization
         if batch_idx == 0:
-            x = self.destandardize(x)
+            interpolated = self.destandardize(interpolated)
             y = self.destandardize(y)
             y_hat = self.destandardize(y_hat)
-            self.validation_plots(x, y, y_hat, 'Validation')
+            self.validation_plots(interpolated, y, y_hat, 'Validation')
 
         return loss
 
     def test_step(self, batch, batch_idx):
         print("Test step")
-        x, y, y_path = batch
+        x, y, y_path, interpolated = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
         self.log('test_loss', loss, on_epoch=True, on_step=False)
 
         # Log the first test batch for visualization
         if batch_idx == 0:
-            x = self.destandardize(x)
+            interpolated = self.destandardize(interpolated)
             y = self.destandardize(y)
             y_hat = self.destandardize(y_hat)
-            self.validation_plots(x, y, y_hat, 'Test')
+            self.validation_plots(interpolated, y, y_hat, 'Test')
 
         # Save the prediction for each batch individually
         results_dir = self.trainer.logger.save_dir  # or any other directory you have defined
@@ -282,92 +282,88 @@ class LSTMRegressor(pl.LightningModule):
     def destandardize(self, prediction):
         return prediction * self.std + self.mean
 
-    def validation_plots(self, x, y, y_hat, phase):
+    def validation_plots(self, interpolated, y, y_hat, phase):
 
         # Convert tensors to numpy arrays and move to CPU
-        # val_lr_destandardized = np.asarray(x.to('cpu'))
-        # TODO: Destandardize
-        val_hr_destandardized = np.asarray(y.to('cpu'))
-        val_sr_destandardized = np.asarray(y_hat.to('cpu'))
+        interpolated_destandardized = np.asarray(interpolated.to('cpu'))
+        hr_destandardized = np.asarray(y.to('cpu'))
+        sr_destandardized = np.asarray(y_hat.to('cpu'))
 
         # Extract specific channels
-        # lr_channel = val_lr_destandardized[0][6][2]
-        val_channel = val_hr_destandardized[0][0][6][2]
-        sr_channel = val_sr_destandardized[0][0][6][2]
+        interpolated_channel = interpolated_destandardized[0][0][6][2]
+        hr_channel = hr_destandardized[0][0][6][2]
+        sr_channel = sr_destandardized[0][0][6][2]
 
         ############################## Log Plots given channel########################################
         print("Logging plots for batch index 0 given channel")
 
-        # x-axis for the following logs
-        bar_fig_1, axs = plt.subplots(3, 1, figsize=(8, 10))
-
-        # Log one channel in the middle of the grid
-        axs[0].plot(val_channel)
-        axs[0].set_title('Validation channel [6][2]')
-
-        # Log one channel in the middle of the grid
-        axs[1].plot(sr_channel)
-        axs[1].set_title('Super-resolution channel [6][2]')
+        plotly_fig0 = go.Figure()
 
         # log cross correlation
-        auto_correlation = np.correlate(val_channel, val_channel, mode='full')
-        cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
+        auto_correlation = np.correlate(hr_channel, hr_channel, mode='full')
+        cross_correlation = (np.correlate(hr_channel, sr_channel, mode='full')) / np.max(auto_correlation)
         cross_correlation = cross_correlation.squeeze()
-        axs[2].plot(cross_correlation)
-        axs[2].set_title('Cross Correlation channel [6][2]')
+        plotly_fig0.add_trace(go.Scatter(y=cross_correlation))
 
-        plt.tight_layout()
-        wandb.log({phase + " given Channel": [wandb.Image(bar_fig_1)]})
-        # Close the figure
-        plt.close(bar_fig_1)
+        # Update layout
+        plotly_fig0.update_layout(
+            title='Cross Correlation - Predicted Channel',
+            xaxis_title='Index',
+            yaxis_title='Cross Correlation',
+            template="plotly_white"
+        )
+
+        # Log the Plotly figure to W&B
+        wandb.log({phase + " Cross correlation - Given Channel [6][2]": plotly_fig0})
 
         # New figure for plots of channels
         # Create Plotly figure
         plotly_fig = go.Figure()
         # Add traces for all channels
         plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution channel [6][2]'))
+            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution'))
         plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(val_channel)), y=val_channel, name='Validation channel [6][2]', opacity=0.5))
-        # plotly_fig.add_trace(
-        # go.Scatter(x=np.arange(len(lr_channel)), y=lr_channel, name='Low-resolution channel [6][2]', opacity=0.5))
+            go.Scatter(x=np.arange(len(hr_channel)), y=hr_channel, name='High-resolution', opacity=0.5))
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
+                       opacity=0.5))
         # Update layout
-        plotly_fig.update_layout(title="Super-resolution vs Validation - given Channel", showlegend=True,
+        plotly_fig.update_layout(title="Super-resolution vs Validation - Given Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
         # Log the Plotly figure to W&B
-        wandb.log({phase + " - SR vs Val - given Channel": plotly_fig})
+        wandb.log({phase + " - SR vs Val - Given Channel [6][2]": plotly_fig})
 
         ############# Plot frequency histogram# #################
         sampling_freq = 2048
 
         # Compute FFT for val_channel
-        n = len(val_channel)
+        n = len(hr_channel)
         k = np.arange(n)
         T = n / sampling_freq
         frq = k / T  # Two sides frequency range
         frq = frq[range(n // 2)]  # One side frequency range
-        val_Y = np.fft.fft(val_channel) / n
-        val_Y = val_Y[range(n // 2)]
+        hr_Y = np.fft.fft(hr_channel) / n
+        hr_Y = hr_Y[range(n // 2)]
 
         # Compute FFT for sr_channel
         sr_Y = np.fft.fft(sr_channel) / n
         sr_Y = sr_Y[range(n // 2)]
 
-        # Compute FFT for lr_channel
-        # lr_Y = np.fft.fft(lr_channel) / n
-        # lr_Y = lr_Y[range(n // 2)]
+        # Compute FFT for interpolated_channel
+        interpolated_Y = np.fft.fft(interpolated_channel) / n
+        interpolated_Y = interpolated_Y[range(n // 2)]
 
         # Plot
         bar_fig_1 = go.Figure()
 
         # Plot val_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation (HR) channel', opacity=1, offset=0))
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
 
         # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution channel', opacity=1, offset=0.2))
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
 
         # Plot sr_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution channel', opacity=1, offset=0.1))
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
 
         bar_fig_1.update_layout(title='Frequency Spectrum - Given channel',
                                 xaxis_title='Frequency (Hz)',
@@ -375,110 +371,106 @@ class LSTMRegressor(pl.LightningModule):
                                 barmode='group')
 
         # Log figure to wandb
-        wandb.log({phase + " - Frequency Spectrum - Given channel": bar_fig_1})
+        wandb.log({phase + " - Frequency Spectrum - Bar - Given channel [6][2]": bar_fig_1})
 
         # Plot
         freq_spec1 = go.Figure()
 
         # Plot val_channel
         freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='Validation (HR) channel', opacity=0.5))
+            go.Scatter(x=frq, y=np.abs(hr_Y), mode='lines', name='High-resolution', opacity=0.5))
 
-        # Plot lr_channel
-        # freq_spec1.add_trace(
-        #    go.Scatter(x=frq, y=np.abs(lr_Y), mode='lines', name='Low-resolution channel', opacity=0.5))
+        # Plot interpolated_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(interpolated_Y), mode='lines', name='Interpolated', opacity=0.5))
 
         # Plot sr channel
         freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution channel', opacity=1))
+            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution', opacity=1))
 
         freq_spec1.update_layout(title='Frequency Spectrum - Given channel',
                                  xaxis_title='Frequency (Hz)',
                                  yaxis_title='Magnitude')
 
-        wandb.log({phase + " - Frequency Spectrum - Given channel": freq_spec1})
+        wandb.log({phase + " - Frequency Spectrum - Scatter - Given channel [6][2]": freq_spec1})
 
         ############################## Log Plots predicted channel########################################
         print("Logging plots for batch index 0 predicted channel")
 
         # Select channels
-        val_channel = val_hr_destandardized[0][0][6][1]
-        sr_channel = val_sr_destandardized[0][0][6][1]
-        # lr_channel = val_lr_destandardized[0][2][6][1]
+        hr_channel = hr_destandardized[0][0][6][1]
+        sr_channel = sr_destandardized[0][0][6][1]
+        interpolated_channel = interpolated_destandardized[0][0][6][1]
 
-        # x-axis for the following logs
-        fig1, axs1 = plt.subplots(3, 1, figsize=(8, 10))
-
-        # Log one channel in the middle of the grid
-        axs1[0].plot(val_channel)
-        axs1[0].set_title('Validation channel [6][1]')
-
-        # Log one channel in the middle of the grid
-        axs1[1].plot(sr_channel)
-        axs1[1].set_title('Super-resolution channel [6][1]')
+        plotly_fig1 = go.Figure()
 
         # log cross correlation
-        auto_correlation = np.correlate(val_channel, val_channel, mode='full')
-        cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
+        auto_correlation = np.correlate(hr_channel, hr_channel, mode='full')
+        cross_correlation = (np.correlate(hr_channel, sr_channel, mode='full')) / np.max(auto_correlation)
         cross_correlation = cross_correlation.squeeze()
-        axs1[2].plot(cross_correlation)
-        axs1[2].set_title('Cross Correlation channel [6][1]')
+        plotly_fig1.add_trace(go.Scatter(y=cross_correlation))
 
-        plt.tight_layout()
-        wandb.log({phase + " predicted Channel": [wandb.Image(fig1)]})
+        # Update layout
+        plotly_fig1.update_layout(
+            title='Cross Correlation - Predicted Channel',
+            xaxis_title='Index',
+            yaxis_title='Cross Correlation',
+            template="plotly_white"
+        )
 
-        # Close the figure
-        plt.close(fig1)
+        # Log the Plotly figure to W&B
+        wandb.log({phase + " Cross correlation - Predicted Channel  [6][1]": plotly_fig1})
 
         # New figure for plots of channels
         # Create Plotly figure
         plotly_fig = go.Figure()
         # Add traces for all channels
         plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution channel [6][1]'))
+            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution'))
         plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(val_channel)), y=val_channel, name='Validation channel [6][1]', opacity=0.5))
-        # plotly_fig.add_trace(
-        # go.Scatter(x=np.arange(len(lr_channel)), y=lr_channel, name='Low-resolution channel [6][1]', opacity=0.5))
+            go.Scatter(x=np.arange(len(hr_channel)), y=hr_channel, name='High-resolution', opacity=0.5))
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
+                       opacity=0.5))
         # Update layout
-        plotly_fig.update_layout(title="Super-resolution vs Validation - predicted Channel", showlegend=True,
+        plotly_fig.update_layout(title="Super-resolution vs Validation - Predicted Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
 
         # Log the Plotly figure to W&B
-        wandb.log({phase + " - SR vs Val - predicted Channel": plotly_fig})
+        wandb.log({phase + " - SR vs Val - Predicted Channel [6][1]": plotly_fig})
 
         ############# Plot frequency histogram# #################
         # Generate sample data for demonstration purposes
         sampling_freq = 2048
 
         # Compute FFT for val_channel
-        n = len(val_channel)
+        n = len(hr_channel)
         k = np.arange(n)
         T = n / sampling_freq
         frq = k / T  # Two sides frequency range
         frq = frq[range(n // 2)]  # One side frequency range
-        val_Y = np.fft.fft(val_channel) / n
-        val_Y = val_Y[range(n // 2)]
+        hr_Y = np.fft.fft(hr_channel) / n
+        hr_Y = hr_Y[range(n // 2)]
 
         # Compute FFT for sr_channel
         sr_Y = np.fft.fft(sr_channel) / n
         sr_Y = sr_Y[range(n // 2)]
 
-        # Compute FFT for lr_channel
-        # lr_Y = np.fft.fft(lr_channel) / n
-        # lr_Y = lr_Y[range(n // 2)]
+        # Compute FFT for interpolated_channel
+        interpolated_Y = np.fft.fft(interpolated_channel) / n
+        interpolated_Y = interpolated_Y[range(n // 2)]
 
         # Plot
         bar_fig_1 = go.Figure()
 
         # Plot val_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(val_Y), name='Validation (HR) channel', opacity=1, offset=0))
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
 
         # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(lr_Y), name='Low-resolution channel', opacity=1, offset=0.2))
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
 
         # Plot sr_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution channel', opacity=1, offset=0.1))
+        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
 
         bar_fig_1.update_layout(title='Frequency Spectrum - Predicted channel',
                                 xaxis_title='Frequency (Hz)',
@@ -486,25 +478,25 @@ class LSTMRegressor(pl.LightningModule):
                                 barmode='group')
 
         # Log figure to wandb
-        wandb.log({phase + " - Frequency Spectrum - Predicted channel": bar_fig_1})
+        wandb.log({phase + " - Frequency Spectrum - Bar - Predicted channel [6][1]": bar_fig_1})
 
         # Plot
         freq_spec1 = go.Figure()
 
         # Plot val_channel
         freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(val_Y), mode='lines', name='Validation (HR) channel', opacity=0.5))
+            go.Scatter(x=frq, y=np.abs(hr_Y), mode='lines', name='High-resolution', opacity=0.5))
 
-        # Plot lr_channel
-        # freq_spec1.add_trace(
-        #    go.Scatter(x=frq, y=np.abs(lr_Y), mode='lines', name='Low-resolution channel', opacity=0.5))
+        # Plot interpolated_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(interpolated_Y), mode='lines', name='Interpolated', opacity=0.5))
 
         # Plot sr channel
         freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution channel', opacity=1))
+            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution', opacity=1))
 
         freq_spec1.update_layout(title='Frequency Spectrum - Predicted channel',
                                  xaxis_title='Frequency (Hz)',
                                  yaxis_title='Magnitude')
 
-        wandb.log({phase + " - Frequency Spectrum - Predicted channel": freq_spec1})
+        wandb.log({phase + " - Frequency Spectrum - Scatter - Predicted channel [6][1]": freq_spec1})

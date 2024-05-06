@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import pytorch_lightning as pl
 import pandas as pd
+from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import butter, filtfilt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -43,14 +44,18 @@ class TimeseriesDataset(Dataset):
         # Bandpass filter
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
 
-        # Standardize
-        hr_emg = self.standardize(hr_emg)
-
         # extract lr emg
         lr_emg = hr_emg[::2, ::2]
+        lr_interpolated = self.grid_interpolation(lr_emg, hr_emg.shape, method='linear')
+
+        # Standardize
+        hr_emg = self.standardize(hr_emg)
+        lr_emg = self.standardize(lr_emg)
+        lr_interpolated = self.standardize(lr_interpolated)
 
         lr_emg = torch.tensor(lr_emg.copy()).to(torch.float32)
         hr_emg = torch.tensor(hr_emg.copy()).to(torch.float32)
+        lr_interpolated = torch.tensor(lr_interpolated.copy()).to(torch.float32)
 
         # Transform
         # if self.transform:
@@ -60,8 +65,9 @@ class TimeseriesDataset(Dataset):
         # Convert input data to the same data type as the model parameters
         lr_emg = lr_emg.unsqueeze(0)
         hr_emg = hr_emg.unsqueeze(0)
+        lr_interpolated = lr_interpolated.unsqueeze(0)
 
-        return (lr_emg, hr_emg, hr_emg_path)
+        return (lr_emg, hr_emg, hr_emg_path, lr_interpolated)
 
     def standardize(self, X):
         '''
@@ -106,6 +112,45 @@ class TimeseriesDataset(Dataset):
         filtered_signal = filtfilt(b, a, data)
 
         return filtered_signal
+
+    def grid_interpolation(self, lr_emg: np.ndarray, hr_emg_shape: tuple, method: str) -> np.ndarray:
+        """
+        Performs cubic interpolation on the low resolution data to get high resolution data.
+        Parameters
+        ----------
+        lr_emg: numpy.ndarray
+                Low resolution emg data.
+        hr_emg_shape: tuple
+                Shape of the high resolution emg data.
+        method: str
+                Method of interpolation. On default set to linear.
+
+        Returns
+        -------
+        interpolated_signal: numpy.ndarray
+                High resolution emg data.
+        """
+        # Create a grid for the original signal
+        x = np.linspace(0, 1, lr_emg.shape[0])
+        y = np.linspace(0, 1, lr_emg.shape[1])
+        z = np.linspace(0, 1, lr_emg.shape[2])
+
+        # Create a new grid for the desired interpolated signal
+        new_x = np.linspace(0, 1, hr_emg_shape[0])
+        new_y = np.linspace(0, 1, hr_emg_shape[1])
+        new_z = np.linspace(0, 1, hr_emg_shape[2])
+
+        # Create meshgrid from new grid
+        mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
+
+        # Create interpolator
+        interpolator = RegularGridInterpolator((x, y, z), lr_emg, method=method)
+        # print("Created the interpolater")
+
+        # Interpolate
+        interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
+        # print("Finished the interpolator")
+        return interpolated_signal
 
 class CustomDataModule(pl.LightningDataModule):
     '''
