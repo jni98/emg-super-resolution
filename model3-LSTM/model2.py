@@ -231,7 +231,7 @@ class LSTMRegressor(pl.LightningModule):
         x, y, _, _ = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
-        self.log('train_loss', loss, on_epoch=True, on_step=False)
+        self.log('train_loss', loss)
         return loss
 
     def on_validation_epoch_end(self):
@@ -239,7 +239,7 @@ class LSTMRegressor(pl.LightningModule):
         if self.current_epoch % 100 == 0:
             # Assuming 'outputs' contains the data necessary for plotting
             x, y, interpolated, y_hat = self.outputs['x'], self.outputs['y'], self.outputs['interpolated'], \
-            self.outputs['y_hat']
+                self.outputs['y_hat']
             y = self.destandardize(y)
             y_hat = self.destandardize(y_hat)
             interpolated = self.destandardize(interpolated)
@@ -250,7 +250,7 @@ class LSTMRegressor(pl.LightningModule):
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
         # Log loss as usual
-        self.log('val_loss', loss, on_epoch=True, on_step=False)
+        self.log('val_loss', loss)
         # Return additional data for plotting
         self.outputs = {'x': x, 'y': y, 'interpolated': interpolated, 'y_hat': y_hat, 'loss': loss}
 
@@ -261,7 +261,7 @@ class LSTMRegressor(pl.LightningModule):
         x, y, y_path, interpolated = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
-        self.log('test_loss', loss, on_epoch=True, on_step=False)
+        self.log('test_loss', loss)
 
         # Log the first test batch for visualization
         if batch_idx == 0:
@@ -360,24 +360,24 @@ class LSTMRegressor(pl.LightningModule):
         interpolated_Y = interpolated_Y[range(n // 2)]
 
         # Plot
-        bar_fig_1 = go.Figure()
-
-        # Plot val_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
-
-        # Plot val_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
-
-        # Plot sr_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
-
-        bar_fig_1.update_layout(title='Frequency Spectrum - Given channel',
-                                xaxis_title='Frequency (Hz)',
-                                yaxis_title='Magnitude',
-                                barmode='group')
-
-        # Log figure to wandb
-        wandb.log({phase + " - Frequency Spectrum - Bar - Given channel [6][2]": bar_fig_1})
+        # bar_fig_1 = go.Figure()
+        #
+        # # Plot val_channel
+        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
+        #
+        # # Plot val_channel
+        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
+        #
+        # # Plot sr_channel
+        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
+        #
+        # bar_fig_1.update_layout(title='Frequency Spectrum - Given channel',
+        #                         xaxis_title='Frequency (Hz)',
+        #                         yaxis_title='Magnitude',
+        #                         barmode='group')
+        #
+        # # Log figure to wandb
+        # wandb.log({phase + " - Frequency Spectrum - Bar - Given channel [6][2]": bar_fig_1})
 
         # Plot
         freq_spec1 = go.Figure()
@@ -467,24 +467,24 @@ class LSTMRegressor(pl.LightningModule):
         interpolated_Y = interpolated_Y[range(n // 2)]
 
         # Plot
-        bar_fig_1 = go.Figure()
-
-        # Plot val_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
-
-        # Plot val_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
-
-        # Plot sr_channel
-        bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
-
-        bar_fig_1.update_layout(title='Frequency Spectrum - Predicted channel',
-                                xaxis_title='Frequency (Hz)',
-                                yaxis_title='Magnitude',
-                                barmode='group')
-
-        # Log figure to wandb
-        wandb.log({phase + " - Frequency Spectrum - Bar - Predicted channel [6][1]": bar_fig_1})
+        # bar_fig_1 = go.Figure()
+        #
+        # # Plot val_channel
+        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
+        #
+        # # Plot val_channel
+        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
+        #
+        # # Plot sr_channel
+        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
+        #
+        # bar_fig_1.update_layout(title='Frequency Spectrum - Predicted channel',
+        #                         xaxis_title='Frequency (Hz)',
+        #                         yaxis_title='Magnitude',
+        #                         barmode='group')
+        #
+        # # Log figure to wandb
+        # wandb.log({phase + " - Frequency Spectrum - Bar - Predicted channel [6][1]": bar_fig_1})
 
         # Plot
         freq_spec1 = go.Figure()

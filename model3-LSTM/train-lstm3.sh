@@ -24,7 +24,7 @@ FAST_DATA_DIR=$TMPDIR/model3-LSTM-$SLURM_JOB_ID
 
 EPOCHS=5000
 BATCHSIZE=20
-LR=0.001
+LR=0.0001
 
 ############    params   ###############
 
