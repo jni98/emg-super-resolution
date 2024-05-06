@@ -231,7 +231,7 @@ class LSTMRegressor(pl.LightningModule):
         x, y, _ = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
-        self.log('train_loss', loss)
+        self.log('train_loss', loss, on_epoch=True, on_step=False)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -239,7 +239,7 @@ class LSTMRegressor(pl.LightningModule):
         x, y, _ = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
-        self.log('val_loss', loss)
+        self.log('val_loss', loss, on_epoch=True, on_step=False)
 
         # Log the first validation batch for visualization
         if batch_idx == 0:
@@ -255,7 +255,7 @@ class LSTMRegressor(pl.LightningModule):
         x, y, y_path = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
-        self.log('test_loss', loss)
+        self.log('test_loss', loss, on_epoch=True, on_step=False)
 
         # Log the first test batch for visualization
         if batch_idx == 0:
