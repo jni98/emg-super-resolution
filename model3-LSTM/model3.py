@@ -11,6 +11,7 @@ import numpy as np
 import plotly.graph_objects as go
 import wandb
 
+
 class ResidualBlock3D(nn.Module):
     def __init__(self, channels, kernel_size=3, stride=1, padding=1):
         super(ResidualBlock3D, self).__init__()
@@ -38,27 +39,27 @@ class Encoder3D(nn.Module):
     def __init__(self):
         super(Encoder3D, self).__init__()
 
-        self.conv2 = nn.Conv3d(1, 16, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.conv2 = nn.Conv3d(1, 16, kernel_size=3, stride=(1, 1, 2), padding=1)  # Downsample
         self.bn2 = nn.BatchNorm3d(16)
         self.res2 = ResidualBlock3D(16)
 
-        self.conv3 = nn.Conv3d(16, 32, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.conv3 = nn.Conv3d(16, 32, kernel_size=3, stride=(1, 1, 2), padding=1)  # Downsample
         self.bn3 = nn.BatchNorm3d(32)
         self.res3 = ResidualBlock3D(32)
 
-        self.conv4 = nn.Conv3d(32, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.conv4 = nn.Conv3d(32, 64, kernel_size=3, stride=(1, 1, 2), padding=1)  # Downsample
         self.bn4 = nn.BatchNorm3d(64)
         self.res4 = ResidualBlock3D(64)
 
-        self.conv5 = nn.Conv3d(64, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.conv5 = nn.Conv3d(64, 64, kernel_size=3, stride=(1, 1, 2), padding=1)  # Downsample
         self.bn5 = nn.BatchNorm3d(64)
         self.res5 = ResidualBlock3D(64)
 
-        self.conv6 = nn.Conv3d(64, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.conv6 = nn.Conv3d(64, 64, kernel_size=3, stride=(1, 1, 2), padding=1)  # Downsample
         self.bn6 = nn.BatchNorm3d(64)
         self.res6 = ResidualBlock3D(64)
 
-        self.conv7 = nn.Conv3d(64, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.conv7 = nn.Conv3d(64, 64, kernel_size=3, stride=(1, 1, 2), padding=1)  # Downsample
         self.bn7 = nn.BatchNorm3d(64)
         self.res7 = ResidualBlock3D(64)
 
@@ -93,7 +94,8 @@ class Decoder3D(nn.Module):
         self.transConv5 = nn.ConvTranspose3d(32, 16, kernel_size=3, stride=(2, 2, 2), padding=1,
                                              output_padding=(0, 0, 1))
         self.bn5 = nn.BatchNorm3d(16)
-        self.transConv6 = nn.ConvTranspose3d(16, 1, kernel_size=3, stride=(1, 1, 2), padding=1, output_padding=(0, 0, 1))
+        self.transConv6 = nn.ConvTranspose3d(16, 1, kernel_size=3, stride=(1, 1, 2), padding=1,
+                                             output_padding=(0, 0, 1))
 
         self.relu = nn.PReLU()
 
@@ -116,7 +118,8 @@ class Decoder3D(nn.Module):
 
 
 class LSTMRegressor(pl.LightningModule):
-    def __init__(self, n_features, hidden_size, seq_len, batch_size, num_layers, dropout, learning_rate, criterion, mean, std):
+    def __init__(self, n_features, hidden_size, seq_len, batch_size, num_layers, dropout, learning_rate, criterion,
+                 mean, std):
         super(LSTMRegressor, self).__init__()
         self.n_features = n_features
         self.hidden_size = hidden_size
@@ -128,6 +131,8 @@ class LSTMRegressor(pl.LightningModule):
         self.learning_rate = learning_rate
         self.mean = mean
         self.std = std
+
+        self.outputs = None
 
         # Initialize the encoder and decoder
         self.encoder = Encoder3D()
@@ -143,16 +148,16 @@ class LSTMRegressor(pl.LightningModule):
         # out shape (batch_size, 32, 7, 3, 2560)
         x_shape = x.shape
 
-        x = torch.reshape(x, (self.batch_size, x.shape[1]*x.shape[2]*x.shape[3], x.shape[-1]))
-        x = x.transpose(1,2) # Flatten and prepare dimensions for LSTM
+        x = torch.reshape(x, (self.batch_size, x.shape[1] * x.shape[2] * x.shape[3], x.shape[-1]))
+        x = x.transpose(1, 2)  # Flatten and prepare dimensions for LSTM
         # out shape: (batch_size, 2560, 672)
 
         # LSTM
         lstm_out, _ = self.lstm(x)
 
         # Decode
-        lstm_out = lstm_out.transpose(1,2)
-        lstm_out = torch.reshape(lstm_out,x_shape)# Reshape for decoder
+        lstm_out = lstm_out.transpose(1, 2)
+        lstm_out = torch.reshape(lstm_out, x_shape)  # Reshape for decoder
 
         x = self.decoder(lstm_out)
 
@@ -169,16 +174,15 @@ class LSTMRegressor(pl.LightningModule):
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         return loss
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
         # Check if it's the 10th epoch
-        if self.current_epoch % 100 == 0:
+        if self.current_epoch % 1 == 0:
             # Assuming 'outputs' contains the data necessary for plotting
-            for output in outputs:
-                x, y, interpolated, y_hat = output['x'], output['y'], output['interpolated'], output['y_hat']
-                y = self.destandardize(y)
-                y_hat = self.destandardize(y_hat)
-                interpolated = self.destandardize(interpolated)
-                self.validation_plots(interpolated, y, y_hat, 'Validation')
+            x, y, interpolated, y_hat = self.outputs['x'], self.outputs['y'], self.outputs['interpolated'], self.outputs['y_hat']
+            y = self.destandardize(y)
+            y_hat = self.destandardize(y_hat)
+            interpolated = self.destandardize(interpolated)
+            self.validation_plots(interpolated, y, y_hat, 'Validation')
 
     def validation_step(self, batch, batch_idx):
         x, y, _, interpolated = batch
@@ -187,7 +191,9 @@ class LSTMRegressor(pl.LightningModule):
         # Log loss as usual
         self.log('val_loss', loss, on_epoch=True, on_step=False)
         # Return additional data for plotting
-        return {'x': x, 'y': y, 'interpolated': interpolated, 'y_hat': y_hat, 'loss': loss}
+        self.outputs = {'x': x, 'y': y, 'interpolated': interpolated, 'y_hat': y_hat, 'loss': loss}
+
+        return loss
 
     def test_step(self, batch, batch_idx):
         print("Test step")
@@ -264,7 +270,8 @@ class LSTMRegressor(pl.LightningModule):
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(hr_channel)), y=hr_channel, name='High-resolution', opacity=0.5))
         plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated', opacity=0.5))
+            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
+                       opacity=0.5))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - Given Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
@@ -368,7 +375,8 @@ class LSTMRegressor(pl.LightningModule):
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(hr_channel)), y=hr_channel, name='High-resolution', opacity=0.5))
         plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated', opacity=0.5))
+            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
+                       opacity=0.5))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - Predicted Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")

@@ -234,16 +234,16 @@ class LSTMRegressor(pl.LightningModule):
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         return loss
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
         # Check if it's the 10th epoch
-        if self.current_epoch % 100 == 0:
+        if self.current_epoch % 1 == 0:
             # Assuming 'outputs' contains the data necessary for plotting
-            for output in outputs:
-                x, y, interpolated, y_hat = output['x'], output['y'], output['interpolated'], output['y_hat']
-                y = self.destandardize(y)
-                y_hat = self.destandardize(y_hat)
-                interpolated = self.destandardize(interpolated)
-                self.validation_plots(interpolated, y, y_hat, 'Validation')
+            x, y, interpolated, y_hat = self.outputs['x'], self.outputs['y'], self.outputs['interpolated'], \
+            self.outputs['y_hat']
+            y = self.destandardize(y)
+            y_hat = self.destandardize(y_hat)
+            interpolated = self.destandardize(interpolated)
+            self.validation_plots(interpolated, y, y_hat, 'Validation')
 
     def validation_step(self, batch, batch_idx):
         x, y, _, interpolated = batch
@@ -252,7 +252,9 @@ class LSTMRegressor(pl.LightningModule):
         # Log loss as usual
         self.log('val_loss', loss, on_epoch=True, on_step=False)
         # Return additional data for plotting
-        return {'x': x, 'y': y, 'interpolated': interpolated, 'y_hat': y_hat, 'loss': loss}
+        self.outputs = {'x': x, 'y': y, 'interpolated': interpolated, 'y_hat': y_hat, 'loss': loss}
+
+        return loss
 
     def test_step(self, batch, batch_idx):
         print("Test step")
