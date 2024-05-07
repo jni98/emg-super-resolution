@@ -68,6 +68,6 @@ git log --oneline -n 1
 python trainer.py --data "$FAST_DATA_DIR/dataset_lstm/train" \
                   --testdata "$FAST_DATA_DIR/dataset_lstm/test" \
                   --results "$RESULTS_DIR" \
-                  --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint_path $CHECKPOINT_PATH
+                  --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint $CHECKPOINT_PATH
 
 rm -rf "$FAST_DATA_DIR"
