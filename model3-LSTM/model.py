@@ -294,7 +294,7 @@ class LSTMRegressor(pl.LightningModule):
         x, y, _, _ = batch
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
-        self.log('train_loss', loss)
+        self.log('train_loss', loss, on_step=False, on_epoch=True)
         return loss
 
     def on_validation_epoch_end(self):
@@ -313,7 +313,7 @@ class LSTMRegressor(pl.LightningModule):
         y_hat = self(x)
         loss = self.criterion(y_hat, y)
         # Log loss as usual
-        self.log('val_loss', loss)
+        self.log('val_loss', loss, on_step=False, on_epoch=True)
         # Return additional data for plotting
         self.outputs = {'x': x, 'y': y, 'interpolated': interpolated, 'y_hat': y_hat, 'loss': loss}
 

@@ -7,7 +7,7 @@
 ############    slurm    ###############
 
 #SBATCH --job-name=model3-LSTM
-#SBATCH --time=0:03:00
+#SBATCH --time=1:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
 #SBATCH --partition=a100
@@ -68,6 +68,6 @@ git log --oneline -n 1
 python trainer.py --data "$FAST_DATA_DIR/dataset_lstm/train" \
                   --testdata "$FAST_DATA_DIR/dataset_lstm/test" \
                   --results "$RESULTS_DIR" \
-                  --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint $CHECKPOINT_PATH
+                  --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint "$CHECKPOINT_PATH"
 
 rm -rf "$FAST_DATA_DIR"
