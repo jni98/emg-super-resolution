@@ -39,7 +39,8 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         dirpath=config['results'],
         filename='best_model',
         save_top_k=1,
-        verbose=True
+        save_weights_only=False,
+        save_last=True
     )
 
     lr_monitor = LearningRateMonitor(logging_interval='epoch')
@@ -55,6 +56,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
             criterion=config['criterion'],
             num_layers=config['num_layers'],
             dropout=config['dropout'],
+            learning_rate=config['learning_rate'],
             mean=mean_std_dict['mean'],
             std=mean_std_dict['std']
         )
