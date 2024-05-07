@@ -10,6 +10,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import transforms
+from emg_augmentations import GaussianNoise, WaveletDecomposition, MagnitudeWarping
+import random
 
 
 class TimeseriesDataset(Dataset):
@@ -21,12 +23,17 @@ class TimeseriesDataset(Dataset):
       of `(batch_size, seq_len, n_features)` shape.
     Suitable as an input to RNNs.
     '''
-    def __init__(self, X: np.ndarray,directory: str,mean, std, transform=None):
+    def __init__(self, X: np.ndarray,directory: str,mean, std, transform=None, augment = False):
         self.X = X
         self.directory = directory
         self.transform = transform
         self.mean = mean
         self.std = std
+        self.augment = augment
+
+        self.gaussian_noise_generator = GaussianNoise(target_snr__db=5.0)
+        self.wavelet_decomposition = WaveletDecomposition(b=0.25, wavelet="db7", level=5, nr_of_grids=1)
+        self.magnitude_warping = MagnitudeWarping(nr_of_grids=1)
 
     def __len__(self) -> int:
         return len(self.X)
@@ -40,6 +47,14 @@ class TimeseriesDataset(Dataset):
 
         # Load and preprocess HR data
         hr_emg = np.load(f"{self.directory}/{hr_emg_path}")
+
+        if self.augment:
+            # Randomly choose whether to augment the data or not
+            augmentation_method = random.choice(
+                [self.no_augmentation, self.apply_gaussian_noise, self.apply_wavelet_decomposition, self.apply_magnitude_warping])
+
+            # Apply the selected augmentation method
+            hr_emg = augmentation_method(hr_emg)
 
         # Bandpass filter
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
@@ -68,6 +83,18 @@ class TimeseriesDataset(Dataset):
         lr_interpolated = lr_interpolated.unsqueeze(0)
 
         return (lr_emg, hr_emg, hr_emg_path, lr_interpolated)
+
+    def no_augmentation(self, data):
+        return data
+
+    def apply_gaussian_noise(self, data):
+        return self.gaussian_noise_generator(data)
+
+    def apply_wavelet_decomposition(self, data):
+        return self.wavelet_decomposition(data)
+
+    def apply_magnitude_warping(self,data):
+        return self.magnitude_warping(data)
 
     def standardize(self, X):
         '''
@@ -161,13 +188,14 @@ class CustomDataModule(pl.LightningDataModule):
       and processing work in one place.
     '''
 
-    def __init__(self, seq_len=1, batch_size=128, num_workers=2, data_directory: str = None, test_data_directory: str = None):
+    def __init__(self, seq_len=1, batch_size=128, num_workers=2, data_directory: str = None, test_data_directory: str = None, augment: bool = False):
         super().__init__()
         self.seq_len = seq_len
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.data_directory = data_directory
         self.test_data_directory = test_data_directory
+        self.augment = augment
         self.X_train = None
         self.X_val = None
         self.X_test = None
@@ -192,7 +220,7 @@ class CustomDataModule(pl.LightningDataModule):
         # Define your transformations
         data_transform = False
 
-        train_dataset = TimeseriesDataset(self.X_train, self.data_directory, mean = self.mean_std_dict['mean'], std = self.mean_std_dict['std'], transform = data_transform)
+        train_dataset = TimeseriesDataset(self.X_train, self.data_directory, mean = self.mean_std_dict['mean'], std = self.mean_std_dict['std'], transform = data_transform, augment= self.augment)
         train_loader = DataLoader(train_dataset,
                                   batch_size=self.batch_size,
                                   shuffle=False,

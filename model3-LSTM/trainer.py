@@ -81,7 +81,8 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         seq_len=config['seq_len'],
         batch_size=config['batch_size'],
         data_directory=config['data'],
-        test_data_directory=config['testdata']
+        test_data_directory=config['testdata'],
+        augment = config['augment']
     )
 
     # Total number of parameters
