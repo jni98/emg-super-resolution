@@ -63,23 +63,32 @@ cd "$SRC_DIR" || echo "could not cd into $SRC_DIR"
 echo "Using Repository Revision"
 git log --oneline -n 1
 
-############    training   ###############
+############    Variables Setup    ###############
+CHECKPOINT_PATH=$1  # Capture the first argument as the checkpoint path
 
-CHECKPOINT_PATH=$1  # Optionally pass a checkpoint path when calling this script
+echo "CHECKPOINT_PATH at script start: '$CHECKPOINT_PATH'"
 
-echo "CHECKPOINT_PATH at start: $CHECKPOINT_PATH"
+############    Begin Training    ###############
 
-# Command to start training, possibly including logic based on $CHECKPOINT_PATH's state
-python trainer.py --data "$FAST_DATA_DIR"/dataset_lstm/train --testdata "$FAST_DATA_DIR"/dataset_lstm/test --results "$RESULTS_DIR" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint "$CHECKPOINT_PATH"
+# Only pass the --checkpoint flag if CHECKPOINT_PATH is not empty
+if [ -n "$CHECKPOINT_PATH" ]; then
+    echo "Resuming from checkpoint: $CHECKPOINT_PATH"
+    TRAIN_CMD="python trainer.py --data \"$FAST_DATA_DIR\"/dataset_lstm/train --testdata \"$FAST_DATA_DIR\"/dataset_lstm/test --results \"$RESULTS_DIR\" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint \"$CHECKPOINT_PATH\""
+else
+    echo "Starting a new training job"
+    TRAIN_CMD="python trainer.py --data \"$FAST_DATA_DIR\"/dataset_lstm/train --testdata \"$FAST_DATA_DIR\"/dataset_lstm/test --results \"$RESULTS_DIR\" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR"
+fi
 
-# Clean up operations
+echo "Running training command: $TRAIN_CMD"
+eval $TRAIN_CMD
+
+############    Cleanup and Job Chaining    ###############
 rm -rf "$FAST_DATA_DIR"
 
-echo "CHECKPOINT_PATH before scheduling next job: $CHECKPOINT_PATH"
-
+# Schedule the next job if this is the initial job and CHECKPOINT_PATH was empty
 if [ -z "$CHECKPOINT_PATH" ]; then
-    # Make sure the checkpoint path includes the actual checkpoint filename, not just the directory
-    sbatch --dependency=afterok:$SLURM_JOB_ID $0 "${RESULTS_DIR}/best_model.ckpt"
+    echo "Scheduling next job with new checkpoint from: $RESULTS_DIR/best_model.ckpt"
+    sbatch --dependency=afterok:$SLURM_JOB_ID $0 "$RESULTS_DIR/best_model.ckpt"
 else
-    echo "Checkpoint was provided; no new job scheduled."
+    echo "No further jobs scheduled."
 fi
