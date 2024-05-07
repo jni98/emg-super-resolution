@@ -63,32 +63,9 @@ cd "$SRC_DIR" || echo "could not cd into $SRC_DIR"
 echo "Using Repository Revision"
 git log --oneline -n 1
 
-############    Variables Setup    ###############
-CHECKPOINT_PATH=$1  # Capture the first argument as the checkpoint path
+python trainer.py --data "$FAST_DATA_DIR/dataset_lstm/train" \
+                  --testdata "$FAST_DATA_DIR/dataset_lstm/test" \
+                  --results "$RESULTS_DIR" \
+                  --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR
 
-echo "CHECKPOINT_PATH at script start: '$CHECKPOINT_PATH'"
-
-############    Begin Training    ###############
-
-# Only pass the --checkpoint flag if CHECKPOINT_PATH is not empty
-if [ -n "$CHECKPOINT_PATH" ]; then
-    echo "Resuming from checkpoint: $CHECKPOINT_PATH"
-    TRAIN_CMD="python trainer.py --data \"$FAST_DATA_DIR\"/dataset_lstm/train --testdata \"$FAST_DATA_DIR\"/dataset_lstm/test --results \"$RESULTS_DIR\" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint \"$CHECKPOINT_PATH\""
-else
-    echo "Starting a new training job"
-    TRAIN_CMD="python trainer.py --data \"$FAST_DATA_DIR\"/dataset_lstm/train --testdata \"$FAST_DATA_DIR\"/dataset_lstm/test --results \"$RESULTS_DIR\" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR"
-fi
-
-echo "Running training command: $TRAIN_CMD"
-eval $TRAIN_CMD
-
-############    Cleanup and Job Chaining    ###############
 rm -rf "$FAST_DATA_DIR"
-
-# Schedule the next job if this is the initial job and CHECKPOINT_PATH was empty
-if [ -z "$CHECKPOINT_PATH" ]; then
-    echo "Scheduling next job with new checkpoint from: $RESULTS_DIR/best_model.ckpt"
-    sbatch --dependency=afterany:$SLURM_JOB_ID $0 "$RESULTS_DIR/best_model.ckpt"
-else
-    echo "No further jobs scheduled."
-fi

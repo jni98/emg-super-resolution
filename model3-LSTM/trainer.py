@@ -52,10 +52,9 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
             hidden_size=config['hidden_size'],
             seq_len=config['seq_len'],
             batch_size=config['batch_size'],
+            criterion=config['criterion'],
             num_layers=config['num_layers'],
             dropout=config['dropout'],
-            learning_rate=config['learning_rate'],
-            criterion=config['criterion'],
             mean=mean_std_dict['mean'],
             std=mean_std_dict['std']
         )
