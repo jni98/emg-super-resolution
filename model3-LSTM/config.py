@@ -4,7 +4,7 @@ from torch import nn
 
 def get_config(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate):
     config = dict(
-        seq_len=10240,
+        seq_len=40960,
         batch_size=batch_size,
         criterion=nn.MSELoss(),
         max_epochs=num_epochs,
@@ -16,7 +16,7 @@ def get_config(data_directory, test_data_directory, results_directory, num_epoch
         results=results_directory,
         data=data_directory,
         testdata=test_data_directory,
-        model_version = 'model3'
+        model_version = 'model'
     )
 
     return config

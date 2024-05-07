@@ -69,51 +69,51 @@ class Encoder3D(nn.Module):
 
     def forward(self, x):
         print("Encoder")
-        # input shape: (batch_size, 1, 7, 3, 20480)
+        # input shape: (batch_size, 1, 7, 3, 40960)
         print("input shape" + str(x.shape))
         out = self.conv1(x)
-        # out shape: (batch_size, 32, 7, 3, 20480)
+        # out shape: (batch_size, 32, 7, 3, 40960)
 
         out = self.conv2(out)
         out = self.bn2(out)
         out = self.relu(out)
         #out = self.res2(out)
-        # out shape: (batch_size, 64, 7, 3, 10240)
+        # out shape: (batch_size, 64, 7, 3, 20480)
         print("conv2 shape" + str(out.shape))
 
         out = self.conv3(out)
         out = self.bn3(out)
         out = self.relu(out)
         #out = self.res3(out)
-        # out shape: (batch_size, 128, 7, 3, 5120)
+        # out shape: (batch_size, 128, 7, 3, 10240)
         print("conv3 shape" + str(out.shape))
 
         out = self.conv4(out)
         out = self.bn4(out)
         out = self.relu(out)
         #out = self.res4(out)
-        # out shape: (batch_size, 128, 7, 3, 2560)
+        # out shape: (batch_size, 128, 7, 3, 5120)
         print("conv4 shape" + str(out.shape))
 
         out = self.conv5(out)
         out = self.bn5(out)
         out = self.relu(out)
         #out = self.res5(out)
-        # out shape: (batch_size, 128, 7, 3, 1280)
+        # out shape: (batch_size, 128, 7, 3, 2560)
         print("conv5 shape" + str(out.shape))
 
         out = self.conv6(out)
         out = self.bn6(out)
         out = self.relu(out)
         #out = self.res6(out)
-        # out shape: (batch_size, 128, 7, 3, 640)
+        # out shape: (batch_size, 128, 7, 3, 1280)
         print("conv6 shape" + str(out.shape))
 
         out = self.conv7(out)
         out = self.bn7(out)
         out = self.relu(out)
         #out = self.res7(out)
-        # out shape: (batch_size, 128, 7, 3, 320)
+        # out shape: (batch_size, 128, 7, 3, 640)
         print("conv7 shape" + str(out.shape))
 
         return out
@@ -166,14 +166,14 @@ class Decoder3D(nn.Module):
         self.relu = nn.PReLU()
 
     def forward(self, x):
-        # input shape: (batch_size, 64, 7, 3, 320)
+        # input shape: (batch_size, 64, 7, 3, 640)
         print("Decoder")
         print("input shape" + str(x.shape))
 
         out = self.transConv1(x)
         out = self.bn1(out)
         out = self.relu(out)
-        # out: (batch_size, 64, 13, 5, 640)
+        # out: (batch_size, 64, 13, 5, 1280)
         print("transConv1 shape" + str(out.shape))
 
         out = self.conv1(out)
@@ -183,7 +183,7 @@ class Decoder3D(nn.Module):
         out = self.transConv2(out)
         out = self.bn2(out)
         out = self.relu(out)
-        # out shape: (batch_size, 64, 13, 5, 1280)
+        # out shape: (batch_size, 64, 13, 5, 2560)
         print("transConv2 shape" + str(out.shape))
 
         out = self.conv2(out)
@@ -193,7 +193,7 @@ class Decoder3D(nn.Module):
         out = self.transConv3(out)
         out = self.bn3(out)
         out = self.relu(out)
-        # out shape: (batch_size, 64, 13, 5, 2560)
+        # out shape: (batch_size, 64, 13, 5, 5120)
         print("transConv3 shape" + str(out.shape))
 
         out = self.conv3(out)
@@ -203,7 +203,7 @@ class Decoder3D(nn.Module):
         out = self.transConv4(out)
         out = self.bn4(out)
         out = self.relu(out)
-        # out shape: (batch_size, 64, 13, 5, 5120)
+        # out shape: (batch_size, 64, 13, 5, 10240)
         print("transConv4 shape" + str(out.shape))
 
         out = self.conv4(out)
@@ -213,7 +213,7 @@ class Decoder3D(nn.Module):
         out = self.transConv5(out)
         out = self.bn5(out)
         out = self.relu(out)
-        # out shape: (batch_size, 64, 13, 5, 10240)
+        # out shape: (batch_size, 64, 13, 5, 20480)
         print("transConv5 shape" + str(out.shape))
 
         out = self.conv5(out)
@@ -223,11 +223,11 @@ class Decoder3D(nn.Module):
         out = self.transConv6(out)
         out = self.bn6(out)
         out = self.relu(out)
-        # out shape: (batch_size, 64, 13, 5, 20480)
+        # out shape: (batch_size, 64, 13, 5, 40960)
         print("transConv6 shape" + str(out.shape))
 
         out = self.lastConv(out)
-        # out shape: (batch_size, 1, 13, 5, 20480)
+        # out shape: (batch_size, 1, 13, 5, 40960)
 
 
         return out
@@ -258,12 +258,12 @@ class LSTMRegressor(pl.LightningModule):
     def forward(self, x):
         # Encode
         x = self.encoder(x)
-        # out shape (batch_size, 128, 7, 3, 320)
+        # out shape (batch_size, 128, 7, 3, 640)
         x_shape = x.shape
 
         x = torch.reshape(x, (self.batch_size, x.shape[1]*x.shape[2]*x.shape[3], x.shape[-1]))
         x = x.transpose(1,2) # Flatten and prepare dimensions for LSTM
-        # out shape: (batch_size, 320, 2688)
+        # out shape: (batch_size, 640, 2688)
 
         # LSTM
         lstm_out, _ = self.lstm(x)
