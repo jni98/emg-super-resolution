@@ -24,7 +24,7 @@ FAST_DATA_DIR=$TMPDIR/model3-LSTM-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=5
+EPOCHS=20
 BATCHSIZE=4
 LR=0.0001
 
@@ -88,7 +88,7 @@ rm -rf "$FAST_DATA_DIR"
 # Schedule the next job if this is the initial job and CHECKPOINT_PATH was empty
 if [ -z "$CHECKPOINT_PATH" ]; then
     echo "Scheduling next job with new checkpoint from: $RESULTS_DIR/best_model.ckpt"
-    sbatch --dependency=afterok:$SLURM_JOB_ID $0 "$RESULTS_DIR/best_model.ckpt"
+    sbatch --dependency=afterany:$SLURM_JOB_ID $0 "$RESULTS_DIR/best_model.ckpt"
 else
     echo "No further jobs scheduled."
 fi

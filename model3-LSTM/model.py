@@ -40,6 +40,7 @@ class Encoder3D(nn.Module):
         super(Encoder3D, self).__init__()
 
         self.conv1 = nn.Conv3d(1, 32, kernel_size=3, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm3d(32)
 
         self.conv2 = nn.Conv3d(32, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
         self.bn2 = nn.BatchNorm3d(64)
@@ -72,6 +73,8 @@ class Encoder3D(nn.Module):
         # input shape: (batch_size, 1, 7, 3, 40960)
         print("input shape" + str(x.shape))
         out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
         # out shape: (batch_size, 32, 7, 3, 40960)
 
         out = self.conv2(out)
@@ -279,7 +282,7 @@ class LSTMRegressor(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         lr_scheduler = {
-            'scheduler': torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda _: 0.5 ** (self.current_epoch // 5000)),
+            'scheduler': torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda _: 0.5 ** (self.current_epoch // 10)),
             'name': 'lr_scheduler_logging',
             'interval': 'epoch',  # Ensure scheduler updates at every epoch interval
             'frequency': 1        # Update the scheduler at every epoch
