@@ -77,10 +77,9 @@ rm -rf "$FAST_DATA_DIR"
 
 echo "CHECKPOINT_PATH before scheduling next job: $CHECKPOINT_PATH"
 
-# Check if the script was called without a checkpoint path and schedule the next job
 if [ -z "$CHECKPOINT_PATH" ]; then
-    echo "Scheduling next job without initial checkpoint."
-    sbatch --dependency=afterok:$SLURM_JOB_ID $0 $RESULTS_DIR/best_model.ckpt
+    # Make sure the checkpoint path includes the actual checkpoint filename, not just the directory
+    sbatch --dependency=afterok:$SLURM_JOB_ID $0 "${RESULTS_DIR}/best_model.ckpt"
 else
     echo "Checkpoint was provided; no new job scheduled."
 fi
