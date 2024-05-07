@@ -1,13 +1,13 @@
 import argparse
 import json
 
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
-from data import CustomDataModule
-from model import LSTMRegressor
 from pytorch_lightning import Trainer, seed_everything
-from lightning.pytorch.loggers import WandbLogger
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, Callback
+from pytorch_lightning.loggers import WandbLogger
+from model import LSTMRegressor  # Make sure this import is correctly pointing to your model definition
+from data import CustomDataModule
 from config import get_config
-import numpy as np
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Training script arguments")
@@ -17,40 +17,69 @@ def parse_args():
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs')
     parser.add_argument('--batch_size', type=int, default=256, help='Batch size')
     parser.add_argument('--lr', type=float, default=0.00001, help='Learning rate')
+    parser.add_argument('--checkpoint', type=str, default=None, help='Path to a model checkpoint to resume training')
     return parser.parse_args()
 
-def main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate):
 
+def main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate,
+         checkpoint_path=None):
     seed_everything(1)
-
     config = get_config(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
 
-    wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=config['results'], config=config, mode='online', offline=False)
+    wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=config['results'], config=config,
+                               mode='online', offline=False)
 
     # Load the JSON file with values for standardization into a Python dictionary
     with open(data_directory + '/mean_std.json', 'r') as file:
         mean_std_dict = json.load(file)
 
-    # Define the EarlyStopping callback
-    # early_stop_callback = EarlyStopping(
-    #     monitor='val_loss',  # Monitor validation loss
-    #     min_delta=0.00001,  # Minimum change to qualify as an improvement
-    #     patience=3,  # Number of epochs to wait for improvement
-    #     verbose=True,  # Print messages when early stopping is triggered
-    #     mode='min',  # Stop when the monitored quantity stops decreasing
-    #     strict=True  # Error if `monitor` is not found
-    # )
-
-
-
-    # Define the ModelCheckpoint callback
     checkpoint_callback = ModelCheckpoint(
-        monitor='val_loss',  # Monitor validation loss
-        mode='min',  # Save the model with the lowest validation loss
-        dirpath=config['results'],  # Directory to save checkpoints
-        filename='best_model',  # File name prefix for saved checkpoints
-        save_top_k=1,  # Save only the best model
+        monitor='val_loss',
+        mode='min',
+        dirpath=config['results'],
+        filename='best_model',
+        save_top_k=1,
         verbose=True
+    )
+
+    lr_monitor = LearningRateMonitor(logging_interval='epoch')
+
+    # Assuming model is being loaded from a checkpoint
+    if checkpoint_path is not None:
+        model = LSTMRegressor.load_from_checkpoint(
+            checkpoint_path=checkpoint_path,
+            n_features=config['n_features'],
+            hidden_size=config['hidden_size'],
+            seq_len=config['seq_len'],
+            batch_size=config['batch_size'],
+            num_layers=config['num_layers'],
+            dropout=config['dropout'],
+            learning_rate=config['learning_rate'],
+            criterion=config['criterion'],
+            mean=mean_std_dict['mean'],
+            std=mean_std_dict['std']
+        )
+    else:
+        model = LSTMRegressor(
+            n_features=config['n_features'],
+            hidden_size=config['hidden_size'],
+            seq_len=config['seq_len'],
+            batch_size=config['batch_size'],
+            criterion=config['criterion'],
+            num_layers=config['num_layers'],
+            dropout=config['dropout'],
+            learning_rate=config['learning_rate'],
+            mean=mean_std_dict['mean'],
+            std=mean_std_dict['std']
+
+        )
+
+    dm = CustomDataModule(
+        seq_len=config['seq_len'],
+        batch_size=config['batch_size'],
+        data_directory=config['data'],
+        test_data_directory=config['testdata'],
+        augment=config['augment']
     )
 
     trainer = Trainer(
@@ -59,41 +88,15 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         accelerator="gpu",
         deterministic=True,
         logger=wandb_logger,
-        callbacks=[checkpoint_callback],
+        callbacks=[checkpoint_callback, lr_monitor],
         default_root_dir=config['results'],
-        log_every_n_steps=1,
+        log_every_n_steps=1
     )
 
-    model = LSTMRegressor(
-        n_features=config['n_features'],
-        hidden_size=config['hidden_size'],
-        seq_len=config['seq_len'],
-        batch_size=config['batch_size'],
-        criterion=config['criterion'],
-        num_layers=config['num_layers'],
-        dropout=config['dropout'],
-        learning_rate=config['learning_rate'],
-        mean = mean_std_dict['mean'],
-        std = mean_std_dict['std']
-    )
-
-    dm = CustomDataModule(
-        seq_len=config['seq_len'],
-        batch_size=config['batch_size'],
-        data_directory=config['data'],
-        test_data_directory=config['testdata'],
-        augment = config['augment']
-    )
-
-    # Total number of parameters
-    total_params = sum(p.numel() for p in model.parameters())
-    print(f"Total parameters: {total_params}")
-
-    # Total trainable parameters
-    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"Trainable parameters: {trainable_params}")
-
-    trainer.fit(model, dm)
+    if checkpoint_path is not None:
+        trainer.fit(model, dm, ckpt_path=checkpoint_path)
+    else:
+        trainer.fit(model, dm)
 
     model_for_inference = LSTMRegressor.load_from_checkpoint(
         checkpoint_path=config['results'] + "/best_model.ckpt",
@@ -105,28 +108,15 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         dropout=config['dropout'],
         learning_rate=config['learning_rate'],
         criterion=config['criterion'],
-        mean = mean_std_dict['mean'],
-        std = mean_std_dict['std']
+        mean=mean_std_dict['mean'],
+        std=mean_std_dict['std']
     )
 
-    trainer.test(model_for_inference, datamodule=dm)
+    trainer.test(model=model_for_inference, datamodule=dm)
+
 
 if __name__ == "__main__":
+    # args = parse_args()
+    main(args.data, args.testdata, args.results, args.epochs, args.batch_size, args.lr, args.checkpoint)
 
-    #Parse arguments
-    args = parse_args()
-    data_directory = args.data
-    test_data_directory = args.testdata
-    results_directory = args.results
-    num_epochs = args.epochs
-    batch_size = args.batch_size
-    learning_rate = args.lr
-
-    # data_directory = '../dataset_lstm/train'
-    # test_data_directory ='../dataset_lstm/test'
-    # results_directory = 'runs/'
-    # num_epochs = 2
-    # batch_size = 1
-    # learning_rate = 0.00001
-
-    main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
+    #main('../dataset/train', '../dataset/test', 'runs/', 6, 2, 0.0001, None)

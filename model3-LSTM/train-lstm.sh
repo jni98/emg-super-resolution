@@ -1,11 +1,13 @@
 #!/bin/bash -l
 
-## Usage:  sbatch.tinygpu train-lstm.sh
+# Usage: sbatch train-lstm.sh [optional_checkpoint_path]
+# Example to start first job: sbatch train-lstm.sh
+# Example to start second job manually (if needed): sbatch train-lstm.sh $HOME/model3-LSTM-<JOBID>/best_model.ckpt
 
 ############    slurm    ###############
 
 #SBATCH --job-name=model3-LSTM
-#SBATCH --time=24:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
 #SBATCH --partition=a100
@@ -22,22 +24,22 @@ FAST_DATA_DIR=$TMPDIR/model3-LSTM-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=5000
+EPOCHS=5
 BATCHSIZE=4
 LR=0.00001
 
-############    params   ###############
+############    setup    ###############
 
 # allows for internet connection on cluster nodes
 export http_proxy=http://proxy:80
 export https_proxy=http://proxy:80
 
-# load and init conda if it doesnt exist
+# load and init conda if it doesn't exist
 if ! command -v conda &> /dev/null
 then
-	echo "load conda from module"
-	module load python/3.10-anaconda
-	conda init bash
+    echo "load conda from module"
+    module load python/3.10-anaconda
+    conda init bash
 fi
 
 # activate conda env
@@ -49,7 +51,6 @@ nvidia-smi
 echo "python reaches gpu: $(python -c 'import torch;print(torch.cuda.is_available())')"
 
 # copy training data to faster drive
-
 echo "started data transfer at $(date)"
 mkdir "$FAST_DATA_DIR"
 tar -xf "$DATA_ARCHIVE" -C "$FAST_DATA_DIR"
@@ -62,8 +63,19 @@ cd "$SRC_DIR" || echo "could not cd into $SRC_DIR"
 echo "Using Repository Revision"
 git log --oneline -n 1
 
-# start training
-python trainer.py --data "$FAST_DATA_DIR"/dataset_lstm/train --testdata "$FAST_DATA_DIR"/dataset_lstm/test --results "$RESULTS_DIR" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR
+############    training   ###############
+
+CHECKPOINT_PATH=$1  # Optionally pass a checkpoint path when calling this script
+
+# Start training with or without checkpoint
+python trainer.py --data "$FAST_DATA_DIR"/dataset_lstm/train --testdata "$FAST_DATA_DIR"/dataset_lstm/test --results "$RESULTS_DIR" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint "$CHECKPOINT_PATH"
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"
+
+############    job chaining   ###############
+
+# Schedule next job if this is the first of the two jobs
+if [ -z "$CHECKPOINT_PATH" ]; then
+    sbatch --dependency=afterok:$SLURM_JOB_ID $0 $RESULTS_DIR/best_model.ckpt
+fi
