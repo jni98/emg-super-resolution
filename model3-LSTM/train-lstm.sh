@@ -67,6 +67,8 @@ git log --oneline -n 1
 
 CHECKPOINT_PATH=$1  # Optionally pass a checkpoint path when calling this script
 
+echo "CHECKPOINT_PATH: $CHECKPOINT_PATH"
+
 # Start training with or without checkpoint
 python trainer.py --data "$FAST_DATA_DIR"/dataset_lstm/train --testdata "$FAST_DATA_DIR"/dataset_lstm/test --results "$RESULTS_DIR" --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint "$CHECKPOINT_PATH"
 
@@ -76,6 +78,9 @@ rm -rf "$FAST_DATA_DIR"
 ############    job chaining   ###############
 
 # Schedule next job if this is the first of the two jobs
+
+echo "CHECKPOINT_PATH: $CHECKPOINT_PATH"
+
 if [ -z "$CHECKPOINT_PATH" ]; then
     sbatch --dependency=afterok:$SLURM_JOB_ID $0 $RESULTS_DIR/best_model.ckpt
 fi
