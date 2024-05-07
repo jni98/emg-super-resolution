@@ -7,7 +7,7 @@
 ############    slurm    ###############
 
 #SBATCH --job-name=model3-LSTM
-#SBATCH --time=1:00:00
+#SBATCH --time=0:03:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
 #SBATCH --partition=a100
@@ -24,7 +24,7 @@ FAST_DATA_DIR=$TMPDIR/model3-LSTM-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=20
+EPOCHS=40
 BATCHSIZE=4
 LR=0.0001
 
