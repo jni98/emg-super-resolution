@@ -1,0 +1,153 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file contains the class Discriminator, which is a convolutional neural network that is used to
+classify if the input data is real or fake.
+
+The code is called from the trainer.py file which is started by the train.py.
+"""
+import pytorch_lightning as pl
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+class Discriminator(pl.LightningModule):
+    def __init__(self, in_channels=1) -> None:
+        """
+        Constructs all the necessary attributes for the Discriminator object.
+        Parameters
+        ----------
+        in_channels: int
+                     Number of channels the emg data has. On default set to 1.
+        """
+
+        super(Discriminator, self).__init__()
+
+        self.conv1 = nn.Conv3d(in_channels, 64, kernel_size=3, stride=1, padding=1)
+        self.leaky_relu1 = nn.LeakyReLU(0.2, inplace=True)
+
+        self.conv2 = nn.Conv3d(64, 64, kernel_size=3, stride=2, padding=1)
+        self.batch_norm2 = nn.BatchNorm3d(64)
+        self.leaky_relu2 = nn.LeakyReLU(0.2, inplace=True)
+
+        self.conv3 = nn.Conv3d(64, 128, kernel_size=3, stride=1, padding=1)
+        self.batch_norm3 = nn.BatchNorm3d(128)
+        self.leaky_relu3 = nn.LeakyReLU(0.2, inplace=True)
+
+        self.conv4 = nn.Conv3d(128, 128, kernel_size=3, stride=2, padding=1)
+        self.batch_norm4 = nn.BatchNorm3d(128)
+        self.leaky_relu4 = nn.LeakyReLU(0.2, inplace=True)
+
+        self.conv5 = nn.Conv3d(128, 256, kernel_size=3, stride=1, padding=1)
+        self.batch_norm5 = nn.BatchNorm3d(256)
+        self.leaky_relu5 = nn.LeakyReLU(0.2, inplace=True)
+
+        self.conv6 = nn.Conv3d(256, 256, kernel_size=3, stride=2, padding=1)
+        self.batch_norm6 = nn.BatchNorm3d(256)
+        self.leaky_relu6 = nn.LeakyReLU(0.2, inplace=True)
+
+        self.conv7 = nn.Conv3d(256, 512, kernel_size=3, stride=1, padding=1)
+        self.batch_norm7 = nn.BatchNorm3d(512)
+        self.leaky_relu7 = nn.LeakyReLU(0.2, inplace=True)
+
+        self.conv8 = nn.Conv3d(512, 512, kernel_size=3, stride=2, padding=1)
+        self.batch_norm8 = nn.BatchNorm3d(512)
+        self.leaky_relu8 = nn.LeakyReLU(0.2, inplace=True)
+
+        self.flatten = nn.Flatten()
+
+        # Adapt dense layer to output size of flatten()
+        self.dense1 = nn.Linear(65536, 1024)
+        self.leaky_relu9 = nn.LeakyReLU(0.2, inplace=True)
+        self.dense2 = nn.Linear(1024, 1)
+        self.activation = nn.Sigmoid()
+
+    def forward(self, x: torch.tensor) -> torch.tensor:
+        """
+        Forwards the input tensor through all the layers.
+
+        Parameters
+        ----------
+        x: torch.tensor
+           Tensor that is given to the network.
+
+        Returns
+        -------
+        out: torch.tensor
+             Output tensor of the network.
+        """
+        # print("Discriminator input", x.shape)
+
+        out = self.conv1(x)
+        out = self.leaky_relu1(out)
+        # print("Discriminator after conv1", out.shape)
+
+        out = self.conv2(out)
+        out = self.batch_norm2(out)
+        out = self.leaky_relu2(out)
+        # print("Discriminator after conv2", out.shape)
+
+        out = self.conv3(out)
+        out = self.batch_norm3(out)
+        out = self.leaky_relu3(out)
+        # print("Discriminator after conv3", out.shape)
+
+        out = self.conv4(out)
+        out = self.batch_norm4(out)
+        out = self.leaky_relu4(out)
+        # print("Discriminator after conv4", out.shape)
+
+        out = self.conv5(out)
+        out = self.batch_norm5(out)
+        out = self.leaky_relu5(out)
+        # print("Discriminator after conv5", out.shape)
+
+        out = self.conv6(out)
+        out = self.batch_norm6(out)
+        out = self.leaky_relu6(out)
+        # print("Discriminator after conv6", out.shape)
+
+        out = self.conv7(out)
+        out = self.batch_norm7(out)
+        out = self.leaky_relu7(out)
+        # print("Discriminator after conv7", out.shape)
+
+        out = self.conv8(out)
+        out = self.batch_norm8(out)
+        out = self.leaky_relu8(out)
+        # print("Discriminator after conv8", out.shape)
+
+        out = self.flatten(out)
+        # print("Discriminator after flatte",out.shape)
+
+        out = self.dense1(out)
+        out = self.leaky_relu9(out)
+        # print("Discriminator after dense1", out.shape)
+
+        out = self.dense2(out)
+        # print("Discriminator after dense2", out.shape)
+
+        out = self.activation(out)
+        # print("Discriminator after activation", out.shape)
+        return out
+
+    def training_step(self, batch, batch_idx, optimizer_idx):
+        x,y, _ = batch
+
+        # Train on real images
+        valid = torch.ones(y.size(0), 1, device=self.device)
+        real_loss = F.binary_cross_entropy(self(y), valid)
+
+        # Train on fake images
+        fake_imgs = self.generator(x.detach())  # Assuming generator is available
+        fake = torch.zeros(fake_imgs.size(0), 1, device=self.device)
+        fake_loss = F.binary_cross_entropy(self(fake_imgs), fake)
+
+        # Combine losses
+        d_loss = (real_loss + fake_loss) / 2
+        self.log('d_loss', d_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        return d_loss
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=0.0002)
