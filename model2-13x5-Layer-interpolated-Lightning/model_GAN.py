@@ -30,40 +30,51 @@ class GAN(pl.LightningModule):
         return F.mse_loss(fake, real)
 
     def training_step(self, batch, batch_idx):
-
         x, y, _ = batch
-        sr = self.generator(x)
 
-        # Train discriminator
-        real_pred = self.discriminator(y)
-        fake_pred = self.discriminator(sr.detach())
-        d_loss_real = self.adversarial_loss(real_pred, torch.ones_like(real_pred))
-        d_loss_fake = self.adversarial_loss(fake_pred, torch.zeros_like(fake_pred))
-        d_loss = (d_loss_real + d_loss_fake) / 2
+        optimizer_g, optimizer_d = self.optimizers()
 
-        # Calculate MSE loss
-        mse = self.mse_loss(sr, y)
+        # train generator
+        # generate sr data
+        self.toggle_optimizer(optimizer_g)
+        sr = self(x)
 
-        # Total discriminator loss
-        d_total_loss = self.adv_weight * d_loss + mse
+        # ground truth result (ie: all fake)
+        # put on GPU because we created this tensor inside training_loop
+        valid = torch.ones(y.size(0), 1)
+        valid = valid.type_as(y)
 
-        self.manual_backward(d_total_loss)
-        self.optimizers()[0].step()
-        self.optimizers()[0].zero_grad()
+        # adversarial loss is binary cross-entropy
+        g_loss = self.adv_weight * self.adversarial_loss(self.discriminator(sr), valid) + self.mse_loss(sr, y)
+        self.log("g_loss", g_loss, prog_bar=True)
+        self.manual_backward(g_loss)
+        optimizer_g.step()
+        optimizer_g.zero_grad()
+        self.untoggle_optimizer(optimizer_g)
 
-        # Train generator
-        fake_pred = self.discriminator(sr)
-        g_loss = self.adversarial_loss(fake_pred, torch.ones_like(fake_pred))
+        # train discriminator
+        # Measure discriminator's ability to classify real from generated samples
+        self.toggle_optimizer(optimizer_d)
 
-        # Total generator loss
-        g_total_loss = 0.01 * g_loss + mse
+        # how well can it label as real?
+        valid = torch.ones(y.size(0), 1)
+        valid = valid.type_as(y)
 
-        self.manual_backward(g_total_loss)
-        self.optimizers()[1].step()
-        self.optimizers()[1].zero_grad()
+        real_loss = self.adversarial_loss(self.discriminator(y), valid)
 
-        self.log('d_total_loss', d_total_loss, on_step=False, on_epoch = True, prog_bar=True)
-        self.log('g_total_loss', g_total_loss, on_step=False, on_epoch = True, prog_bar=True)
+        # how well can it label as fake?
+        fake = torch.zeros(y.size(0), 1)
+        fake = fake.type_as(y)
+
+        fake_loss = self.adversarial_loss(self.discriminator(self(x).detach()), fake)
+
+        # discriminator loss is the average of these
+        d_loss = (real_loss + fake_loss) / 2
+        self.log("d_loss", d_loss, prog_bar=True)
+        self.manual_backward(d_loss)
+        optimizer_d.step()
+        optimizer_d.zero_grad()
+        self.untoggle_optimizer(optimizer_d)
 
     def validation_step(self, batch, batch_idx):
         x, y, _ = batch
@@ -128,9 +139,13 @@ class GAN(pl.LightningModule):
         print(f"Saved batch {batch_idx} predictions to {file_path}")
 
     def configure_optimizers(self):
-        opt_disc = torch.optim.Adam(self.discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
-        opt_gen = torch.optim.Adam(self.generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
-        return [opt_disc, opt_gen]
+        lr = self.hparams.lr
+        b1 = self.hparams.b1
+        b2 = self.hparams.b2
+
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
+        return [opt_g, opt_d], []
 
     def validation_plots(self, interpolated, y, y_hat, phase):
 
