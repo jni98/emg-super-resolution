@@ -17,10 +17,10 @@ unset SLURM_EXPORT_ENV
 
 ############    paths    ###############
 
-SRC_DIR=$HOME/code/model2-Layer
-RESULTS_DIR=$HOME/model2-Layer-$SLURM_JOB_ID
+SRC_DIR=$HOME/code/model2-13x5-Layer-interpolated-Lightning
+RESULTS_DIR=$HOME/model2-13x5-Layer-interpolated-Lightning-$SLURM_JOB_ID
 DATA_ARCHIVE=$HPCVAULT/dataset.tar
-FAST_DATA_DIR=$TMPDIR/model2-Layer-$SLURM_JOB_ID
+FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-interpolated-Lightning-$SLURM_JOB_ID
 
 ############    params   ###############
 
