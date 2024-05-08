@@ -1,8 +1,8 @@
 #!/bin/bash -l
 
-# Usage: sbatch train-lstm.sh [optional_checkpoint_path]
-# Example to start first job: sbatch train-lstm.sh
-# Example to start second job manually (if needed): sbatch train-lstm.sh $HOME/model3-LSTM-<JOBID>/best_model.ckpt
+# Usage: sbatch train-model2.sh [optional_checkpoint_path]
+# Example to start first job: sbatch train-model2.sh
+# Example to start second job manually (if needed): sbatch train-model2.sh $HOME/model2-13x5-Layer-interpolated-Lightning-<JOBID>/best_model.ckpt
 
 ############    slurm    ###############
 
@@ -64,8 +64,8 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 
-python trainer.py --data "$FAST_DATA_DIR/dataset_lstm/train" \
-                  --testdata "$FAST_DATA_DIR/dataset_lstm/test" \
+python trainer.py --data "$FAST_DATA_DIR/dataset/train" \
+                  --testdata "$FAST_DATA_DIR/dataset/test" \
                   --results "$RESULTS_DIR" \
                   --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint "$CHECKPOINT_PATH"
 
