@@ -72,7 +72,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
     trainer = Trainer(
         max_epochs=num_epochs,
-        devices=2,
+        devices=1,
         accelerator="gpu",
         deterministic=True,
         logger=wandb_logger,
