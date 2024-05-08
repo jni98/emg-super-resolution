@@ -40,6 +40,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
             checkpoint_path=checkpoint_path,
             generator=generator,
             discriminator=discriminator,
+            learning_rate=config['learning_rate'],
             adv_weight=config['adv_weight'],
             mean=mean_std_dict['mean'],  # These should be defined as per your model's needs
             std=mean_std_dict['std']
@@ -48,6 +49,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         model = GAN(
             generator=generator,
             discriminator=discriminator,
+            learning_rate=config['learning_rate'],
             adv_weight=config['adv_weight'],
             mean=mean_std_dict['mean'],  # These should be defined as per your model's needs
             std=mean_std_dict['std']

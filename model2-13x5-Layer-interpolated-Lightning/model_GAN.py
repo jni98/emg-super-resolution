@@ -9,10 +9,11 @@ import numpy as np
 
 
 class GAN(pl.LightningModule):
-    def __init__(self, generator, discriminator, adv_weight, mean, std):
+    def __init__(self, generator, discriminator, learning_rate, adv_weight, mean, std):
         super().__init__()
         self.generator = generator
         self.discriminator = discriminator
+        self.lr = learning_rate
         self.automatic_optimization = False  # Enable manual optimization
         self.adv_weight = adv_weight
         self.mean = mean
@@ -139,12 +140,8 @@ class GAN(pl.LightningModule):
         print(f"Saved batch {batch_idx} predictions to {file_path}")
 
     def configure_optimizers(self):
-        lr = self.hparams.lr
-        b1 = self.hparams.b1
-        b2 = self.hparams.b2
-
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr)
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.lr)
         return [opt_g, opt_d], []
 
     def validation_plots(self, interpolated, y, y_hat, phase):
