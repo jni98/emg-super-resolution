@@ -13,7 +13,7 @@ def get_config(data_directory, test_data_directory, results_directory, num_epoch
         testdata=test_data_directory,
         augment = True,
         adv_weight = 0.1,
-        model = 'model2-13x5-Layer-interpolated-Lightning'
+        model = 'model2-13x5-Layer-Lightning'
     )
 
     return config
