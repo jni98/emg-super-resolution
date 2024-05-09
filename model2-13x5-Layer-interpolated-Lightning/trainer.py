@@ -40,7 +40,8 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
             checkpoint_path=checkpoint_path,
             generator=generator,
             discriminator=discriminator,
-            learning_rate=config['learning_rate'],
+            learning_rate_g=config['learning_rate'],
+            learning_rate_d = 0.0001,
             adv_weight=config['adv_weight'],
             mean=mean_std_dict['mean'],  # These should be defined as per your model's needs
             std=mean_std_dict['std']

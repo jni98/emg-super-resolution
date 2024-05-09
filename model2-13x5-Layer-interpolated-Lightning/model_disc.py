@@ -131,23 +131,3 @@ class Discriminator(pl.LightningModule):
         out = self.activation(out)
         # print("Discriminator after activation", out.shape)
         return out
-
-    def training_step(self, batch, batch_idx, optimizer_idx):
-        x,y, _ = batch
-
-        # Train on real images
-        valid = torch.ones(y.size(0), 1, device=self.device)
-        real_loss = F.binary_cross_entropy(self(y), valid)
-
-        # Train on fake images
-        fake_imgs = self.generator(x.detach())  # Assuming generator is available
-        fake = torch.zeros(fake_imgs.size(0), 1, device=self.device)
-        fake_loss = F.binary_cross_entropy(self(fake_imgs), fake)
-
-        # Combine losses
-        d_loss = (real_loss + fake_loss) / 2
-        self.log('d_loss', d_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        return d_loss
-
-    def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.0002)

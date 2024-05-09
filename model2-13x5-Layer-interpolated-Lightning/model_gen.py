@@ -175,13 +175,3 @@ class Generator(pl.LightningModule):
         # print("Generator output", out.shape)
 
         return out
-
-    def training_step(self, batch, batch_idx):
-        x,y,_ = batch
-        fake = self(x)
-        loss = F.mse_loss(fake, y)  # This is a placeholder for the actual loss function
-        self.log('gen_loss', loss)
-        return loss
-
-    def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.002)

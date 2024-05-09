@@ -9,11 +9,12 @@ import numpy as np
 
 
 class GAN(pl.LightningModule):
-    def __init__(self, generator, discriminator, learning_rate, adv_weight, mean, std):
+    def __init__(self, generator, discriminator, learning_rate_g, learning_rate_d, adv_weight, mean, std):
         super().__init__()
         self.generator = generator
         self.discriminator = discriminator
-        self.lr = learning_rate
+        self.lr_gen = learning_rate_g
+        self.lr_disc = learning_rate_d
         self.automatic_optimization = False  # Enable manual optimization
         self.adv_weight = adv_weight
         self.mean = mean
@@ -90,7 +91,11 @@ class GAN(pl.LightningModule):
         mse = self.mse_loss(sr, y)
         d_total_loss = self.adv_weight * d_loss + mse
 
-        self.log('val_d_total_loss', d_total_loss,  on_epoch=True, on_step=False)
+        self.log('val_adv_loss', d_loss,  on_epoch=True, on_step=False)
+
+        self.log('val_mse_loss', mse,  on_epoch=True, on_step=False)
+
+        self.log('val_loss', d_total_loss,  on_epoch=True, on_step=False)
 
         self.outputs = {'interpolated': x, 'y': y, 'sr': sr}
 
@@ -117,7 +122,8 @@ class GAN(pl.LightningModule):
         mse = self.mse_loss(sr, y)
         d_total_loss = self.adv_weight * d_loss + mse
 
-        self.log('test_d_total_loss', d_total_loss,  on_epoch=True, on_step=False)
+        self.log('test_mse_loss', mse,  on_epoch=True, on_step=False)
+        self.log('test_loss', d_total_loss,  on_epoch=True, on_step=False)
 
         # Log the first test batch for visualization
         if batch_idx == 0:
@@ -140,8 +146,8 @@ class GAN(pl.LightningModule):
         print(f"Saved batch {batch_idx} predictions to {file_path}")
 
     def configure_optimizers(self):
-        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr)
-        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.lr)
+        opt_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr_gen)
+        opt_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.lr_disc)
         return [opt_g, opt_d], []
 
     def validation_plots(self, interpolated, y, y_hat, phase):
