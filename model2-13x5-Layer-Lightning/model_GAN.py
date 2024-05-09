@@ -32,7 +32,7 @@ class GAN(pl.LightningModule):
         return F.mse_loss(fake, real)
 
     def training_step(self, batch, batch_idx):
-        x, y, _ = batch
+        x, y, _, _ = batch
 
         optimizer_g, optimizer_d = self.optimizers()
 

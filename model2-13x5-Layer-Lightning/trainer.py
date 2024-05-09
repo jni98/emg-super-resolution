@@ -65,7 +65,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
     )
 
     checkpoint_callback = ModelCheckpoint(
-        monitor='val_d_total_loss',
+        monitor='val_loss',
         mode='min',
         dirpath=config['results'],
         filename='best_model',
