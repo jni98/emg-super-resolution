@@ -91,7 +91,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         trainer.fit(model, dm)
 
     model_for_inference = GAN.load_from_checkpoint(
-        checkpoint_path=checkpoint_path.replace('last.ckpt', 'best_model.ckpt'),
+        checkpoint_path=config['results'] + "/best_model.ckpt",
         generator=generator,
         discriminator=discriminator,
         learning_rate_g=config['learning_rate'],
