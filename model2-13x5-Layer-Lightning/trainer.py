@@ -27,7 +27,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
     wandb_logger = WandbLogger(project="GAN-Training", save_dir=config['results'], config=config, mode='online', offline=False)
 
-    generator = Generator(num_res_blocks=4, num_res_blocks_last=4, in_channels=1)
+    generator = Generator(num_res_blocks=5, num_res_blocks_last=5, in_channels=1)
     discriminator = Discriminator(in_channels=1)
 
     # Load the JSON file with values for standardization into a Python dictionary

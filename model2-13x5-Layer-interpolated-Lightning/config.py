@@ -11,7 +11,7 @@ def get_config(data_directory, test_data_directory, results_directory, num_epoch
         results=results_directory,
         data=data_directory,
         testdata=test_data_directory,
-        augment = True,
+        augment = False,
         adv_weight = 0.01,
         model = 'model2-13x5-Layer-interpolated-Lightning'
     )
