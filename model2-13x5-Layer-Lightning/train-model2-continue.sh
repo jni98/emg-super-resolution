@@ -27,6 +27,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-Lightning-$SLURM_JOB_ID
 EPOCHS=1000
 BATCHSIZE=12
 LR=0.00001
+CHECKPOINT_PATH=$1
 
 ############    setup    ###############
 
