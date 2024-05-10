@@ -113,17 +113,9 @@ class GAN(pl.LightningModule):
         x, y, y_path, interpolated = batch
         sr = self.generator(x)
 
-        real_pred = self.discriminator(y)
-        fake_pred = self.discriminator(sr)
-
-        d_loss_real = self.adversarial_loss(real_pred, torch.ones_like(real_pred))
-        d_loss_fake = self.adversarial_loss(fake_pred, torch.zeros_like(fake_pred))
-        d_loss = (d_loss_real + d_loss_fake) / 2
         mse = self.mse_loss(sr, y)
-        d_total_loss = self.adv_weight * d_loss + mse
 
         self.log('test_mse_loss', mse,  on_epoch=True, on_step=False)
-        self.log('test_loss', d_total_loss,  on_epoch=True, on_step=False)
 
         # Log the first test batch for visualization
         if batch_idx == 0:
