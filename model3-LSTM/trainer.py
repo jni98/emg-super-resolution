@@ -27,7 +27,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
     seed_everything(1)
     config = get_config(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
 
-    wandb.init(project="emg-super-resolution-LSTM", config=config, mode='online', offline=False)
+    wandb.init(project="emg-super-resolution-LSTM", config=config, mode='online')
 
     wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=config['results'], config=config,
                                mode='online', offline=False)
