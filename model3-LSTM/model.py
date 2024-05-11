@@ -42,27 +42,27 @@ class Encoder3D(nn.Module):
         self.conv1 = nn.Conv3d(1, 32, kernel_size=3, stride=1, padding=1)
         self.bn1 = nn.BatchNorm3d(32)
 
-        self.conv2 = nn.Conv3d(32, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.down_conv1 = nn.Conv3d(32, 64, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
         self.bn2 = nn.BatchNorm3d(64)
         self.res2 = ResidualBlock3D(64)
 
-        self.conv3 = nn.Conv3d(64, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.down_conv2 = nn.Conv3d(64, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
         self.bn3 = nn.BatchNorm3d(128)
         self.res3 = ResidualBlock3D(128)
 
-        self.conv4 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.down_conv3 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
         self.bn4 = nn.BatchNorm3d(128)
         self.res4 = ResidualBlock3D(128)
 
-        self.conv5 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.down_conv4 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
         self.bn5 = nn.BatchNorm3d(128)
         self.res5 = ResidualBlock3D(128)
 
-        self.conv6 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.down_conv5 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
         self.bn6 = nn.BatchNorm3d(128)
         self.res6 = ResidualBlock3D(128)
 
-        self.conv7 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
+        self.down_conv6 = nn.Conv3d(128, 128, kernel_size=3, stride=(1,1,2), padding=1)  # Downsample
         self.bn7 = nn.BatchNorm3d(128)
         self.res7 = ResidualBlock3D(128)
 
@@ -77,45 +77,45 @@ class Encoder3D(nn.Module):
         out = self.relu(out)
         # out shape: (batch_size, 32, 7, 3, 40960)
 
-        out = self.conv2(out)
+        out = self.down_conv1(out)
         out = self.bn2(out)
         out = self.relu(out)
-        #out = self.res2(out)
+        out = self.res2(out)
         # out shape: (batch_size, 64, 7, 3, 20480)
         print("conv2 shape" + str(out.shape))
 
-        out = self.conv3(out)
+        out = self.down_conv2(out)
         out = self.bn3(out)
         out = self.relu(out)
-        #out = self.res3(out)
+        out = self.res3(out)
         # out shape: (batch_size, 128, 7, 3, 10240)
         print("conv3 shape" + str(out.shape))
 
-        out = self.conv4(out)
+        out = self.down_conv3(out)
         out = self.bn4(out)
         out = self.relu(out)
-        #out = self.res4(out)
+        out = self.res4(out)
         # out shape: (batch_size, 128, 7, 3, 5120)
         print("conv4 shape" + str(out.shape))
 
-        out = self.conv5(out)
+        out = self.down_conv4(out)
         out = self.bn5(out)
         out = self.relu(out)
-        #out = self.res5(out)
+        out = self.res5(out)
         # out shape: (batch_size, 128, 7, 3, 2560)
         print("conv5 shape" + str(out.shape))
 
-        out = self.conv6(out)
+        out = self.down_conv5(out)
         out = self.bn6(out)
         out = self.relu(out)
-        #out = self.res6(out)
+        out = self.res6(out)
         # out shape: (batch_size, 128, 7, 3, 1280)
         print("conv6 shape" + str(out.shape))
 
-        out = self.conv7(out)
+        out = self.down_conv6(out)
         out = self.bn7(out)
         out = self.relu(out)
-        #out = self.res7(out)
+        out = self.res7(out)
         # out shape: (batch_size, 128, 7, 3, 640)
         print("conv7 shape" + str(out.shape))
 

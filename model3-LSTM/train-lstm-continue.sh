@@ -1,10 +1,10 @@
 #!/bin/bash -l
 
-# Usage: sbatch train-lstm.sh [optional_checkpoint_path]
+# Usage: sbatch train-lstm.sh [optional_checkpoint_path] [optional_results_dir]
 # Example to start first job: sbatch train-lstm.sh
-# Example to start second job manually (if needed): sbatch train-lstm.sh $HOME/model3-LSTM-<JOBID>/last.ckpt
+# Example to start second job manually: sbatch train-lstm.sh $HOME/model3-LSTM-<JOBID>/last.ckpt $HOME/model3-LSTM-<JOBID>
 
-############    slurm    ###############
+############ slurm ###############
 
 #SBATCH --job-name=model3-LSTM
 #SBATCH --time=24:00:00
@@ -15,21 +15,21 @@
 
 unset SLURM_EXPORT_ENV
 
-############    paths    ###############
+############ paths ###############
 
 SRC_DIR=$HOME/code/model3-LSTM
-RESULTS_DIR=$HOME/model3-LSTM-$SLURM_JOB_ID
+RESULTS_DIR=${2:-$HOME/model3-LSTM-$SLURM_JOB_ID}  # Use passed results directory or default to new one based on job ID
 DATA_ARCHIVE=$HPCVAULT/dataset_lstm.tar
 FAST_DATA_DIR=$TMPDIR/model3-LSTM-$SLURM_JOB_ID
 
-############    params   ###############
+############ params ###############
 
 EPOCHS=20000
 BATCHSIZE=4
 LR=0.00001
-CHECKPOINT_PATH=$1
+CHECKPOINT_PATH=$1  # First parameter: optional checkpoint path
 
-############    setup    ###############
+############ setup ###############
 
 # allows for internet connection on cluster nodes
 export http_proxy=http://proxy:80
