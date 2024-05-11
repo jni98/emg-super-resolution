@@ -82,7 +82,6 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
         test_data_directory=config['testdata'],
         augment=config['augment'],
         num_workers=4,  # Adjust based on your system's CPU and memory resources
-        pin_memory=True
     )
 
     trainer = Trainer(

@@ -225,7 +225,9 @@ class CustomDataModule(pl.LightningDataModule):
                                   batch_size=self.batch_size,
                                   shuffle=False,
                                   num_workers=self.num_workers,
-                                  drop_last=True)
+                                  drop_last=True,
+                                  pin_memory=True
+                                  )
 
         return train_loader
 
@@ -239,7 +241,9 @@ class CustomDataModule(pl.LightningDataModule):
                                 batch_size=self.batch_size,
                                 shuffle=False,
                                 num_workers=self.num_workers,
-                                drop_last=True)
+                                drop_last=True,
+                                pin_memory=True
+                                )
 
         return val_loader
 
