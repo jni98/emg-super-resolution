@@ -120,7 +120,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
 
 if __name__ == "__main__":
-    #args = parse_args()
-    #main(args.data, args.testdata, args.results, args.epochs, args.batch_size, args.lr, args.checkpoint)
+    args = parse_args()
+    main(args.data, args.testdata, args.results, args.epochs, args.batch_size, args.lr, args.checkpoint)
 
-    main('../dataset/train', '../dataset/test', 'runs/', 6, 2, 0.0001, None)
+    #main('../dataset/train', '../dataset/test', 'runs/', 6, 2, 0.0001, None)
