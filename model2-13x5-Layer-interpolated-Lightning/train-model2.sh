@@ -6,10 +6,10 @@
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model2-Layer
+#SBATCH --job-name=model2-Layer-interpolated-Lightning
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
-#SBATCH --gres=gpu:a100:1
+#SBATCH --gres=gpu:a100:2
 #SBATCH --partition=a100
 #SBATCH --export=NONE
 
@@ -25,7 +25,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-interpolated-Lightning-$SLURM_JOB_ID
 ############    params   ###############
 
 EPOCHS=1000
-BATCHSIZE=10
+BATCHSIZE=16
 LR=0.00001
 
 ############    setup    ###############

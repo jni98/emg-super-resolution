@@ -9,27 +9,27 @@
 #SBATCH --job-name=model2-Layer
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
-#SBATCH --gres=gpu:a100:1
+#SBATCH --gres=gpu:a100:2
 #SBATCH --partition=a100
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV
 
-############    paths    ###############
+############ paths ###############
 
 SRC_DIR=$HOME/code/model2-13x5-Layer-Lightning
-RESULTS_DIR=$HOME/model2-13x5-Layer-Lightning-$SLURM_JOB_ID
+RESULTS_DIR=${2:-$HOME/model2-13x5-Layer-Lightning-$SLURM_JOB_ID}  # Use passed results directory or default to new one based on job ID
 DATA_ARCHIVE=$HPCVAULT/dataset.tar
 FAST_DATA_DIR=$TMPDIR/model2-13x5-Layer-Lightning-$SLURM_JOB_ID
 
-############    params   ###############
+############ params ###############
 
 EPOCHS=1000
-BATCHSIZE=12
+BATCHSIZE=16
 LR=0.00001
-CHECKPOINT_PATH=$1
+CHECKPOINT_PATH=$1  # First parameter: optional checkpoint path
 
-############    setup    ###############
+############ setup ###############
 
 # allows for internet connection on cluster nodes
 export http_proxy=http://proxy:80
@@ -65,8 +65,8 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 
-python trainer.py --data "$FAST_DATA_DIR/dataset/train" \
-                  --testdata "$FAST_DATA_DIR/dataset/test" \
+srun python trainer.py --data "$FAST_DATA_DIR/dataset_lstm/train" \
+                  --testdata "$FAST_DATA_DIR/dataset_lstm/test" \
                   --results "$RESULTS_DIR" \
                   --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR --checkpoint "$CHECKPOINT_PATH"
 

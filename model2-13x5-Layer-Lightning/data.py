@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import transforms
-from emg_augmentations import GaussianNoise, WaveletDecomposition, MagnitudeWarping
+from emg_augmentations import GaussianNoise, WaveletDecomposition
 import random
 
 
@@ -33,7 +33,6 @@ class TimeseriesDataset(Dataset):
 
         self.gaussian_noise_generator = GaussianNoise(target_snr__db=5.0)
         self.wavelet_decomposition = WaveletDecomposition(b=0.25, wavelet="db7", level=5, nr_of_grids=1)
-        self.magnitude_warping = MagnitudeWarping(nr_of_grids=1)
 
     def __len__(self) -> int:
         return len(self.X)
@@ -51,7 +50,7 @@ class TimeseriesDataset(Dataset):
         if self.augment:
             # Randomly choose whether to augment the data or not
             augmentation_method = random.choice(
-                [self.no_augmentation, self.apply_gaussian_noise, self.apply_wavelet_decomposition, self.apply_magnitude_warping])
+                [self.no_augmentation, self.apply_gaussian_noise, self.apply_wavelet_decomposition])
 
             # Apply the selected augmentation method
             hr_emg = augmentation_method(hr_emg)
@@ -93,9 +92,6 @@ class TimeseriesDataset(Dataset):
 
     def apply_wavelet_decomposition(self, data):
         return self.wavelet_decomposition(data)
-
-    def apply_magnitude_warping(self,data):
-        return self.magnitude_warping(data)
 
     def standardize(self, X):
         '''
