@@ -50,6 +50,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
     # Assuming model is being loaded from a checkpoint
     if checkpoint_path is not None:
+        print("Received checkpoint path for training: ", checkpoint_path)
         model = LSTMRegressor.load_from_checkpoint(
             checkpoint_path=checkpoint_path,
             n_features=config['n_features'],
@@ -100,6 +101,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
     )
 
     if checkpoint_path is not None:
+        print("Received checkpoint path for fitting: ", checkpoint_path)
         trainer.fit(model, dm, ckpt_path=checkpoint_path)
     else:
         trainer.fit(model, dm)
