@@ -6,7 +6,7 @@
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model2-Fourier-interpolated-Lightning
+#SBATCH --job-name=model2-13x5-Fourier-Lightning
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
@@ -17,10 +17,10 @@ unset SLURM_EXPORT_ENV
 
 ############ paths ###############
 
-SRC_DIR=$HOME/code/model2-13x5-Fourier-interpolated-Lightning
-RESULTS_DIR=${2:-$HOME/model2-13x5-Fourier-interpolated-Lightning-$SLURM_JOB_ID}  # Use passed results directory or default to new one based on job ID
+SRC_DIR=$HOME/code/model2-13x5-Fourier-Lightning
+RESULTS_DIR=${2:-$HOME/model2-13x5-Fourier-Lightning-$SLURM_JOB_ID}  # Use passed results directory or default to new one based on job ID
 DATA_ARCHIVE=$HPCVAULT/dataset.tar
-FAST_DATA_DIR=$TMPDIR/model2-13x5-Fourier-interpolated-Lightning-$SLURM_JOB_ID
+FAST_DATA_DIR=$TMPDIR/model2-13x5-Fourier-Lightning-$SLURM_JOB_ID
 
 ############ params ###############
 

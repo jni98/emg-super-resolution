@@ -2,11 +2,11 @@
 
 # Usage: sbatch train-model2.sh [optional_checkpoint_path]
 # Example to start first job: sbatch train-model2.sh
-# Example to start second job manually (if needed): sbatch train-model2.sh $HOME/model2-13x5-Fourier-interpolated-Lightning-<JOBID>/best_model.ckpt
+# Example to start second job manually (if needed): sbatch train-model2.sh $HOME/model2-13x5-Fourier-Lightning-<JOBID>/best_model.ckpt
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model2-Fourier-interpolated-Lightning
+#SBATCH --job-name=model2-13x5-Fourier-Lightning
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
@@ -17,10 +17,10 @@ unset SLURM_EXPORT_ENV
 
 ############    paths    ###############
 
-SRC_DIR=$HOME/code/model2-13x5-Fourier-interpolated-Lightning
-RESULTS_DIR=$HOME/model2-13x5-Fourier-interpolated-Lightning-$SLURM_JOB_ID
+SRC_DIR=$HOME/code/model2-13x5-Fourier-Lightning
+RESULTS_DIR=$HOME/model2-13x5-Fourier-Lightning-$SLURM_JOB_ID
 DATA_ARCHIVE=$HPCVAULT/dataset.tar
-FAST_DATA_DIR=$TMPDIR/model2-13x5-Fourier-interpolated-Lightning-$SLURM_JOB_ID
+FAST_DATA_DIR=$TMPDIR/model2-13x5-Fourier-Lightning-$SLURM_JOB_ID
 
 ############    params   ###############
 
