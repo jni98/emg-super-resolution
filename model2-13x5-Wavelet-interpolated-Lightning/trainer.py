@@ -5,6 +5,7 @@ import wandb
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.strategies import DDPStrategy
 from model_GAN import GAN  # Update this import to your GAN model
 from data import CustomDataModule  # Ensure this data module is suitable for your GAN
 from config import get_config
@@ -85,8 +86,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
     trainer = Trainer(
         max_epochs=num_epochs,
-        devices=2,
-        strategy="ddp",  # Use DistributedDataParallel for multi-GPU training
+        devices=1,
         accelerator="gpu",
         deterministic=True,
         logger=wandb_logger,
