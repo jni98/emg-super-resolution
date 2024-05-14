@@ -178,3 +178,4 @@ dmypy.json
 /model3-LSTM/runs/
 /model3-LSTM/wandb/
 /files_to_plot/
+/dataset_lstm_40960/

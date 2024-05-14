@@ -285,7 +285,7 @@ class LSTMRegressor(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         lr_scheduler = {
-            'scheduler': torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda _: 0.5 ** (self.current_epoch // 5000)),
+            'scheduler': torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda _: 0.5 ** (self.current_epoch // 8000)),
             'name': 'lr_scheduler_logging',
             'interval': 'epoch',  # Ensure scheduler updates at every epoch interval
             'frequency': 1        # Update the scheduler at every epoch
