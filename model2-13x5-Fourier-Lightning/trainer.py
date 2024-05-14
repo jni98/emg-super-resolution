@@ -1,6 +1,7 @@
 import argparse
 import json
 
+import wandb
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
@@ -24,6 +25,8 @@ def parse_args():
 def main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate, checkpoint_path=None):
     seed_everything(1)
     config = get_config(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
+
+    wandb.init(project="GAN-Training", config=config, mode='online')
 
     wandb_logger = WandbLogger(project="GAN-Training", save_dir=config['results'], config=config, mode='online', offline=False)
 

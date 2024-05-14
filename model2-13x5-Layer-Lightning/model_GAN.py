@@ -48,7 +48,7 @@ class GAN(pl.LightningModule):
 
         # adversarial loss is binary cross-entropy
         g_loss = self.adv_weight * self.adversarial_loss(self.discriminator(sr), valid) + self.mse_loss(sr, y)
-        self.log("g_loss", g_loss, on_epoch=True, on_step=False)
+        self.log("g_loss", g_loss, on_epoch=True, on_step=False, sync_dist=True)
         self.manual_backward(g_loss)
         optimizer_g.step()
         optimizer_g.zero_grad()
@@ -72,7 +72,7 @@ class GAN(pl.LightningModule):
 
         # discriminator loss is the average of these
         d_loss = (real_loss + fake_loss) / 2
-        self.log("d_loss", d_loss,  on_epoch=True, on_step=False)
+        self.log("d_loss", d_loss,  on_epoch=True, on_step=False, sync_dist=True)
         self.manual_backward(d_loss)
         optimizer_d.step()
         optimizer_d.zero_grad()
@@ -91,11 +91,11 @@ class GAN(pl.LightningModule):
         mse = self.mse_loss(sr, y)
         d_total_loss = self.adv_weight * d_loss + mse
 
-        self.log('val_adv_loss', d_loss,  on_epoch=True, on_step=False)
+        self.log('val_adv_loss', d_loss,  on_epoch=True, on_step=False, sync_dist=True)
 
-        self.log('val_mse_loss', mse,  on_epoch=True, on_step=False)
+        self.log('val_mse_loss', mse,  on_epoch=True, on_step=False, sync_dist=True)
 
-        self.log('val_loss', d_total_loss,  on_epoch=True, on_step=False)
+        self.log('val_loss', d_total_loss,  on_epoch=True, on_step=False, sync_dist=True)
 
         self.outputs = {'interpolated': interpolated, 'y': y, 'sr': sr}
 
@@ -115,7 +115,7 @@ class GAN(pl.LightningModule):
 
         mse = self.mse_loss(sr, y)
 
-        self.log('test_mse_loss', mse,  on_epoch=True, on_step=False)
+        self.log('test_mse_loss', mse,  on_epoch=True, on_step=False, sync_dist=True)
 
         # Log the first test batch for visualization
         if batch_idx == 0:
