@@ -72,13 +72,24 @@ class LSTMRegressor(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+
+        def lr_lambda(epoch):
+            if epoch < 5200:
+                return 1.0
+            elif 5200 <= epoch < 7000:
+                return 0.5
+            elif 7000 <= epoch < 10000:
+                return 0.25
+            else:
+                return 0.125
+
         lr_scheduler = {
-            'scheduler': torch.optim.lr_scheduler.LambdaLR(optimizer,
-                                                           lr_lambda=lambda _: 0.5 ** (self.current_epoch // 200)),
+            'scheduler': torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_lambda),
             'name': 'lr_scheduler_logging',
             'interval': 'epoch',  # Ensure scheduler updates at every epoch interval
             'frequency': 1  # Update the scheduler at every epoch
         }
+
         return [optimizer], [lr_scheduler]
 
     def training_step(self, batch, batch_idx):
