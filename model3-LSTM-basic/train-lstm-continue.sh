@@ -25,7 +25,7 @@ FAST_DATA_DIR=$TMPDIR/model3-LSTM-basic-$SLURM_JOB_ID
 ############ params ###############
 
 EPOCHS=20000
-BATCHSIZE=2
+BATCHSIZE=8
 LR=0.001
 CHECKPOINT_PATH=$1  # First parameter: optional checkpoint path
 

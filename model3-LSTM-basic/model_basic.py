@@ -74,9 +74,9 @@ class LSTMRegressor(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
         def lr_lambda(epoch):
-            if epoch < 5200:
+            if epoch < 5000:
                 return 1.0
-            elif 5200 <= epoch < 7000:
+            elif 5000 <= epoch < 7000:
                 return 0.5
             elif 7000 <= epoch < 10000:
                 return 0.25
