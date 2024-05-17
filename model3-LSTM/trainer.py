@@ -90,9 +90,9 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
     trainer = Trainer(
         max_epochs=config['max_epochs'],
-        devices=2,  # Specify the number of GPUs
+        devices=1,  # Specify the number of GPUs
         accelerator="gpu",
-        strategy="ddp",  # Use DistributedDataParallel for multi-GPU training
+        #strategy="ddp",  # Use DistributedDataParallel for multi-GPU training
         deterministic=True,
         logger=wandb_logger,
         callbacks=[checkpoint_callback, lr_monitor],

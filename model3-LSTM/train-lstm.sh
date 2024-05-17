@@ -9,7 +9,7 @@
 #SBATCH --job-name=model3-LSTM
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
-#SBATCH --gres=gpu:a100:2
+#SBATCH --gres=gpu:a100:1
 #SBATCH --partition=a100
 #SBATCH --export=NONE
 
