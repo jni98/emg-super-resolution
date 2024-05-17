@@ -51,31 +51,22 @@ class Custom_Dataset(Dataset):
         if torch.is_tensor(index):
             index = index.tolist()
 
-        lr_emg_path = self.data.iloc[index]['lr_filename']
         hr_emg_path = self.data.iloc[index]['hr_filename']
+        lr_emg_path = hr_emg_path.replace('hr', 'lr')
+        hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
-        lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
+        lr_emg = hr_emg[::2, ::2]
 
         # bandpass filter
         lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=5)
 
         lr_emg = self.reshape(lr_emg)
 
-        # plt.figure()
-        # plt.plot(lr_emg[0][0])
-        # plt.savefig('lr_emg.png')
-
         # Standardize using mean and std values of the complete dataset
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
 
-        # plt.figure()
-        # plt.plot(lr_emg_standardized[0][0])
-        # plt.savefig('lr_emg_standardized.png')
-
         # unsqueeze to add a one channel dimension at the beginning
         lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
-
-        hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
 
         # bandpass filter
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=5)
