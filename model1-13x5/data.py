@@ -53,7 +53,7 @@ class Custom_Dataset(Dataset):
 
         hr_emg_path = self.data.iloc[index]['hr_filename']
         lr_emg_path = hr_emg_path.replace('hr', 'lr')
-        hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
+        hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
 
         lr_emg = hr_emg[::2, ::2]
 
