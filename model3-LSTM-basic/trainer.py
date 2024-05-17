@@ -5,7 +5,7 @@ import wandb
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, Callback
 from pytorch_lightning.loggers import WandbLogger
-from model_basic_L1 import LSTMRegressor  # Make sure this import is correctly pointing to your model definition
+from model_basic import LSTMRegressor  # Make sure this import is correctly pointing to your model definition
 from data import CustomDataModule
 from config import get_config
 
