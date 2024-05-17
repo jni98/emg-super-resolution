@@ -363,6 +363,9 @@ class LSTMRegressor(pl.LightningModule):
         hr_channel = hr_destandardized[0][0][6][2]
         sr_channel = sr_destandardized[0][0][6][2]
 
+        # Calculate the difference between hr_channel and sr_channel
+        diff_channel = hr_channel - sr_channel
+
         ############################## Log Plots given channel########################################
         print("Logging plots for batch index 0 given channel")
 
@@ -396,6 +399,9 @@ class LSTMRegressor(pl.LightningModule):
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
                        opacity=0.5))
+        # Add trace for the difference channel
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(diff_channel)), y=diff_channel, name='HR - SR'))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - Given Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
@@ -471,6 +477,9 @@ class LSTMRegressor(pl.LightningModule):
         sr_channel = sr_destandardized[0][0][6][1]
         interpolated_channel = interpolated_destandardized[0][0][6][1]
 
+        # Calculate the difference between hr_channel and sr_channel
+        diff_channel = hr_channel - sr_channel
+
         plotly_fig1 = go.Figure()
 
         # log cross correlation
@@ -501,6 +510,9 @@ class LSTMRegressor(pl.LightningModule):
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
                        opacity=0.5))
+        # Add trace for the difference channel
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(diff_channel)), y=diff_channel, name='HR - SR'))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - Predicted Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
