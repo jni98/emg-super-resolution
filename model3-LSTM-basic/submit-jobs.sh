@@ -12,7 +12,7 @@ then
 fi
 
 # Set the results directory using the first job's JOBID
-RESULTS_DIR1=$HOME/model3-LSTM-$JOBID1
+RESULTS_DIR1=$HOME/model3-LSTM-basic-$JOBID1
 
 # Submit the second job with a dependency to start after the first job completes under any circumstance
 JOBID2=$(sbatch.tinygpu --dependency=afterany:$JOBID1 train-lstm-continue.sh $RESULTS_DIR1/last.ckpt $RESULTS_DIR1 | awk '{print $4}')

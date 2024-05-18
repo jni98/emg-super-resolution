@@ -2,7 +2,7 @@
 
 # Usage: sbatch train-lstm.sh [optional_checkpoint_path] [optional_results_dir]
 # Example to start first job: sbatch train-lstm.sh
-# Example to start second job manually: sbatch train-lstm.sh $HOME/model3-LSTM-<JOBID>/last.ckpt $HOME/model3-LSTM-<JOBID>
+# Example to start second job manually: sbatch train-lstm.sh $HOME/model3-LSTM-basic-<JOBID>/last.ckpt $HOME/model3-LSTM-basic-<JOBID>
 
 ############ slurm ###############
 
