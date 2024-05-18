@@ -205,10 +205,10 @@ class Generator(nn.Module):
         self.res_blocks5 = nn.Sequential(*[ResidualBlock(in_channels=1024) for _ in range(num_res_blocks_last)])
 
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlock(wavelet=self.wavelet, in_channels=512, kernel_size= (3,3,3), stride=(1,1,1), padding=(1,1,0))
+        self.upConv1 = UpConvolutionBlock(wavelet=self.wavelet, in_channels=512, kernel_size= (3,3,2), stride=(1,1,1), padding=(1,1,0))
 
         # Upsampling 1
-        self.upConv2 = UpConvolutionBlock(wavelet=self.wavelet, in_channels=256, kernel_size= (3,3,2), stride=(1,1,1), padding=(1,1,1))
+        self.upConv2 = UpConvolutionBlock(wavelet=self.wavelet, in_channels=256, kernel_size= (3,3,2), stride=(1,1,1), padding=(1,1,0))
 
         # Upsampling 2
         self.upConv3 = UpConvolutionBlock(wavelet=self.wavelet, in_channels=128, kernel_size= (3,3,3), stride=(1,1,1), padding=(1,1,1))
@@ -245,11 +245,11 @@ class Generator(nn.Module):
         down4 = self.res_blocks5(down4)
 
         up1 = self.upConv1(down4, skip4)
-        up2 = self.upConv1(up1, skip3)
+        up2 = self.upConv2(up1, skip3)
         # print("Generator output after upsample1", up1.shape)
-        up3 = self.upConv2(up2, skip2)
+        up3 = self.upConv3(up2, skip2)
         # print("Generator output after upsample2", up2.shape)
-        up4 = self.upConv3(up3)
+        up4 = self.upConv4(up3)
         # print("Generator output after upsample3", up3.shape)
 
         out = self.finalConv(up4)
