@@ -80,7 +80,8 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
     trainer = Trainer(
         max_epochs=num_epochs,
         devices=2,
-        strategy="ddp",  # Use DistributedDataParallel for multi-GPU training
+        #strategy="ddp",  # Use DistributedDataParallel for multi-GPU training
+        strategy='ddp_find_unused_parameters_true',
         accelerator="gpu",
         deterministic=True,
         logger=wandb_logger,
