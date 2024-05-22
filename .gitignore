@@ -179,3 +179,16 @@ dmypy.json
 /model3-LSTM/wandb/
 /files_to_plot/
 /dataset_lstm_40960/
+/Visualization-13x5grid/plot_absolute_difference/
+/Visualization-13x5grid/plot_propagation/
+/dataset_model/
+/Visualization-13x5grid/plot_absolute_difference/
+/Visualization-13x5grid/plot_channels/
+/Visualization-13x5grid/plot_channels_difference/
+/Visualization-13x5grid/plot_correlations/
+/Visualization-13x5grid/plot_heatmaps/
+/Visualization-13x5grid/plot_mean_differences_heatmap/
+/Visualization-13x5grid/plot_pearsonr_heatmap/
+/Visualization-13x5grid/plot_pearsonr_heatmap_oneChannel/
+/Visualization-13x5grid/plot_propagation/
+/Visualization-13x5grid/syn/
