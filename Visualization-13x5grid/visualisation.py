@@ -65,7 +65,7 @@ class Visualizer:
 
         print("Start plotting channels")
 
-        time_axis = np.arange(64584)  # Assuming the time axis runs along axis 2
+        time_axis = np.arange(64570)  # Assuming the time axis runs along axis 2
 
         for title, emg_data in self.emg_data_dict.items():
             # Plot Training losses in a separate figure
@@ -75,7 +75,7 @@ class Visualizer:
 
             for rows in range(13):
                 for cols in range(5):
-                    signal = emg_data[rows][cols][:64584]
+                    signal = emg_data[rows][cols][:64570]
 
                     predicted = ''
                     # if title == 'Original HR':
@@ -112,6 +112,7 @@ class Visualizer:
             os.makedirs(directory, exist_ok=True)
 
             plt.savefig(f'{directory}{title}.png')
+            print(f'Saving to: {directory}{title}')
             plt.close()
             plt.figure()
 
@@ -135,8 +136,8 @@ class Visualizer:
             # Plot Training losses in a separate figure
             plt.figure(figsize=(8.27, 14))
 
-            groundtruth_cut = groundtruth[:, :, :64584]
-            emg_data_cut = emg_data[:, :, :64584]
+            groundtruth_cut = groundtruth[:, :, :64570]
+            emg_data_cut = emg_data[:, :, :64570]
 
             mean_absolute_differences = np.mean(np.abs(groundtruth_cut - emg_data_cut), axis=2)
 
@@ -159,6 +160,7 @@ class Visualizer:
             os.makedirs(directory, exist_ok=True)
 
             plt.savefig(f'{directory}{title}.png')
+            print(f'Saving to: {directory}{title}')
             plt.close()
             plt.figure()
 
@@ -178,6 +180,8 @@ class Visualizer:
             os.makedirs(directory, exist_ok=True)
 
             plt.savefig(f'{directory}{title}_mean_differences.png')
+            print(f'Saving to: {directory}{title}')
+
             plt.close()
 
     def plot_heat_maps(self) -> None:
@@ -228,6 +232,7 @@ class Visualizer:
         os.makedirs(directory, exist_ok=True)
 
         plt.savefig(f'{directory}Heatmaps.png')
+        print(f'Saving to: {directory}')
 
     def plot_correlations(self) -> None:
         """
@@ -296,6 +301,7 @@ class Visualizer:
                         os.makedirs(directory, exist_ok=True)
 
                         plt.savefig(f'{directory}{keys_list[g]} with Original HR - {plot_number}.png')
+                        print(f'Saving to: {directory}{keys_list[g]} with Original HR - {plot_number}')
                         plt.close()
                         plt.figure()
                         plot_number += 1
@@ -325,6 +331,9 @@ class Visualizer:
             groundtruth = grids[0]
             grid_2 = grids[g]
 
+            groundtruth = groundtruth[:, :, :64570]
+            grid_2 = grid_2[:, :, :64570]
+
             # Initialize an array to store correlation coefficients
             correlation_coefficients = np.zeros((13, 5))
 
@@ -349,6 +358,7 @@ class Visualizer:
             os.makedirs(directory, exist_ok=True)
 
             plt.savefig(f'{directory}{keys_list[g]}.png')
+            print(f'Saving to: {directory}{keys_list[g]}')
             plt.close()
 
             # Correlation of one channel in the groundtruth signal with all other channels of the interpolated or model 2 signal channels
@@ -375,7 +385,127 @@ class Visualizer:
                     os.makedirs(directory, exist_ok=True)
 
                     plt.savefig(f'{directory}{keys_list[g]}-r{row1}c{col1}.png')
+                    print(f'Saving to: {directory}{keys_list[g]}-r{row1}c{col1}')
                     plt.close()
+
+    # Function to create subplots of absolute differences
+    def create_difference_plots(self):
+        """
+        Creates subplots showing the absolute difference between the original data and other models.
+        Each subplot corresponds to one channel, with the differences plotted.
+
+        Returns
+        -------
+        None
+        """
+        print("Start plotting absolute difference grids")
+
+        grids = (
+            self.emg_data_dict['Original HR'],
+            self.emg_data_dict['Linear LR to SR'],
+            self.emg_data_dict['Model 1 LR to SR'],
+            self.emg_data_dict['Model 2 LR to SR'])
+
+        # Accessing keys by index
+        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR')
+
+        for g in range(1, len(grids)):
+            groundtruth = grids[0]
+            grid_2 = grids[g]
+
+            # Cut for same length
+            groundtruth = groundtruth[:, :, :64570]
+            grid_2 = grid_2[:, :, :64570]
+
+            # Calculate absolute difference
+            abs_diff = np.abs(groundtruth - grid_2)
+
+            # Find global min and max for y-axis limits
+            global_min = np.floor(np.min(abs_diff) / 200) * 200  # Round down to nearest 200
+            global_max = np.ceil(np.max(abs_diff) / 200) * 200  # Round up to nearest 200
+
+            # Create a figure with 13x5 subplots
+            fig, axes = plt.subplots(nrows=13, ncols=5, figsize=(20, 20))
+            fig.suptitle(f'Absolute Differences: Original HR vs {keys_list[g]}', fontsize=16)
+
+            for i in range(13):
+                for j in range(5):
+                    ax = axes[i, j]
+                    ax.plot(abs_diff[i, j])
+                    ax.set_title(f'Row {i + 1}, Column {j + 1}', fontsize=8)
+                    ax.set_xticks([])
+
+                    # Set y-axis ticks and labels
+                    if j == 0:  # Only show y-axis labels on the first column
+                        y_ticks = np.arange(global_min, global_max + 200, 200)
+                        ax.set_yticks(y_ticks)
+                        ax.set_yticklabels([f'{tick:.0f}' for tick in y_ticks])
+                    else:
+                        ax.set_yticks([])
+
+                    ax.set_ylim(global_min, global_max)  # Set y-axis limits
+
+            plt.tight_layout()
+            plt.subplots_adjust(top=0.95)
+
+            # Create the directory if it doesn't exist
+            directory = 'plot_absolute_difference/'
+            os.makedirs(directory, exist_ok=True)
+
+            # Save the figure
+            plt.savefig(f'{directory}Absolute_Differences_{keys_list[g]}.png')
+            print(f'Saving to: {directory}Absolute_Differences_{keys_list[g]}')
+            plt.close()
+
+    def propagation_plot(self):
+        """
+        Creates a figure with 13 subplots for each element in the grids dictionary.
+        Each subplot shows the signal [y][0][28.976:31024] for the first column of the array.
+
+        Returns
+        -------
+        None
+        """
+        print("Start plotting propagation plots")
+
+        grids = (
+            self.emg_data_dict['Original HR'],
+            self.emg_data_dict['Linear LR to SR'],
+            self.emg_data_dict['Model 1 LR to SR'],
+            self.emg_data_dict['Model 2 LR to SR'])
+
+        # Accessing keys by index
+        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR')
+
+        # Calculate the exact start and end indices for the range 28976 to 31024
+        start_idx = int(30050)
+        end_idx = int(30050+100)
+
+        for g in range(len(grids)):
+            array = grids[g]
+
+            # Create a figure with 13 subplots (one for each row)
+            fig, axes = plt.subplots(nrows=13, ncols=1, figsize=(15, 30))
+            fig.suptitle(f'Propagation Plot: {keys_list[g]}', fontsize=16)
+
+            for y in range(13):
+                ax = axes[y]
+                ax.plot(array[y, 0, start_idx:end_idx])
+                ax.set_title(f'Row {y + 1}', fontsize=10)
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+            plt.tight_layout()
+            plt.subplots_adjust(top=0.95)
+
+            # Create the directory if it doesn't exist
+            directory = 'plot_propagation/'
+            os.makedirs(directory, exist_ok=True)
+
+            # Save the figure
+            plt.savefig(f'{directory}Propagation_Plot_{keys_list[g]}.png')
+            print(f'Saving to: {directory}Propagation_Plot_{keys_list[g]}')
+            plt.close()
 
 
 if __name__ == '__main__':
@@ -384,8 +514,10 @@ if __name__ == '__main__':
 
     visualize = Visualizer(file_path)
 
-    visualize.plot_emg_channels()
-    visualize.plot_emg_channels_difference()
-    visualize.plot_heat_maps()
+    # visualize.plot_emg_channels()
+    # visualize.plot_emg_channels_difference()
+    # visualize.plot_heat_maps()
     # visualize.plot_correlations()
-    visualize.plot_pearson_coefficient_grid()
+    # visualize.plot_pearson_coefficient_grid()
+    # visualize.create_difference_plots()
+    visualize.propagation_plot()
