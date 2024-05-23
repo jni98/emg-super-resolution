@@ -40,6 +40,9 @@ class Visualizer:
         interpolation_lr_sr = np.load(self.file_path + 'linear_Interpolation/path0-lr.npy')
         model1_lr_sr = np.load(self.file_path + 'model_1/path0-lr.npy')
         model2_lr_sr = np.load(self.file_path + 'model_2/path0-lr.npy')
+        model3_lr_sr = np.load(self.file_path + 'model_3_LSTM/path0-sr-b.npy')
+
+        model3_lr_sr = model3_lr_sr.squeeze()
 
         # Load original data and normalize it
         origin_hr = np.load(self.file_path + 'groundtruth/path0-hr.npy')
@@ -49,6 +52,7 @@ class Visualizer:
             'Linear LR to SR': interpolation_lr_sr,
             'Model 1 LR to SR': model1_lr_sr,
             'Model 2 LR to SR': model2_lr_sr,
+            'Model 3 LR to SR': model3_lr_sr,
             'Original HR': origin_hr
         }
 
@@ -128,7 +132,7 @@ class Visualizer:
         """
         print("Start plotting EMG differences")
 
-        time_axis = np.arange(64584)  # Assuming the time axis runs along axis 2
+        time_axis = np.arange(64570)  # Assuming the time axis runs along axis 2
 
         groundtruth = self.emg_data_dict['Original HR']
 
@@ -199,10 +203,11 @@ class Visualizer:
             self.emg_data_dict['Original HR'],
             self.emg_data_dict['Linear LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR']
+            self.emg_data_dict['Model 2 LR to SR'],
+            self.emg_data_dict['Model 3 LR to SR']
         )
 
-        keys_list = ('Original HR', 'Linear', 'Model 1', 'Model 2')
+        keys_list = ('Original HR', 'Linear', 'Model 1', 'Model 2', 'Model 3')
 
         time_points = [20000, 30000, 40000]
 
@@ -248,14 +253,16 @@ class Visualizer:
             self.emg_data_dict['Original HR'],
             self.emg_data_dict['Linear LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR'])
+            self.emg_data_dict['Model 2 LR to SR'],
+            self.emg_data_dict['Model 3 LR to SR']
+        )
 
         # Accessing keys by index
-        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR')
+        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR', 'Model 3 LR to SR')
 
         for g in range(1, len(grids)):
-            groundtruth = grids[0][:][:][:64584]
-            grid_2 = grids[g][:][:][:64584]
+            groundtruth = grids[0][:][:][:64570]
+            grid_2 = grids[g][:][:][:64570]
 
             plt.figure()
             number_graphs = 0
@@ -322,10 +329,11 @@ class Visualizer:
             self.emg_data_dict['Original HR'],
             self.emg_data_dict['Linear LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR'])
+            self.emg_data_dict['Model 2 LR to SR'],
+            self.emg_data_dict['Model 3 LR to SR'])
 
         # Accessing keys by index
-        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR')
+        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR', 'Model 3 LR to SR')
 
         for g in range(1, len(grids)):
             groundtruth = grids[0]
@@ -404,10 +412,11 @@ class Visualizer:
             self.emg_data_dict['Original HR'],
             self.emg_data_dict['Linear LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR'])
+            self.emg_data_dict['Model 2 LR to SR'],
+            self.emg_data_dict['Model 3 LR to SR'])
 
         # Accessing keys by index
-        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR')
+        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR', 'Model 3 LR to SR')
 
         for g in range(1, len(grids)):
             groundtruth = grids[0]
@@ -472,10 +481,11 @@ class Visualizer:
             self.emg_data_dict['Original HR'],
             self.emg_data_dict['Linear LR to SR'],
             self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR'])
+            self.emg_data_dict['Model 2 LR to SR'],
+            self.emg_data_dict['Model 3 LR to SR'])
 
         # Accessing keys by index
-        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR')
+        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR', 'Model 3 LR to SR')
 
         # Calculate the exact start and end indices for the range 28976 to 31024
         start_idx = int(30050)
@@ -514,10 +524,10 @@ if __name__ == '__main__':
 
     visualize = Visualizer(file_path)
 
-    # visualize.plot_emg_channels()
-    # visualize.plot_emg_channels_difference()
-    # visualize.plot_heat_maps()
-    # visualize.plot_correlations()
-    # visualize.plot_pearson_coefficient_grid()
-    # visualize.create_difference_plots()
+    visualize.plot_emg_channels()
+    visualize.plot_emg_channels_difference()
+    visualize.plot_heat_maps()
+    visualize.plot_correlations()
+    visualize.plot_pearson_coefficient_grid()
+    visualize.create_difference_plots()
     visualize.propagation_plot()
