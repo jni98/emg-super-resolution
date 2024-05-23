@@ -6,11 +6,11 @@ import os
 import pytorch_lightning as pl
 import torch
 from matplotlib import pyplot as plt
+from scipy.signal import butter, filtfilt
 from torch import nn
 import numpy as np
 import plotly.graph_objects as go
 import wandb
-from utilities import butter_bandpass_filter
 
 
 class ResidualBlock3D(nn.Module):
@@ -364,8 +364,8 @@ class LSTMRegressor(pl.LightningModule):
         hr_channel = hr_destandardized[0][0][6][2]
         sr_channel = sr_destandardized[0][0][6][2]
 
-        interpolated_channel = butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
-        sr_channel = butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
@@ -461,8 +461,8 @@ class LSTMRegressor(pl.LightningModule):
         sr_channel = sr_destandardized[0][0][6][1]
         interpolated_channel = interpolated_destandardized[0][0][6][1]
 
-        interpolated_channel = butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
-        sr_channel = butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
@@ -548,3 +548,32 @@ class LSTMRegressor(pl.LightningModule):
                                  yaxis_title='Magnitude')
 
         wandb.log({phase + " - Frequency Spectrum - Scatter - Predicted channel [6][1]": freq_spec1})
+
+    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
+        """
+        Apply a bandpass filter to the data
+        Parameters
+        ----------
+        data: np.array
+            Data to be filtered
+        lowcut: float
+            Lower cut-off frequency
+        highcut: float
+            Higher cut-off frequency
+        fs: int
+            Sampling frequency
+        order: int
+            Order of the filter
+
+        Returns
+        -------
+        y: np.array
+            Filtered data
+        """
+        nyq = 0.5 * fs
+        low = lowcut / nyq
+        high = highcut / nyq
+        b, a = butter(order, [low, high], btype='band')
+        filtered_signal = filtfilt(b, a, data)
+
+        return filtered_signal
