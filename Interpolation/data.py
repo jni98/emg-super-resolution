@@ -30,127 +30,17 @@ class Custom_Dataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index: int) -> tuple:
-        """
-        Returns the data at the given index
-        Parameters
-        ----------
-        index: int
-
-        Returns
-        -------
-        lr_emg_standardized: torch.tensor
-            Low resolution EMG data standardized
-        hr_emg_standardized: torch.tensor
-            High resolution EMG data standardized
-        lr_emg_path: str
-            Path to the low resolution EMG data
-        hr_emg_path: str
-            Path to the high resolution EMG data
-        """
-
         if torch.is_tensor(index):
             index = index.tolist()
 
-        lr_emg_path = self.data.iloc[index]['lr_filename']
+        # Load file paths
         hr_emg_path = self.data.iloc[index]['hr_filename']
+        lr_emg_path = hr_emg_path.replace("hr", "lr")
 
-        lr_emg = np.load(self.directory + '/' + self.data.iloc[index, 0])
+        # Load and preprocess HR data
+        hr_emg = np.load(f"{self.directory}/{hr_emg_path}")
 
-        # bandpass filter
-        lr_emg = self.butter_bandpass_filter(lr_emg, 20, 500, 2048, order=5)
+        # extract lr emg
+        lr_emg = hr_emg[::2, ::2]
 
-        # plt.figure()
-        # plt.plot(lr_emg[0][0])
-        # plt.savefig('lr_emg.png')
-
-        # Standardize using mean and std values of the complete dataset
-        lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
-
-        # plt.figure()
-        # plt.plot(lr_emg_standardized[0][0])
-        # plt.savefig('lr_emg_standardized.png')
-
-        # unsqueeze to add a one channel dimension at the beginning
-        lr_emg_standardized = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
-
-        hr_emg = np.load(self.directory + '/' + self.data.iloc[index, 1])
-
-        # bandpass filter
-        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=5)
-        #  Standardize using mean and std values of the complete dataset
-        hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std)
-        # unsqueeze to add a one channel dimension at the beginning
-        hr_emg_standardized = torch.tensor(hr_emg_standardized).unsqueeze(0).to(torch.float32)
-
-        return lr_emg_standardized, hr_emg_standardized, lr_emg_path, hr_emg_path
-
-    def standardization(self, data: np.array, mean: float, std: float) -> np.array:
-        """
-        Standardize the data using the mean and std values
-        Parameters
-        ----------
-        data: np.array
-            Data to be standardized
-        mean: float
-            Mean value of the complete dataset
-        std: float
-            Standard deviation value of the complete dataset
-
-        Returns
-        -------
-        standardized_data: np.array
-            Standardized data
-        """
-
-        # Min-max normalization using precalculated min and max values
-        standardized_data = (data - mean) / std
-        return standardized_data
-
-    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=5):
-        """
-        Apply a bandpass filter to the data
-        Parameters
-        ----------
-        data: np.array
-            Data to be filtered
-        lowcut: float
-            Lower cut-off frequency
-        highcut: float
-            Higher cut-off frequency
-        fs: int
-            Sampling frequency
-        order: int
-            Order of the filter
-
-        Returns
-        -------
-        y: np.array
-            Filtered data
-        """
-        nyq = 0.5 * fs
-        low = lowcut / nyq
-        high = highcut / nyq
-        b, a = butter(order, [low, high], btype='band')
-        filtered_signal = filtfilt(b, a, data)
-
-        # # Compute the frequency spectrum using FFT along the samples axis
-        # spectrum_original = np.fft.fftn(data, axes=(2,))
-        # spectrum_filtered = np.fft.fftn(filtered_signal, axes=(2,))
-        #
-        # # Frequency values
-        # freq = np.fft.fftfreq(data.shape[2], d=1/fs)  # Assuming uniform sampling, adjust if needed
-        #
-        # # Plot the frequency spectra
-        # plt.figure(figsize=(10, 6))
-        # plt.plot(freq, np.abs(np.mean(spectrum_original, axis=(0, 1))), label='Original Signal')
-        # plt.plot(freq, np.abs(np.mean(spectrum_filtered, axis=(0, 1))), label='Filtered Signal')
-        # plt.xlabel('Frequency (Hz)')
-        # plt.ylabel('Magnitude')
-        # plt.title('Frequency Spectrum')
-        # plt.legend()
-        # plt.grid(True)
-        # plt.savefig('frequency_spectrum.png')
-        #
-        # print("Signal filtered")
-
-        return filtered_signal
+        return (lr_emg, hr_emg,lr_emg_path, hr_emg_path)

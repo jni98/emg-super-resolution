@@ -77,13 +77,13 @@ class LSTMRegressor(pl.LightningModule):
             if epoch < 5000:
                 return 1.0
             elif 5000 <= epoch < 7000:
-                return 0.5
+                return 0.1
             elif 7000 <= epoch < 10000:
-                return 0.25
+                return 0.05
             elif 10000 <= epoch < 12000:
-                return 0.125
+                return 0.025
             else:
-                return 0.0625
+                return 0.0125
 
         lr_scheduler = {
             'scheduler': torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_lambda),

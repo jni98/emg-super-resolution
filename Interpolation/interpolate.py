@@ -126,10 +126,9 @@ class Interpolation:
             print(f'Batch index: {batch_idx}')
 
             lr_emg = lr_emg.numpy().squeeze()
-            lr_emg_grid = self.destandardize_data(lr_emg)
 
             # Perform linear interpolation
-            interpolated_lr_hr = self.grid_interpolation(lr_emg_grid, (13, 5, lr_emg.shape[2]), 'linear')
+            interpolated_lr_hr = self.grid_interpolation(lr_emg, (13, 5, lr_emg.shape[2]), 'linear')
 
             # Save cubic interpolated signal from lr to hr
             path = '../results/linear_Interpolation/'

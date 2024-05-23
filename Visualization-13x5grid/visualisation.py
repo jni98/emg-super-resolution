@@ -9,15 +9,12 @@ to call the different visualization functions.
 """
 
 import os
-
 import numpy as np
 import matplotlib
 
 matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
-
 from scipy.stats import pearsonr
-
 
 class Visualizer:
     """
@@ -27,416 +24,272 @@ class Visualizer:
     def __init__(self, file_path: str) -> None:
         """
         Constructs all the necessary attributes for the Visualizer object.
+
         Parameters
         ----------
         file_path: str
-                      Path to the directory where the data is stored.
+            Path to the directory where the data is stored.
         """
         self.file_path = file_path
+        self.emg_data_dict = self._load_data()
+        print("Initialization done")
 
-        # TODO: Load the correct data from the file_path
+    def _load_data(self) -> dict:
+        """
+        Load the data from the given file path.
 
-        # Load your data (already normalized)
+        Returns
+        -------
+        dict
+            Dictionary with titles as keys and EMG data as values.
+        """
         interpolation_lr_sr = np.load(self.file_path + 'linear_Interpolation/path0-lr.npy')
         model1_lr_sr = np.load(self.file_path + 'model_1/path0-lr.npy')
         model2_lr_sr = np.load(self.file_path + 'model_2/path0-lr.npy')
-        model3_lr_sr = np.load(self.file_path + 'model_3_LSTM/path0-sr-b.npy')
-
-        model3_lr_sr = model3_lr_sr.squeeze()
-
-        # Load original data and normalize it
+        model2_Fourier_lr_sr = np.load(self.file_path + 'model_2_Fourier/path0-lr.npy')
+        model2_Wavelet_lr_sr = np.load(self.file_path + 'model_2_Wavelet/path0-lr.npy')
+        model3_lr_sr = np.load(self.file_path + 'model_3_LSTM/path0-sr-b.npy').squeeze()
         origin_hr = np.load(self.file_path + 'groundtruth/path0-hr.npy')
 
-        # Create a dictionary with titles as keys and EMG data as values
-        self.emg_data_dict = {
+        return {
+            'Original HR': origin_hr,
             'Linear LR to SR': interpolation_lr_sr,
             'Model 1 LR to SR': model1_lr_sr,
             'Model 2 LR to SR': model2_lr_sr,
-            'Model 3 LR to SR': model3_lr_sr,
-            'Original HR': origin_hr
+            'Model 2 Fourier LR to SR': model2_Fourier_lr_sr,
+            'Model 2 Wavelet LR to SR': model2_Wavelet_lr_sr,
+            'Model 3 LR to SR': model3_lr_sr
         }
 
-        print("init done")
+    def _create_directory(self, directory: str) -> None:
+        """
+        Create the directory if it doesn't exist.
+
+        Parameters
+        ----------
+        directory: str
+            Path to the directory to be created.
+        """
+        os.makedirs(directory, exist_ok=True)
 
     def plot_emg_channels(self) -> None:
         """
-        Plot all emg channels for the original signal, the model 2 signal and the interpolated signal. Channels are
-        plotted by an offset of 500.
-        Returns
-        -------
-        None
+        Plot all EMG channels for the original signal, the model 2 signal, and the interpolated signal.
+        Channels are plotted with an offset.
         """
-
         print("Start plotting channels")
 
-        time_axis = np.arange(64570)  # Assuming the time axis runs along axis 2
-
+        time_axis = np.arange(64570)
         for title, emg_data in self.emg_data_dict.items():
-            # Plot Training losses in a separate figure
             plt.figure(figsize=(8.27, 14))
-
             offset = 0
-
             for rows in range(13):
                 for cols in range(5):
                     signal = emg_data[rows][cols][:64570]
-
-                    predicted = ''
-                    # if title == 'Original HR':
-                    #     predicted = ''
-                    #
-                    # else:
-                    #     if (j % 2) != 0:
-                    #         predicted = '(predicted)'
-                    #     elif (j > 6 and j < 14) or (j > 20 and j < 28) or (j > 34 and j < 42):
-                    #         predicted = '(predicted)'
-                    #     else:
-                    #         predicted = ''
-
-                    plt.plot(time_axis, signal.squeeze() + offset,
-                             label=f'Channel row{rows + 1} col{cols + 1} {predicted}')
+                    plt.plot(time_axis, signal.squeeze() + offset, label=f'Channel row{rows + 1} col{cols + 1}')
                     offset += 3500
 
             plt.xlabel('Time in samples')
             plt.title(title)
-
-            # Retrieve handles and labels for legend
             handles, labels = plt.gca().get_legend_handles_labels()
-
-            # Reverse the order of handles and labels
-            handles = handles[::-1]
-            labels = labels[::-1]
-
-            plt.legend(handles, labels, loc='upper left', bbox_to_anchor=(1, 1))
-
+            plt.legend(handles[::-1], labels[::-1], loc='upper left', bbox_to_anchor=(1, 1))
             plt.tight_layout()
 
-            # Create the directory if it doesn't exist
-            directory = f'plot_channels/'
-            os.makedirs(directory, exist_ok=True)
-
+            directory = 'plot_channels/'
+            self._create_directory(directory)
             plt.savefig(f'{directory}{title}.png')
             print(f'Saving to: {directory}{title}')
             plt.close()
-            plt.figure()
 
     def plot_emg_channels_difference(self) -> None:
         """
-        Plot the mean absolute difference between the channels of the groundtruth signal and model 2 or interpolated
-        signal.
-        Results are displayed on the grid.
-
-        Returns
-        -------
-
+        Plot the mean absolute difference between the channels of the groundtruth signal and other signals.
         """
         print("Start plotting EMG differences")
 
-        time_axis = np.arange(64570)  # Assuming the time axis runs along axis 2
+        groundtruth = self.emg_data_dict['Original HR'][:, :, :64570]
 
-        groundtruth = self.emg_data_dict['Original HR']
-
-        for title, emg_data in self.emg_data_dict.items():
-            # Plot Training losses in a separate figure
-            plt.figure(figsize=(8.27, 14))
-
-            groundtruth_cut = groundtruth[:, :, :64570]
+        for title, emg_data in list(self.emg_data_dict.items())[1:]:  # Skip the groundtruth itself
             emg_data_cut = emg_data[:, :, :64570]
+            mean_absolute_differences = np.mean(np.abs(groundtruth - emg_data_cut), axis=2)
 
-            mean_absolute_differences = np.mean(np.abs(groundtruth_cut - emg_data_cut), axis=2)
+            # Plot each channel with a bit of an offset
+            plt.figure(figsize=(12, 8))
+            offset = 0
+            for row in range(13):
+                for col in range(5):
+                    diff = np.abs(groundtruth[row, col, :] - emg_data_cut[row, col, :])
+                    plt.plot(diff + offset, label=f'Channel row {row + 1} col {col + 1}')
+                    offset += np.max(diff) + 1000  # Adjust the offset for visual separation
 
             plt.xlabel('Time in samples')
-            plt.title(title)
+            plt.ylabel('Mean Absolute Difference (with offset)')
+            plt.title(f'Mean Absolute Differences - Channels - {title}')
+            plt.legend(loc='upper right', fontsize='small', ncol=2)
+            plt.tight_layout()
 
-            # Retrieve handles and labels for legend
-            handles, labels = plt.gca().get_legend_handles_labels()
-
-            # Reverse the order of handles and labels
-            handles = handles[::-1]
-            labels = labels[::-1]
-
-            plt.legend(handles, labels, loc='upper left', bbox_to_anchor=(1, 1))
-
-            plt.tight_layout()  # Adjust layouts to avoid overlapping
-
-            # Create the directory if it doesn't exist
-            directory = f'plot_channels_difference/'
-            os.makedirs(directory, exist_ok=True)
-
-            plt.savefig(f'{directory}{title}.png')
-            print(f'Saving to: {directory}{title}')
+            directory = 'plot_channels_difference/'
+            self._create_directory(directory)
+            plt.savefig(f'{directory}{title}_channels_difference.png')
+            print(f'Saving to: {directory}{title}_channels_difference.png')
             plt.close()
-            plt.figure()
 
-            # Plot and save mean_differences_grid
+            # Heatmap of mean absolute differences
             plt.figure()
             plt.imshow(mean_absolute_differences, cmap='viridis', origin='upper', vmin=0, vmax=60)
-
-            # Set ticks and tick labels before calling imshow
             plt.xticks(range(5), labels=range(1, 6))
             plt.yticks(range(13), labels=range(13, 0, -1))
-
-            plt.title(f'Mean absolute differences - {title}')
+            plt.title(f'Mean Absolute Differences - Heatmap - {title}')
             plt.colorbar()
 
-            # Create the directory if it doesn't exist
-            directory = f'plot_mean_differences_heatmap/'
-            os.makedirs(directory, exist_ok=True)
-
+            directory = 'plot_mean_differences_heatmap/'
+            self._create_directory(directory)
             plt.savefig(f'{directory}{title}_mean_differences.png')
-            print(f'Saving to: {directory}{title}')
-
+            print(f'Saving to: {directory}{title}_mean_differences.png')
             plt.close()
 
     def plot_heat_maps(self) -> None:
         """
-        Plots a heatmap at one specific point in time for each the Original, the Linear interpolated and the model 2
-        created signal.
-
-        Returns
-        -------
-
+        Plot heatmaps at specific points in time for each signal.
         """
         print("Start plotting heat maps")
 
-        grids = (
-            self.emg_data_dict['Original HR'],
-            self.emg_data_dict['Linear LR to SR'],
-            self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR'],
-            self.emg_data_dict['Model 3 LR to SR']
-        )
-
-        keys_list = ('Original HR', 'Linear', 'Model 1', 'Model 2', 'Model 3')
-
         time_points = [20000, 30000, 40000]
+        num_signals = len(self.emg_data_dict)
+        num_time_points = len(time_points)
 
-        fig, axs = plt.subplots(len(grids), len(time_points))
+        # Calculate the global min and max for each time point
+        global_mins = []
+        global_maxs = []
 
-        for g in range(len(grids)):
-            emg_data = grids[g]
+        for i, time_point in enumerate(time_points):
+            min_val = float('inf')
+            max_val = float('-inf')
+            for title, emg_data in self.emg_data_dict.items():
+                emg_heatmap = emg_data[:, :, time_point]
+                min_val = min(min_val, np.min(emg_heatmap))
+                max_val = max(max_val, np.max(emg_heatmap))
+            global_mins.append(min_val)
+            global_maxs.append(max_val)
 
+        fig, axs = plt.subplots(num_signals, num_time_points, figsize=(15, 30))
+        for g, (title, emg_data) in enumerate(self.emg_data_dict.items()):
             for i, time_point in enumerate(time_points):
                 emg_heatmap = emg_data[:, :, time_point]
-                im = axs[g][i].imshow(emg_heatmap, cmap='hot')
+                im = axs[g, i].imshow(emg_heatmap, cmap='hot', vmin=global_mins[i], vmax=global_maxs[i])
+                axs[g, i].set_xticks(range(5))
+                axs[g, i].set_yticks(range(13))
+                axs[g, i].set_xticklabels(range(1, 6))
+                axs[g, i].set_yticklabels(range(1, 14))
+                axs[g, i].set_title(f'{title} - {time_point}')
+                axs[g, i].invert_yaxis()
+                fig.colorbar(im, ax=axs[g, i])
 
-                # Set ticks and tick labels to start from 1 but position them at 0 to match the data
-                axs[g][i].set_xticks(range(5))
-                axs[g][i].set_yticks(range(13))
-                axs[g][i].set_xticklabels(range(1, 6))
-                axs[g][i].set_yticklabels(range(1, 14))
-                axs[g][i].set_title(keys_list[g] + f'-{time_point}')
-
-                axs[g][i].invert_yaxis()  # Invert the y-axis direction
-                fig.colorbar(im, ax=axs[g][i])
-
-        plt.tight_layout()  # Adjust layouts to avoid overlapping
-
-        # Create the directory if it doesn't exist
-        directory = f'plot_heatmaps/'
-        os.makedirs(directory, exist_ok=True)
-
+        plt.tight_layout()
+        directory = 'plot_heatmaps/'
+        self._create_directory(directory)
         plt.savefig(f'{directory}Heatmaps.png')
         print(f'Saving to: {directory}')
+        plt.close()
 
     def plot_correlations(self) -> None:
         """
-        Plots the cross correlation and the dtw of the original, linear interpolated and model 2 signal.
-
-        Returns
-        -------
-
+        Plot the cross-correlation of the original signal with other signals.
         """
         print("Start plotting correlations")
 
-        grids = (
-            self.emg_data_dict['Original HR'],
-            self.emg_data_dict['Linear LR to SR'],
-            self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR'],
-            self.emg_data_dict['Model 3 LR to SR']
-        )
+        groundtruth = self.emg_data_dict['Original HR'][:, :, :64570]
+        for title, emg_data in list(self.emg_data_dict.items())[1:]:
+            grid_2 = emg_data[:, :, :64570]
 
-        # Accessing keys by index
-        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR', 'Model 3 LR to SR')
-
-        for g in range(1, len(grids)):
-            groundtruth = grids[0][:][:][:64570]
-            grid_2 = grids[g][:][:][:64570]
-
-            plt.figure()
             number_graphs = 0
             plot_number = 1
-
             for row in range(13):
                 for col in range(5):
-                    # Iterate through electrodes
-                    correlation = np.correlate(groundtruth[row][col], grid_2[row][col], mode='full')
+                    correlation = np.correlate(groundtruth[row, col], grid_2[row, col], mode='full')
+                    autocorr_groundtruth = np.correlate(groundtruth[row, col], groundtruth[row, col], mode='full')
+                    normalized_correlation = correlation / np.max(autocorr_groundtruth) if (row != 12 or col != 0) else correlation
 
-                    # Calculate autocorrelation of groundtruth
-                    autocorr_groundtruth = np.correlate(groundtruth[row][col], groundtruth[row][col], mode='full')
-
-                    # normalize correlation by autocorrelation
-                    if (row == 12 and col == 0):
-                        normalized_correlation = correlation
-                    else:
-                        normalized_correlation = correlation / np.max(autocorr_groundtruth)
-
-                    # Find the maximum and minimum values of normalized_corr across all electrodes
-                    # max_corr = max([max(corr) for corr in normalized_corr])
-                    # min_corr = min([min(corr) for corr in normalized_corr])
-
-                    # TODO: Achtung, predicted stimmt nicht mehr
-                    predicted = ''
-
-                    plt.plot(normalized_correlation, label=f'Ch row {row} col {col} {predicted}')
+                    plt.plot(normalized_correlation, label=f'Ch row {row} col {col}')
                     number_graphs += 1
-                    plt.xlabel('Shift')
-                    plt.ylabel('Correlation')
-                    plt.legend(loc='best', bbox_to_anchor=(1, 1))
-                    plt.title(f'Cross-correlation of {keys_list[g]} with Original HR - {plot_number}')
-
-                    # TODO: Adjust limits
-                    # Set the y-axis limits to the maximum and minimum values across all electrodes
-                    plt.ylim(-0.4, 1.2)
-
-                    plt.tight_layout()  # Adjust layouts to avoid overlapping
-
                     if number_graphs % 5 == 0:
-                        # Create the directory if it doesn't exist
-                        directory = f'plot_correlations/{keys_list[g]}/'
-                        os.makedirs(directory, exist_ok=True)
+                        plt.xlabel('Shift')
+                        plt.ylabel('Correlation')
+                        plt.legend(loc='best', bbox_to_anchor=(1, 1))
+                        plt.title(f'Cross-correlation of {title} with Original HR - {plot_number}')
+                        plt.ylim(-0.4, 1.2)
+                        plt.tight_layout()
 
-                        plt.savefig(f'{directory}{keys_list[g]} with Original HR - {plot_number}.png')
-                        print(f'Saving to: {directory}{keys_list[g]} with Original HR - {plot_number}')
+                        directory = f'plot_correlations/{title}/'
+                        self._create_directory(directory)
+                        plt.savefig(f'{directory}{title} with Original HR - {plot_number}.png')
+                        print(f'Saving to: {directory}{title} with Original HR - {plot_number}')
                         plt.close()
                         plt.figure()
                         plot_number += 1
 
     def plot_pearson_coefficient_grid(self) -> None:
-
         """
-        Plots the pearson coefficient of the correlation of one channel in the groundtruth signal with all other
-        channels of the interpolated or model 2 signal channels. Results are displayed on the grid.
-
-        Returns
-        -------
-
+        Plot the Pearson coefficient of the correlation of one channel in the groundtruth signal with all other channels.
         """
-        print("Start plotting pearson coefficient grids")
+        print("Start plotting Pearson coefficient grids")
 
-        grids = (
-            self.emg_data_dict['Original HR'],
-            self.emg_data_dict['Linear LR to SR'],
-            self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR'],
-            self.emg_data_dict['Model 3 LR to SR'])
-
-        # Accessing keys by index
-        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR', 'Model 3 LR to SR')
-
-        for g in range(1, len(grids)):
-            groundtruth = grids[0]
-            grid_2 = grids[g]
-
-            groundtruth = groundtruth[:, :, :64570]
+        groundtruth = self.emg_data_dict['Original HR'][:, :, :64570]
+        for title, grid_2 in list(self.emg_data_dict.items())[1:]:
             grid_2 = grid_2[:, :, :64570]
-
-            # Initialize an array to store correlation coefficients
             correlation_coefficients = np.zeros((13, 5))
 
-            # Calculate Pearson correlation coefficients
             for row in range(13):
                 for col in range(5):
                     correlation_coefficients[row, col], _ = pearsonr(groundtruth[row, col], grid_2[row, col])
 
-            # Plot and save correlation grid
             plt.figure()
             plt.imshow(correlation_coefficients, cmap='viridis', origin='upper', vmin=0.95, vmax=1)
-
-            # Set ticks and tick labels before calling imshow
             plt.xticks(range(5), labels=range(1, 6))
             plt.yticks(range(13), labels=range(13, 0, -1))
-
-            plt.title(f'Pearson coefficient - Origin with {keys_list[g]}')
+            plt.title(f'Pearson coefficient - Origin with {title}')
             plt.colorbar()
 
-            # Create the directory if it doesn't exist
-            directory = f'plot_pearsonr_heatmap/'
-            os.makedirs(directory, exist_ok=True)
-
-            plt.savefig(f'{directory}{keys_list[g]}.png')
-            print(f'Saving to: {directory}{keys_list[g]}')
+            directory = 'plot_pearsonr_heatmap/'
+            self._create_directory(directory)
+            plt.savefig(f'{directory}{title}.png')
+            print(f'Saving to: {directory}{title}')
             plt.close()
 
-            # Correlation of one channel in the groundtruth signal with all other channels of the interpolated or model 2 signal channels
             for row1 in range(13):
                 for col1 in range(5):
                     for row2 in range(13):
                         for col2 in range(5):
-                            correlation_coefficients[row2, col2], _ = pearsonr(groundtruth[row1, col1],
-                                                                               grid_2[row2, col2])
+                            correlation_coefficients[row2, col2], _ = pearsonr(groundtruth[row1, col1], grid_2[row2, col2])
 
-                    # Plot and save correlation grid
                     plt.figure()
                     plt.imshow(correlation_coefficients, cmap='viridis', origin='upper', vmin=0.3, vmax=1)
-
-                    # Set ticks and tick labels before calling imshow
                     plt.xticks(range(5), labels=range(1, 6))
                     plt.yticks(range(13), labels=range(13, 0, -1))
-
-                    plt.title(f'Pearson coefficient - Origin channel ({row1, col1}) with {keys_list[g]}')
+                    plt.title(f'Pearson coefficient - Origin channel ({row1, col1}) with {title}')
                     plt.colorbar()
 
-                    # Create the directory if it doesn't exist
-                    directory = f'plot_pearsonr_heatmap_oneChannel/'
-                    os.makedirs(directory, exist_ok=True)
-
-                    plt.savefig(f'{directory}{keys_list[g]}-r{row1}c{col1}.png')
-                    print(f'Saving to: {directory}{keys_list[g]}-r{row1}c{col1}')
+                    directory = 'plot_pearsonr_heatmap_oneChannel/'
+                    self._create_directory(directory)
+                    plt.savefig(f'{directory}{title}-r{row1}c{col1}.png')
+                    print(f'Saving to: {directory}{title}-r{row1}c{col1}')
                     plt.close()
 
-    # Function to create subplots of absolute differences
-    def create_difference_plots(self):
+    def create_difference_plots(self) -> None:
         """
         Creates subplots showing the absolute difference between the original data and other models.
-        Each subplot corresponds to one channel, with the differences plotted.
-
-        Returns
-        -------
-        None
         """
         print("Start plotting absolute difference grids")
 
-        grids = (
-            self.emg_data_dict['Original HR'],
-            self.emg_data_dict['Linear LR to SR'],
-            self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR'],
-            self.emg_data_dict['Model 3 LR to SR'])
-
-        # Accessing keys by index
-        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR', 'Model 3 LR to SR')
-
-        for g in range(1, len(grids)):
-            groundtruth = grids[0]
-            grid_2 = grids[g]
-
-            # Cut for same length
-            groundtruth = groundtruth[:, :, :64570]
+        groundtruth = self.emg_data_dict['Original HR'][:, :, :64570]
+        for title, grid_2 in list(self.emg_data_dict.items())[1:]:
             grid_2 = grid_2[:, :, :64570]
-
-            # Calculate absolute difference
             abs_diff = np.abs(groundtruth - grid_2)
+            global_min = np.floor(np.min(abs_diff) / 200) * 200
+            global_max = np.ceil(np.max(abs_diff) / 200) * 200
 
-            # Find global min and max for y-axis limits
-            global_min = np.floor(np.min(abs_diff) / 200) * 200  # Round down to nearest 200
-            global_max = np.ceil(np.max(abs_diff) / 200) * 200  # Round up to nearest 200
-
-            # Create a figure with 13x5 subplots
             fig, axes = plt.subplots(nrows=13, ncols=5, figsize=(20, 20))
-            fig.suptitle(f'Absolute Differences: Original HR vs {keys_list[g]}', fontsize=16)
-
+            fig.suptitle(f'Absolute Differences: Original HR vs {title}', fontsize=16)
             for i in range(13):
                 for j in range(5):
                     ax = axes[i, j]
@@ -444,90 +297,163 @@ class Visualizer:
                     ax.set_title(f'Row {i + 1}, Column {j + 1}', fontsize=8)
                     ax.set_xticks([])
 
-                    # Set y-axis ticks and labels
-                    if j == 0:  # Only show y-axis labels on the first column
+                    if j == 0:
                         y_ticks = np.arange(global_min, global_max + 200, 200)
                         ax.set_yticks(y_ticks)
                         ax.set_yticklabels([f'{tick:.0f}' for tick in y_ticks])
                     else:
                         ax.set_yticks([])
 
-                    ax.set_ylim(global_min, global_max)  # Set y-axis limits
+                    ax.set_ylim(global_min, global_max)
 
             plt.tight_layout()
             plt.subplots_adjust(top=0.95)
-
-            # Create the directory if it doesn't exist
             directory = 'plot_absolute_difference/'
-            os.makedirs(directory, exist_ok=True)
-
-            # Save the figure
-            plt.savefig(f'{directory}Absolute_Differences_{keys_list[g]}.png')
-            print(f'Saving to: {directory}Absolute_Differences_{keys_list[g]}')
+            self._create_directory(directory)
+            plt.savefig(f'{directory}Absolute_Differences_{title}.png')
+            print(f'Saving to: {directory}Absolute_Differences_{title}')
             plt.close()
 
-    def propagation_plot(self):
+    def propagation_plot(self) -> None:
         """
         Creates a figure with 13 subplots for each element in the grids dictionary.
-        Each subplot shows the signal [y][0][28.976:31024] for the first column of the array.
-
-        Returns
-        -------
-        None
+        Each subplot shows the signal [y][0][28976:31024] for the first column of the array.
         """
         print("Start plotting propagation plots")
 
-        grids = (
-            self.emg_data_dict['Original HR'],
-            self.emg_data_dict['Linear LR to SR'],
-            self.emg_data_dict['Model 1 LR to SR'],
-            self.emg_data_dict['Model 2 LR to SR'],
-            self.emg_data_dict['Model 3 LR to SR'])
+        start_idx = 30050
+        end_idx = start_idx + 256
 
-        # Accessing keys by index
-        keys_list = ('Original HR', 'Linear LR to SR', 'Model 1 LR to SR', 'Model 2 LR to SR', 'Model 3 LR to SR')
-
-        # Calculate the exact start and end indices for the range 28976 to 31024
-        start_idx = int(30050)
-        end_idx = int(30050+100)
-
-        for g in range(len(grids)):
-            array = grids[g]
-
-            # Create a figure with 13 subplots (one for each row)
+        for title, array in self.emg_data_dict.items():
             fig, axes = plt.subplots(nrows=13, ncols=1, figsize=(15, 30))
-            fig.suptitle(f'Propagation Plot: {keys_list[g]}', fontsize=16)
-
+            fig.suptitle(f'Propagation Plot: {title}', fontsize=16)
             for y in range(13):
                 ax = axes[y]
-                ax.plot(array[y, 0, start_idx:end_idx])
+                ax.plot(array[y, 2, start_idx:end_idx])
                 ax.set_title(f'Row {y + 1}', fontsize=10)
                 ax.set_xticks([])
                 ax.set_yticks([])
 
             plt.tight_layout()
             plt.subplots_adjust(top=0.95)
-
-            # Create the directory if it doesn't exist
             directory = 'plot_propagation/'
-            os.makedirs(directory, exist_ok=True)
-
-            # Save the figure
-            plt.savefig(f'{directory}Propagation_Plot_{keys_list[g]}.png')
-            print(f'Saving to: {directory}Propagation_Plot_{keys_list[g]}')
+            self._create_directory(directory)
+            plt.savefig(f'{directory}Propagation_Plot_{title}.png')
+            print(f'Saving to: {directory}Propagation_Plot_{title}')
             plt.close()
+
+    def calculate_windowed_correlation(self, signal1, signal2, window_size=512):
+        """
+        Calculate the Pearson correlation coefficient for non-overlapping windows of two signals.
+
+        Parameters
+        ----------
+        signal1 : array-like
+            First signal.
+        signal2 : array-like
+            Second signal.
+        window_size : int
+            Size of the windows.
+
+        Returns
+        -------
+        list
+            List of Pearson correlation coefficients for each window.
+        """
+
+        signal1 = signal1.astype(np.float64)
+        signal2 = signal2.astype(np.float64)
+
+        num_windows = len(signal1) // window_size
+        correlations = []
+        for i in range(num_windows):
+            start = i * window_size
+            end = start + window_size
+            window1 = signal1[start:end]
+            window2 = signal2[start:end]
+            if len(window1) == len(window2):  # Ensure both windows are of the same size
+                corr, _ = pearsonr(window1, window2)
+                if corr == 0.9999999999999999:
+                    corr = 1
+
+                if corr < 0:
+                    print("Negative correlation")
+                correlations.append(corr)
+        return correlations
+
+    def plot_windowed_correlations(self) -> None:
+        """
+        Plot the Pearson correlation coefficient for non-overlapping windows of the original signal with other signals.
+        """
+        print("Start plotting windowed correlations")
+
+        window_size = 512
+        groundtruth = self.emg_data_dict['Original HR']
+        linear_interpolation = self.emg_data_dict['Linear LR to SR']
+
+        for title, emg_data in list(self.emg_data_dict.items())[1:]:
+            # Plot correlations for each model
+            for row in range(13):
+                for col in range(5):
+                    groundtruth_sig= groundtruth[row, col, :64570]
+                    signal2 = emg_data[row, col, :64570]
+                    correlations = self.calculate_windowed_correlation(groundtruth_sig, signal2, window_size)
+                    x_axis = np.arange(len(correlations))
+
+                    plt.figure()
+                    plt.plot(x_axis, correlations)
+                    plt.xlabel('Window Index')
+                    plt.ylabel('Pearson Correlation Coefficient')
+                    plt.title(f'Windowed Pearson Correlation - Electrode ({row + 1}, {col + 1}) - Original HR with {title}')
+                    plt.ylim(0, 1.1)
+
+                    directory = f'plot_windowed_correlations/{title}/'
+                    self._create_directory(directory)
+                    plt.savefig(f'{directory}Windowed_Correlation_Electrode_{row + 1}_{col + 1}.png')
+                    print(f'Saving to: {directory}Windowed_Correlation_Electrode_{row + 1}_{col + 1}.png')
+                    plt.close()
+
+            # Plot differences with the linear interpolation model
+            if title != 'Linear LR to SR':
+                for row in range(13):
+                    for col in range(5):
+                        signal_linear = linear_interpolation[row, col, :64570]
+                        signal_compare = emg_data[row, col, :64570]
+                        groundtruth_sig = groundtruth[row, col, :64570]
+
+                        if title == 'Model 1 LR to SR':
+                            print("STOP")
+                        correlations_linear = self.calculate_windowed_correlation(groundtruth_sig, signal_linear, window_size)
+                        correlations_compare = self.calculate_windowed_correlation(groundtruth_sig, signal_compare, window_size)
+
+                        differences = np.array(correlations_compare) - np.array(correlations_linear)
+                        x_axis = np.arange(len(differences))
+
+                        plt.figure()
+                        plt.fill_between(x_axis, differences, where=(differences >= 0),color='lightgreen', alpha=0.5)
+                        plt.fill_between(x_axis, differences, where=(differences < 0), color='lightcoral', alpha=0.5)
+                        plt.plot(x_axis, differences, color='black')
+                        plt.xlabel('Window Index')
+                        plt.ylabel('Difference in Pearson Correlation Coefficient')
+                        plt.title(f'Difference in Windowed Pearson Correlation - Electrode ({row + 1}, {col + 1}) - Linear vs {title}')
+                        plt.ylim(-0.15, 0.15)
+
+                        directory = f'plot_windowed_correlations/Linear_vs_{title}/'
+                        self._create_directory(directory)
+                        plt.savefig(f'{directory}Difference_Windowed_Correlation_Electrode_{row + 1}_{col + 1}.png')
+                        print(f'Saving to: {directory}Difference_Windowed_Correlation_Electrode_{row + 1}_{col + 1}.png')
+                        plt.close()
+
 
 
 if __name__ == '__main__':
-    # TODO: Beschriftung mit (predicted) etc. passt nicht zu HR to SR plots
     file_path = '../results/'
-
     visualize = Visualizer(file_path)
-
-    visualize.plot_emg_channels()
-    visualize.plot_emg_channels_difference()
-    visualize.plot_heat_maps()
-    visualize.plot_correlations()
-    visualize.plot_pearson_coefficient_grid()
-    visualize.create_difference_plots()
-    visualize.propagation_plot()
+    # visualize.plot_emg_channels()
+    #visualize.plot_emg_channels_difference()
+    # visualize.plot_heat_maps()
+    # visualize.plot_correlations()
+    # visualize.plot_pearson_coefficient_grid()
+    #visualize.create_difference_plots()
+    #visualize.propagation_plot()
+    visualize.plot_windowed_correlations()
