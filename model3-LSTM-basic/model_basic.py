@@ -7,6 +7,7 @@ from torch import nn
 import numpy as np
 import plotly.graph_objects as go
 import wandb
+from utilities import butter_bandpass_filter
 
 
 class LSTMRegressor(pl.LightningModule):
@@ -168,6 +169,9 @@ class LSTMRegressor(pl.LightningModule):
         hr_channel = hr_destandardized[0][6][2]
         sr_channel = sr_destandardized[0][6][2]
 
+        interpolated_channel = butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
 
@@ -234,26 +238,6 @@ class LSTMRegressor(pl.LightningModule):
         interpolated_Y = interpolated_Y[range(n // 2)]
 
         # Plot
-        # bar_fig_1 = go.Figure()
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
-        #
-        # # Plot sr_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
-        #
-        # bar_fig_1.update_layout(title='Frequency Spectrum - Given channel',
-        #                         xaxis_title='Frequency (Hz)',
-        #                         yaxis_title='Magnitude',
-        #                         barmode='group')
-        #
-        # # Log figure to wandb
-        # wandb.log({phase + " - Frequency Spectrum - Bar - Given channel [6][2]": bar_fig_1})
-
-        # Plot
         freq_spec1 = go.Figure()
 
         # Plot val_channel
@@ -281,6 +265,9 @@ class LSTMRegressor(pl.LightningModule):
         hr_channel = hr_destandardized[0][6][1]
         sr_channel = sr_destandardized[0][6][1]
         interpolated_channel = interpolated_destandardized[0][6][1]
+
+        interpolated_channel = butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
@@ -345,26 +332,6 @@ class LSTMRegressor(pl.LightningModule):
         # Compute FFT for interpolated_channel
         interpolated_Y = np.fft.fft(interpolated_channel) / n
         interpolated_Y = interpolated_Y[range(n // 2)]
-
-        # Plot
-        # bar_fig_1 = go.Figure()
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
-        #
-        # # Plot sr_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
-        #
-        # bar_fig_1.update_layout(title='Frequency Spectrum - Predicted channel',
-        #                         xaxis_title='Frequency (Hz)',
-        #                         yaxis_title='Magnitude',
-        #                         barmode='group')
-        #
-        # # Log figure to wandb
-        # wandb.log({phase + " - Frequency Spectrum - Bar - Predicted channel [6][1]": bar_fig_1})
 
         # Plot
         freq_spec1 = go.Figure()

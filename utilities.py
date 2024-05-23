@@ -1,6 +1,8 @@
 import math
 
 import numpy as np
+from scipy.signal import filtfilt, butter
+
 
 def data_13x5_2D_to_3D(data: np.ndarray, rows: int, cols: int) -> np.ndarray:
     """
@@ -33,6 +35,7 @@ def data_13x5_2D_to_3D(data: np.ndarray, rows: int, cols: int) -> np.ndarray:
     data_grid[:, 1::2] = data_grid[::-1, 1::2]
 
     return data_grid
+
 
 def data_13x5_3D_to_2D(data: np.ndarray) -> np.ndarray:
     """
@@ -82,6 +85,7 @@ def data_8x8_2D_to_3D(data: np.ndarray) -> np.ndarray:
 
     return data_grid
 
+
 def data_8x8_3D_to_2D(data: np.ndarray) -> np.ndarray:
     """
     Reshape the 3D grid data to 2D shape
@@ -102,3 +106,32 @@ def data_8x8_3D_to_2D(data: np.ndarray) -> np.ndarray:
 
     return data_2D
 
+
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=2):
+    """
+    Apply a bandpass filter to the data
+    Parameters
+    ----------
+    data: np.array
+        Data to be filtered
+    lowcut: float
+        Lower cut-off frequency
+    highcut: float
+        Higher cut-off frequency
+    fs: int
+        Sampling frequency
+    order: int
+        Order of the filter
+
+    Returns
+    -------
+    y: np.array
+        Filtered data
+    """
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = butter(order, [low, high], btype='band')
+    filtered_signal = filtfilt(b, a, data)
+
+    return filtered_signal
