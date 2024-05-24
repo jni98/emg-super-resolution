@@ -133,10 +133,10 @@ class LSTMRegressor(pl.LightningModule):
 
         # Log the first test batch for visualization
         if batch_idx == 0:
-            interpolated = self.destandardize(interpolated)
-            y = self.destandardize(y)
-            y_hat = self.destandardize(y_hat)
-            self.validation_plots(interpolated, y, y_hat, 'Test')
+            interpolated_plot = self.destandardize(interpolated)
+            y_plot = self.destandardize(y)
+            y_hat_plot = self.destandardize(y_hat)
+            self.validation_plots(interpolated_plot, y_plot, y_hat_plot, 'Test')
 
         # Save the prediction for each batch individually
         results_dir = self.trainer.logger.save_dir  # or any other directory you have defined
@@ -146,8 +146,12 @@ class LSTMRegressor(pl.LightningModule):
         y_path = y_path[0].replace("hr", "sr")
         # File name with batch index
         file_path = os.path.join(results_dir, y_path)
+
         y_hat = self.destandardize(y_hat)
-        np.save(file_path, y_hat.cpu().numpy())  # Save as NumPy array
+        y_hat = np.asarray(y_hat.to('cpu'))
+        y_hat = self.butter_bandpass_filter(y_hat, 20, 500, 2048, order=2)
+
+        np.save(file_path, y_hat)  # Save as NumPy array
 
         print(f"Saved batch {batch_idx} predictions to {file_path}")
 
@@ -168,11 +172,19 @@ class LSTMRegressor(pl.LightningModule):
         hr_channel = hr_destandardized[0][6][2]
         sr_channel = sr_destandardized[0][6][2]
 
-        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
+
+
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
+        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, filtered, given Channel: ", diff_filtered)
+        print("Difference filtered-unfiltered", diff_filtered-diff_unfiltered)
+
 
         ############################## Log Plots given channel########################################
         print("Logging plots for batch index 0 given channel")
@@ -265,11 +277,17 @@ class LSTMRegressor(pl.LightningModule):
         sr_channel = sr_destandardized[0][6][1]
         interpolated_channel = interpolated_destandardized[0][6][1]
 
-        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
+
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
+        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, filtered, given Channel: ", diff_filtered)
+        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
 
         plotly_fig1 = go.Figure()
 
