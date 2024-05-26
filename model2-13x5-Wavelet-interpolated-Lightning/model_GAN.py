@@ -7,6 +7,7 @@ import torch.nn.functional as F
 import plotly.graph_objects as go
 import wandb
 import numpy as np
+from scipy.signal import butter, filtfilt
 
 
 class GAN(pl.LightningModule):
@@ -151,10 +152,10 @@ class GAN(pl.LightningModule):
 
         # Log the first test batch for visualization
         if batch_idx == 0:
-            interpolated = self.destandardize(x)
-            y = self.destandardize(y)
-            sr = self.destandardize(sr)
-            self.validation_plots(interpolated, y, sr, 'Test')
+            interpolated_plot = self.destandardize(x)
+            y_plot = self.destandardize(y)
+            sr_plot = self.destandardize(sr)
+            self.validation_plots(interpolated_plot, y_plot, sr_plot, 'Test')
 
         # Save the prediction for each batch individually
         results_dir = self.trainer.logger.save_dir  # or any other directory you have defined
@@ -164,8 +165,11 @@ class GAN(pl.LightningModule):
         y_path = y_path[0].replace("hr", "sr")
         # File name with batch index
         file_path = os.path.join(results_dir, y_path)
+
         sr = self.destandardize(sr)
-        np.save(file_path, sr.cpu().numpy())  # Save as NumPy array
+        sr = np.asarray(sr.to('cpu'))
+        sr = self.butter_bandpass_filter(sr, 20, 400, 2048, order=2)
+        np.save(file_path, sr)  # Save as NumPy array
 
         print(f"Saved batch {batch_idx} predictions to {file_path}")
 
@@ -198,6 +202,18 @@ class GAN(pl.LightningModule):
         interpolated_channel = interpolated_destandardized[0][0][6][2]
         hr_channel = hr_destandardized[0][0][6][2]
         sr_channel = sr_destandardized[0][0][6][2]
+
+        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
+
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+
+        # Calculate the difference between hr_channel and sr_channel
+        diff_channel = hr_channel - sr_channel
+        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, filtered, given Channel: ", diff_filtered)
+        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
 
         ############################## Log Plots given channel########################################
         print("Logging plots for batch index 0 given channel")
@@ -232,6 +248,9 @@ class GAN(pl.LightningModule):
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
                        opacity=0.5))
+        # Add trace for the difference channel
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(diff_channel)), y=diff_channel, name='HR - SR'))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - Given Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
@@ -257,26 +276,6 @@ class GAN(pl.LightningModule):
         # Compute FFT for interpolated_channel
         interpolated_Y = np.fft.fft(interpolated_channel) / n
         interpolated_Y = interpolated_Y[range(n // 2)]
-
-        # Plot
-        # bar_fig_1 = go.Figure()
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
-        #
-        # # Plot sr_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
-        #
-        # bar_fig_1.update_layout(title='Frequency Spectrum - Given channel',
-        #                         xaxis_title='Frequency (Hz)',
-        #                         yaxis_title='Magnitude',
-        #                         barmode='group')
-        #
-        # # Log figure to wandb
-        # wandb.log({phase + " - Frequency Spectrum - Bar - Given channel [6][2]": bar_fig_1})
 
         # Plot
         freq_spec1 = go.Figure()
@@ -306,6 +305,18 @@ class GAN(pl.LightningModule):
         hr_channel = hr_destandardized[0][0][6][1]
         sr_channel = sr_destandardized[0][0][6][1]
         interpolated_channel = interpolated_destandardized[0][0][6][1]
+
+        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
+
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+
+        # Calculate the difference between hr_channel and sr_channel
+        diff_channel = hr_channel - sr_channel
+        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, filtered, given Channel: ", diff_filtered)
+        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
 
         plotly_fig1 = go.Figure()
 
@@ -337,6 +348,9 @@ class GAN(pl.LightningModule):
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
                        opacity=0.5))
+        # Add trace for the difference channel
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(diff_channel)), y=diff_channel, name='HR - SR'))
         # Update layout
         plotly_fig.update_layout(title="Super-resolution vs Validation - Predicted Channel", showlegend=True,
                                  xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
@@ -366,26 +380,6 @@ class GAN(pl.LightningModule):
         interpolated_Y = interpolated_Y[range(n // 2)]
 
         # Plot
-        # bar_fig_1 = go.Figure()
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
-        #
-        # # Plot sr_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
-        #
-        # bar_fig_1.update_layout(title='Frequency Spectrum - Predicted channel',
-        #                         xaxis_title='Frequency (Hz)',
-        #                         yaxis_title='Magnitude',
-        #                         barmode='group')
-        #
-        # # Log figure to wandb
-        # wandb.log({phase + " - Frequency Spectrum - Bar - Predicted channel [6][1]": bar_fig_1})
-
-        # Plot
         freq_spec1 = go.Figure()
 
         # Plot val_channel
@@ -405,6 +399,35 @@ class GAN(pl.LightningModule):
                                  yaxis_title='Magnitude')
 
         wandb.log({phase + " - Frequency Spectrum - Scatter - Predicted channel [6][1]": freq_spec1})
+
+    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
+        """
+        Apply a bandpass filter to the data
+        Parameters
+        ----------
+        data: np.array
+            Data to be filtered
+        lowcut: float
+            Lower cut-off frequency
+        highcut: float
+            Higher cut-off frequency
+        fs: int
+            Sampling frequency
+        order: int
+            Order of the filter
+
+        Returns
+        -------
+        y: np.array
+            Filtered data
+        """
+        nyq = 0.5 * fs
+        low = lowcut / nyq
+        high = highcut / nyq
+        b, a = butter(order, [low, high], btype='band')
+        filtered_signal = filtfilt(b, a, data)
+
+        return filtered_signal
 
     def destandardize(self, prediction):
         return prediction * self.std + self.mean

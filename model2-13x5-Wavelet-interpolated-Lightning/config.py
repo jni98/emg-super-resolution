@@ -11,10 +11,10 @@ def get_config(data_directory, test_data_directory, results_directory, num_epoch
         results=results_directory,
         data=data_directory,
         testdata=test_data_directory,
-        augment = False,
+        augment = True,
         adv_weight = 0.01,
         model = 'model2-13x5-Wavelet-interpolated-Lightning',
-        wavelet_loss_weight = 30,
+        wavelet_loss_weight = 10,
         wavelet_loss_level= 3
     )
 
