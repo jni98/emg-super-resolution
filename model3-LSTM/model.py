@@ -307,6 +307,8 @@ class LSTMRegressor(pl.LightningModule):
             y = self.destandardize(y)
             y_hat = self.destandardize(y_hat)
             interpolated = self.destandardize(interpolated)
+            print("sr shape", y_hat.shape)
+            print("interpolated shape", interpolated.shape)
             self.validation_plots(interpolated, y, y_hat, 'Validation')
 
     def validation_step(self, batch, batch_idx):

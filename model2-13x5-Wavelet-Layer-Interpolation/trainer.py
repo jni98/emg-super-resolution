@@ -84,7 +84,10 @@ class Trainer:
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
 
-        wandb.init(project="emg-super-resolution", entity="masterthesis-sr")
+        wandb.init(project="GAN-Training", entity="masterthesis-sr")
+
+        # Define lambda function for the LR scheduler
+        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 500)
 
         print("init done")
 
@@ -161,17 +164,15 @@ class Trainer:
         self.generator.to(self.device)
         self.discriminator.to(self.device)
 
-        # print("Generator summary")
-        # print(str(summary(self.generator, (1, 7,3,2048))))
-
-        # print("Discriminator summary")
-        # print(str(summary(self.discriminator, (1, 13, 5, 2048))))
-
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
+
+        # Initialize the LR schedulers
+        self.scheduler_G = LambdaLR(self.optimizer_G, lr_lambda=self.lr_lambda)
+        self.scheduler_D = LambdaLR(self.optimizer_D, lr_lambda=self.lr_lambda)
 
         print("Successfully initialized the models")
 
@@ -227,6 +228,10 @@ class Trainer:
                 best_val_loss = avg_val_loss
                 self._save_final_models()  # Save the final models when a new best model is found
 
+            # Step the LR schedulers
+            self.scheduler_G.step()
+            self.scheduler_D.step()
+
             # Clear unnecessary variables to release memory
             del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
 
@@ -238,6 +243,7 @@ class Trainer:
             print(f"After epoch {epoch}, GPU memory cached increased by: {cached_diff} bytes")
 
         return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, train_wavelet_loss, val_loss, psnr
+
 
     def _train_epoch(self, epoch: int) -> tuple:
         """
@@ -422,7 +428,7 @@ class Trainer:
 
                 if val_batch_idx == 0:
                     self.validation_plots_logging(val_lr_destandardized, val_hr_destandardized,
-                                                  val_sr_destandardized, "Validation")
+                                                  val_sr_destandardized, 'Validation')
 
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
@@ -453,32 +459,29 @@ class Trainer:
 
         return avg_validation_loss, avg_psnr
 
-    def validation_plots_logging(self, val_lr_destandardized, val_hr_destandardized, val_sr_destandardized,
-                                 phase):
-        """
+    def validation_plots(self, interpolated, y, y_hat, phase):
 
-        Parameters
-        ----------
-        val_hr_destandardized
-        val_sr_destandardized
-        abs_diff
-
-        Returns
-        -------
-
-        """
         # Convert tensors to numpy arrays and move to CPU
-        interpolated_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
-        hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
-        sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
+        interpolated_destandardized = np.asarray(interpolated.to('cpu'))
+        hr_destandardized = np.asarray(y.to('cpu'))
+        sr_destandardized = np.asarray(y_hat.to('cpu'))
 
         # Extract specific channels
         interpolated_channel = interpolated_destandardized[0][0][6][2]
         hr_channel = hr_destandardized[0][0][6][2]
         sr_channel = sr_destandardized[0][0][6][2]
 
+        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
+
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
+        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, filtered, given Channel: ", diff_filtered)
+        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
 
         ############################## Log Plots given channel########################################
         print("Logging plots for batch index 0 given channel")
@@ -543,26 +546,6 @@ class Trainer:
         interpolated_Y = interpolated_Y[range(n // 2)]
 
         # Plot
-        # bar_fig_1 = go.Figure()
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
-        #
-        # # Plot sr_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
-        #
-        # bar_fig_1.update_layout(title='Frequency Spectrum - Given channel',
-        #                         xaxis_title='Frequency (Hz)',
-        #                         yaxis_title='Magnitude',
-        #                         barmode='group')
-        #
-        # # Log figure to wandb
-        # wandb.log({phase + " - Frequency Spectrum - Bar - Given channel [6][2]": bar_fig_1})
-
-        # Plot
         freq_spec1 = go.Figure()
 
         # Plot val_channel
@@ -591,8 +574,17 @@ class Trainer:
         sr_channel = sr_destandardized[0][0][6][1]
         interpolated_channel = interpolated_destandardized[0][0][6][1]
 
+        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
+
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
+        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, filtered, given Channel: ", diff_filtered)
+        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
 
         plotly_fig1 = go.Figure()
 
@@ -654,26 +646,6 @@ class Trainer:
         # Compute FFT for interpolated_channel
         interpolated_Y = np.fft.fft(interpolated_channel) / n
         interpolated_Y = interpolated_Y[range(n // 2)]
-
-        # Plot
-        # bar_fig_1 = go.Figure()
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(hr_Y), name='High-resolution', opacity=1, offset=0))
-        #
-        # # Plot val_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(interpolated_Y), name='Interpolated', opacity=1, offset=0.2))
-        #
-        # # Plot sr_channel
-        # bar_fig_1.add_trace(go.Bar(x=frq, y=np.abs(sr_Y), name='Super-resolution', opacity=1, offset=0.1))
-        #
-        # bar_fig_1.update_layout(title='Frequency Spectrum - Predicted channel',
-        #                         xaxis_title='Frequency (Hz)',
-        #                         yaxis_title='Magnitude',
-        #                         barmode='group')
-        #
-        # # Log figure to wandb
-        # wandb.log({phase + " - Frequency Spectrum - Bar - Predicted channel [6][1]": bar_fig_1})
 
         # Plot
         freq_spec1 = go.Figure()
@@ -848,6 +820,13 @@ class Trainer:
                 # Generate super-resolved data (SR) from LR data
                 lr_sr_emg = self.generator(lr_emg).to('cpu').numpy().squeeze()
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
+
+                # destacndardize the data for the logged plots
+                lr_emg_destandardized = self.destandardize_data(lr_emg)
+                hr_emg_destandardized = self.destandardize_data(hr_emg)
+
+                if batch_idx == 0:
+                    self.validation_plots_logging(lr_emg_destandardized, hr_emg_destandardized, lr_sr_emg_destandardized, 'Test')
 
                 # Save signal from lr to sr and hr to sr
                 model_path = self.run_folder + self.unique_folder + '/results/'
