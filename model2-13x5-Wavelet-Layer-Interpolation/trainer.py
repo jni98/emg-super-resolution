@@ -15,6 +15,7 @@ import ptwt
 import wandb
 import torch
 import pandas as pd
+from scipy.signal import butter, filtfilt
 
 from generator import Generator
 from discriminator import Discriminator
@@ -673,6 +674,7 @@ class Trainer:
                                  yaxis_title='Magnitude')
 
         wandb.log({phase + " - Frequency Spectrum - Scatter - Predicted channel [6][1]": freq_spec1})
+
     def compute_wavelet_transform_loss(self, groundtruth, superresolution):
 
         # compute first level loss
