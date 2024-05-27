@@ -1194,4 +1194,3 @@ class LSTMRegressor(pl.LightningModule):
         filtered_signal = filtfilt(b, a, data)
 
         return filtered_signal
->>>>>>> 9b4dc97ee4b808b0f648de740fa14bc645b2e534
