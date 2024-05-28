@@ -243,7 +243,7 @@ class Trainer:
             # Step the LR schedulers
             self.scheduler_G.step()
             self.scheduler_D.step()
-            wandb.log('lr_scheduler', self.scheduler_G.get_last_lr())
+            wandb.log({'lr_scheduler', self.scheduler_G.get_last_lr()})
 
             # Check GPU memory usage after training
             allocated_diff = torch.cuda.memory_allocated() - initial_allocated
