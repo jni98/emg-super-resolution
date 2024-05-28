@@ -19,7 +19,7 @@ unset SLURM_EXPORT_ENV
 
 SRC_DIR=$HOME/code/model3-LSTM
 RESULTS_DIR=${2:-$HOME/model3-LSTM-$SLURM_JOB_ID}  # Use passed results directory or default to new one based on job ID
-DATA_ARCHIVE=$HPCVAULT/dataset_lstm.tar
+DATA_ARCHIVE=$HPCVAULT/dataset_lstm_20480.tar
 FAST_DATA_DIR=$TMPDIR/model3-LSTM-$SLURM_JOB_ID
 
 ############ params ###############
