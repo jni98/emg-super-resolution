@@ -243,6 +243,7 @@ class Trainer:
             # Step the LR schedulers
             self.scheduler_G.step()
             self.scheduler_D.step()
+            wandb.log('lr_scheduler', self.scheduler_G.get_last_lr())
 
             # Check GPU memory usage after training
             allocated_diff = torch.cuda.memory_allocated() - initial_allocated
@@ -838,7 +839,7 @@ class Trainer:
                 lr_emg = lr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
-                lr_sr_emg = self.generator(lr_emg).to('cpu').numpy().squeeze()
+                lr_sr_emg = self.generator(lr_emg)
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
                 interpolated_destandardized = self.destandardize_data(lr_emg)
                 hr_emg_destandardized = self.destandardize_data(hr_emg)
@@ -846,7 +847,8 @@ class Trainer:
                 if batch_idx == 0:
                     self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,lr_sr_emg_destandardized, 'Test')
 
-                # Save signal from lr to sr and hr to sr
+                # Save signal from lr to sr
+                lr_sr_emg = lr_sr_emg.to('cpu').numpy().squeeze()
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
