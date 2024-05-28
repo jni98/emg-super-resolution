@@ -40,7 +40,7 @@ def setup_sweep():
                 'values': [3]
             },
             'augment':{
-                'value':[True]
+                'value':[False]
             }
 
         }

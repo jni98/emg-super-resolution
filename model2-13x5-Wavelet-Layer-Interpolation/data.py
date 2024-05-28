@@ -44,9 +44,6 @@ class Custom_Dataset(Dataset):
             # Apply the selected augmentation method
             hr_emg = augmentation_method(hr_emg)
 
-        #TODO: Delete again
-        hr_emg = hr_emg[:11,:,:]
-
         # Bandpass filter
         hr_emg = self.butter_bandpass_filter(hr_emg, 20, 400, 2048, order=2)
 
