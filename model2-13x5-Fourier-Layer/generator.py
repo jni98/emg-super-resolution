@@ -127,14 +127,14 @@ class Generator(nn.Module):
         self.res_blocks3 = nn.Sequential(*[ResidualBlock(in_channels=256) for _ in range(num_res_blocks)])
 
         # DownConvolution 3
-        self.downConv3 = DownConvolutionBlock(in_channels=256, out_channels=512)
+        self.downConv3 = DownConvolutionBlock(in_channels=256, out_channels=256)
 
         # Upsampling of the residual and residual block 4
-        self.residualUp4 = nn.ConvTranspose3d(512, 512, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
-        self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=512) for _ in range(num_res_blocks_last)])
+        self.residualUp4 = nn.ConvTranspose3d(256, 256, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
+        self.res_blocks4 = nn.Sequential(*[ResidualBlock(in_channels=256) for _ in range(num_res_blocks_last)])
 
         # Upsampling 1
-        self.upConv1 = UpConvolutionBlock(512, 256, stride=(2, 2, 2))
+        self.upConv1 = UpConvolutionBlock(256, 256, stride=(2, 2, 2))
 
         # Upsampling 2
         self.upConv2 = UpConvolutionBlock(256, 128, stride=(1, 1, 2))
