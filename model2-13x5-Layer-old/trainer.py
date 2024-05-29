@@ -428,6 +428,8 @@ class Trainer:
             wandb.log({"Average absolute difference": [wandb.Image(fig2)]})
             wandb.log({'Mean absolute difference': np.mean(avg_abs_diff)})
 
+            # Close the figure
+            plt.close(fig2)
 
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
 

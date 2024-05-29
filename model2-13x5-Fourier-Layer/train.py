@@ -12,29 +12,29 @@ import argparse
 import torch
 import wandb  # Import wandb library
 
-from trainer_small import Trainer
+from trainer import Trainer
 
 
 def setup_sweep():
     # Define the sweep config
     sweep_config = {
-        'method': 'bayes',
+        'method': 'grid',
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-                'values': [10,12],  # Add the batch sizes you want to include
+                'values': [14],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [0.00003]
+                'values': [0.00001]
             },
             'num_res_blocks': {
                 'values': [3]
             },
             'adv_loss_weight': {
-                'values': [0.1, 0.2]
+                'values': [0.01]
             },
             'fourier_loss_weight': {
-                'values': [0.001, 0.008]
+                'values': [0.001]
             },
             'augment':{
                 'value':[True]
