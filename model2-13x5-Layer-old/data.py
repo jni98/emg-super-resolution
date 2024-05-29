@@ -12,15 +12,16 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
     """
 
-    def __init__(self, data, directory, mean: float, std: float) -> None:
+    def __init__(self, data, directory, mean: float, std: float, augment: bool) -> None:
         super().__init__()
         self.data = data
         self.directory = directory
         self.mean = mean
         self.std = std
+        self.augment = augment
 
-        #self.gaussian_noise_generator = GaussianNoise(target_snr__db=5.0)
-        #self.wavelet_decomposition = WaveletDecomposition(b=0.25, wavelet="db7", level=5, nr_of_grids=1)
+        self.gaussian_noise_generator = GaussianNoise(target_snr__db=5.0)
+        self.wavelet_decomposition = WaveletDecomposition(b=0.25, wavelet="db7", level=5, nr_of_grids=1)
 
     def __len__(self) -> int:
         return len(self.data)
@@ -35,16 +36,16 @@ class Custom_Dataset(Dataset):
         # Load and preprocess HR data
         hr_emg = np.load(f"{self.directory}/{hr_emg_path}")
 
-        # if self.augment:
-        #     # Randomly choose whether to augment the data or not
-        #     augmentation_method = random.choice(
-        #         [self.no_augmentation, self.apply_gaussian_noise, self.apply_wavelet_decomposition])
-        #
-        #     # Apply the selected augmentation method
-        #     hr_emg = augmentation_method(hr_emg)
+        if self.augment:
+            # Randomly choose whether to augment the data or not
+            augmentation_method = random.choice(
+                [self.no_augmentation, self.apply_gaussian_noise, self.apply_wavelet_decomposition])
+
+            # Apply the selected augmentation method
+            hr_emg = augmentation_method(hr_emg)
 
         # Bandpass filter
-        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
+        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 400, 2048, order=2)
 
         # extract lr emg
         lr_emg = hr_emg[::2, ::2]
@@ -62,14 +63,14 @@ class Custom_Dataset(Dataset):
 
         return lr_emg_standardized_tensor, hr_emg_standardized_tensor, lr_emg_path, hr_emg_path
 
-    # def no_augmentation(self, data):
-    #     return data
-    #
-    # def apply_gaussian_noise(self, data):
-    #     return self.gaussian_noise_generator(data)
-    #
-    # def apply_wavelet_decomposition(self, data):
-    #     return self.wavelet_decomposition(data)
+    def no_augmentation(self, data):
+        return data
+
+    def apply_gaussian_noise(self, data):
+        return self.gaussian_noise_generator(data)
+
+    def apply_wavelet_decomposition(self, data):
+        return self.wavelet_decomposition(data)
 
     def standardization(self, data: np.array, mean: float, std: float) -> np.array:
         """
@@ -122,41 +123,3 @@ class Custom_Dataset(Dataset):
 
         return filtered_signal
 
-    # def grid_interpolation(self, lr_emg: np.ndarray, hr_emg_shape: tuple, method: str) -> np.ndarray:
-    #     """
-    #     Performs cubic interpolation on the low resolution data to get high resolution data.
-    #     Parameters
-    #     ----------
-    #     lr_emg: numpy.ndarray
-    #             Low resolution emg data.
-    #     hr_emg_shape: tuple
-    #             Shape of the high resolution emg data.
-    #     method: str
-    #             Method of interpolation. On default set to linear.
-    #
-    #     Returns
-    #     -------
-    #     interpolated_signal: numpy.ndarray
-    #             High resolution emg data.
-    #     """
-    #     # Create a grid for the original signal
-    #     x = np.linspace(0, 1, lr_emg.shape[0])
-    #     y = np.linspace(0, 1, lr_emg.shape[1])
-    #     z = np.linspace(0, 1, lr_emg.shape[2])
-    #
-    #     # Create a new grid for the desired interpolated signal
-    #     new_x = np.linspace(0, 1, hr_emg_shape[0])
-    #     new_y = np.linspace(0, 1, hr_emg_shape[1])
-    #     new_z = np.linspace(0, 1, hr_emg_shape[2])
-    #
-    #     # Create meshgrid from new grid
-    #     mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
-    #
-    #     # Create interpolator
-    #     interpolator = RegularGridInterpolator((x, y, z), lr_emg, method=method)
-    #     # print("Created the interpolater")
-    #
-    #     # Interpolate
-    #     interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
-    #     # print("Finished the interpolator")
-    #     return interpolated_signal
