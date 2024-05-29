@@ -5,7 +5,7 @@
 ############    slurm    ###############
 
 #SBATCH --job-name=model2-13x5-Fourier-Layer-Interpolation
-#SBATCH --time=10:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
 #SBATCH --partition=a100
@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-13x5-Fourier-Layer-Interpolation-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=300
+EPOCHS=1000
 
 ############    params   ###############
 
