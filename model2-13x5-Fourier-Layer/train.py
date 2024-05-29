@@ -22,7 +22,7 @@ def setup_sweep():
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
-                'values': [10],  # Add the batch sizes you want to include
+                'values': [8],  # Add the batch sizes you want to include
             },
             'learning_rate': {
                 'values': [0.00001]
@@ -43,7 +43,7 @@ def setup_sweep():
     }
 
     # Initialize and run the sweep
-    sweep_id = wandb.sweep(sweep_config, project="emg-super-resolution", entity="masterthesis-sr")
+    sweep_id = wandb.sweep(sweep_config, project="GAN-Training", entity="masterthesis-sr")
 
     return sweep_config, sweep_id
 
