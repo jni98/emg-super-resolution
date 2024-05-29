@@ -30,6 +30,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 import plotly.graph_objects as go
+from torch.optim.lr_scheduler import LambdaLR  # Import LambdaLR
+
 
 
 class Trainer:
@@ -84,7 +86,10 @@ class Trainer:
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
 
-        wandb.init(project="emg-super-resolution", entity="masterthesis-sr")
+        wandb.init(project="GAN-Training", entity="masterthesis-sr")
+
+        # Define lambda function for the LR scheduler
+        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 300)
 
         print("init done")
 
@@ -173,6 +178,10 @@ class Trainer:
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
 
+        # Initialize the LR schedulers
+        self.scheduler_G = LambdaLR(self.optimizer_G, lr_lambda=self.lr_lambda)
+        self.scheduler_D = LambdaLR(self.optimizer_D, lr_lambda=self.lr_lambda)
+
         print("Successfully initialized the models")
 
     def train(self) -> tuple:
@@ -229,6 +238,15 @@ class Trainer:
 
             # Clear unnecessary variables to release memory
             del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
+
+            # Step the LR schedulers
+            self.scheduler_G.step()
+            self.scheduler_D.step()
+
+            # Assuming self.scheduler_G.get_last_lr() returns a list of learning rates
+            last_lr_list = self.scheduler_G.get_last_lr()
+            last_lr = last_lr_list[-1]  # Get the last learning rate
+            wandb.log({'lr_scheduler': last_lr})
 
             # Check GPU memory usage after training
             allocated_diff = torch.cuda.memory_allocated() - initial_allocated
