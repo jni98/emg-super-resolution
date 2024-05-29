@@ -33,6 +33,9 @@ def setup_sweep():
             },
             'adv_loss_weight':{
                 'values': [0.01]
+            },
+            'augment':{
+                'values': [True]
             }
 
         }
