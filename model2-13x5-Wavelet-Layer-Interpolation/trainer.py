@@ -835,7 +835,7 @@ class Trainer:
 
         print("Starting to generate LR to SR data")
         # load the final generator
-        self.generator.load_state_dict(torch.load('/home/hpc/iwso/iwso124h/model2-13x5-Wavelet-Layer-Interpolation-828147/20240528092728/final_generator.pt'))
+        self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
 
         with torch.no_grad():
@@ -855,7 +855,7 @@ class Trainer:
                 lr_sr_emg = lr_sr_emg.to('cpu').numpy().squeeze()
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
-                np.save('/home/hpc/iwso/iwso124h/model2-13x5-Wavelet-Layer-Interpolation-828147/20240528092728/results/' + lr_emg_paths[0], lr_sr_emg)
+                np.save(model_path + lr_emg_paths[0], lr_sr_emg)
 
         print("Successfully generated LR to SR data")
 
