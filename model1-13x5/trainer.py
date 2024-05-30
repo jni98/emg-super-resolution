@@ -445,7 +445,7 @@ class Trainer:
                 val_sr_destandardized = self.destandardize_data(val_sr)
                 val_lr_interpolated = self.destandardize_data(val_lr_interpolated)
 
-                if val_batch_idx == 0:
+                if val_batch_idx == 6:
                     self.validation_plots_logging(val_lr_interpolated, val_hr_destandardized,
                                                   val_sr_destandardized, 'Validation')
 
