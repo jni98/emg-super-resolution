@@ -56,7 +56,7 @@ class Discriminator(nn.Module):
         self.flatten = nn.Flatten()
 
         # Adapt dense layer to output size of flatten()
-        self.dense1 = nn.Linear(327680, 1024)
+        self.dense1 = nn.Linear(81920, 1024)
         self.leaky_relu9 = nn.LeakyReLU(0.2, inplace=True)
         self.dense2 = nn.Linear(1024, 1)
         self.activation = nn.Sigmoid()
