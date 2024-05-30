@@ -269,7 +269,7 @@ class Trainer:
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
 
-        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
+        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.training):
             print("batch index", batch_idx)
 
             with torch.no_grad():  # Disable gradient calculation within this block
@@ -365,7 +365,7 @@ class Trainer:
         total_abs_diff = 0.0
 
         with torch.no_grad():
-            for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
+            for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path,  lr_emg_interpolated) in enumerate(self.validation):
                 print("validation batch index", val_batch_idx)
 
                 val_lr = val_lr.to(self.device)
@@ -398,7 +398,7 @@ class Trainer:
                 # destacndardize the data for the logged plots
                 val_hr_destandardized = self.destandardize_data(val_hr)
                 val_sr_destandardized = self.destandardize_data(val_sr)
-                val_lr_destandardized = self.destandardize_data(val_lr)
+                val_lr_destandardized = self.destandardize_data(lr_emg_interpolated)
 
                 # log absolute difference for one channel absolute difference
                 abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_destandardized[0][0][6][2])
@@ -795,13 +795,13 @@ class Trainer:
         self.generator.eval()  # Set the generator to evaluation mode
 
         with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
                 lr_emg = lr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
                 lr_sr_emg = self.generator(lr_emg)
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
-                interpolated_destandardized = self.destandardize_data(lr_emg)
+                interpolated_destandardized = self.destandardize_data(lr_emg_interpolated)
                 hr_emg_destandardized = self.destandardize_data(hr_emg)
 
                 if batch_idx == 0:
