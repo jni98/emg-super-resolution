@@ -84,6 +84,7 @@ class Custom_Dataset(Dataset):
 
         # reshape lr emg to 2D
         lr_emg = self.reshape(lr_emg)
+        hr_emg = self.reshape(hr_emg)
 
         # standardize both
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)

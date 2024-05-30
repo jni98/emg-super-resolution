@@ -193,3 +193,5 @@ dmypy.json
 /Visualization-13x5grid/plot_propagation/
 /Visualization-13x5grid/syn/
 /Visualization-13x5grid/plot_windowed_correlations/
+/dataset_512/
+/dataset_lstm_20480/
