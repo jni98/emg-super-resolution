@@ -414,7 +414,10 @@ class Trainer:
 
                 # Generate SR data from LR data using the generator
                 val_sr = self.generator(val_lr).to(self.device)
+                print("val hr shape", val_hr.shape)
+                print("val sr shape before deleting", val_sr.shape)
                 val_sr = self._delete_row_column(val_sr)
+                print("val sr shape after deleting", val_sr.shape)
 
                 # Calculate adversarial loss
                 real_labels = torch.ones(val_hr.size(0), 1).to(self.device)
@@ -506,11 +509,13 @@ class Trainer:
         sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
 
         # 2D to 3D
+        print("sr destandardized shape", sr_destandardized.shape)
         sr_destandardized = sr_destandardized.reshape(5, 13, sr_destandardized.shape[0]).transpose(1, 0, 2)
         sr_destandardized = np.flipud(sr_destandardized)
         sr_destandardized[:, 1::2, :] = np.flipud(sr_destandardized[:, 1::2, :])
 
         # 2D to 3D
+        print("hr destandardized shape", hr_destandardized.shape)
         hr_destandardized = hr_destandardized.reshape(5, 13, hr_destandardized.shape[0]).transpose(1, 0, 2)
         hr_destandardized = np.flipud(hr_destandardized)
         hr_destandardized[:, 1::2, :] = np.flipud(hr_destandardized[:, 1::2, :])
