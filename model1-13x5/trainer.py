@@ -506,9 +506,9 @@ class Trainer:
         hr_destandardized = np.asarray(val_hr_destandardized.to('cpu')).squeeze()
         sr_destandardized = np.asarray(val_sr_destandardized.to('cpu')).squeeze()
 
-        interpolated_destandardized = interpolated_destandardized[0]
-        hr_destandardized = hr_destandardized[0]
-        sr_destandardized = sr_destandardized[0]
+        interpolated_destandardized = interpolated_destandardized[6]
+        hr_destandardized = hr_destandardized[6]
+        sr_destandardized = sr_destandardized[6]
 
         # 2D to 3D
         print("sr destandardized shape", sr_destandardized.shape)
@@ -530,7 +530,7 @@ class Trainer:
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
 
-        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
         sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
@@ -633,7 +633,7 @@ class Trainer:
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
 
-        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
         sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel

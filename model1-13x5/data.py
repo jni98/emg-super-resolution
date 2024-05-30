@@ -75,7 +75,6 @@ class Custom_Dataset(Dataset):
         # extract lr emg
         lr_emg = hr_emg[::2, ::2]
 
-
         # interpolate for hr shape
         lr_emg_interpolated = self.grid_interpolation(lr_emg, hr_emg.shape, method='linear')
 
