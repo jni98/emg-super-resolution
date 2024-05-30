@@ -501,12 +501,14 @@ class Trainer:
 
         """
 
-
-
         # Convert tensors to numpy arrays and move to CPU
         interpolated_destandardized = np.asarray(val_lr_destandardized.to('cpu')).squeeze()
         hr_destandardized = np.asarray(val_hr_destandardized.to('cpu')).squeeze()
         sr_destandardized = np.asarray(val_sr_destandardized.to('cpu')).squeeze()
+
+        interpolated_destandardized = interpolated_destandardized[0]
+        hr_destandardized = hr_destandardized[0]
+        sr_destandardized = sr_destandardized[0]
 
         # 2D to 3D
         print("sr destandardized shape", sr_destandardized.shape)
@@ -521,9 +523,9 @@ class Trainer:
         hr_destandardized[:, 1::2, :] = np.flipud(hr_destandardized[:, 1::2, :])
 
         # Extract specific channels
-        interpolated_channel = interpolated_destandardized[0][6][2]
-        hr_channel = hr_destandardized[0][6][2]
-        sr_channel = sr_destandardized[0][6][2]
+        interpolated_channel = interpolated_destandardized[6][2]
+        hr_channel = hr_destandardized[6][2]
+        sr_channel = sr_destandardized[6][2]
 
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
@@ -624,9 +626,9 @@ class Trainer:
         print("Logging plots for batch index 0 predicted channel")
 
         # Select channels
-        hr_channel = hr_destandardized[0][6][1]
-        sr_channel = sr_destandardized[0][6][1]
-        interpolated_channel = interpolated_destandardized[0][6][1]
+        hr_channel = hr_destandardized[6][1]
+        sr_channel = sr_destandardized[6][1]
+        interpolated_channel = interpolated_destandardized[6][1]
 
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
