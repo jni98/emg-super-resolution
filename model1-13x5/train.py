@@ -26,7 +26,13 @@ def setup_sweep():
             },
             'learning_rate': {
                 'values': [0.00001]
-            }
+            },
+            'augment':{
+                'values': [True],
+            },
+            'adv_loss_weight': {
+                'values': [0.001]
+            },
 
         }
     }

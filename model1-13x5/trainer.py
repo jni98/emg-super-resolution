@@ -14,6 +14,8 @@ import matplotlib
 import wandb
 import torch
 import pandas as pd
+from scipy.signal import butter, filtfilt
+
 from generator import Generator
 from discriminator import Discriminator
 from data import Custom_Dataset
@@ -22,6 +24,7 @@ matplotlib.use('Agg')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
 
 import numpy as np
+import plotly.graph_objects as go
 
 import torch.nn as nn
 import torch.optim as optim
@@ -64,6 +67,7 @@ class Trainer:
 
         self.lr = config.learning_rate
         self.batch_size = config.batch_size
+        self.adv_loss_weight = config.adv_loss_weight
 
         self.unique_folder = '/' + datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -104,18 +108,18 @@ class Trainer:
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], augment=self.config.augment),
             batch_size=self.batch_size, pin_memory=True
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']),
+                           self.mean_std_dict['std'], augment = False),
             batch_size=self.batch_size, pin_memory=True
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std']), pin_memory=True)
+                           self.mean_std_dict['std'], augment = False), pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
@@ -254,7 +258,7 @@ class Trainer:
         total_loss_d_fake = 0.0
         total_loss_d = 0.0
 
-        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
+        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_interpolated) in enumerate(self.training):
             print("batch index", batch_idx)
 
             lr_emg = lr_emg.to(self.device)
@@ -301,7 +305,7 @@ class Trainer:
 
             loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
 
-            loss_generator = (0.01 * loss_generator_adv + loss_generator_content)
+            loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content)
 
             loss_generator.backward()
 
@@ -398,130 +402,79 @@ class Trainer:
         total_validation_loss = 0.0
         total_psnr = 0.0
         total_abs_diff = 0.0
+        total_val_gen_content = 0.0
+        total_val_gen_adv = 0.0
 
         with torch.no_grad():
-            for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
+            for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path, val_lr_interpolated) in enumerate(self.validation):
                 print("validation batch index", val_batch_idx)
 
                 val_lr = val_lr.to(self.device)
                 val_hr = val_hr.to(self.device)
 
                 # Generate SR data from LR data using the generator
-                val_sr_emg = self.generator(val_lr).to(self.device)
-                val_sr_emg = self._delete_row_column(val_sr_emg)
+                val_sr = self.generator(val_lr).to(self.device)
+                val_sr = self._delete_row_column(val_sr)
 
-                # TODO: Adversarial Loss hinzufügen
+                # Calculate adversarial loss
+                real_labels = torch.ones(val_hr.size(0), 1).to(self.device)
+                output_disc = self.discriminator(val_sr)
+                loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
 
-                # Calculate validation loss
-                val_loss = self.mse(val_sr_emg, val_hr)
+                # Calculate content loss
+                loss_generator_content = self.mse(val_sr, val_hr)
+
+                # Total loss for validation
+                val_loss = (self.adv_loss_weight * loss_generator_adv +
+                            loss_generator_content)
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
+                total_val_gen_adv += loss_generator_adv.item()
+                total_val_gen_content += loss_generator_content.item()
 
-                psnr = 20 * torch.log10(1.0 / torch.sqrt(val_loss))
+                psnr = 10 * torch.log10(1.0 / loss_generator_content)
 
                 total_psnr += psnr.item()
 
                 # destacndardize the data for the logged plots
                 val_hr_destandardized = self.destandardize_data(val_hr)
-                val_sr_emg_destandardized = self.destandardize_data(val_sr_emg)
+                val_sr_destandardized = self.destandardize_data(val_sr)
+                val_lr_interpolated = self.destandardize_data(val_lr_interpolated)
+
+                if val_batch_idx == 0:
+                    self.validation_plots_logging(val_lr_interpolated, val_hr_destandardized,
+                                                  val_sr_destandardized, 'Validation')
 
                 # log absolute difference for one channel absolute difference
                 val_hr_destandardized = val_hr_destandardized.permute(0,1,3,2)
-                val_sr_emg_destandardized = val_sr_emg_destandardized.permute(0,1,3,2)
+                val_sr_destandardized = val_sr_destandardized.permute(0,1,3,2)
 
-                abs_diff = torch.abs(val_hr_destandardized[0][0][32] - val_sr_emg_destandardized[0][0][32])
+                abs_diff = torch.abs(val_hr_destandardized[0][0][32] - val_sr_destandardized[0][0][32])
                 abs_diff = abs_diff.squeeze().to('cpu')
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
 
-                if val_batch_idx == 0:
-                    ############################## Log Plots given channel########################################
-                    print("Logging plots for batch index 0 given channel")
-
-                    # x-axis for the following logs
-                    fig, axs = plt.subplots(4, 1, figsize=(8, 10))
-                    x_values = range(val_hr.shape[2])
-
-                    # log absolute difference for one channel
-                    axs[0].plot(x_values, abs_diff)
-                    axs[0].set_title('Absolute difference given channel')
-
-                    # Log one channel in the middle of the grid
-                    val_channel = val_hr_destandardized[0][0][32]
-                    val_channel = val_channel.to('cpu')
-                    val_channel = np.asarray(val_channel)
-                    axs[1].plot(x_values, val_channel)
-                    axs[1].set_title('Validation channel [32]')
-
-                    # Log one channel in the middle of the grid
-                    sr_channel = val_sr_emg_destandardized[0][0][32]
-                    sr_channel = sr_channel.to('cpu')
-                    sr_channel = np.asarray(sr_channel)
-                    axs[2].plot(x_values, sr_channel)
-                    axs[2].set_title('Super-resolution channel [32]')
-
-                    # log cross correlation
-                    auto_correlation = np.correlate(val_channel, val_channel, mode='full')
-                    cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
-                    cross_correlation = cross_correlation.squeeze()
-                    axs[3].plot(range(len(cross_correlation)), cross_correlation)
-                    axs[3].set_title('Cross Correlation channel [32]')
-
-                    plt.tight_layout()
-                    wandb.log({"Logged plots": [wandb.Image(fig)]})
-
-                    # Close the figure
-                    plt.close(fig)
-
-                    ############################## Log Plots predicted channel########################################
-                    print("Logging plots for batch index 0 predicted channel")
-
-                    # x-axis for the following logs
-                    fig1, axs1 = plt.subplots(4, 1, figsize=(8, 10))
-                    x_values = range(val_hr.shape[2])
-
-                    # log absolute difference for one channel
-                    axs1[0].plot(x_values, torch.abs(
-                        val_hr_destandardized[0][0][32] - val_sr_emg_destandardized[0][0][32]).squeeze().to('cpu'))
-                    axs1[0].set_title('Absolute difference predicted channel')
-
-                    # Log one channel in the middle of the grid
-                    val_channel = val_hr_destandardized[0][0][32]
-                    val_channel = val_channel.to('cpu')
-                    val_channel = np.asarray(val_channel)
-                    axs1[1].plot(x_values, val_channel)
-                    axs1[1].set_title('Validation channel [32]')
-
-                    # Log one channel in the middle of the grid
-                    sr_channel = val_sr_emg_destandardized[0][0][32]
-                    sr_channel = sr_channel.to('cpu')
-                    sr_channel = np.asarray(sr_channel)
-                    axs1[2].plot(x_values, sr_channel)
-                    axs1[2].set_title('Super-resolution channel [32]')
-
-                    # log cross correlation
-                    auto_correlation = np.correlate(val_channel, val_channel, mode='full')
-                    cross_correlation = (np.correlate(val_channel, sr_channel, mode='full')) / np.max(auto_correlation)
-                    cross_correlation = cross_correlation.squeeze()
-                    axs1[3].plot(range(len(cross_correlation)), cross_correlation)
-                    axs1[3].set_title('Cross Correlation channel [32]')
-
-                    plt.tight_layout()
-                    wandb.log({"Logged plots": [wandb.Image(fig1)]})
-
-                    # Close the figure
-                    plt.close(fig1)
-
             # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
+            avg_val_content = total_val_gen_content / len(self.validation)
+            avg_val_adv = total_val_gen_adv / len(self.validation)
             avg_psnr = total_psnr / len(self.validation)
-            wandb.log({'val_loss': avg_validation_loss})
-            wandb.log({'psnr': avg_psnr})
+
+            wandb.log({'val_loss': avg_validation_loss, 'val_content': avg_val_content,
+                       'val_adv': avg_val_adv, 'val_psnr': avg_psnr})
 
             # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
+            fig2, axs2 = plt.subplots(1, 1, figsize=(8, 10))
+            axs2.plot(range(len(avg_abs_diff)), avg_abs_diff)
+            axs2.set_title('Average absolute difference')
+            plt.tight_layout()
+            wandb.log({"Average absolute difference": [wandb.Image(fig2)]})
             wandb.log({'Mean absolute difference': np.mean(avg_abs_diff)})
+
+            # Close the figure
+            plt.close(fig2)
 
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
 
@@ -529,6 +482,240 @@ class Trainer:
         self.discriminator.train()  # Set the discriminator back to training mode if needed
 
         return avg_validation_loss, avg_psnr
+
+    def validation_plots_logging(self, val_lr_destandardized, val_hr_destandardized, val_sr_destandardized,
+                                 phase):
+        """
+
+        Parameters
+        ----------
+        val_hr_destandardized
+        val_sr_destandardized
+        abs_diff
+
+        Returns
+        -------
+
+        """
+
+
+
+        # Convert tensors to numpy arrays and move to CPU
+        interpolated_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
+        hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
+        sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
+
+        # 2D to 3D
+        sr_destandardized = sr_destandardized.reshape(5, 13, sr_destandardized.shape[0]).transpose(1, 0, 2)
+        sr_destandardized = np.flipud(sr_destandardized)
+        sr_destandardized[:, 1::2, :] = np.flipud(sr_destandardized[:, 1::2, :])
+
+        # 2D to 3D
+        hr_destandardized = hr_destandardized.reshape(5, 13, hr_destandardized.shape[0]).transpose(1, 0, 2)
+        hr_destandardized = np.flipud(hr_destandardized)
+        hr_destandardized[:, 1::2, :] = np.flipud(hr_destandardized[:, 1::2, :])
+
+        # Extract specific channels
+        interpolated_channel = interpolated_destandardized[0][0][6][2]
+        hr_channel = hr_destandardized[0][0][6][2]
+        sr_channel = sr_destandardized[0][0][6][2]
+
+        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
+
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+
+        # Calculate the difference between hr_channel and sr_channel
+        diff_channel = hr_channel - sr_channel
+        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, filtered, given Channel: ", diff_filtered)
+        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
+
+        ############################## Log Plots given channel########################################
+        print("Logging plots for batch index 0 given channel")
+
+        plotly_fig0 = go.Figure()
+
+        # log cross correlation
+        auto_correlation = np.correlate(hr_channel, hr_channel, mode='full')
+        cross_correlation = (np.correlate(hr_channel, sr_channel, mode='full')) / np.max(auto_correlation)
+        cross_correlation = cross_correlation.squeeze()
+        plotly_fig0.add_trace(go.Scatter(y=cross_correlation))
+
+        # Update layout
+        plotly_fig0.update_layout(
+            title='Cross Correlation - Predicted Channel',
+            xaxis_title='Index',
+            yaxis_title='Cross Correlation',
+            template="plotly_white"
+        )
+
+        # Log the Plotly figure to W&B
+        wandb.log({phase + " Cross correlation - Given Channel [6][2]": plotly_fig0})
+
+        # New figure for plots of channels
+        # Create Plotly figure
+        plotly_fig = go.Figure()
+        # Add traces for all channels
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution'))
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(hr_channel)), y=hr_channel, name='High-resolution', opacity=0.5))
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
+                       opacity=0.5))
+        # Add trace for the difference channel
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(diff_channel)), y=diff_channel, name='HR - SR'))
+        # Update layout
+        plotly_fig.update_layout(title="Super-resolution vs Validation - Given Channel", showlegend=True,
+                                 xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
+        # Log the Plotly figure to W&B
+        wandb.log({phase + " - SR vs Val - Given Channel [6][2]": plotly_fig})
+
+        ############# Plot frequency histogram# #################
+        sampling_freq = 2048
+
+        # Compute FFT for val_channel
+        n = len(hr_channel)
+        k = np.arange(n)
+        T = n / sampling_freq
+        frq = k / T  # Two sides frequency range
+        frq = frq[range(n // 2)]  # One side frequency range
+        hr_Y = np.fft.fft(hr_channel) / n
+        hr_Y = hr_Y[range(n // 2)]
+
+        # Compute FFT for sr_channel
+        sr_Y = np.fft.fft(sr_channel) / n
+        sr_Y = sr_Y[range(n // 2)]
+
+        # Compute FFT for interpolated_channel
+        interpolated_Y = np.fft.fft(interpolated_channel) / n
+        interpolated_Y = interpolated_Y[range(n // 2)]
+
+        # Plot
+        freq_spec1 = go.Figure()
+
+        # Plot val_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(hr_Y), mode='lines', name='High-resolution', opacity=0.5))
+
+        # Plot interpolated_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(interpolated_Y), mode='lines', name='Interpolated', opacity=0.5))
+
+        # Plot sr channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution', opacity=1))
+
+        freq_spec1.update_layout(title='Frequency Spectrum - Given channel',
+                                 xaxis_title='Frequency (Hz)',
+                                 yaxis_title='Magnitude')
+
+        wandb.log({phase + " - Frequency Spectrum - Scatter - Given channel [6][2]": freq_spec1})
+
+        ############################## Log Plots predicted channel########################################
+        print("Logging plots for batch index 0 predicted channel")
+
+        # Select channels
+        hr_channel = hr_destandardized[0][0][6][1]
+        sr_channel = sr_destandardized[0][0][6][1]
+        interpolated_channel = interpolated_destandardized[0][0][6][1]
+
+        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
+
+        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+
+        # Calculate the difference between hr_channel and sr_channel
+        diff_channel = hr_channel - sr_channel
+        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
+        print("abs diff sum, filtered, given Channel: ", diff_filtered)
+        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
+
+        plotly_fig1 = go.Figure()
+
+        # log cross correlation
+        auto_correlation = np.correlate(hr_channel, hr_channel, mode='full')
+        cross_correlation = (np.correlate(hr_channel, sr_channel, mode='full')) / np.max(auto_correlation)
+        cross_correlation = cross_correlation.squeeze()
+        plotly_fig1.add_trace(go.Scatter(y=cross_correlation))
+
+        # Update layout
+        plotly_fig1.update_layout(
+            title='Cross Correlation - Predicted Channel',
+            xaxis_title='Index',
+            yaxis_title='Cross Correlation',
+            template="plotly_white"
+        )
+
+        # Log the Plotly figure to W&B
+        wandb.log({phase + " Cross correlation - Predicted Channel  [6][1]": plotly_fig1})
+
+        # New figure for plots of channels
+        # Create Plotly figure
+        plotly_fig = go.Figure()
+        # Add traces for all channels
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution'))
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(hr_channel)), y=hr_channel, name='High-resolution', opacity=0.5))
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
+                       opacity=0.5))
+        # Add trace for the difference channel
+        plotly_fig.add_trace(
+            go.Scatter(x=np.arange(len(diff_channel)), y=diff_channel, name='HR - SR'))
+        # Update layout
+        plotly_fig.update_layout(title="Super-resolution vs Validation - Predicted Channel", showlegend=True,
+                                 xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
+
+        # Log the Plotly figure to W&B
+        wandb.log({phase + " - SR vs Val - Predicted Channel [6][1]": plotly_fig})
+
+        ############# Plot frequency histogram# #################
+        # Generate sample data for demonstration purposes
+        sampling_freq = 2048
+
+        # Compute FFT for val_channel
+        n = len(hr_channel)
+        k = np.arange(n)
+        T = n / sampling_freq
+        frq = k / T  # Two sides frequency range
+        frq = frq[range(n // 2)]  # One side frequency range
+        hr_Y = np.fft.fft(hr_channel) / n
+        hr_Y = hr_Y[range(n // 2)]
+
+        # Compute FFT for sr_channel
+        sr_Y = np.fft.fft(sr_channel) / n
+        sr_Y = sr_Y[range(n // 2)]
+
+        # Compute FFT for interpolated_channel
+        interpolated_Y = np.fft.fft(interpolated_channel) / n
+        interpolated_Y = interpolated_Y[range(n // 2)]
+
+        # Plot
+        freq_spec1 = go.Figure()
+
+        # Plot val_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(hr_Y), mode='lines', name='High-resolution', opacity=0.5))
+
+        # Plot interpolated_channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(interpolated_Y), mode='lines', name='Interpolated', opacity=0.5))
+
+        # Plot sr channel
+        freq_spec1.add_trace(
+            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution', opacity=1))
+
+        freq_spec1.update_layout(title='Frequency Spectrum - Predicted channel',
+                                 xaxis_title='Frequency (Hz)',
+                                 yaxis_title='Magnitude')
+
+        wandb.log({phase + " - Frequency Spectrum - Scatter - Predicted channel [6][1]": freq_spec1})
 
     def _save_checkpoint(self, epoch: int) -> None:
         """
@@ -666,22 +853,29 @@ class Trainer:
         self.generator.eval()  # Set the generator to evaluation mode
 
         with (torch.no_grad()):
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_interpolated) in enumerate(self.testing):
                 lr_emg = lr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
-                lr_sr_emg = self.generator(lr_emg).to('cpu')
+                lr_sr_emg = self.generator(lr_emg)
                 lr_sr_emg = self._delete_row_column(lr_sr_emg)
-                lr_sr_emg = lr_sr_emg.numpy().squeeze()
-                lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
                 lr_sr_emg_shape = lr_sr_emg.shape
 
-                # 2D to 3D
-                lr_sr_emg = lr_sr_emg.reshape(5, 13, lr_sr_emg_shape[0]).transpose(1, 0, 2)
-                lr_sr_emg = np.flipud(lr_sr_emg)
-                lr_sr_emg[:, 1::2, :] = np.flipud(lr_sr_emg[:, 1::2, :])
+                lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
+                interpolated_destandardized = self.destandardize_data(lr_interpolated)
+                hr_emg_destandardized = self.destandardize_data(hr_emg)
 
-                # Save signal from lr to sr and hr to sr
+                if batch_idx == 0:
+                    self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,
+                                                  lr_sr_emg_destandardized, 'Test')
+
+                # 2D to 3D
+                lr_sr_emg_destandardized = lr_sr_emg_destandardized.reshape(5, 13, lr_sr_emg_shape[0]).transpose(1, 0, 2)
+                lr_sr_emg_destandardized = np.flipud(lr_sr_emg_destandardized)
+                lr_sr_emg_destandardized[:, 1::2, :] = np.flipud(lr_sr_emg_destandardized[:, 1::2, :])
+
+                # Save signal from lr to sr
+                lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
@@ -701,3 +895,32 @@ class Trainer:
         """
 
         return standardized_data * self.mean_std_dict['std'] + self.mean_std_dict['mean']
+
+    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
+        """
+        Apply a bandpass filter to the data
+        Parameters
+        ----------
+        data: np.array
+            Data to be filtered
+        lowcut: float
+            Lower cut-off frequency
+        highcut: float
+            Higher cut-off frequency
+        fs: int
+            Sampling frequency
+        order: int
+            Order of the filter
+
+        Returns
+        -------
+        y: np.array
+            Filtered data
+        """
+        nyq = 0.5 * fs
+        low = lowcut / nyq
+        high = highcut / nyq
+        b, a = butter(order, [low, high], btype='band')
+        filtered_signal = filtfilt(b, a, data)
+
+        return filtered_signal

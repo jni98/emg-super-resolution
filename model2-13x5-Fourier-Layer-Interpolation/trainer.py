@@ -849,10 +849,10 @@ class Trainer:
                                                   lr_sr_emg_destandardized, 'Test')
 
                 # Save signal from lr to sr
-                lr_sr_emg = lr_sr_emg.to('cpu').numpy().squeeze()
+                lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
-                np.save(model_path + lr_emg_paths[0], lr_sr_emg)
+                np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
 
         print("Successfully generated LR to SR data")
 

@@ -13,6 +13,7 @@ import pandas as pd
 from scipy.interpolate import RegularGridInterpolator
 import torch
 from data import Custom_Dataset
+import scipy.ndimage
 
 
 class Interpolation:
@@ -136,6 +137,25 @@ class Interpolation:
             os.makedirs(path, exist_ok=True)
             print("Saving")
             np.save(path + lr_emg_paths[0], interpolated_lr_hr)
+
+            # Upsampling factors for the first two dimensions, keeping the third dimension the same
+            zoom_factors = (13 / 7, 5 / 3, 1)
+
+            # Perform the interpolation
+            interpolated_lr_hr = scipy.ndimage.zoom(lr_emg, zoom_factors, order=3)  # Using cubic interpolation
+
+            # Save cubic interpolated signal from lr to hr
+            path = '../results/cubic_interpolation/'
+
+            os.makedirs(path, exist_ok=True)
+            print("Saving")
+            np.save(path + lr_emg_paths[0], interpolated_lr_hr)
+
+
+
+
+
+
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
         """
