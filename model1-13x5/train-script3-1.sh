@@ -17,7 +17,7 @@ unset SLURM_EXPORT_ENV
 
 SRC_DIR=$HOME/code/model1-13x5
 RESULTS_DIR=$HOME/model1-13x5-$SLURM_JOB_ID
-DATA_ARCHIVE=$HPCVAULT/dataset_512.tar
+DATA_ARCHIVE=$HPCVAULT/dataset.tar
 FAST_DATA_DIR=$TMPDIR/model1-13x5-$SLURM_JOB_ID
 
 ############    params   ###############
@@ -61,7 +61,7 @@ echo "Using Repository Revision"
 git log --oneline -n 1
 
 # start training
-python train.py --data "$FAST_DATA_DIR"/dataset_512/train --testdata "$FAST_DATA_DIR"/dataset_512/test --results "$RESULTS_DIR" --epochs $EPOCHS
+python train.py --data "$FAST_DATA_DIR"/dataset/train --testdata "$FAST_DATA_DIR"/dataset/test --results "$RESULTS_DIR" --epochs $EPOCHS
 
 # cleanup
 rm -rf "$FAST_DATA_DIR"
