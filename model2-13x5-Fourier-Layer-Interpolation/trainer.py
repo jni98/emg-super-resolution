@@ -510,8 +510,8 @@ class Trainer:
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
 
-        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
@@ -613,8 +613,8 @@ class Trainer:
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
 
-        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 400, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 400, 2048, order=2)
+        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
