@@ -506,9 +506,10 @@ class Trainer:
         hr_destandardized = np.asarray(val_hr_destandardized.to('cpu')).squeeze()
         sr_destandardized = np.asarray(val_sr_destandardized.to('cpu')).squeeze()
 
-        interpolated_destandardized = interpolated_destandardized[6]
-        hr_destandardized = hr_destandardized[6]
-        sr_destandardized = sr_destandardized[6]
+        if phase == 'Validation':
+            interpolated_destandardized = interpolated_destandardized[6]
+            hr_destandardized = hr_destandardized[6]
+            sr_destandardized = sr_destandardized[6]
 
         # 2D to 3D
         print("sr destandardized shape", sr_destandardized.shape)
@@ -877,29 +878,17 @@ class Trainer:
                                                   lr_sr_emg_destandardized, 'Test')
 
                 # 2D to 3D
-                lr_sr_emg_destandardized = lr_sr_emg_destandardized.reshape(5, 13, lr_sr_emg_shape[0]).transpose(1, 0, 2)
+                lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
+                lr_sr_emg_destandardized = lr_sr_emg_destandardized.reshape(5, 13, lr_sr_emg_shape[2]).transpose(1,0,2)
                 lr_sr_emg_destandardized = np.flipud(lr_sr_emg_destandardized)
                 lr_sr_emg_destandardized[:, 1::2, :] = np.flipud(lr_sr_emg_destandardized[:, 1::2, :])
 
                 # Save signal from lr to sr
-                lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
 
-    def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
-
-        """
-        De-standardizes the data with the mean and standard deviation from the training set.
-
-        Parameters
-        ----------
-        standardized_data: numpy array
-
-        Returns
-        -------
-        destandardized_data: numpy array
-        """
+    def destandardize_data(self, standardized_data):
 
         return standardized_data * self.mean_std_dict['std'] + self.mean_std_dict['mean']
 
