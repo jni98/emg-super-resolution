@@ -167,7 +167,7 @@ class Trainer:
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
-        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
+        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=0.000001, betas=self.betas)
 
         print("Successfully initialized the models")
 
