@@ -18,25 +18,25 @@ class ResidualBlock(nn.Module):
 
     def __init__(self, in_channels) -> None:
         super(ResidualBlock, self).__init__()
-        self.conv1 = nn.Sequential(
-            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
-                      padding=(1, 1, 1)),
-            nn.BatchNorm3d(in_channels),
-            nn.PReLU())
-
-        self.conv2 = nn.Sequential(
-            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
-                      padding=(1, 1, 1)),
-            nn.BatchNorm3d(in_channels))
-
+        self.conv1 = nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
+                      padding=(1, 1, 1))
+        self.bn1 =nn.BatchNorm3d(in_channels)
         self.prelu = nn.PReLU()
+
+        self.conv2 = nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
+                      padding=(1, 1, 1))
+        self.bn2 = nn.BatchNorm3d(in_channels)
 
     def forward(self, x: torch.tensor) -> torch.tensor:
         residual = x
         out = self.conv1(x)
-        out = self.conv2(out)
-        out += residual
+        out = self.bn1(out)
         out = self.prelu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        out += residual
         return out
 
 
