@@ -19,7 +19,7 @@ unset SLURM_EXPORT_ENV
 
 SRC_DIR=$HOME/code/model3-LSTM
 RESULTS_DIR=$HOME/model3-LSTM-$SLURM_JOB_ID
-DATA_ARCHIVE=$HPCVAULT/dataset.tar
+DATA_ARCHIVE=$HPCVAULT/dataset_lstm.tar
 FAST_DATA_DIR=$TMPDIR/model3-LSTM-$SLURM_JOB_ID
 
 ############    params   ###############
@@ -63,8 +63,8 @@ cd "$SRC_DIR" || echo "could not cd into $SRC_DIR"
 echo "Using Repository Revision"
 git log --oneline -n 1
 
-srun python trainer.py --data "$FAST_DATA_DIR/dataset/train" \
-                  --testdata "$FAST_DATA_DIR/dataset/test" \
+srun python trainer.py --data "$FAST_DATA_DIR/dataset_lstm/train" \
+                  --testdata "$FAST_DATA_DIR/dataset_lstm/test" \
                   --results "$RESULTS_DIR" \
                   --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR
 
