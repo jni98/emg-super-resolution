@@ -18,7 +18,7 @@ from trainer import Trainer
 def setup_sweep():
     # Define the sweep config
     sweep_config = {
-        'method': 'bayes',
+        'method': 'grid',
         'metric': {'goal': 'minimize', 'name': 'val_loss'},
         'parameters': {
             'batch_size': {
@@ -34,13 +34,16 @@ def setup_sweep():
                 'values': [0.01]
             },
             'wavelet_loss_weight': {
-                'values': [30]
+                'values': [1]
             },
             'loss_level': {
                 'values': [3]
             },
             'augment':{
                 'value':[True]
+            },
+            'bandpass_upper':{
+                'value':[400, 500]
             }
 
         }

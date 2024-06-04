@@ -72,6 +72,7 @@ class Trainer:
         self.batch_size = config.batch_size
         self.adv_loss_weight = config.adv_loss_weight
         self.wavelet_loss_weight = config.wavelet_loss_weight
+        self.bandpass_upper = config.bandpass_upper
 
         self.unique_folder = '/' + datetime.now().strftime('%Y%m%d%H%M%S')
 
@@ -90,7 +91,7 @@ class Trainer:
         wandb.init(project="GAN-Training", entity="masterthesis-sr")
 
         # Define lambda function for the LR scheduler
-        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 300)
+        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 500)
 
         print("init done")
 
@@ -115,18 +116,18 @@ class Trainer:
         # Use Custom_Dataset with standardization
         self.training = torch.utils.data.DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], augment=self.config.augment),
+                           self.mean_std_dict['std'], augment=self.config.augment, bandpass_upper=self.bandpass_upper),
             batch_size=self.batch_size, pin_memory=True, shuffle=True
         )
 
         self.validation = torch.utils.data.DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], augment=False),
+                           self.mean_std_dict['std'], augment=False, bandpass_upper=self.bandpass_upper),
             batch_size=self.batch_size, pin_memory=True
         )
         self.testing = torch.utils.data.DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], augment=False),
+                           self.mean_std_dict['std'], augment=False, bandpass_upper=self.bandpass_upper),
             pin_memory=True)
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
@@ -499,8 +500,8 @@ class Trainer:
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
 
-        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
+        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, self.bandpass_upper, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, self.bandpass_upper, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
@@ -602,8 +603,8 @@ class Trainer:
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
 
-        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
+        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, self.bandpass_upper, 2048, order=2)
+        sr_channel = self.butter_bandpass_filter(sr_channel, 20, self.bandpass_upper, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
@@ -838,7 +839,7 @@ class Trainer:
         total_test_loss = 0.0
 
         with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
                 lr_emg = lr_emg.to(self.device)
                 hr_emg = hr_emg.to(self.device)
 
@@ -852,7 +853,7 @@ class Trainer:
                 total_test_loss += test_content.item()
 
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
-                interpolated_destandardized = self.destandardize_data(lr_emg_interpolated)
+                interpolated_destandardized = self.destandardize_data(lr_emg)
                 hr_emg_destandardized = self.destandardize_data(hr_emg)
 
                 if batch_idx == 0:
@@ -890,7 +891,7 @@ class Trainer:
 
     def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
         """
-        Apply a bandpass filter to the data
+        Apply a bandpass_upper filter to the data
         Parameters
         ----------
         data: np.array

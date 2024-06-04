@@ -12,13 +12,14 @@ class Custom_Dataset(Dataset):
     Custom dataset class for loading the data
     """
 
-    def __init__(self, data, directory, mean: float, std: float, augment: bool) -> None:
+    def __init__(self, data, directory, mean: float, std: float, augment: bool, bandpass_upper:int) -> None:
         super().__init__()
         self.data = data
         self.directory = directory
         self.mean = mean
         self.std = std
         self.augment = augment
+        self.bandpass_upper = bandpass_upper
 
         self.gaussian_noise_generator = GaussianNoise(target_snr__db=5.0)
         self.wavelet_decomposition = WaveletDecomposition(b=0.25, wavelet="db7", level=5, nr_of_grids=1)
@@ -45,7 +46,7 @@ class Custom_Dataset(Dataset):
             hr_emg = augmentation_method(hr_emg)
 
         # Bandpass filter
-        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
+        hr_emg = self.butter_bandpass_filter(hr_emg, 20, self.bandpass_upper, 2048, order=2)
 
         # extract lr emg
         lr_emg = hr_emg[::2, ::2]
@@ -101,7 +102,7 @@ class Custom_Dataset(Dataset):
 
     def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
         """
-        Apply a bandpass filter to the data
+        Apply a bandpass_upper filter to the data
         Parameters
         ----------
         data: np.array
