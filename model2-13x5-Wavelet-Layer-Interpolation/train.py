@@ -43,7 +43,7 @@ def setup_sweep():
                 'value':[True]
             },
             'bandpass_upper':{
-                'value':[400, 500]
+                'values':[400, 500]
             }
 
         }
