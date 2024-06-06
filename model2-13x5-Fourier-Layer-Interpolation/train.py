@@ -40,7 +40,7 @@ def setup_sweep():
                 'value':[True]
             },
             'bandpass_upper':{
-                'values':[500]
+                'values':[400]
             }
         }
     }
@@ -65,10 +65,10 @@ def train(data_directory: str, test_data_directory: str, results_directory: str,
         trainer.initialize_models()
 
         # Run the training
-        train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, train_fourier_loss, val_loss, psnr = trainer.train()
+        #train_G_loss, train_D_loss, train_D_loss_real, train_D_loss_fake, train_fourier_loss, val_loss, psnr = trainer.train()
 
         # Plot the training results
-        trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, train_fourier_loss, val_loss, psnr)
+        #trainer._plot_result_losses(train_G_loss, train_D_loss_real, train_D_loss_fake, train_D_loss, train_fourier_loss, val_loss, psnr)
 
         trainer.generate_sr_data()
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     test_data_directory = args.testdata
     results_directory = args.results
     num_epochs = args.epochs
-
+    #
     # data_directory = '../dataset/train'
     # test_data_directory ='../dataset/test'
     # results_directory = 'runs/'
