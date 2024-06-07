@@ -81,10 +81,6 @@ class UpConvolutionBlock(nn.Module):
             nn.Conv3d(in_channels=out_channels + out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                       stride=(1, 1, 1), padding=(1, 1, 1)),
             nn.BatchNorm3d(out_channels),
-            nn.PReLU(),
-            nn.Conv3d(in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
-                      stride=(1, 1, 1), padding=(1, 1, 1)),
-            nn.BatchNorm3d(out_channels),
             nn.PReLU()
         )
 
@@ -186,7 +182,7 @@ class Generator(nn.Module):
         )
 
         # Upsampling 3
-        self.upConv3 = UpConvolutionBlockLast(128, 64, stride=(1, 1, 2))
+        self.upConv3 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
 
         # Finale Convolution für Channel 1
         self.finalConv = nn.Conv3d(in_channels=64, out_channels=1, kernel_size=(3, 3, 3), stride=(1, 1, 1),
@@ -262,9 +258,9 @@ class Generator(nn.Module):
 
         up2_ifft = self.ifft(up2)
 
-        channel_down = self.channel_down(up2_ifft)
+        #channel_down = self.channel_down(up2_ifft)
 
-        up3 = self.upConv3(channel_down)
+        up3 = self.upConv3(up2_ifft, skip1)
         #print("Generator output after upsample3", up3.shape)
 
         out = self.finalConv(up3)

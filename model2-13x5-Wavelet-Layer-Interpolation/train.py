@@ -28,7 +28,7 @@ def setup_sweep():
                 'values': [0.00001]
             },
             'num_res_blocks': {
-                'values': [1]
+                'values': [3]
             },
             'adv_loss_weight': {
                 'values': [0.01]
@@ -43,7 +43,7 @@ def setup_sweep():
                 'value':[True]
             },
             'bandpass_upper':{
-                'values':[500]
+                'values':[400, 500]
             }
 
         }
