@@ -31,7 +31,7 @@ def setup_sweep():
                 'values': [3]
             },
             'adv_loss_weight': {
-                'values': [0.01]
+                'values': [0.001]
             },
             'fourier_loss_weight': {
                 'values': [0.001]
