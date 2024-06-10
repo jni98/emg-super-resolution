@@ -9,12 +9,17 @@ to call the different visualization functions.
 """
 
 import os
+import textwrap
+
 import numpy as np
 import matplotlib
+import pandas as pd
 
-matplotlib.use('Agg')  # Use the 'Agg' backend
+matplotlib.use('pdf')  # Use the 'Agg' backend
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
+import matplotlib.colors as mcolors
+
 
 
 class Visualizer:
@@ -31,12 +36,14 @@ class Visualizer:
         file_path: str
             Path to the directory where the data is stored.
         """
+        plt.rcParams.update({'font.size': 10})
         self.file_path = file_path
         self.emg_data_dicts = self._load_data()
         print("Initialization done")
 
     def _load_data(self):
         paths = ['path0', 'path1', 'path2', 'path3']
+        # paths = ['path0']
         # Define the specific third dimension sizes for each path
         dim_sizes = {
             'path0': 64576,
@@ -44,6 +51,9 @@ class Visualizer:
             'path2': 60736,
             'path3': 65984
         }
+        # dim_sizes = {
+        #     'path0': 64576
+        # }
 
         data_dicts = []
 
@@ -127,39 +137,37 @@ class Visualizer:
         """
         print("Start plotting EMG differences")
 
-        # Iterate over each dictionary in the list
         for data_dict in self.emg_data_dicts:
-            # Unpack the path and its datasets from each dictionary
             for path, datasets in data_dict.items():
                 groundtruth = datasets['Original']
+                model_titles = [title for title in datasets.keys() if title != 'Original']
+                mean_diffs_dict = {}
 
-                # Iterate over datasets, skipping the 'Original' itself
                 for title, emg_data in {k: v for k, v in datasets.items() if k != 'Original'}.items():
                     mean_absolute_differences = np.mean(np.abs(groundtruth - emg_data), axis=2)
+                    mean_diffs_dict[title] = mean_absolute_differences
 
-                    # Plot each channel with a bit of an offset
-                    plt.figure(figsize=(12, 8))
+                    plt.figure(figsize=(8, 10))
                     offset = 0
                     for row in range(13):
                         for col in range(5):
                             diff = np.abs(groundtruth[row, col, :] - emg_data[row, col, :])
                             plt.plot(diff + offset, label=f'Channel row {row + 1} col {col + 1}')
-                            offset += np.max(diff) + 1000  # Adjust the offset for visual separation
+                            offset += np.max(diff) + 1000
 
                     plt.xlabel('Time in samples')
                     plt.ylabel('Mean Absolute Difference (with offset)')
-                    plt.title(f'Mean Absolute Differences - Channels - {title} - {path}')
+                    plt.title(f'{title}')
                     plt.legend(loc='upper right', fontsize='small', ncol=2)
-                    plt.tight_layout()
+                    plt.tight_layout(rect=[0, 0, 1, 0.95])
 
                     directory = f'plot_channels_difference/{path}/'
                     self._create_directory(directory)
-                    plt.savefig(f'{directory}{title}_channels_difference.png')
-                    print(f'Saving to: {directory}{title}_channels_difference.png')
+                    plt.savefig(f'{directory}{title}_channels_difference.pdf')
+                    print(f'Saving to: {directory}{title}_channels_difference.pdf')
                     plt.close()
 
-                    # Heatmap of mean absolute differences
-                    plt.figure()
+                    plt.figure(figsize=(8, 10))
                     plt.imshow(mean_absolute_differences, cmap='viridis', origin='upper', vmin=0, vmax=60)
                     plt.xticks(range(5), labels=range(1, 6))
                     plt.yticks(range(13), labels=range(13, 0, -1))
@@ -168,9 +176,109 @@ class Visualizer:
 
                     directory = f'plot_mean_differences_heatmap/{path}/'
                     self._create_directory(directory)
-                    plt.savefig(f'{directory}{title}_mean_differences.png')
-                    print(f'Saving to: {directory}{title}_mean_differences.png')
+                    plt.savefig(f'{directory}{title}_mean_differences.pdf', bbox_inches='tight')
+                    print(f'Saving to: {directory}{title}_mean_differences.pdf')
                     plt.close()
+
+                fig_width_cm = 16
+                fig_height_cm = fig_width_cm * 11.69 / 8.27
+                fig_size = (fig_width_cm / 2.54, fig_height_cm / 2.54)
+
+                fig, axes = plt.subplots(3, 3, figsize=fig_size)
+                fig.suptitle(f'Mean absolute differences', fontsize=12)
+                axes = axes.flatten()
+
+                wrapper = textwrap.TextWrapper(width=15, break_long_words=False, break_on_hyphens=False)
+                for idx, title in enumerate(model_titles):
+                    ax = axes[idx]
+                    im = ax.imshow(mean_diffs_dict[title], cmap='viridis', origin='upper', vmin=0, vmax=60)
+                    wrapped_title = wrapper.fill(text=title)
+                    ax.set_title(wrapped_title)
+                    ax.set_xticks(range(5))
+                    ax.set_xticklabels(range(1, 6))
+                    ax.set_yticks(range(13))
+                    ax.set_yticklabels(range(13, 0, -1))
+
+                for i in range(len(model_titles), len(axes)):
+                    fig.delaxes(axes[i])
+
+                cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+                fig.colorbar(im, cax=cbar_ax)
+
+                plt.tight_layout()
+
+                directory = f'plot_mean_differences_heatmap/{path}/'
+                self._create_directory(directory)
+                plt.savefig(f'{directory}All_models_heatmaps.pdf', bbox_inches='tight')
+                print(f'Saving to: {directory}All_models_heatmaps.pdf')
+                plt.close()
+
+    def plot_pearson_coefficient_grid(self):
+        """
+        Plot the Pearson coefficient of the correlation of one channel in the groundtruth signal with all other channels.
+        """
+        print("Start plotting Pearson coefficient grids")
+
+        for data_dict in self.emg_data_dicts:
+            for path, datasets in data_dict.items():
+                groundtruth = datasets['Original']
+                model_titles = [title for title in datasets.keys() if title != 'Original']
+                pearson_dict = {}
+
+                for title, grid_2 in {k: v for k, v in datasets.items() if k != 'Original'}.items():
+                    correlation_coefficients = np.zeros((13, 5))
+
+                    for row in range(13):
+                        for col in range(5):
+                            correlation_coefficients[row, col], _ = pearsonr(groundtruth[row, col], grid_2[row, col])
+
+                        pearson_dict[title] = correlation_coefficients
+
+                        plt.figure(figsize=(8, 10))
+                        plt.imshow(correlation_coefficients, cmap='viridis', origin='upper', vmin=0.95, vmax=1)
+                        plt.xticks(range(5), labels=range(1, 6))
+                        plt.yticks(range(13), labels=range(13, 0, -1))
+                        plt.title(f'{title}')
+                        plt.colorbar()
+
+                        directory = f'plot_pearsonr_heatmap/{path}/'
+                        self._create_directory(directory)
+                        plt.savefig(f'{directory}{title}.pdf', bbox_inches='tight')
+                        print(f'Saving to: {directory}{title}.pdf')
+                        plt.close()
+
+                fig_width_cm = 16
+                fig_height_cm = fig_width_cm * 11.69 / 8.27
+                fig_size = (fig_width_cm / 2.54, fig_height_cm / 2.54)
+
+                fig, axes = plt.subplots(3, 3, figsize=fig_size)
+                fig.suptitle(f'Pearson coefficient', fontsize=12)
+                axes = axes.flatten()
+
+                wrapper = textwrap.TextWrapper(width=15, break_long_words=False, break_on_hyphens=False)
+                for idx, title in enumerate(model_titles):
+                    ax = axes[idx]
+                    im = ax.imshow(pearson_dict[title], cmap='viridis', origin='upper', vmin=0.95, vmax=1)
+                    wrapped_title = wrapper.fill(text=title)
+                    ax.set_title(wrapped_title)
+                    ax.set_xticks(range(5))
+                    ax.set_xticklabels(range(1, 6))
+                    ax.set_yticks(range(13))
+                    ax.set_yticklabels(range(13, 0, -1))
+
+                for i in range(len(model_titles), len(axes)):
+                    fig.delaxes(axes[i])
+
+                cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+                fig.colorbar(im, cax=cbar_ax)
+
+                plt.tight_layout()
+
+                directory = f'plot_pearsonr_heatmap/{path}/'
+                self._create_directory(directory)
+                plt.savefig(f'{directory}All_models_pearson_heatmaps.pdf', bbox_inches='tight')
+                print(f'Saving to: {directory}All_models_pearson_heatmaps.pdf')
+                plt.close()
 
     # def plot_heat_maps(self) -> None:
     #     """
@@ -258,6 +366,9 @@ class Visualizer:
         """
         print("Start plotting correlations")
 
+        # Storage for mean and std calculations
+        all_normalized_correlations = {}
+
         # Iterate over each dictionary in the list
         for data_dict in self.emg_data_dicts:
             # Unpack the path and its datasets from each dictionary
@@ -268,6 +379,14 @@ class Visualizer:
                 max_corr = np.max(np.abs(auto_corr))
                 max_corr_idx = np.argmax(np.abs(auto_corr))
                 print(f"Max autocorrelation: {max_corr} at index {max_corr_idx} for {path}")
+
+                # Initialize storage for correlations
+                for title in datasets.keys():
+                    if title != 'Original':
+                        if title not in all_normalized_correlations:
+                            all_normalized_correlations[title] = {}
+                        if path not in all_normalized_correlations[title]:
+                            all_normalized_correlations[title][path] = []
 
                 # Iterate over datasets, skipping the 'Original' itself
                 for title, emg_data in {k: v for k, v in datasets.items() if k != 'Original'}.items():
@@ -282,6 +401,11 @@ class Visualizer:
                             std_x = np.std(x)
                             std_y = np.std(y)
 
+                            if std_x == 0 or std_y == 0:
+                                print(
+                                    f"Standard deviation is zero for row {row}, col {col} in {title}. Skipping normalization.")
+                                continue
+
                             # Normalize the signals
                             norm_x = (x - mu_x) / std_x
                             norm_y = (y - mu_y) / std_y
@@ -291,12 +415,20 @@ class Visualizer:
                             normalized_correlation = correlation / len(
                                 x)  # Correct normalization by length of the signal overlap
 
+                            if np.isnan(normalized_correlation).any():
+                                print(f"NaN detected in normalized correlation for row {row}, col {col} in {title}.")
+                                continue
+
                             max_corr = np.max(np.abs(normalized_correlation))
                             max_corr_idx = np.argmax(np.abs(normalized_correlation))
                             print(f"Max correlation: {max_corr} at index {max_corr_idx} for {path}")
 
+                            # Store the normalized correlation
+                            all_normalized_correlations[title][path].append(normalized_correlation)
+
                             plt.plot(normalized_correlation, label=f'Ch row {row} col {col}')
                             number_graphs += 1
+
                             if number_graphs % 5 == 0:
                                 plt.xlabel('Shift')
                                 plt.ylabel('Normalized Correlation')
@@ -314,58 +446,38 @@ class Visualizer:
                                 plt.figure()
                                 plot_number += 1
 
-    def plot_pearson_coefficient_grid(self):
-        """
-        Plot the Pearson coefficient of the correlation of one channel in the groundtruth signal with all other channels.
-        """
-        print("Start plotting Pearson coefficient grids")
+        # Plot mean and std deviation for each title and path
+        for title, paths in all_normalized_correlations.items():
+            for path, correlations in paths.items():
+                if len(correlations) > 0:
+                    correlations_array = np.array(correlations)
+                    mean_corr = np.nanmean(correlations_array, axis=0)
+                    std_corr = np.nanstd(correlations_array, axis=0)
+                    shifts = np.arange(-len(mean_corr) // 2 + 1, len(mean_corr) // 2 + 1)
 
-        # Iterate over each dictionary in the list
-        for data_dict in self.emg_data_dicts:
-            # Unpack the path and its datasets from each dictionary
-            for path, datasets in data_dict.items():
-                groundtruth = datasets['Original']
-
-                # Iterate over datasets, skipping the 'Original' itself
-                for title, grid_2 in {k: v for k, v in datasets.items() if k != 'Original'}.items():
-                    correlation_coefficients = np.zeros((13, 5))
-
-                    for row in range(13):
-                        for col in range(5):
-                            correlation_coefficients[row, col], _ = pearsonr(groundtruth[row, col], grid_2[row, col])
+                    # Replace NaNs with 0
+                    mean_corr = np.nan_to_num(mean_corr)
+                    std_corr = np.nan_to_num(std_corr)
 
                     plt.figure()
-                    plt.imshow(correlation_coefficients, cmap='viridis', origin='upper', vmin=0.95, vmax=1)
-                    plt.xticks(range(5), labels=range(1, 6))
-                    plt.yticks(range(13), labels=range(13, 0, -1))
-                    plt.title(f'Pearson coefficient - Origin with {title} - {path}')
-                    plt.colorbar()
+                    plt.plot(shifts, mean_corr, label='Mean Normalized Correlation')
+                    plt.fill_between(shifts, mean_corr - std_corr, mean_corr + std_corr, color='b', alpha=0.2,
+                                     label='Standard Deviation')
+                    plt.xlabel('Shift')
+                    plt.ylabel('Normalized Correlation')
+                    plt.title(f'Mean Normalized Cross-Correlation with Std Dev - {title} - {path}')
+                    plt.legend(loc='best')
+                    plt.ylim(-0.5, 1)
+                    plt.xlim(-60000, 60000)
+                    plt.tight_layout()
 
-                    directory = f'plot_pearsonr_heatmap/{path}/'
+                    directory = f'plot_normalized_correlations/summary/{path}/'
                     self._create_directory(directory)
-                    plt.savefig(f'{directory}{title}.png')
-                    print(f'Saving to: {directory}{title}.png')
+                    plt.savefig(f'{directory}Mean_Normalized_Correlation_{title}_{path}.png')
+                    print(f'Saving summary plot to: {directory}Mean_Normalized_Correlation_{title}_{path}.png')
                     plt.close()
-
-                    for row1 in range(13):
-                        for col1 in range(5):
-                            for row2 in range(13):
-                                for col2 in range(5):
-                                    correlation_coefficients[row2, col2], _ = pearsonr(groundtruth[row1, col1],
-                                                                                       grid_2[row2, col2])
-
-                            plt.figure()
-                            plt.imshow(correlation_coefficients, cmap='viridis', origin='upper', vmin=0.3, vmax=1)
-                            plt.xticks(range(5), labels=range(1, 6))
-                            plt.yticks(range(13), labels=range(13, 0, -1))
-                            plt.title(f'Pearson coefficient - Origin channel ({row1, col1}) with {title} - {path}')
-                            plt.colorbar()
-
-                            directory = f'plot_pearsonr_heatmap_oneChannel/{path}/'
-                            self._create_directory(directory)
-                            plt.savefig(f'{directory}{title}-r{row1}c{col1}.png')
-                            print(f'Saving to: {directory}{title}-r{row1}c{col1}.png')
-                            plt.close()
+                else:
+                    print(f"No correlation data found for {title} in {path}")
 
     def create_difference_plots(self):
         """
@@ -615,6 +727,181 @@ class Visualizer:
 
         print("Finished plotting all correlations and differences.")
 
+    # def create_box_plot(self):
+    #     data_dicts = self._load_data()
+    #
+    #     # Initialize dictionaries to hold differences for each model across all paths for each subset
+    #     differences_all = {
+    #         'Bilinear interpolation': [],
+    #         'Bicubic spline interpolation': [],
+    #         'SRGAN': [],
+    #         'UNet': [],
+    #         'UNet with Fourier': [],
+    #         'UNet with Wavelet': [],
+    #         'CNN-LSTM': []
+    #     }
+    #
+    #     differences_even = {
+    #         'Bilinear interpolation': [],
+    #         'Bicubic spline interpolation': [],
+    #         'SRGAN': [],
+    #         'UNet': [],
+    #         'UNet with Fourier': [],
+    #         'UNet with Wavelet': [],
+    #         'CNN-LSTM': []
+    #     }
+    #
+    #     differences_odd = {
+    #         'Bilinear interpolation': [],
+    #         'Bicubic spline interpolation': [],
+    #         'SRGAN': [],
+    #         'UNet': [],
+    #         'UNet with Fourier': [],
+    #         'UNet with Wavelet': [],
+    #         'CNN-LSTM': []
+    #     }
+    #
+    #     # Calculate the absolute differences
+    #     for data_dict in data_dicts:
+    #         for path, data in data_dict.items():
+    #             origin_hr = data['Original']
+    #             for model, model_data in data.items():
+    #                 if model != 'Original':
+    #                     # All data
+    #                     differences_all[model].extend(np.abs(model_data - origin_hr).flatten())
+    #
+    #                     # Even rows and columns (0,0), (0,2), (2,0), etc.
+    #                     even_diffs = np.abs(model_data[::2, ::2] - origin_hr[::2, ::2])
+    #                     differences_even[model].extend(even_diffs.flatten())
+    #
+    #                     # Print non-zero positions for 'Bicubic spline interpolation' where differences are greater than 1
+    #                     if model == 'Bicubic spline interpolation':
+    #                         # Create a mask for differences greater than 1
+    #                         significant_diffs_mask = even_diffs > 1
+    #                         print(even_diffs)
+    #                         non_zero_significant_indices = np.nonzero(significant_diffs_mask)
+    #                         print(
+    #                             f'Significant non-zero positions in {model} for path {path} (even indices): {non_zero_significant_indices}')
+    #
+    #                     # Odd rows and columns (1,1), (1,3), (3,1), etc.
+    #                     differences_odd[model].extend(np.abs(model_data[1::2, 1::2] - origin_hr[1::2, 1::2]).flatten())
+    #
+    #     def calculate_outliers(data):
+    #         # Calculate Q1 (25th percentile) and Q3 (75th percentile)
+    #         Q1 = np.percentile(data, 25)
+    #         Q3 = np.percentile(data, 75)
+    #
+    #         # Calculate IQR
+    #         IQR = Q3 - Q1
+    #
+    #         # Calculate lower and upper bounds
+    #         lower_bound = Q1 - 1.5 * IQR
+    #         upper_bound = Q3 + 1.5 * IQR
+    #
+    #         # Identify outliers
+    #         outliers = [x for x in data if x < lower_bound or x > upper_bound]
+    #
+    #         # Filter outliers from the data
+    #         filtered_data = [x for x in data if lower_bound <= x <= upper_bound]
+    #
+    #         # Calculate the percentage of outliers
+    #         outliers_percentage = (len(outliers) / len(data)) * 100
+    #
+    #         return outliers_percentage, filtered_data
+    #
+    #     def save_metrics(differences, filename):
+    #         metrics = {}
+    #         for model, diffs in differences.items():
+    #             metrics[model] = {
+    #                 'Mean': np.mean(diffs),
+    #                 'Std': np.std(diffs),
+    #                 'Q1': np.percentile(diffs, 25),
+    #                 'Median': np.median(diffs),
+    #                 'Q3': np.percentile(diffs, 75),
+    #                 'Min': np.min(diffs),
+    #                 'Max': np.max(diffs)
+    #             }
+    #         df_metrics = pd.DataFrame(metrics).transpose()
+    #         df_metrics.to_csv(filename)
+    #
+    #     def plot_boxplot(differences, title, colors, filename, remove_outliers=False, show_percentage=True):
+    #         boxplot_data = []
+    #         labels = []  # Will hold labels for the x-axis, which are model names wrapped if needed
+    #         outlier_percentages = []
+    #
+    #         # Creating a TextWrapper object to wrap text without breaking words
+    #         wrapper = textwrap.TextWrapper(width=15, break_long_words=False, break_on_hyphens=False)
+    #
+    #         for model, diffs in differences.items():
+    #             if remove_outliers:
+    #                 outlier_percentage, filtered_data = calculate_outliers(diffs)
+    #                 boxplot_data.append(filtered_data)
+    #                 outlier_percentages.append(outlier_percentage)
+    #             else:
+    #                 outlier_percentage, _ = calculate_outliers(diffs)
+    #                 boxplot_data.append(diffs)
+    #                 outlier_percentages.append(outlier_percentage)
+    #             # Wrap the model name and replace it in labels list
+    #             wrapped_label = wrapper.fill(text=model)
+    #             labels.append(wrapped_label)
+    #
+    #         fig, ax = plt.subplots(figsize=(10, 6))
+    #         bp = ax.boxplot(boxplot_data, labels=labels, patch_artist=True)
+    #
+    #         # Color the boxes
+    #         for patch in bp['boxes']:
+    #             patch.set_facecolor(colors[0])
+    #
+    #         # Adjust the ylim to give more space for outlier percentages
+    #         y_max = max([max(data) for data in boxplot_data if data]) * 1.06  # Increase by 5% for space
+    #         ax.set_ylim(0, y_max)
+    #
+    #         # Display percentages above the boxes if required
+    #         if show_percentage:
+    #             for i, outlier_percentage in enumerate(outlier_percentages):
+    #                 max_val = max(boxplot_data[i]) if boxplot_data[i] else 0
+    #                 ax.text(i + 1, max_val * 1.02, f'{outlier_percentage:.2f}%', horizontalalignment='right',
+    #                         color='black')
+    #
+    #         # Setting title with bold font and adjusting spacing
+    #         ax.set_title(title, weight='bold', pad=20)
+    #
+    #         plt.xlabel('Models')
+    #         plt.ylabel('Absolute difference in µV')
+    #         plt.xticks(rotation=0)
+    #         plt.grid(True)
+    #         plt.tight_layout()
+    #         plt.savefig(filename)
+    #         print("Automatically chosen figure size: Width = {:.2f} inches, Height = {:.2f} inches".format(
+    #             fig.get_figwidth(), fig.get_figheight()))
+    #         plt.close()
+    #
+    #     colors = ['#C6DEE9', '#5DC08A', '#2F586E']  # The first color in this list will be used for all boxes.
+    #
+    #     # Plot for all data
+    #     plot_boxplot(differences_all, 'Absolute difference between real and synthetic data', colors,
+    #                  'boxplots/boxplot_all_data.png')
+    #     plot_boxplot(differences_all,
+    #                  'Absolute difference between real and synthetic data - Without outliers', colors,
+    #                  'boxplots/boxplot_all_data_no_outliers.png', remove_outliers=True, show_percentage=False)
+    #     save_metrics(differences_all, 'boxplots/metrics_all_data.csv')
+    #
+    #     # Plot for even rows and columns
+    #     plot_boxplot(differences_even, 'Absolute difference between real and synthetic data (Even Rows/Cols)', colors,
+    #                  'boxplots/boxplot_even_rows_cols.png')
+    #     plot_boxplot(differences_even,
+    #                  'Absolute difference between real and synthetic data (Even Rows/Cols) - Without Outliers', colors,
+    #                  'boxplots/boxplot_even_rows_cols_no_outliers.png', remove_outliers=True, show_percentage=False)
+    #     save_metrics(differences_even, 'boxplots/metrics_even_rows_cols.csv')
+    #
+    #     # Plot for odd rows and columns
+    #     plot_boxplot(differences_odd, 'Absolute difference between real and synthetic data (Odd Rows/Cols)', colors,
+    #                  'boxplots/boxplot_odd_rows_cols.png')
+    #     plot_boxplot(differences_odd,
+    #                  'Absolute difference between real and synthetic data (Odd Rows/Cols) - Without Outliers', colors,
+    #                  'boxplots/boxplot_odd_rows_cols_no_outliers.png', remove_outliers=True, show_percentage=False)
+    #     save_metrics(differences_odd, 'boxplots/metrics_odd_rows_cols.csv')
+
     def create_box_plot(self):
         data_dicts = self._load_data()
 
@@ -659,12 +946,25 @@ class Visualizer:
                         differences_all[model].extend(np.abs(model_data - origin_hr).flatten())
 
                         # Even rows and columns (0,0), (0,2), (2,0), etc.
-                        differences_even[model].extend(np.abs(model_data[::2, ::2] - origin_hr[::2, ::2]).flatten())
+                        even_diffs = np.abs(model_data[::2, ::2] - origin_hr[::2, ::2])
+                        differences_even[model].extend(even_diffs.flatten())
 
-                        # Odd rows and columns (1,1), (1,3), (3,1), etc.
-                        differences_odd[model].extend(np.abs(model_data[1::2, 1::2] - origin_hr[1::2, 1::2]).flatten())
+                        # Odd columns completely and odd rows in the even columns
+                        odd_cols_completely = model_data[:, 1::2]
+                        odd_rows_even_cols = model_data[1::2, ::2]
+                        odd_cols_completely_orig = origin_hr[:, 1::2]
+                        odd_rows_even_cols_orig = origin_hr[1::2, ::2]
+
+                        odd_diffs_cols_completely = np.abs(odd_cols_completely - odd_cols_completely_orig).flatten()
+                        odd_diffs_rows_even_cols = np.abs(odd_rows_even_cols - odd_rows_even_cols_orig).flatten()
+
+                        differences_odd[model].extend(odd_diffs_cols_completely)
+                        differences_odd[model].extend(odd_diffs_rows_even_cols)
 
         def calculate_outliers(data):
+            if len(data) == 0:
+                return 0, data  # Return 0 outliers and the original empty data
+
             # Calculate Q1 (25th percentile) and Q3 (75th percentile)
             Q1 = np.percentile(data, 25)
             Q3 = np.percentile(data, 75)
@@ -687,66 +987,154 @@ class Visualizer:
 
             return outliers_percentage, filtered_data
 
-        def plot_boxplot(differences, title, colors, filename, remove_outliers=False, show_percentage=True):
+        def save_metrics(differences, filename):
+            metrics = {}
+            for model, diffs in differences.items():
+                metrics[model] = {
+                    'Mean': np.mean(diffs),
+                    'Std': np.std(diffs),
+                    'Q1': np.percentile(diffs, 25),
+                    'Median': np.median(diffs),
+                    'Q3': np.percentile(diffs, 75),
+                    'Min': np.min(diffs),
+                    'Max': np.max(diffs)
+                }
+            df_metrics = pd.DataFrame(metrics).transpose()
+            df_metrics.to_csv(filename)
+
+        def plot_grouped_boxplot(differences_all, differences_even, differences_odd, title, colors, filename,
+                                 remove_outliers=False, group_spacing=2, box_spacing=0, box_width=0.7):
             boxplot_data = []
-            labels = []
-            outlier_percentages = []
+            labels = []  # Will hold labels for the x-axis, which are model names wrapped if needed
 
-            for model in differences:
+            # Creating a TextWrapper object to wrap text without breaking words
+            wrapper = textwrap.TextWrapper(width=15, break_long_words=False, break_on_hyphens=False)
+
+            for model in differences_all.keys():
+                all_diffs = differences_all[model]
+                even_diffs = differences_even[model]
+                odd_diffs = differences_odd[model]
                 if remove_outliers:
-                    outlier_percentage, filtered_data = calculate_outliers(differences[model])
-                    boxplot_data.append(filtered_data)
-                    outlier_percentages.append(outlier_percentage)
-                else:
-                    boxplot_data.append(differences[model])
-                    outlier_percentage, _ = calculate_outliers(differences[model])
-                    outlier_percentages.append(outlier_percentage)
-                labels.append(model)
+                    _, all_diffs = calculate_outliers(all_diffs)
+                    _, even_diffs = calculate_outliers(even_diffs)
+                    _, odd_diffs = calculate_outliers(odd_diffs)
 
-            fig, ax = plt.subplots(figsize=(18, 10))
-            bp = ax.boxplot(boxplot_data, labels=labels, patch_artist=True)
+                boxplot_data.append(all_diffs)
+                boxplot_data.append(even_diffs)
+                boxplot_data.append(odd_diffs)
+                labels.append(wrapper.fill(text=model))
 
-            for patch, color in zip(bp['boxes'], colors * (len(differences) // len(colors))):
-                patch.set_facecolor(color)
+            fig, ax = plt.subplots(figsize=(7, 5))  # Width set to 16 cm (~6.3 inches), height will adapt
+            positions = []
+            for i in range(len(differences_all)):
+                base_position = i * (3 * box_width + group_spacing)
+                positions.extend([base_position + j * (box_width + box_spacing) for j in range(3)])
 
-            if show_percentage:
-                for i, outlier_percentage in enumerate(outlier_percentages):
-                    # Move the percentage text upwards by multiplying the maximum value by 1.025
-                    max_val = max(boxplot_data[i]) if boxplot_data[i] else 0  # Handle empty lists
-                    ax.text(i + 1, max_val * 1.025, f'{outlier_percentage:.2f}%', horizontalalignment='center',
-                            color='red')
+            bp = ax.boxplot(boxplot_data, positions=positions, patch_artist=True, widths=box_width)
 
-            plt.title(title)
+            # Color the boxes
+            for i, patch in enumerate(bp['boxes']):
+                patch.set_facecolor(colors[i % len(colors)])
+
+            # Create a legend
+            legend_elements = [
+                plt.Line2D([0], [0], color=colors[0], lw=4, label='All\nrows/columns'),
+                plt.Line2D([0], [0], color=colors[1], lw=4, label='Even\nrows/columns'),
+                plt.Line2D([0], [0], color=colors[2], lw=4, label='Odd\nrows/columns')
+            ]
+
+            # Adjust the ylim to give more space for outlier percentages
+            y_max = max([max(data) for data in boxplot_data if data]) * 1.06  # Increase by 6% for space
+            ax.set_ylim(0, y_max)
+
+            # Setting title with bold font and adjusting spacing
+            ax.set_title(title, pad=20, fontsize=12)
+
             plt.xlabel('Models')
-            plt.ylabel('Absolute Difference')
-            plt.xticks(rotation=45)
+            plt.ylabel('Absolute difference in µV')
+            ax.set_xticks([np.mean(positions[i * 3:(i + 1) * 3]) for i in range(len(differences_all))])
+            ax.set_xticklabels(labels, rotation=0, ha='center')
             plt.grid(True)
             plt.tight_layout()
-            plt.savefig(filename)
+
+            # Place the legend outside the plot in the top right corner
+            plt.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1), fancybox=False, shadow=False)
+
+            plt.savefig(filename, bbox_inches='tight', format='pdf')
+            print("Automatically chosen figure size: Width = {:.2f} inches, Height = {:.2f} inches".format(
+                fig.get_figwidth(), fig.get_figheight()))
             plt.close()
 
-        colors = ['#C6DEE9', '#5DC08A', '#2F586E']
+        colors = ['#C6DEE9', '#5DC08A', '#2F586E']  # Different colors for each data type group.
 
-        # Plot for all data
-        plot_boxplot(differences_all, 'Absolute Differences Between Models and Ground Truth (All Data)', colors,
-                     'boxplots/boxplot_all_data.png')
-        plot_boxplot(differences_all,
-                     'Absolute Differences Between Models and Ground Truth (All Data) - Without Outliers', colors,
-                     'boxplots/boxplot_all_data_no_outliers.png', remove_outliers=True, show_percentage=False)
+        # Plot grouped boxplot without outliers
+        plot_grouped_boxplot(differences_all, differences_even, differences_odd,
+                             'Absolute difference between real and synthetic data (Without outliers)',
+                             colors,
+                             'boxplots/boxplot_grouped_data_no_outliers.pdf', remove_outliers=True)
 
-        # Plot for even rows and columns
-        plot_boxplot(differences_even, 'Absolute Differences Between Models and Ground Truth (Even Rows/Cols)', colors,
-                     'boxplots/boxplot_even_rows_cols.png')
-        plot_boxplot(differences_even,
-                     'Absolute Differences Between Models and Ground Truth (Even Rows/Cols) - Without Outliers', colors,
-                     'boxplots/boxplot_even_rows_cols_no_outliers.png', remove_outliers=True, show_percentage=False)
+        # Plot grouped boxplot with outliers
+        plot_grouped_boxplot(differences_all, differences_even, differences_odd,
+                             'Absolute difference between real and synthetic data by data type (With outliers)', colors,
+                             'boxplots/boxplot_grouped_data_with_outliers.pdf', remove_outliers=False)
 
-        # Plot for odd rows and columns
-        plot_boxplot(differences_odd, 'Absolute Differences Between Models and Ground Truth (Odd Rows/Cols)', colors,
-                     'boxplots/boxplot_odd_rows_cols.png')
-        plot_boxplot(differences_odd,
-                     'Absolute Differences Between Models and Ground Truth (Odd Rows/Cols) - Without Outliers', colors,
-                     'boxplots/boxplot_odd_rows_cols_no_outliers.png', remove_outliers=True, show_percentage=False)
+        save_metrics(differences_all, 'boxplots/metrics_all_data.csv')
+        save_metrics(differences_even, 'boxplots/metrics_even_rows_cols.csv')
+        save_metrics(differences_odd, 'boxplots/metrics_odd_rows_cols.csv')
+
+    def plot_specific_positions(self):
+        """
+        Create plots for specific positions [3][1] and [4][2] for each path and selected models.
+        """
+        positions = [(3, 1), (4, 2)]
+        x_range = slice(30000, 30128)  # x-axis range from 30000 to 30256 (256 samples)
+        fig_size = (16 / 2.54, 12 / 2.54)  # Convert cm to inches
+
+        models_group_1 = ['Original','UNet' , 'Bicubic spline interpolation', 'SRGAN', 'Bilinear interpolation']
+        models_group_2 = ['Original', 'UNet with Wavelet', 'Bicubic spline interpolation', 'UNet with Fourier','Bilinear interpolation' ]
+
+        # Iterate over each dictionary in the list
+        for data_dict in self.emg_data_dicts:
+            # Unpack the path and its datasets from each dictionary
+            for path, datasets in data_dict.items():
+                # Iterate over specified positions
+                for pos_idx, (row, col) in enumerate(positions):
+                    # Plot for group 1 models
+                    fig, ax = plt.subplots(figsize=fig_size)
+                    for title in models_group_1:
+                        if title in datasets:
+                            signal = datasets[title][row, col, x_range]
+                            ax.plot(signal, label=title, alpha=0.7)
+                    ax.set_xlabel('Time in samples')
+                    ax.set_ylabel('Amplitude in µV')
+                    ax.set_title(f'sEMG - Position [{row}][{col}] - Group 1')
+                    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=3)
+                    plt.tight_layout()
+
+                    # Create directory and save the plot
+                    directory = f'plot_specific_positions/{path}/'
+                    self._create_directory(directory)
+                    plt.savefig(f'{directory}Position_{row}_{col}_Group1.pdf', bbox_inches='tight')
+                    plt.close()
+
+                    # Plot for group 2 models
+                    fig, ax = plt.subplots(figsize=fig_size)
+                    for title in models_group_2:
+                        if title in datasets:
+                            signal = datasets[title][row, col, x_range]
+                            ax.plot(signal, label=title, alpha=0.7)
+                    ax.set_xlabel('Time in samples')
+                    ax.set_ylabel('Amplitude in µV')
+                    ax.set_title(f'sEMG - Position [{row}][{col}] - Group 2')
+                    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=3)
+                    plt.tight_layout()
+
+                    # Save the plot
+                    plt.savefig(f'{directory}Position_{row}_{col}_Group2.pdf', bbox_inches='tight')
+                    plt.close()
+
+                    print(f'Saving to: {directory}Position_{row}_{col}_Group1.pdf and {directory}Position_{row}_{col}_Group2.pdf')
+
 
     def linear_methods_subtraction(self):
 
@@ -782,10 +1170,11 @@ if __name__ == '__main__':
     #visualize.plot_emg_channels()
     #visualize.plot_emg_channels_difference()
 
-    #visualize.plot_normalized_correlations()
     #visualize.plot_pearson_coefficient_grid()
     #visualize.create_difference_plots()
-    #visualize.propagation_plot()
+    # visualize.propagation_plot()
     #visualize.plot_windowed_correlations()
 
     visualize.create_box_plot()
+    # visualize.plot_normalized_correlations()
+    visualize.plot_specific_positions()
