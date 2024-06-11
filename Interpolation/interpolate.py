@@ -14,7 +14,7 @@ from scipy.interpolate import RegularGridInterpolator
 import torch
 from data import Custom_Dataset
 import scipy.ndimage
-
+from sklearn.metrics import mean_squared_error
 
 class Interpolation:
     """
@@ -116,46 +116,84 @@ class Interpolation:
 
     def interpolate_13x5(self) -> None:
         """
-        Performs cubic interpolation on the low resolution data to get high resolution data.
+        Performs cubic and linear interpolation on the low resolution data to get high resolution data,
+        and calculates the mean squared error for each interpolation method. Saves the MSE to a file.
 
         Returns
         -------
         interpolated_lr_hr: numpy.ndarray
                 High resolution emg data.
         """
+        total_mse_linear = 0
+        total_mse_cubic = 0
+        total_batches = len(self.testing)
+
+        # Load mean and std
+        mean = self.mean_std_dict['mean']
+        std = self.mean_std_dict['std']
+
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
             print(f'Batch index: {batch_idx}')
 
             lr_emg = lr_emg.numpy().squeeze()
+            hr_emg = hr_emg.numpy().squeeze()
 
-            # Perform linear interpolation
+            # Perform linear interpolation using grid interpolation method
             interpolated_lr_hr = self.grid_interpolation(lr_emg, (13, 5, lr_emg.shape[2]), 'linear')
 
-            # Save cubic interpolated signal from lr to hr
+            # Save linear interpolated signal from lr to hr
             path = '../results/linear_Interpolation/'
-
             os.makedirs(path, exist_ok=True)
             print("Saving")
             np.save(path + lr_emg_paths[0], interpolated_lr_hr)
+
+            # Standardize the data
+            standardized_hr_emg = (hr_emg - mean) / std
+            standardized_interpolated_lr_hr = (interpolated_lr_hr - mean) / std
+
+            # Calculate and accumulate the MSE for linear interpolation
+            mse_linear = mean_squared_error(standardized_hr_emg.flatten(), standardized_interpolated_lr_hr.flatten())
+            total_mse_linear += mse_linear
 
             # Upsampling factors for the first two dimensions, keeping the third dimension the same
             zoom_factors = (13 / 7, 5 / 3, 1)
 
-            # Perform the interpolation
+            # Perform cubic interpolation
             interpolated_lr_hr = scipy.ndimage.zoom(lr_emg, zoom_factors, order=3)  # Using cubic interpolation
 
             # Save cubic interpolated signal from lr to hr
             path = '../results/cubic_interpolation/'
-
             os.makedirs(path, exist_ok=True)
             print("Saving")
             np.save(path + lr_emg_paths[0], interpolated_lr_hr)
 
+            # Standardize the cubic interpolated data
+            standardized_interpolated_lr_hr = (interpolated_lr_hr - mean) / std
 
+            # Calculate and accumulate the MSE for cubic interpolation
+            mse_cubic = mean_squared_error(standardized_hr_emg.flatten(), standardized_interpolated_lr_hr.flatten())
+            total_mse_cubic += mse_cubic
 
+            # Perform linear interpolation using scipy.ndimage.zoom method
+            interpolated_lr_hr = scipy.ndimage.zoom(lr_emg, zoom_factors, order=1)  # Using linear interpolation
 
+            # Save linear interpolated signal from lr to hr
+            path = '../results/linear_zoom_interpolation/'
+            os.makedirs(path, exist_ok=True)
+            print("Saving")
+            np.save(path + lr_emg_paths[0], interpolated_lr_hr)
 
+        # Calculate average MSE
+        average_mse_linear = total_mse_linear / total_batches
+        average_mse_cubic = total_mse_cubic / total_batches
 
+        print(f'Average MSE for linear interpolation: {average_mse_linear}')
+        print(f'Average MSE for cubic interpolation: {average_mse_cubic}')
+
+        # Save the test loss to a file
+        with open('test_loss.txt', 'w') as f:
+            f.write(f'Average MSE for linear interpolation: {average_mse_linear}\n')
+            f.write(f'Average MSE for cubic interpolation: {average_mse_cubic}\n')
 
     def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
         """
