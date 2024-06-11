@@ -57,7 +57,7 @@ class TimeseriesDataset(Dataset):
             hr_emg = augmentation_method(hr_emg)
 
         # Bandpass filter
-        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 400, 2048, order=2)
+        hr_emg = self.butter_bandpass_filter(hr_emg, 20, 500, 2048, order=2)
 
         # extract lr emg
         lr_emg = hr_emg[::2, ::2]

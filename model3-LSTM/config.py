@@ -10,7 +10,7 @@ def get_config(data_directory, test_data_directory, results_directory, num_epoch
         max_epochs=num_epochs,
         n_features=2688,
         hidden_size=1344,
-        num_layers=1,
+        num_layers=2,
         dropout=0.2,
         learning_rate=learning_rate,
         results=results_directory,
