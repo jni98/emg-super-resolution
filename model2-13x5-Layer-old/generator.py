@@ -31,7 +31,7 @@ class ResidualBlock(nn.Module):
         residual = x
         out = self.conv1(x)
         out = self.bn1(out)
-        out = self.GELU(out)
+        out = self.prelu(out)
 
         out = self.conv2(out)
         out = self.bn2(out)
