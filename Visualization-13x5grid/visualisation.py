@@ -135,11 +135,14 @@ class Visualizer:
                         for cols in range(5):
                             signal = emg_data[rows][cols][
                                      :]  # Adjusted for the third dimension slicing as per your dataset
-                            plt.plot(signal.squeeze() + offset, label=f'Channel row {rows + 1} col {cols + 1}')
+                            # Create a time array
+                            time_array = np.arange(len(signal)) / 2048.0
+                            plt.plot(time_array, signal.squeeze() + offset,
+                                     label=f'Channel row {rows + 1} col {cols + 1}')
                             offset += 3500  # Adjust offset for visual clarity
 
-                    plt.xlabel('Time in samples')
-                    plt.title(f'{title} - {path}')
+                    plt.xlabel('Time in s')
+                    plt.title(f'{title}')
                     handles, labels = plt.gca().get_legend_handles_labels()
                     plt.legend(handles[::-1], labels[::-1], loc='upper left', bbox_to_anchor=(1, 1))
                     plt.tight_layout()
@@ -148,7 +151,7 @@ class Visualizer:
                     self._create_directory(directory)
                     file_name = f'{directory}{title}.pdf'
                     file_name = file_name.replace(' ', '_')
-                    plt.savefig(file_name,format='pdf')
+                    plt.savefig(file_name, format='pdf')
                     print(f'Saving to: {directory}{title}.pdf')
                     plt.close()
 
@@ -173,10 +176,11 @@ class Visualizer:
                     for row in range(13):
                         for col in range(5):
                             diff = np.abs(groundtruth[row, col, :] - emg_data[row, col, :])
-                            plt.plot(diff + offset, label=f'Channel row {row + 1} col {col + 1}')
+                            time_array = np.arange(len(diff)) / 2048.0
+                            plt.plot(time_array, diff + offset, label=f'Channel row {row + 1} col {col + 1}')
                             offset += np.max(diff) + 1000
 
-                    plt.xlabel('Time in samples')
+                    plt.xlabel('Time in s')
                     plt.ylabel('Mean Absolute Difference (with offset)')
                     plt.title(f'{title}')
                     plt.legend(loc='upper right', fontsize='small', ncol=2)
@@ -186,7 +190,7 @@ class Visualizer:
                     self._create_directory(directory)
                     filename = f'{directory}{title}_channels_difference.pdf'
                     filename = filename.replace(' ', '_')
-                    plt.savefig(filename,format='pdf')
+                    plt.savefig(filename, format='pdf')
                     print(f'Saving to: {directory}{title}_channels_difference.pdf')
                     plt.close()
 
@@ -201,7 +205,7 @@ class Visualizer:
                     self._create_directory(directory)
                     filename = f'{directory}{title}_mean_differences.pdf'
                     filename = filename.replace(' ', '_')
-                    plt.savefig(filename, bbox_inches='tight',format='pdf')
+                    plt.savefig(filename, bbox_inches='tight', format='pdf')
                     print(f'Saving to: {directory}{title}_mean_differences.pdf')
                     plt.close()
 
@@ -238,7 +242,7 @@ class Visualizer:
                 self._create_directory(directory)
                 filename = f'{directory}All_models_heatmaps.pdf'
                 filename = filename.replace(' ', '_')
-                plt.savefig(filename, bbox_inches='tight',format='pdf')
+                plt.savefig(filename, bbox_inches='tight', format='pdf')
                 print(f'Saving to: {directory}All_models_heatmaps.pdf')
                 plt.close()
 
@@ -391,7 +395,7 @@ class Visualizer:
                         correlations_array = np.array(correlations)
                         mean_corr = np.nanmean(correlations_array, axis=0)
                         std_corr = np.nanstd(correlations_array, axis=0)
-                        shifts = np.arange(-len(mean_corr) // 2 + 1, len(mean_corr) // 2 + 1)
+                        shifts = np.arange(-len(mean_corr) // 2 + 1, len(mean_corr) // 2 + 1) / 2048.0
 
                         # Replace NaNs with 0
                         mean_corr = np.nan_to_num(mean_corr)
@@ -399,7 +403,7 @@ class Visualizer:
 
                         fig, ax = plt.subplots(figsize=(16 / 2.54, 10 / 2.54))  # Convert cm to inches
                         ax.plot(shifts, mean_corr, label='Mean Correlation', color=mean_color)
-                        ax.fill_between(shifts, mean_corr - std_corr, mean_corr + std_corr, color=std_color, alpha=0.2,
+                        ax.fill_between(shifts, mean_corr - std_corr, mean_corr + std_corr, color=std_color, alpha=0.8,
                                         label='Standard Deviation')
 
                         # Save the peak of the mean value plot
@@ -414,13 +418,13 @@ class Visualizer:
                             'peak_std': peak_std
                         })
 
-                        ax.set_xlabel('Shift')
-                        ax.set_ylabel('Normalized Correlation')
-                        ax.set_title('Mean Normalized Cross-Correlation with Std Dev')
+                        ax.set_xlabel('Shift (seconds)')
+                        ax.set_ylabel('Normalized cross-correlation')
+                        ax.set_title('Mean normalized cross-correlation with std dev')
                         ax.legend(loc='best')
                         ax.grid(True)
                         ax.set_ylim(-0.4, 1.1)
-                        ax.set_xlim(-60000, 60000)
+                        ax.set_xlim(-35, 35)
                         plt.tight_layout()
 
                         directory = f'plot_normalized_correlations/{title}/{path}/'
@@ -435,7 +439,7 @@ class Visualizer:
             for path in data_dict.keys():
                 combined_fig, combined_axes = plt.subplots(2, 4, figsize=(
                 32 / 2.54, 16 / 2.54))  # 32x16 cm converted to inches
-                combined_fig.suptitle('Mean and Std Dev Normalized Cross-Correlation', fontsize=12)
+                combined_fig.suptitle('Mean and std dev normalized cross-correlation', fontsize=12)
                 combined_axes = combined_axes.flatten()
 
                 for idx, (title, paths) in enumerate(all_normalized_correlations.items()):
@@ -448,7 +452,7 @@ class Visualizer:
                             correlations_array = np.array(correlations)
                             mean_corr = np.nanmean(correlations_array, axis=0)
                             std_corr = np.nanstd(correlations_array, axis=0)
-                            shifts = np.arange(-len(mean_corr) // 2 + 1, len(mean_corr) // 2 + 1)
+                            shifts = np.arange(-len(mean_corr) // 2 + 1, len(mean_corr) // 2 + 1) / 2048.0
 
                             mean_corr = np.nan_to_num(mean_corr)
                             std_corr = np.nan_to_num(std_corr)
@@ -457,11 +461,11 @@ class Visualizer:
                             ax.fill_between(shifts, mean_corr - std_corr, mean_corr + std_corr, color=std_color,
                                             alpha=0.2, label='Standard Deviation')
                             ax.set_title(f'{title}', fontsize=10)
-                            ax.set_xlabel('Shift')
+                            ax.set_xlabel('Shift (seconds)')
                             ax.set_ylabel('Normalized Correlation')
                             ax.grid(True)
                             ax.set_ylim(-0.4, 1.1)
-                            ax.set_xlim(-60000, 60000)
+                            ax.set_xlim(-35, 35)
 
                 # Hide any unused subplots
                 for j in range(idx + 1, len(combined_axes)):
@@ -519,7 +523,8 @@ class Visualizer:
                     for i in range(13):
                         for j in range(5):
                             ax = axes[i, j]
-                            ax.plot(diff[i, j], color=plot_color)
+                            time_array = np.arange(diff.shape[2]) / 2048.0
+                            ax.plot(time_array, diff[i, j], color=plot_color)
                             ax.set_xticks([])
                             if j == 0:
                                 y_ticks = np.arange(global_min - 50, global_max + 50, 500)
@@ -529,9 +534,9 @@ class Visualizer:
                                 ax.set_yticks([])
                             ax.set_ylim(global_min, global_max)
                             if i == 1 and j == 4:
-                                ax_large.plot(diff[i, j], color=plot_color)
+                                ax_large.plot(time_array, diff[i, j], color=plot_color)
                                 ax_large.set_title(f'Large Plot: Differences at Row 2, Column 5 - {path}', fontsize=12)
-                                ax_large.set_xlabel('Time Points')
+                                ax_large.set_xlabel('Time in s')
                                 ax_large.set_ylabel('Difference Value')
                                 ax_large.set_ylim(global_min, global_max)
                                 y_ticks_large = np.arange(global_min - 50, global_max + 50, 500)
@@ -564,10 +569,11 @@ class Visualizer:
 
                         diff = groundtruth - grid_2
                         ax = axes_position[idx]
-                        ax.plot(diff[row, col], color=plot_color)
+                        time_array = np.arange(diff.shape[2]) / 2048.0
+                        ax.plot(time_array, diff[row, col], color=plot_color)
                         ax.set_title(f'{title}', fontsize=10)
                         ax.set_ylim(global_min, global_max)
-                        ax.set_xlabel('Time Points')
+                        ax.set_xlabel('Time in s')
                         ax.set_ylabel('Difference in µV')
                         ax.grid(True)
 
@@ -592,12 +598,15 @@ class Visualizer:
     def propagation_plot(self) -> None:
         """
         Creates a figure with 13 subplots for each element in the grids dictionary.
-        Each subplot shows the signal [y][0][28976:31024] for the first column of the array.
+        Each subplot shows the signal [y][2][start_idx:end_idx] for the third column of the array.
         """
         print("Start plotting propagation plots")
 
         start_idx = 30050
         end_idx = start_idx + 256
+
+        # Calculate the time array in milliseconds
+        time_array = (np.arange(start_idx, end_idx) - start_idx) / 2048.0 * 1000  # in milliseconds
 
         # Iterate over each dictionary in the list
         for data_dict in self.emg_data_dicts:
@@ -610,9 +619,10 @@ class Visualizer:
 
                     for y in range(13):
                         ax = axes[y]
-                        ax.plot(array[y, 2, start_idx:end_idx])  # Adjusted to plot from the third dimension
+                        ax.plot(time_array, array[y, 2, start_idx:end_idx])  # Adjusted to plot from the third dimension
                         ax.set_title(f'Row {y + 1}', fontsize=10)
-                        ax.set_xticks([])
+                        if y == 12:  # Only set x-axis labels on the last subplot
+                            ax.set_xlabel('Time in ms')
                         ax.set_yticks([])
 
                     plt.tight_layout()
@@ -621,7 +631,7 @@ class Visualizer:
                     self._create_directory(directory)
                     filename = f'{directory}Propagation_Plot_{title}.pdf'
                     filename = filename.replace(' ', '_')
-                    plt.savefig(filename,format='pdf')
+                    plt.savefig(filename, format='pdf')
                     print(f'Saving to: {directory}Propagation_Plot_{title}.pdf')
                     plt.close()
 
@@ -723,18 +733,17 @@ class Visualizer:
                             plt.plot(x_axis, correlations)
                             plt.xlabel('Window Index')
                             plt.ylabel('Pearson Correlation Coefficient')
-                            plt.title(f'Windowed Pearson Correlation - Channel ({row + 1}, {col + 1}) - {title}')
+                            plt.title(f'Windowed Pearson Correlation - {title}')
                             plt.ylim(global_y_min, global_y_max)
                             plt.xlim(global_x_min, global_x_max)
                             filename = f'{directory}Windowed_Correlation_Channel_{row + 1}_{col + 1}.pdf'
                             filename = filename.replace(' ', '_')
-                            plt.savefig(f'{directory}Windowed_Correlation_Channel_{row + 1}_{col + 1}.pdf')
+                            plt.savefig(filename)
                             plt.close()
 
                             # Add to big subplot figure
                             ax = axes[row, col]
                             ax.plot(x_axis, correlations)
-                            ax.set_title(f'Channel ({row + 1}, {col + 1})')
                             ax.set_ylim(global_y_min, global_y_max)
                             ax.set_xlim(global_x_min, global_x_max)
                             ax.label_outer()  # Only show outer labels to reduce clutter
@@ -799,7 +808,7 @@ class Visualizer:
                                 plt.xlabel('Window Index')
                                 plt.ylabel('Difference in Pearson Correlation Coefficient')
                                 plt.title(
-                                    f'Difference in Windowed Pearson Correlation - Bilinear interpolation vs {title}')
+                                    f'Difference in Windowed Pearson Correlation\nBilinear interpolation vs {title}')
                                 plt.ylim(global_diff_y_min, global_diff_y_max)
                                 plt.xlim(global_diff_x_min, global_diff_x_max)
                                 filename = f'{diff_directory}Difference_Windowed_Correlation_Channel_{row + 1}_{col + 1}.pdf'
@@ -822,7 +831,7 @@ class Visualizer:
                         # Save the large difference figure
                         fig_diff.tight_layout()
                         fig_diff.subplots_adjust(top=0.95)
-                        fig_diff.suptitle(f'Difference in Windowed Pearson Correlation - Bilinear interpolation vs {title}')
+                        fig_diff.suptitle(f'Difference in Windowed Pearson Correlation\nBilinear interpolation vs {title}')
                         filename = f'{diff_directory}Combined_Difference_{title}.pdf'
                         filename = filename.replace(' ', '_')
                         fig_diff.savefig(filename)
@@ -975,11 +984,11 @@ class Visualizer:
 
             # Create a legend
             legend_elements = [
-                plt.Line2D([0], [0], color=colors[0], lw=4, label='All\nchannels'),
-                plt.Line2D([0], [0], color=colors[1], lw=4, label='Predicted\nchannel'),
-                plt.Line2D([0], [0], color=colors[2], lw=4, label='Given\nchannel'),
-                plt.Line2D([0], [0], marker='x', color='w', label='Mean', markerfacecolor='red', markersize=8,
-                           markeredgewidth=2)
+                plt.Line2D([0], [0], color=colors[0], lw=4, label='all\nchannels'),
+                plt.Line2D([0], [0], color=colors[1], lw=4, label='predicted\nchannel'),
+                plt.Line2D([0], [0], color=colors[2], lw=4, label='given\nchannel'),
+                #plt.Line2D([0], [0], marker='x', color='w', markerfacecolor='red', markersize=8,
+                           #markeredgewidth=2)
             ]
 
             # Adjust the ylim to give more space for outlier percentages
@@ -1041,6 +1050,9 @@ class Visualizer:
             (112 / 255, 48 / 255, 160 / 255), (0 / 255, 128 / 255, 0 / 255)
         ]
 
+        # Calculate the time array in milliseconds
+        time_array = (np.arange(x_range.start, x_range.stop) - x_range.start) / 2048.0 * 1000  # in milliseconds
+
         # Iterate over each dictionary in the list
         for data_dict in self.emg_data_dicts:
             # Unpack the path and its datasets from each dictionary
@@ -1056,8 +1068,8 @@ class Visualizer:
                         if title in datasets:
                             alpha = 1 if title == 'Original' else 0.8
                             signal = datasets[title][row, col, x_range]
-                            ax.plot(signal, label=title, alpha=alpha, color=color)
-                    ax.set_xlabel('Time in samples')
+                            ax.plot(time_array, signal, label=title, alpha=alpha, color=color)
+                    ax.set_xlabel('Time in ms')
                     ax.set_ylabel('Amplitude in µV')
                     subtitle = 'predicted channel' if row == 3 else 'given channel'
                     ax.set_title(f'sEMG - {subtitle}')
@@ -1077,6 +1089,8 @@ class Visualizer:
                 plt.close()
 
                 print(f'Saving to: {directory}Position_3_1_and_4_2.pdf')
+
+        print("Finished plotting specific positions.")
 
     def plot_frequency_spectrum_difference(self):
         """
@@ -1131,7 +1145,7 @@ class Visualizer:
                         axes[i].plot(freq_gt, spectrum_diff, label='Spectrum Difference', color=difference_color)
                         axes[i].set_xlim(0, 600)  # Limiting the frequency range for better visualization
                         axes[i].set_title(f'{title}')
-                        axes[i].set_xlabel('Frequency (Hz)')
+                        axes[i].set_xlabel('Frequency in Hz')
                         axes[i].set_ylabel('Magnitude')
                         axes[i].grid(True)
                         axes[i].legend()
@@ -1146,7 +1160,7 @@ class Visualizer:
                         ax_subplot.plot(freq_gt, spectrum_diff, label='Spectrum Difference', color=difference_color)
                         ax_subplot.set_xlim(0, 600)
                         ax_subplot.set_title(f'{title}')
-                        ax_subplot.set_xlabel('Frequency (Hz)')
+                        ax_subplot.set_xlabel('Frequency in Hz')
                         ax_subplot.set_ylabel('Magnitude')
                         ax_subplot.grid(True)
                         ax_subplot.legend()
@@ -1168,20 +1182,21 @@ class Visualizer:
 
         print("Finished plotting frequency spectrum differences.")
 
+    #def plot_rms(self):
+
+
 
 if __name__ == '__main__':
     file_path = '../results/'
     visualize = Visualizer(file_path)
-    # visualize.plot_emg_channels()
-    #visualize.plot_emg_channels_difference()
-    # visualize.plot_pearson_coefficient_grid()
-    #visualize.create_difference_plots()
-    # visualize.propagation_plot()
+    visualize.plot_emg_channels()
+    visualize.plot_emg_channels_difference()
+    visualize.plot_pearson_coefficient_grid()
+    visualize.create_difference_plots()
+    visualize.propagation_plot()
     visualize.plot_windowed_correlations()
-    #
-    # visualize.create_box_plot()
-    #visualize.plot_normalized_correlations()
-    # visualize.plot_specific_positions()
-    #visualize.plot_frequency_spectrum_difference()
 
-    #TODO: Time in s umschreiben
+    visualize.create_box_plot()
+    visualize.plot_normalized_correlations()
+    visualize.plot_specific_positions()
+    visualize.plot_frequency_spectrum_difference()
