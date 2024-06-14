@@ -21,7 +21,7 @@ class ResidualBlock(nn.Module):
         self.conv1 = nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                       padding=(1, 1, 1))
         self.bn1 =nn.BatchNorm3d(in_channels)
-        self.prelu = nn.GELU()
+        self.prelu = nn.PReLU()
 
         self.conv2 = nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                       padding=(1, 1, 1))
@@ -50,7 +50,7 @@ class DownConvolutionBlock(nn.Module):
         self.downConv = nn.Conv3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                                   stride=(1, 1, 2), padding=(1, 1, 1))
         self.bn = nn.BatchNorm3d(out_channels)
-        self.prelu = nn.GELU()
+        self.prelu = nn.PReLU()
 
     def forward(self, x: torch.tensor) -> torch.tensor:
         out = self.downConv(x)
@@ -69,12 +69,12 @@ class UpConvolutionBlock(nn.Module):
         self.upConv = nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                                          stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1))
         self.bn1 = nn.BatchNorm3d(out_channels)
-        self.prelu1 = nn.GELU()
+        self.prelu1 = nn.PReLU()
 
         self.conv = nn.Conv3d(in_channels=out_channels + out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                               stride=(1, 1, 1), padding=(1, 1, 1))
         self.bn2 = nn.BatchNorm3d(out_channels)
-        self.prelu2 = nn.GELU()
+        self.prelu2 = nn.PReLU()
 
     def forward(self, x: torch.tensor, skip: torch.tensor) -> torch.tensor:
         # upsample
@@ -106,7 +106,7 @@ class Generator(nn.Module):
         # Convolution
         self.conv1 = nn.Conv3d(in_channels, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
         self.bn1 = nn.BatchNorm3d(64)
-        self.prelu1 = nn.GELU()
+        self.prelu1 = nn.PReLU()
 
         # Upsampling of the residual and residual block 1
         self.residualUp1 = nn.ConvTranspose3d(64, 64, kernel_size=(3, 3, 3), stride=(2, 2, 1), padding=(1, 1, 1))
