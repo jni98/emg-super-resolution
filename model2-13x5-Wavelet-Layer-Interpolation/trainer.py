@@ -91,7 +91,7 @@ class Trainer:
         wandb.init(project="GAN-Training", entity="masterthesis-sr")
 
         # Define lambda function for the LR scheduler
-        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 100)
+        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 200)
 
         print("init done")
 
