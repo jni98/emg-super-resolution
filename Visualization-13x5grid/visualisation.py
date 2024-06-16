@@ -1347,7 +1347,7 @@ class Visualizer:
             ax_overall_given.set_title(f'Overall Given Positions Mean Difference for {title}')
 
             # Save the overall given differences plot for this model
-            overall_given_filename = f'plot_windowed_correlations/Overall_Given_Positions_Mean_Difference_{title}.pdf'
+            overall_given_filename = f'plot_windowed_correlations/summary/Overall_Given_Positions_Mean_Difference_{title}.pdf'
             overall_given_filename = overall_given_filename.replace(' ', '_')
             fig_overall_given.savefig(overall_given_filename)
             print(f'Saving to: {overall_given_filename}')
@@ -1379,7 +1379,7 @@ class Visualizer:
             plt.close(fig_overall_predicted)
 
         # Create a combined figure with 6 rows and 2 columns of subplots
-        combined_fig, combined_axes = plt.subplots(nrows=6, ncols=2, figsize=(15, 30))
+        combined_fig, combined_axes = plt.subplots(nrows=6, ncols=2, figsize=(self.page_width, self.page_height * 0.85))
 
         for idx, title in enumerate(model_titles):
             x_axis = np.arange(len(model_given_differences[title]))
@@ -1392,7 +1392,7 @@ class Visualizer:
                                   color = 'lightcoral', alpha = 0.5)
             ax_given.plot(x_axis, model_given_differences[title], color='black')
             ax_given.set_xlim(overall_x_min, overall_x_max)
-            ax_given.set_ylim(-0.25, 0.25)
+            ax_given.set_ylim(-0.1, 0.1)
             ax_given.set_xlabel('Index')
             ax_given.set_ylabel('Mean Difference')
             ax_given.set_title(f'Overall Given Positions for {title}')
@@ -1407,13 +1407,15 @@ class Visualizer:
                                       color='lightcoral', alpha=0.5)
             ax_predicted.plot(x_axis, model_predicted_differences[title], color='black')
             ax_predicted.set_xlim(overall_x_min, overall_x_max)
-            ax_predicted.set_ylim(-0.25, 0.25)
+            ax_predicted.set_ylim(-0.1, 0.1)
             ax_predicted.set_xlabel('Index')
             ax_predicted.set_ylabel('Mean Difference')
             ax_predicted.set_title(f'Overall Predicted Positions for {title}')
 
         # Adjust layout and save the combined figure
         combined_fig.tight_layout()
+        combined_fig.text(0.29, 0.95, 'Windowed Pearson - Given channel\nBilinear vs. other models', ha='center', fontsize=12)
+        combined_fig.text(0.74, 0.95, 'Windowed Pearson - Predicted channel\nBilinear vs. other models', ha='center', fontsize=12)
         combined_fig.savefig('plot_windowed_correlations/Combined_Overall_Positions.pdf')
         print(f'Saving combined overall positions plot to: plot_windowed_correlations/Combined_Overall_Positions.pdf')
         plt.close(combined_fig)
