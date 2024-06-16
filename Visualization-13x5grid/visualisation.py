@@ -1149,41 +1149,34 @@ class Visualizer:
         # Define figure size for the main plots
         fig_size = (self.page_width, self.page_height)  # Increased height to 33.7 cm and converted to inches
 
-        # Storage for overall mean and std correlations
-        overall_mean_corr_predicted = {}
-        overall_mean_corr_given = {}
-        overall_std_corr_predicted = {}
-        overall_std_corr_given = {}
-        path_count = 0
+        # Initialize variables to track overall min and max for axes
+        overall_x_min, overall_x_max = float('inf'), float('-inf')
+        overall_y_min, overall_y_max = float('inf'), float('-inf')
 
-        # Custom colors
-        mean_color = (47 / 255, 88 / 255, 110 / 255)  # RGB (47, 88, 110)
-        std_color = (84 / 255, 156 / 255, 188 / 255)  # RGB (84, 156, 188)
+        # Initialize dictionaries to store overall differences for given and predicted channels across all paths for each model
+        model_given_differences = {}
+        model_predicted_differences = {}
 
-        # Iterate over each dictionary in the list
+        # Initialize a list to store titles for the combined figure
+        model_titles = []
+
+        directory = f'plot_windowed_correlations/summary/'
+        self._create_directory(directory)
+
+        # Iterate over each dictionary in the list to determine axis limits
         for data_dict in self.emg_data_dicts:
-            # Unpack the path and its datasets from each dictionary
-            path_count += 1
             for path, datasets in data_dict.items():
                 groundtruth = datasets['Original'][:, :, :60736]
                 linear_interpolation = datasets['Bilinear'][:, :, :60736]
 
-                # Iterate over datasets, skipping the 'Original' itself
                 for title, emg_data in {k: v for k, v in datasets.items() if k != 'Original'}.items():
                     emg_data = emg_data[:, :, :60736]
-                    directory = f'plot_windowed_correlations/{path}/{title}/'
-                    self._create_directory(directory)
 
-                    # Plot differences if the current title is not 'Bilinear interpolation'
                     if title != 'Bilinear':
-                        diff_directory = f'plot_windowed_correlations/{path}/Linear_vs_{title}/'
-                        self._create_directory(diff_directory)
-
-                        # Determine global min and max for differences across all subplots
-                        global_diff_y_min, global_diff_y_max = float('inf'), float('-inf')
-                        global_diff_x_min, global_diff_x_max = float('inf'), float('-inf')
-
-                        fig_diff, axes_diff = plt.subplots(nrows=13, ncols=5, figsize=fig_size)
+                        if title not in model_given_differences:
+                            model_given_differences[title] = []
+                            model_predicted_differences[title] = []
+                            model_titles.append(title)
 
                         for row in range(13):
                             for col in range(5):
@@ -1196,11 +1189,43 @@ class Visualizer:
                                 differences = np.array(correlations_compare) - np.array(correlations_linear)
                                 x_axis_diff = np.arange(len(differences))
 
-                                # Update global min and max for differences
-                                global_diff_y_min = min(global_diff_y_min, min(differences))
-                                global_diff_y_max = max(global_diff_y_max, max(differences))
-                                global_diff_x_min = min(global_diff_x_min, min(x_axis_diff))
-                                global_diff_x_max = max(global_diff_x_max, max(x_axis_diff))
+                                # Update overall x and y limits
+                                overall_x_min = min(overall_x_min, x_axis_diff.min())
+                                overall_x_max = max(overall_x_max, x_axis_diff.max())
+                                overall_y_min = min(overall_y_min, differences.min())
+                                overall_y_max = max(overall_y_max, differences.max())
+
+        # Plot with consistent axis limits
+        for data_dict in self.emg_data_dicts:
+            for path, datasets in data_dict.items():
+                groundtruth = datasets['Original'][:, :, :60736]
+                linear_interpolation = datasets['Bilinear'][:, :, :60736]
+
+                for title, emg_data in {k: v for k, v in datasets.items() if k != 'Original'}.items():
+                    emg_data = emg_data[:, :, :60736]
+                    directory = f'plot_windowed_correlations/{path}/{title}/'
+                    self._create_directory(directory)
+
+                    if title != 'Bilinear':
+                        diff_directory = f'plot_windowed_correlations/{path}/Linear_vs_{title}/'
+                        self._create_directory(diff_directory)
+
+                        fig_diff, axes_diff = plt.subplots(nrows=13, ncols=5, figsize=fig_size)
+
+                        # Initialize lists to store differences for given and predicted channels for this model and path
+                        given_differences = []
+                        predicted_differences = []
+
+                        for row in range(13):
+                            for col in range(5):
+                                signal_linear = linear_interpolation[row, col, :]
+                                signal_compare = emg_data[row, col, :]
+                                correlations_linear = self.calculate_windowed_correlation(groundtruth[row, col, :],
+                                                                                          signal_linear, window_size)
+                                correlations_compare = self.calculate_windowed_correlation(groundtruth[row, col, :],
+                                                                                           signal_compare, window_size)
+                                differences = np.array(correlations_compare) - np.array(correlations_linear)
+                                x_axis_diff = np.arange(len(differences))
 
                                 # Add to big subplot figure for differences
                                 ax_diff = axes_diff[row, col]
@@ -1209,13 +1234,19 @@ class Visualizer:
                                 ax_diff.fill_between(x_axis_diff, differences, where=(differences < 0),
                                                      color='lightcoral', alpha=0.5)
                                 ax_diff.plot(x_axis_diff, differences, color='black')
-                                ax_diff.set_ylim(global_diff_y_min, global_diff_y_max)
-                                ax_diff.set_xlim(global_diff_x_min, global_diff_x_max)
+                                ax_diff.set_xlim(overall_x_min, overall_x_max)  # Set consistent x limits
+                                ax_diff.set_ylim(-0.25, 0.25)  # Set consistent y limits
                                 if row == 12:  # Add x-axis label only to the bottom plots
                                     ax_diff.set_xlabel('Index')
                                 if col == 0:  # Add y-axis label only to the first column
                                     ax_diff.set_ylabel('Diff.')
                                 ax_diff.label_outer()
+
+                                # Collect differences for given and predicted channels for this model and path
+                                if row % 2 == 0 and col % 2 == 0:
+                                    given_differences.append(differences)
+                                else:
+                                    predicted_differences.append(differences)
 
                         # Save the large difference figure
                         fig_diff.tight_layout(rect=[0, 0, 1, 0.95])
@@ -1227,162 +1258,165 @@ class Visualizer:
                         print(f'Saving to: {filename}')
                         plt.close(fig_diff)
 
-                        # Additional plots for positions [3][1] and [4][2]
-                        positions = [(3, 1), (4, 2)]
-                        fig_pred, axes_pred = plt.subplots(2, 3, figsize=(self.page_width, self.page_height * 0.4))  # 2 rows and 3 columns for predicted position
-                        fig_given, axes_given = plt.subplots(2, 3, figsize=(self.page_width, self.page_height * 0.4))  # 2 rows and 3 columns for given position
+                        # Convert lists to arrays and compute the mean differences for this model and path
+                        given_differences = np.nanmean(np.array(given_differences), axis=0)
+                        predicted_differences = np.nanmean(np.array(predicted_differences), axis=0)
 
-                        # Flatten axes for easier indexing
-                        axes_pred = axes_pred.flatten()
-                        axes_given = axes_given.flatten()
+                        # Replace NaN values with zero
+                        given_differences = np.nan_to_num(given_differences, nan=0.0)
+                        predicted_differences = np.nan_to_num(predicted_differences, nan=0.0)
 
-                        # Dictionary to hold figure and axes references for easier looping
-                        fig_axes = {
-                            "predicted": (fig_pred, axes_pred),
-                            "given": (fig_given, axes_given)
-                        }
+                        # Store differences for summary plots
+                        model_given_differences[title].append(given_differences)
+                        model_predicted_differences[title].append(predicted_differences)
 
-                        for pos_idx, (row, col) in enumerate(positions):
-                            fig, axes = fig_axes["predicted" if pos_idx == 0 else "given"]
+                        # New plot for given positions differences
+                        fig_given, ax_given = plt.subplots(figsize=(10, 5))
 
-                            for i, other_title in enumerate([k for k in datasets.keys() if k != 'Bilinear' and k != 'Original']):
-                                signal_linear = linear_interpolation[row, col, :]
-                                signal_compare = datasets[other_title][row, col, :]
-                                correlations_linear = self.calculate_windowed_correlation(groundtruth[row, col, :], signal_linear, window_size)
-                                correlations_compare = self.calculate_windowed_correlation(groundtruth[row, col, :], signal_compare, window_size)
-                                differences = np.array(correlations_compare) - np.array(correlations_linear)
-                                x_axis_diff = np.arange(len(differences))
+                        x_axis = np.arange(len(given_differences))
 
-                                ax = axes[i]
-                                ax.fill_between(x_axis_diff, differences, where=(differences >= 0), color='lightgreen', alpha=0.5)
-                                ax.fill_between(x_axis_diff, differences, where=(differences < 0), color='lightcoral', alpha=0.5)
-                                ax.plot(x_axis_diff, differences, color='black')
-                                ax.set_title(f'{other_title}')
-                                if i % 3 == 0:  # Add y-axis label only to the first column
-                                    ax.set_ylabel('Difference')
-                                if i >= 3:  # Add x-axis label only to the second row
-                                    ax.set_xlabel('Index')
-                                ax.set_ylim(-0.2, 0.2)
-                                ax.set_xlim(0, 120)
+                        # Plot and fill between for given differences
+                        ax_given.fill_between(x_axis, given_differences, where=(given_differences >= 0),
+                                              color='lightgreen', alpha=0.5)
+                        ax_given.fill_between(x_axis, given_differences, where=(given_differences < 0),
+                                              color='lightcoral', alpha=0.5)
+                        ax_given.plot(x_axis, given_differences, color='black')
 
-                        fig_pred.tight_layout(rect=[0, 0, 1, 0.9])  # Adjust layout to make space for column titles
-                        fig_pred.suptitle(f'Difference in windowed Pearson correlation\nBilinear interpolation vs other models - Predicted channel')
-                        fig_given.tight_layout(rect=[0, 0, 1, 0.9])  # Adjust layout to make space for column titles
-                        fig_given.suptitle(f'Difference in windowed Pearson correlation\nBilinear interpolation vs other models - Given channel')
+                        ax_given.set_xlim(overall_x_min, overall_x_max)
+                        ax_given.set_ylim(-0.25, 0.25)
+                        ax_given.set_xlabel('Index')
+                        ax_given.set_ylabel('Mean Difference')
+                        ax_given.set_title('Given Positions Mean Difference')
 
-                        filename_pred = f'{diff_directory}Combined_Difference_Predicted_Position.pdf'
-                        filename_pred = filename_pred.replace(' ', '_')
-                        fig_pred.savefig(filename_pred)
-                        print(f'Saving to: {filename_pred}')
-
-                        filename_given = f'{diff_directory}Combined_Difference_Given_Position.pdf'
-                        filename_given = filename_given.replace(' ', '_')
-                        fig_given.savefig(filename_given)
-                        print(f'Saving to: {filename_given}')
-
-                        plt.close(fig_pred)
+                        # Save the given differences plot
+                        given_filename = f'{directory}Given_Positions_Mean_Difference_{title}.pdf'
+                        given_filename = given_filename.replace(' ', '_')
+                        fig_given.savefig(given_filename)
+                        print(f'Saving to: {given_filename}')
                         plt.close(fig_given)
 
-        # Summarize all paths into one figure
-        for data_dict in self.emg_data_dicts:
-            for path, datasets in data_dict.items():
-                groundtruth = datasets['Original'][:, :, :60736]
-                linear_interpolation = datasets['Bilinear'][:, :, :60736]
+                        # New plot for predicted positions differences
+                        fig_predicted, ax_predicted = plt.subplots(figsize=(10, 5))
 
-                for title, emg_data in {k: v for k, v in datasets.items() if k != 'Original'}.items():
-                    emg_data = emg_data[:, :, :60736]
+                        # Plot and fill between for predicted differences
+                        ax_predicted.fill_between(x_axis, predicted_differences, where=(predicted_differences >= 0),
+                                                  color='lightgreen', alpha=0.5)
+                        ax_predicted.fill_between(x_axis, predicted_differences, where=(predicted_differences < 0),
+                                                  color='lightcoral', alpha=0.5)
+                        ax_predicted.plot(x_axis, predicted_differences, color='black')
 
-                    for row in range(13):
-                        for col in range(5):
-                            signal_linear = linear_interpolation[row, col, :]
-                            signal_compare = emg_data[row, col, :]
-                            correlations_linear = self.calculate_windowed_correlation(groundtruth[row, col, :], signal_linear, window_size)
-                            correlations_compare = self.calculate_windowed_correlation(groundtruth[row, col, :], signal_compare, window_size)
-                            differences = np.array(correlations_compare) - np.array(correlations_linear)
+                        ax_predicted.set_xlim(overall_x_min, overall_x_max)
+                        ax_predicted.set_ylim(-0.25, 0.25)
+                        ax_predicted.set_xlabel('Index')
+                        ax_predicted.set_ylabel('Mean Difference')
+                        ax_predicted.set_title('Predicted Positions Mean Difference')
 
-                            if (row, col) in [(3, 1), (4, 2)]:
-                                key = 'predicted' if (row, col) == (3, 1) else 'given'
-                                if title not in overall_mean_corr_predicted:
-                                    overall_mean_corr_predicted[title] = []
-                                    overall_std_corr_predicted[title] = []
-                                    overall_mean_corr_given[title] = []
-                                    overall_std_corr_given[title] = []
+                        # Save the predicted differences plot
+                        predicted_filename = f'{directory}Predicted_Positions_Mean_Difference_{title}.pdf'
+                        predicted_filename = predicted_filename.replace(' ', '_')
+                        fig_predicted.savefig(predicted_filename)
+                        print(f'Saving to: {predicted_filename}')
+                        plt.close(fig_predicted)
 
-                                if key == 'predicted':
-                                    overall_mean_corr_predicted[title].append(differences)
-                                else:
-                                    overall_mean_corr_given[title].append(differences)
+        # Create summary plots for each model
+        for title in model_given_differences.keys():
+            # Convert overall lists to arrays and compute the overall mean differences for this model
+            model_given_differences[title] = np.nanmean(np.array(model_given_differences[title]), axis=0)
+            model_predicted_differences[title] = np.nanmean(np.array(model_predicted_differences[title]), axis=0)
 
-        # Calculate mean and std for overall correlations
-        for title in overall_mean_corr_predicted.keys():
-            overall_mean_corr_predicted[title] = np.nanmean(np.vstack(overall_mean_corr_predicted[title]), axis=0)
-            overall_std_corr_predicted[title] = np.nanstd(np.vstack(overall_mean_corr_predicted[title]), axis=0)
-            overall_mean_corr_given[title] = np.nanmean(np.vstack(overall_mean_corr_given[title]), axis=0)
-            overall_std_corr_given[title] = np.nanstd(np.vstack(overall_mean_corr_given[title]), axis=0)
+            # Replace NaN values with zero
+            model_given_differences[title] = np.nan_to_num(model_given_differences[title], nan=0.0)
+            model_predicted_differences[title] = np.nan_to_num(model_predicted_differences[title], nan=0.0)
 
-        # Plot overall mean and std deviation for predicted channels
-        fig, axes = plt.subplots(2, 3, figsize=(self.page_width, self.page_height * 0.4))
-        fig.suptitle('Overall Windowed Pearson correlation - Predicted channels')
-        axes = axes.flatten()
+            # Summary plot for overall given positions differences for this model
+            fig_overall_given, ax_overall_given = plt.subplots(figsize=(10, 5))
 
-        for idx, title in enumerate(overall_mean_corr_predicted.keys()):
-            if idx >= 6:
-                break
-            ax = axes[idx]
-            mean_corr = overall_mean_corr_predicted[title]
-            std_corr = overall_std_corr_predicted[title]
-            shifts = np.arange(-len(mean_corr) // 2 + 1, len(mean_corr) // 2 + 1) / 2048.0
+            # Plot and fill between for overall given differences
+            ax_overall_given.fill_between(x_axis, model_given_differences[title],
+                                          where=(model_given_differences[title] >= 0),
+                                          color='lightgreen', alpha=0.5)
+            ax_overall_given.fill_between(x_axis, model_given_differences[title],
+                                          where=(model_given_differences[title] < 0),
+                                          color='lightcoral', alpha=0.5)
+            ax_overall_given.plot(x_axis, model_given_differences[title], color='black')
 
-            ax.plot(shifts, mean_corr, label='Mean', color=mean_color)
-            ax.fill_between(shifts, mean_corr - std_corr, mean_corr + std_corr, color=std_color, alpha=0.2, label='STD')
-            ax.set_title(f'{title}')
-            ax.set_xlabel('Shift in s')
-            ax.set_ylabel('Correlation')
-            ax.grid(True)
-            ax.set_ylim(-0.2, 0.2)
-            ax.set_xlim(-35, 35)
+            ax_overall_given.set_xlim(overall_x_min, overall_x_max)
+            ax_overall_given.set_ylim(-0.25, 0.25)
+            ax_overall_given.set_xlabel('Index')
+            ax_overall_given.set_ylabel('Mean Difference')
+            ax_overall_given.set_title(f'Overall Given Positions Mean Difference for {title}')
 
-        plt.tight_layout(rect=[0, 0, 1, 0.9])
-        directory = f'plot_windowed_correlations/summary/'
-        self._create_directory(directory)
-        filename = f'{directory}Overall_Windowed_Correlation_Predicted_Channels.pdf'
-        filename = filename.replace(' ', '_')
-        fig.savefig(filename)
-        print(f'Saving to: {filename}')
-        plt.close(fig)
+            # Save the overall given differences plot for this model
+            overall_given_filename = f'plot_windowed_correlations/Overall_Given_Positions_Mean_Difference_{title}.pdf'
+            overall_given_filename = overall_given_filename.replace(' ', '_')
+            fig_overall_given.savefig(overall_given_filename)
+            print(f'Saving to: {overall_given_filename}')
+            plt.close(fig_overall_given)
 
-        # Plot overall mean and std deviation for given channels
-        fig, axes = plt.subplots(2, 3, figsize=(self.page_width, self.page_height * 0.4))
-        fig.suptitle('Overall Windowed Pearson correlation - Given channels')
-        axes = axes.flatten()
+            # Summary plot for overall predicted positions differences for this model
+            fig_overall_predicted, ax_overall_predicted = plt.subplots(figsize=(10, 5))
 
-        for idx, title in enumerate(overall_mean_corr_given.keys()):
-            if idx >= 6:
-                break
-            ax = axes[idx]
-            mean_corr = overall_mean_corr_given[title]
-            std_corr = overall_std_corr_given[title]
-            shifts = np.arange(-len(mean_corr) // 2 + 1, len(mean_corr) // 2 + 1) / 2048.0
+            # Plot and fill between for overall predicted differences
+            ax_overall_predicted.fill_between(x_axis, model_predicted_differences[title],
+                                              where=(model_predicted_differences[title] >= 0),
+                                              color='lightgreen', alpha=0.5)
+            ax_overall_predicted.fill_between(x_axis, model_predicted_differences[title],
+                                              where=(model_predicted_differences[title] < 0),
+                                              color='lightcoral', alpha=0.5)
+            ax_overall_predicted.plot(x_axis, model_predicted_differences[title], color='black')
 
-            ax.plot(shifts, mean_corr, label='Mean', color=mean_color)
-            ax.fill_between(shifts, mean_corr - std_corr, mean_corr + std_corr, color=std_color, alpha=0.2, label='STD')
-            ax.set_title(f'{title}')
-            ax.set_xlabel('Shift in s')
-            ax.set_ylabel('Correlation')
-            ax.grid(True)
-            ax.set_ylim(-0.2, 0.2)
-            ax.set_xlim(-35, 35)
+            ax_overall_predicted.set_xlim(overall_x_min, overall_x_max)
+            ax_overall_predicted.set_ylim(-0.25, 0.25)
+            ax_overall_predicted.set_xlabel('Index')
+            ax_overall_predicted.set_ylabel('Mean Difference')
+            ax_overall_predicted.set_title(f'Overall Predicted Positions Mean Difference for {title}')
 
-        plt.tight_layout(rect=[0, 0, 1, 0.9])
-        directory = f'plot_windowed_correlations/summary/'
-        self._create_directory(directory)
-        filename = f'{directory}Overall_Windowed_Correlation_Given_Channels.pdf'
-        filename = filename.replace(' ', '_')
-        fig.savefig(filename)
-        print(f'Saving to: {filename}')
-        plt.close(fig)
+            # Save the overall predicted differences plot for this model
+            overall_predicted_filename = f'plot_windowed_correlations/summary/Overall_Predicted_Positions_Mean_Difference_{title}.pdf'
+            overall_predicted_filename = overall_predicted_filename.replace(' ', '_')
+            fig_overall_predicted.savefig(overall_predicted_filename)
+            print(f'Saving to: {overall_predicted_filename}')
+            plt.close(fig_overall_predicted)
 
-        print("Finished plotting all correlations and differences.")
+        # Create a combined figure with 6 rows and 2 columns of subplots
+        combined_fig, combined_axes = plt.subplots(nrows=6, ncols=2, figsize=(15, 30))
+
+        for idx, title in enumerate(model_titles):
+            x_axis = np.arange(len(model_given_differences[title]))
+
+            # Plot overall given differences in the first column
+            ax_given = combined_axes[idx, 0]
+            ax_given.fill_between(x_axis, model_given_differences[title], where=(model_given_differences[title] >= 0),
+                                  color='lightgreen', alpha=0.5)
+            ax_given.fill_between(x_axis, model_given_differences[title], where=(model_given_differences[title] < 0),
+                                  color = 'lightcoral', alpha = 0.5)
+            ax_given.plot(x_axis, model_given_differences[title], color='black')
+            ax_given.set_xlim(overall_x_min, overall_x_max)
+            ax_given.set_ylim(-0.25, 0.25)
+            ax_given.set_xlabel('Index')
+            ax_given.set_ylabel('Mean Difference')
+            ax_given.set_title(f'Overall Given Positions for {title}')
+
+            # Plot overall predicted differences in the second column
+            ax_predicted = combined_axes[idx, 1]
+            ax_predicted.fill_between(x_axis, model_predicted_differences[title],
+                                      where=(model_predicted_differences[title] >= 0),
+                                      color='lightgreen', alpha=0.5)
+            ax_predicted.fill_between(x_axis, model_predicted_differences[title],
+                                      where=(model_predicted_differences[title] < 0),
+                                      color='lightcoral', alpha=0.5)
+            ax_predicted.plot(x_axis, model_predicted_differences[title], color='black')
+            ax_predicted.set_xlim(overall_x_min, overall_x_max)
+            ax_predicted.set_ylim(-0.25, 0.25)
+            ax_predicted.set_xlabel('Index')
+            ax_predicted.set_ylabel('Mean Difference')
+            ax_predicted.set_title(f'Overall Predicted Positions for {title}')
+
+        # Adjust layout and save the combined figure
+        combined_fig.tight_layout()
+        combined_fig.savefig('plot_windowed_correlations/Combined_Overall_Positions.pdf')
+        print(f'Saving combined overall positions plot to: plot_windowed_correlations/Combined_Overall_Positions.pdf')
+        plt.close(combined_fig)
 
     def create_box_plot(self):
         data_dicts = self._load_data()
@@ -2100,11 +2134,11 @@ if __name__ == '__main__':
     # visualize.plot_emg_channels()
     #visualize.plot_emg_channels_difference()
     #visualize.plot_pearson_coefficient_grid()
-    visualize.create_difference_plots()
+    #visualize.create_difference_plots()
     # visualize.propagation_plot()
-    # visualize.plot_windowed_correlations()
+    visualize.plot_windowed_correlations()
     #visualize.plot_specific_positions()
-    visualize.create_box_plot()
-    visualize.plot_frequency_spectrum_difference()
+    #visualize.create_box_plot()
+    #visualize.plot_frequency_spectrum_difference()
     # visualize.plot_normalized_correlations()
     #visualize.process_matlab_rms()
