@@ -925,7 +925,7 @@ class Visualizer:
                     plt.close(fig_large)
 
                 # Create a single figure for both positions with subplots for all models
-                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width, self.page_height))
+                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width*0.9, self.page_height*0.75))
                 axes = axes.flatten()
 
                 for idx, (title, grid_2) in enumerate(
@@ -951,7 +951,7 @@ class Visualizer:
                         ax1.set_xlabel('Time in s')
                     else:
                         ax1.set_xticklabels([])
-                    ax1.set_ylabel('Error in µV')  # Add y-axis label only to the first column
+                    ax1.set_ylabel('Error\nin µV')  # Add y-axis label only to the first column
 
                     # Predicted channel at position (3, 1)
                     row2, col2 = 3, 1
@@ -972,8 +972,8 @@ class Visualizer:
                     ax2.set_yticklabels([])
 
                 # Add column titles
-                fig.text(0.31, 0.95, 'Error - Given channel', ha='center', fontsize=10)
-                fig.text(0.78, 0.95, 'Error - Predicted channel', ha='center', fontsize=10)
+                fig.text(0.35, 0.95, 'Error - Given channel', ha='center', fontsize=12)
+                fig.text(0.77, 0.95, 'Error - Predicted channel', ha='center', fontsize=12)
 
                 fig.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout to make space for column titles
 
@@ -1040,8 +1040,8 @@ class Visualizer:
                         ax2.set_xticklabels([])
 
                 # Add column titles
-                fig.text(0.31, 0.95, 'Error - Given channels', ha='center', fontsize=10)
-                fig.text(0.78, 0.95, 'Error - Predicted channels', ha='center', fontsize=10)
+                fig.text(0.31, 0.95, 'Error - Given channels', ha='center', fontsize=12)
+                fig.text(0.78, 0.95, 'Error - Predicted channels', ha='center', fontsize=12)
 
                 fig.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout to make space for column titles
 
@@ -1459,7 +1459,7 @@ class Visualizer:
             ax.set_ylim(0, y_max)
 
             # Setting title with bold font and adjusting spacing
-            ax.set_title(title)
+            ax.set_title(title, fontsize=12)
 
             plt.xlabel('Models')
             plt.ylabel('Absolute error in µV')
@@ -2017,7 +2017,7 @@ class Visualizer:
                 # plt.close(fig)
 
                 # Create a single figure for both positions with subplots for all models
-                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width * 1, self.page_height * 1))
+                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width, self.page_height * 0.85))
                 axes = axes.flatten()
 
                 # Initialize lists for handles and labels for the legend
@@ -2079,8 +2079,8 @@ class Visualizer:
 
                 fig.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout to make space for the legend
 
-                fig.text(0.29, 0.95, 'Spectrum - Given channel', ha='center', fontsize=10)
-                fig.text(0.74, 0.95, 'Spectrum - Predicted channel', ha='center', fontsize=10)
+                fig.text(0.29, 0.95, 'Spectrum - Given channel', ha='center', fontsize=12)
+                fig.text(0.74, 0.95, 'Spectrum - Predicted channel', ha='center', fontsize=12)
 
                 # Save the combined figure for given and predicted channels
                 directory = f'plot_frequency_spectrum_difference/{path}/'
@@ -2104,7 +2104,7 @@ if __name__ == '__main__':
     # visualize.propagation_plot()
     # visualize.plot_windowed_correlations()
     #visualize.plot_specific_positions()
-    #visualize.create_box_plot()
-    #visualize.plot_frequency_spectrum_difference()
+    visualize.create_box_plot()
+    visualize.plot_frequency_spectrum_difference()
     # visualize.plot_normalized_correlations()
     #visualize.process_matlab_rms()
