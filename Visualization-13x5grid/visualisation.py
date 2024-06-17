@@ -135,7 +135,7 @@ class Visualizer:
         return data_dicts
 
     def plot_channel_3_2(self, path, model_name, original_data, filtered_data):
-        start_idx = 30050
+        start_idx = 36436
         end_idx = start_idx + 256
         channel_original = original_data[3, 2, start_idx:end_idx]
         channel_filtered = filtered_data[3, 2, start_idx:end_idx]
@@ -150,10 +150,25 @@ class Visualizer:
 
         directory = f'plot_channel_3_2/{path}/'
         self._create_directory(directory)
-        filename = f'{directory}{model_name}_Channel_3_2_comparison.pdf'
+        filename = f'{directory}{model_name}_Channel_3_2_sequence_comparison.pdf'
         plt.savefig(filename, bbox_inches='tight', format='pdf')
         plt.close()
         print(f'Saving plot to: {filename}')
+
+        # plt.figure(figsize=(10, 4))
+        # plt.plot(original_data[3, 2], label='Original', color='blue')
+        # plt.plot(filtered_data[3,2], label='Filtered', color='red')
+        # plt.title(f'{model_name} - Channel [3][2]')
+        # plt.xlabel('Sample')
+        # plt.ylabel('Amplitude')
+        # plt.legend()
+        #
+        # directory = f'plot_channel_3_2/{path}/'
+        # self._create_directory(directory)
+        # filename = f'{directory}{model_name}_Channel_3_2_comparison.pdf'
+        # plt.savefig(filename, bbox_inches='tight', format='pdf')
+        # plt.close()
+        # print(f'Saving plot to: {filename}')
 
     def _create_directory(self, directory: str) -> None:
         """
@@ -643,7 +658,7 @@ class Visualizer:
 
                             if std_x == 0 or std_y == 0:
                                 print(
-                                    f"Standard deviation is zero for row {row}, col {col} in {title}. Skipping normalization.")
+                                    f"Standard deviation is zero for row {row}, col {col} in {title}. Skipping normalisation.")
                                 continue
 
                             # Normalize the signals
@@ -656,7 +671,7 @@ class Visualizer:
                                 x)  # Correct normalization by length of the signal overlap
 
                             if np.isnan(normalized_correlation).any():
-                                print(f"NaN detected in normalized correlation for row {row}, col {col} in {title}.")
+                                print(f"NaN detected in normalised correlation for row {row}, col {col} in {title}.")
                                 continue
 
                             max_corr = np.max(np.abs(normalized_correlation))
@@ -704,7 +719,7 @@ class Visualizer:
                     })
 
                     ax.set_xlabel('Shift in s')
-                    ax.set_ylabel('Normalized cross-correlation')
+                    ax.set_ylabel('Normalised cross-correlation')
                     ax.set_title(f'{title}')
                     ax.legend(loc='best')
                     ax.grid(True)
@@ -724,7 +739,7 @@ class Visualizer:
         for data_dict in self.emg_data_dicts:
             for path in data_dict.keys():
                 fig, axes = plt.subplots(3, 3, figsize=(self.page_width, self.page_height * 0.75))
-                fig.suptitle(f'Normalized cross-correlation')
+                fig.suptitle(f'Normalised cross-correlation')
                 axes = axes.flatten()
 
                 handles_list = []
@@ -785,7 +800,7 @@ class Visualizer:
 
         # Plot overall mean and std deviation for all paths
         fig, axes = plt.subplots(3, 3, figsize=(self.page_width, self.page_height * 0.75))
-        fig.suptitle('Normalized cross-correlation')
+        fig.suptitle('Normalised cross-correlation')
         axes = axes.flatten()
 
         handles_list = []
@@ -860,8 +875,11 @@ class Visualizer:
         """
         print("Start plotting absolute difference grids")
 
-        # Define the custom color
+
+        # Custom colors
         plot_color = (47 / 255, 88 / 255, 110 / 255)  # RGB (47, 88, 110)
+        error_color = (199 / 255, 91 / 255, 76 / 255)
+
         positions = [(3, 1), (4, 2)]  # Only these two positions
 
         # Iterate over each dictionary in the list
@@ -925,13 +943,19 @@ class Visualizer:
                     plt.close(fig_large)
 
                 # Create a single figure for both positions with subplots for all models
-                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width*0.9, self.page_height*0.75))
+                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width*0.9, self.page_height*0.85))
                 axes = axes.flatten()
+
+                labels_list = []
+                handles_list = []
 
                 for idx, (title, grid_2) in enumerate(
                         {k: v for k, v in datasets.items() if k != 'Original'}.items()):
                     if idx >= 14:
                         break  # Ensure we don't create more than 14 subplots (7 rows x 2 columns)
+
+                    global_min = min((np.min(groundtruth[4][2])), (np.min(groundtruth[3][1])))
+                    global_max = max((np.max(groundtruth[4][2])), (np.max(groundtruth[3][1])))
 
                     diff = groundtruth - grid_2
 
@@ -939,31 +963,41 @@ class Visualizer:
                     row1, col1 = 4, 2
                     ax1 = axes[2 * idx]  # Position in the first column
                     time_array1 = np.arange(diff.shape[2]) / 2048.0
-                    ax1.plot(time_array1, diff[row1, col1], color=plot_color, linewidth=0.5)
+                    line1, = ax1.plot(time_array1, groundtruth[row1, col1], label='Real signal', color=plot_color, linewidth=0.5, alpha=0.5)
+                    line2, = ax1.plot(time_array1, diff[row1, col1], label='Error', color=error_color, linewidth=0.5)
                     ax1.set_title(f'{title}')
                     ax1.set_ylim(global_min, global_max)
                     ax1.grid(True, which='both')
 
+                    if idx == 0:
+                        handles_list.append(line1)
+                        handles_list.append(line2)
+                        labels_list.append('Real signal')
+                        labels_list.append('Error')
+
                     # Set minor ticks
-                    ax1.yaxis.set_minor_locator(MultipleLocator(250))
+                    ax1.yaxis.set_minor_locator(MultipleLocator(500))
 
                     if idx == 6:  # Add x-axis label only to the bottom plots
                         ax1.set_xlabel('Time in s')
                     else:
                         ax1.set_xticklabels([])
-                    ax1.set_ylabel('Error\nin µV')  # Add y-axis label only to the first column
+                    ax1.set_ylabel('Amplitude\nin µV')  # Add y-axis label only to the first column
 
                     # Predicted channel at position (3, 1)
                     row2, col2 = 3, 1
                     ax2 = axes[2 * idx + 1]  # Position in the second column
                     time_array2 = np.arange(diff.shape[2]) / 2048.0
-                    line2, = ax2.plot(time_array2, diff[row2, col2], color=plot_color, linewidth=0.5)
+                    line3, = ax2.plot(time_array2, groundtruth[row2, col2], label='Real signal', color=plot_color,
+                                      linewidth=0.5, alpha=0.5)
+                    line4, = ax2.plot(time_array2, diff[row2, col2], label='Error', color=error_color, linewidth=0.5)
+
                     ax2.set_title(f'{title}')
                     ax2.set_ylim(global_min, global_max)
                     ax2.grid(True, which='both')
 
                     # Set minor ticks
-                    ax2.yaxis.set_minor_locator(MultipleLocator(250))
+                    ax2.yaxis.set_minor_locator(MultipleLocator(500))
 
                     if idx == 6:  # Add x-axis label only to the bottom plots
                         ax2.set_xlabel('Time in s')
@@ -971,11 +1005,24 @@ class Visualizer:
                         ax2.set_xticklabels([])
                     ax2.set_yticklabels([])
 
+                # Create a separate Axes for the legend
+                legend_ax = fig.add_axes([0.1, 0.0, 0.8, 0.05])  # [left, bottom, width, height]
+
+                # Create the legend
+                legend = legend_ax.legend(handles=handles_list, labels=labels_list, loc='center', ncol=2)
+
+                # Change the linewidth of the legend lines
+                for line in legend.get_lines():
+                    line.set_linewidth(1.5)
+
+                # Remove the legend Axes' background and ticks
+                legend_ax.axis('off')
+
                 # Add column titles
                 fig.text(0.35, 0.95, 'Error - Given channel', ha='center', fontsize=12)
                 fig.text(0.77, 0.95, 'Error - Predicted channel', ha='center', fontsize=12)
 
-                fig.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout to make space for column titles
+                fig.tight_layout(rect=[0, 0.05, 1, 0.95])  # Adjust layout to make space for column titles
 
                 # Save the combined figure for both positions
                 directory = f'plot_difference/{path}/positions/'
@@ -1379,7 +1426,7 @@ class Visualizer:
             plt.close(fig_overall_predicted)
 
         # Create a combined figure with 6 rows and 2 columns of subplots
-        combined_fig, combined_axes = plt.subplots(nrows=6, ncols=2, figsize=(self.page_width, self.page_height * 0.85))
+        combined_fig, combined_axes = plt.subplots(nrows=6, ncols=2, figsize=(self.page_width*0.9, self.page_height * 0.9))
 
         for idx, title in enumerate(model_titles):
             x_axis = np.arange(len(model_given_differences[title]))
@@ -1392,11 +1439,13 @@ class Visualizer:
                                   color = 'lightcoral', alpha = 0.5)
             ax_given.plot(x_axis, model_given_differences[title], color='black')
             ax_given.set_xlim(overall_x_min, overall_x_max)
-            ax_given.set_ylim(-0.1, 0.1)
-            ax_given.set_xlabel('Index')
-            ax_given.set_ylabel('Mean Difference')
-            ax_given.set_title(f'Overall Given Positions for {title}')
-
+            ax_given.set_ylim(-0.1, 0.05)
+            ax_given.set_ylabel('Mean\nDifference')
+            ax_given.set_title(f'{title}')
+            if idx == 5:
+                ax_given.set_xlabel('Index')
+            else:
+                ax_given.set_xticklabels([])
             # Plot overall predicted differences in the second column
             ax_predicted = combined_axes[idx, 1]
             ax_predicted.fill_between(x_axis, model_predicted_differences[title],
@@ -1407,15 +1456,19 @@ class Visualizer:
                                       color='lightcoral', alpha=0.5)
             ax_predicted.plot(x_axis, model_predicted_differences[title], color='black')
             ax_predicted.set_xlim(overall_x_min, overall_x_max)
-            ax_predicted.set_ylim(-0.1, 0.1)
-            ax_predicted.set_xlabel('Index')
-            ax_predicted.set_ylabel('Mean Difference')
-            ax_predicted.set_title(f'Overall Predicted Positions for {title}')
+            ax_predicted.set_ylim(-0.1, 0.05)
+            if idx == 5:
+                ax_predicted.set_xlabel('Index')
+            else:
+                ax_predicted.set_xticklabels([])
+            ax_predicted.set_yticklabels([])
+            ax_predicted.set_title(f'{title}')
 
         # Adjust layout and save the combined figure
-        combined_fig.tight_layout()
-        combined_fig.text(0.29, 0.95, 'Windowed Pearson - Given channel\nBilinear vs. other models', ha='center', fontsize=12)
-        combined_fig.text(0.74, 0.95, 'Windowed Pearson - Predicted channel\nBilinear vs. other models', ha='center', fontsize=12)
+        combined_fig.tight_layout(rect=[0, 0, 1, 0.93])
+        combined_fig.suptitle('Windowed Pearson correlation coefficient - Bilinear vs. other models')
+        combined_fig.text(0.34, 0.93, 'Given channel', ha='center', fontsize=12)
+        combined_fig.text(0.77, 0.93, 'Predicted channel', ha='center', fontsize=12)
         combined_fig.savefig('plot_windowed_correlations/Combined_Overall_Positions.pdf')
         print(f'Saving combined overall positions plot to: plot_windowed_correlations/Combined_Overall_Positions.pdf')
         plt.close(combined_fig)
@@ -1864,7 +1917,7 @@ class Visualizer:
 
                     ax = axes[idx]
                     freq = np.fft.fftfreq(len(spectra_given[title][0]), d=1 / 2048.0)
-                    line1, = ax.plot(freq, spectra_given[title][0], label='Original spectrum', color=spectrum_color,
+                    line1, = ax.plot(freq, spectra_given[title][0], label='Real spectrum', color=spectrum_color,
                                      linewidth=0.5)
                     line2, = ax.plot(freq, spectra_given[title][1], label='Spectrum error', color=difference_color,
                                      linewidth=0.5)
@@ -1877,7 +1930,7 @@ class Visualizer:
                     if idx == 0:
                         handles_list.append(line1)
                         handles_list.append(line2)
-                        labels_list.append('Original spectrum')
+                        labels_list.append('Real spectrum')
                         labels_list.append('Spectrum error')
 
                 legend_handles = [plt.Line2D([], [], color=handle.get_color(), linewidth=1.5) for handle in
@@ -1914,7 +1967,7 @@ class Visualizer:
 
                     ax = axes[idx]
                     freq = np.fft.fftfreq(len(spectra_predicted[title][0]), d=1 / 2048.0)
-                    line1, = ax.plot(freq, spectra_predicted[title][0], label='Original spectrum', color=spectrum_color,
+                    line1, = ax.plot(freq, spectra_predicted[title][0], label='Real spectrum', color=spectrum_color,
                                      linewidth=0.5)
                     line2, = ax.plot(freq, spectra_predicted[title][1], label='Spectrum error', color=difference_color,
                                      linewidth=0.5)
@@ -1927,7 +1980,7 @@ class Visualizer:
                     if idx == 0:
                         handles_list.append(line1)
                         handles_list.append(line2)
-                        labels_list.append('Original spectrum')
+                        labels_list.append('Real spectrum')
                         labels_list.append('Spectrum error')
 
                 legend_handles = [plt.Line2D([], [], color=handle.get_color(), linewidth=1.5) for handle in
@@ -2053,7 +2106,7 @@ class Visualizer:
                 # plt.close(fig)
 
                 # Create a single figure for both positions with subplots for all models
-                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width, self.page_height * 0.85))
+                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width*0.85, self.page_height * 0.9))
                 axes = axes.flatten()
 
                 # Initialize lists for handles and labels for the legend
@@ -2064,7 +2117,7 @@ class Visualizer:
                 for idx, title in enumerate(spectra_given_positions.keys()):
                     ax = axes[2 * idx]
                     freq = np.fft.fftfreq(len(spectra_given_positions[title][0]), d=1 / 2048.0)
-                    line1, = ax.plot(freq, spectra_given_positions[title][0], label='Original spectrum',
+                    line1, = ax.plot(freq, spectra_given_positions[title][0], label='Real spectrum',
                                      color=spectrum_color,
                                      linewidth=0.5)
                     line2, = ax.plot(freq, spectra_given_positions[title][1], label='Spectrum error',
@@ -2073,11 +2126,15 @@ class Visualizer:
                     ax.set_xlim(0, 600)  # Limiting the frequency range for better visualization
                     ax.set_ylim(-100000, 1000000)  # Set global y-limits
                     ax.set_title(f'{title}')
-                    ax.grid(True)
+                    ax.grid(True, which='both')
+
+                    # Set minor ticks
+                    ax.xaxis.set_minor_locator(MultipleLocator(50))
+
                     if idx == 0:
                         handles_list.append(line1)
                         handles_list.append(line2)
-                        labels_list.append('Original spectrum')
+                        labels_list.append('Real spectrum')
                         labels_list.append('Spectrum error')
                     if idx == 6:  # Add x-axis label only to the bottom plots
                         ax.set_xlabel('Frequency in Hz')
@@ -2089,7 +2146,7 @@ class Visualizer:
                 for idx, title in enumerate(spectra_predicted_positions.keys()):
                     ax = axes[2 * idx + 1]
                     freq = np.fft.fftfreq(len(spectra_predicted_positions[title][0]), d=1 / 2048.0)
-                    line1, = ax.plot(freq, spectra_predicted_positions[title][0], label='Original spectrum',
+                    line1, = ax.plot(freq, spectra_predicted_positions[title][0], label='Real spectrum',
                                      color=spectrum_color,
                                      linewidth=0.5)
                     line2, = ax.plot(freq, spectra_predicted_positions[title][1], label='Spectrum error',
@@ -2098,22 +2155,31 @@ class Visualizer:
                     ax.set_xlim(0, 600)  # Limiting the frequency range for better visualization
                     ax.set_ylim(-100000, 1000000)  # Set global y-limits
                     ax.set_title(f'{title}')
-                    ax.grid(True)
+                    ax.grid(True, which='both')
+
+                    # Set minor ticks
+                    ax.xaxis.set_minor_locator(MultipleLocator(50))
+
                     if idx == 6:  # Add x-axis label only to the bottom plots
                         ax.set_xlabel('Frequency in Hz')
                     else:
                         ax.set_xticklabels([])  # Remove x-axis tick labels for all but the bottom row
                     ax.set_yticklabels([])  # Remove y-axis tick labels for second column
 
-                # Add a single legend in the middle below the two subplots
-                legend_ax = axes[0]  # Using the last subplot for the legend
-                legend = legend_ax.legend(handles=handles_list, labels=labels_list, loc='upper right')
+                # Create a separate Axes for the legend
+                legend_ax = fig.add_axes([0.1, 0.0, 0.8, 0.05])  # [left, bottom, width, height]
+
+                # Create the legend
+                legend = legend_ax.legend(handles=handles_list, labels=labels_list, loc='center', ncol=2)
 
                 # Change the linewidth of the legend lines
                 for line in legend.get_lines():
                     line.set_linewidth(1.5)
 
-                fig.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout to make space for the legend
+                # Remove the legend Axes' background and ticks
+                legend_ax.axis('off')
+
+                fig.tight_layout(rect=[0, 0.05, 1, 0.95])  # Adjust layout to make space for the legend
 
                 fig.text(0.29, 0.95, 'Spectrum - Given channel', ha='center', fontsize=12)
                 fig.text(0.74, 0.95, 'Spectrum - Predicted channel', ha='center', fontsize=12)
@@ -2121,7 +2187,7 @@ class Visualizer:
                 # Save the combined figure for given and predicted channels
                 directory = f'plot_frequency_spectrum_difference/{path}/'
                 self._create_directory(directory)
-                filename = f'{directory}Frequency_Spectrum_Comparison_given_and_predicted_channels.pdf'
+                filename = f'{directory}Frequency_Spectrum_Comparison_given_and_predicted_channel.pdf'
                 filename = filename.replace(' ', '_')
                 plt.savefig(filename, bbox_inches='tight', format='pdf')
                 print(f'Saving to: {filename}')
@@ -2142,5 +2208,5 @@ if __name__ == '__main__':
     #visualize.plot_specific_positions()
     #visualize.create_box_plot()
     #visualize.plot_frequency_spectrum_difference()
-    # visualize.plot_normalized_correlations()
+    #visualize.plot_normalized_correlations()
     #visualize.process_matlab_rms()
