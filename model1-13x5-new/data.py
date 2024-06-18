@@ -126,7 +126,7 @@ class Custom_Dataset(Dataset):
 
     def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=5):
         """
-        Apply a bandpass_upper filter to the data
+        Apply a bandpass filter to the data
         Parameters
         ----------
         data: np.array

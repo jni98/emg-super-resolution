@@ -91,7 +91,7 @@ class Trainer:
         wandb.init(project="GAN-Training", entity="masterthesis-sr")
 
         # Define lambda function for the LR scheduler
-        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 50)
+        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 100)
 
         print("init done")
 
@@ -178,7 +178,7 @@ class Trainer:
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
-        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr*0.1, betas=self.betas)
+        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
 
         # Initialize the LR schedulers
         self.scheduler_G = LambdaLR(self.optimizer_G, lr_lambda=self.lr_lambda)
