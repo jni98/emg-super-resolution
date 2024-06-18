@@ -8,7 +8,7 @@
 #SBATCH --time=0:30:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:v100:1
-#SBATCH --partition=a100
+#SBATCH --partition=v100
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV
