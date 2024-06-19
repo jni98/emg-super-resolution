@@ -875,7 +875,7 @@ class Trainer:
         # torch.cuda.empty_cache()
 
         with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
                 hr_emg = hr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
