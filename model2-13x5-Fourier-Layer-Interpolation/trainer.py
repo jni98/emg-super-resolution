@@ -874,12 +874,11 @@ class Trainer:
         # torch.cuda.empty_cache()
 
         with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-                hr_emg = self.grid_interpolation(hr_emg, (1,1,25,9,hr_emg.shape[-1]), 'linear')
-                hr_emg = hr_emg.to(self.device)
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, hr_interpolated) in enumerate(self.testing):
+                hr_interpolated = hr_interpolated.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
-                hr_sr_emg = self.generator(hr_emg)
+                hr_sr_emg = self.generator(hr_interpolated)
 
                 hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
 
@@ -936,42 +935,3 @@ class Trainer:
         filtered_signal = filtfilt(b, a, data)
 
         return filtered_signal
-
-    def grid_interpolation(self, lr_emg: np.ndarray, hr_emg_shape: tuple, method: str) -> np.ndarray:
-        """
-        Performs cubic interpolation on the low resolution data to get high resolution data.
-        Parameters
-        ----------
-        lr_emg: numpy.ndarray
-                Low resolution emg data.
-        hr_emg_shape: tuple
-                Shape of the high resolution emg data.
-        method: str
-                Method of interpolation. On default set to linear.
-
-        Returns
-        -------
-        interpolated_signal: numpy.ndarray
-                High resolution emg data.
-        """
-        # Create a grid for the original signal
-        x = np.linspace(0, 1, lr_emg.shape[0])
-        y = np.linspace(0, 1, lr_emg.shape[1])
-        z = np.linspace(0, 1, lr_emg.shape[2])
-
-        # Create a new grid for the desired interpolated signal
-        new_x = np.linspace(0, 1, hr_emg_shape[0])
-        new_y = np.linspace(0, 1, hr_emg_shape[1])
-        new_z = np.linspace(0, 1, hr_emg_shape[2])
-
-        # Create meshgrid from new grid
-        mesh_x, mesh_y, mesh_z = np.meshgrid(new_x, new_y, new_z, indexing='ij')
-
-        # Create interpolator
-        interpolator = RegularGridInterpolator((x, y, z), lr_emg, method=method)
-        # print("Created the interpolater")
-
-        # Interpolate
-        interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
-        # print("Finished the interpolator")
-        return interpolated_signal

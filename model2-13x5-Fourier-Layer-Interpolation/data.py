@@ -53,6 +53,7 @@ class Custom_Dataset(Dataset):
 
         # interpolate for hr shape
         lr_emg = self.grid_interpolation(lr_emg, hr_emg.shape, method='linear')
+        hr_interpolated = self.grid_interpolation(hr_emg, (25,9,hr_emg.shape[-1]), method='linear')
 
         # Create lr file path
         lr_emg_path = hr_emg_path.replace("hr", "lr")
@@ -60,12 +61,14 @@ class Custom_Dataset(Dataset):
         # standardize both
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
         hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std)
+        hr_interpolated_standardized = self.standardization(hr_interpolated, self.mean, self.std)
 
         # Change to torch and shape with channel = 1
         lr_emg_standardized_tensor = torch.tensor(lr_emg_standardized).unsqueeze(0).to(torch.float32)
         hr_emg_standardized_tensor = torch.tensor(hr_emg_standardized).unsqueeze(0).to(torch.float32)
+        hr_interpolated_standardized_tensor = torch.tensor(hr_interpolated_standardized).unsqueeze(0).to(torch.float32)
 
-        return lr_emg_standardized_tensor, hr_emg_standardized_tensor, lr_emg_path, hr_emg_path
+        return lr_emg_standardized_tensor, hr_emg_standardized_tensor, lr_emg_path, hr_emg_path, hr_interpolated_standardized_tensor
 
     def no_augmentation(self, data):
         return data
