@@ -26,13 +26,12 @@ import json
 from scipy.io import loadmat
 
 
-
 class Visualizer:
     """
     Class to visualize the results of the interpolation and the neural networks.
     """
 
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, matlab_path: str) -> None:
         """
         Constructs all the necessary attributes for the Visualizer object.
 
@@ -53,12 +52,13 @@ class Visualizer:
         plt.rcParams['ytick.labelsize'] = 10
 
         self.file_path = file_path
-        self.emg_data_dicts = self._load_data()
-        self.page_width = 16/2.54
-        self.page_height = 22/2.54
+        self.emg_data_dicts = self._load_py_data()
+        self.matlab_path = matlab_path
+        self.page_width = 16 / 2.54
+        self.page_height = 22 / 2.54
         print("Initialization done")
 
-    def _load_data(self):
+    def _load_py_data(self):
         paths = ['path0', 'path1', 'path2', 'path3']
         dim_sizes = {
             'path0': 64576,
@@ -99,22 +99,22 @@ class Visualizer:
             # Apply bandpass filter
             interpolation_lr_sr_filtered = apply_bandpass_filter(interpolation_lr_sr)
             cubic_lr_sr_filtered = apply_bandpass_filter(cubic_lr_sr)
-            model1_lr_sr_filtered = apply_bandpass_filter(model1_lr_sr)
-            model2_lr_sr_filtered = apply_bandpass_filter(model2_lr_sr)
-            model2_Fourier_lr_sr_filtered = apply_bandpass_filter(model2_Fourier_lr_sr)
-            model2_Wavelet_lr_sr_filtered = apply_bandpass_filter(model2_Wavelet_lr_sr)
-            model3_lr_sr_filtered = apply_bandpass_filter(model3_lr_sr)
+            model1_lr_sr_filtered = model1_lr_sr  # apply_bandpass_filter(model1_lr_sr)
+            model2_lr_sr_filtered = model2_lr_sr  # apply_bandpass_filter(model2_lr_sr)
+            model2_Fourier_lr_sr_filtered = model2_Fourier_lr_sr  # apply_bandpass_filter(model2_Fourier_lr_sr)
+            model2_Wavelet_lr_sr_filtered = model2_Wavelet_lr_sr  # apply_bandpass_filter(model2_Wavelet_lr_sr)
+            model3_lr_sr_filtered = model3_lr_sr  # apply_bandpass_filter(model3_lr_sr)
             origin_hr_filtered = apply_bandpass_filter(origin_hr)
 
             # Plot before and after filtering
-            self.plot_channel_3_2(path, 'Bilinear', interpolation_lr_sr, interpolation_lr_sr_filtered)
-            self.plot_channel_3_2(path, 'Bicubic spline', cubic_lr_sr, cubic_lr_sr_filtered)
-            self.plot_channel_3_2(path, 'SRGAN', model1_lr_sr, model1_lr_sr_filtered)
-            self.plot_channel_3_2(path, 'UNet', model2_lr_sr, model2_lr_sr_filtered)
-            self.plot_channel_3_2(path, 'UNet Fourier', model2_Fourier_lr_sr, model2_Fourier_lr_sr_filtered)
-            self.plot_channel_3_2(path, 'UNet Wavelet', model2_Wavelet_lr_sr, model2_Wavelet_lr_sr_filtered)
-            self.plot_channel_3_2(path, 'CNN-LSTM', model3_lr_sr, model3_lr_sr_filtered)
-            self.plot_channel_3_2(path, 'Original', origin_hr, origin_hr_filtered)
+            # self.plot_channel_3_2(path, 'Bilinear', interpolation_lr_sr, interpolation_lr_sr_filtered)
+            # self.plot_channel_3_2(path, 'Bicubic spline', cubic_lr_sr, cubic_lr_sr_filtered)
+            # self.plot_channel_3_2(path, 'SRGAN', model1_lr_sr, model1_lr_sr_filtered)
+            # self.plot_channel_3_2(path, 'UNet', model2_lr_sr, model2_lr_sr_filtered)
+            # self.plot_channel_3_2(path, 'UNet Fourier', model2_Fourier_lr_sr, model2_Fourier_lr_sr_filtered)
+            # self.plot_channel_3_2(path, 'UNet Wavelet', model2_Wavelet_lr_sr, model2_Wavelet_lr_sr_filtered)
+            # self.plot_channel_3_2(path, 'CNN-LSTM', model3_lr_sr, model3_lr_sr_filtered)
+            # self.plot_channel_3_2(path, 'Original', origin_hr, origin_hr_filtered)
 
             # Create a dictionary with the loaded and adjusted data
             emg_data_dict = {
@@ -133,6 +133,175 @@ class Visualizer:
             data_dicts.append(emg_data_dict)
 
         return data_dicts
+
+    def _load_matlab_data(self):
+        """
+        Load the MATLAB data for each path and model.
+        """
+        paths = ['path0', 'path1', 'path2', 'path3']
+        models = ['groundtruth_hr', 'groundtruth_lr', 'linear_Interpolation', 'cubic_interpolation', 'model_1',
+                  'model_2', 'model_2_Fourier',
+                  'model_2_Wavelet', 'model_3_LSTM']
+        model_names = ['Original HD', 'Original LD', 'Bilinear', 'Bicubic spline', 'SRGAN', 'UNet', 'UNet Fourier',
+                       'UNet Wavelet',
+                       'CNN-LSTM']
+        matlab_data = {path: {model_name: None for model_name in model_names} for path in paths}
+
+        for path in paths:
+            for model, model_name in zip(models, model_names):
+                if model == 'groundtruth_hr':
+                    file_path = os.path.join(self.matlab_path, f'{model}/{path}-hr_50runs_100threshold.mat')
+                else:
+                    file_path = os.path.join(self.matlab_path, f'{model}/{path}-lr_50runs_100threshold.mat')
+                mat_data = loadmat(file_path)
+                matlab_data[path][model_name] = mat_data['PNR']
+
+        return matlab_data
+
+    def plot_pnr_results(self):
+        """
+        Plot the PNR results for each path and model.
+        """
+        paths = ['path0', 'path1', 'path2', 'path3']
+        model_names = ['Original HD', 'Original LD', 'Bilinear', 'Bicubic spline', 'SRGAN', 'UNet', 'UNet Fourier',
+                       'UNet Wavelet', 'CNN-LSTM']
+        path_colors = [
+            (127 / 255, 127 / 255, 127 / 255),
+            (47 / 255, 88 / 255, 110 / 255),
+            (0 / 255, 0 / 255, 255 / 255),
+            (135 / 255, 206 / 255, 250 / 255)
+        ]
+        model_colors = {
+            'Original HD': (32/255, 66/255, 81 / 255),  # Dark blue
+            'Original LD': (84/255, 156 / 255, 188 / 255) ,  # Medium blue
+            'Bilinear': (127 / 255, 127 / 255, 127 / 255),  # Steel blue
+            'Bicubic spline': (32/255, 66/255, 81 / 255),  # Cornflower blue
+            'SRGAN': (84/255, 156 / 255, 188 / 255),  # Dodger blue
+
+            'UNet': (127 / 255, 127 / 255, 127 / 255),  # Deep sky blue
+            'UNet Fourier': (32/255, 66/255, 81 / 255),  # Light sky blue
+            'UNet Wavelet': (84/255, 156 / 255, 188 / 255),  # Light blue
+            'CNN-LSTM': (127 / 255, 127 / 255, 127 / 255)  # Light cyan
+        }
+        single_color = (47 / 255, 88 / 255, 110 / 255)  # Single color for individual plots
+        matlab_data = self._load_matlab_data()
+
+        # Determine the y-axis limits
+        all_pnr_values = []
+        for path in paths:
+            for model_name in model_names:
+                all_pnr_values.extend(matlab_data[path][model_name].flatten())
+        y_min, y_max = min(all_pnr_values), max(all_pnr_values)
+
+        # Create a figure with 4 subplots for each path
+        fig, axes = plt.subplots(nrows=4, ncols=1, figsize=(self.page_width, self.page_height * 0.6), sharey=True)
+
+        for i, (ax, path, color) in enumerate(zip(axes, paths, path_colors)):
+            for model_name in model_names:
+                pnr_values = matlab_data[path][model_name].flatten()
+                x_values = model_names.index(model_name)
+                jittered_x_values = np.ones_like(
+                    pnr_values) * x_values + np.random.uniform(-0.1, 0.1, size=pnr_values.shape)
+                ax.scatter(jittered_x_values, pnr_values, color=model_colors[model_name],
+                           edgecolor='none', marker='.', s=28, alpha=0.8)  # Small dots with model colors
+
+                # # Add the number of dots per model per path next to the last dot
+                # if len(pnr_values) > 0:
+                #     ax.text(jittered_x_values[-1] + 0.1, pnr_values[-1], f'{len(pnr_values)}', fontsize=8,
+                #             ha='left', va='bottom')
+
+            ax.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha = 0.5)  # Add red dashed line at PNR=30
+            ax.set_xticks(range(len(model_names)))
+            ax.set_ylabel('PNR')
+            ax.set_ylim(10, y_max + 5)
+
+            ax.yaxis.set_major_locator(MultipleLocator(10))
+
+            if i != len(paths) - 1:
+                ax.set_xticklabels([])  # Hide x labels for all but the last subplot
+            else:
+                ax.set_xticklabels(model_names, rotation=45)
+
+            if path == 'path0':
+                subj_title = 'subject 1.1'
+            elif path == 'path1':
+                subj_title = 'subject 1.2'
+            elif path == 'path2':
+                subj_title = 'subject 2.1'
+            else:
+                subj_title = 'subject 2.2'
+
+            ax.set_title(f'Motor unit PNR {subj_title}')
+
+        plt.tight_layout()
+        directory = f'pnr_plots/combined_subplots/'
+        self._create_directory(directory)
+        filename = f'{directory}PNR_Results_Subplots.pdf'
+        plt.savefig(filename, bbox_inches='tight', format='pdf')
+        plt.close()
+        print(f'Saving combined subplots PNR plot to: {filename}')
+
+        # Plot individual figures for each path
+        for path, color in zip(paths, path_colors):
+            plt.figure(figsize=(self.page_width, self.page_height * 0.3))
+            for model_name in model_names:
+                pnr_values = matlab_data[path][model_name].flatten()
+                x_values = model_names.index(model_name)
+                jittered_x_values = np.ones_like(
+                    pnr_values) * x_values  # + np.random.uniform(-0.2, 0.2, size=pnr_values.shape)
+                plt.scatter(jittered_x_values, pnr_values, color=single_color,
+                            edgecolor='none', alpha=0.8, marker='.', s=23)  # Small dots instead of circles
+
+                # Add the number of dots per model per path next to the last dot
+                # if len(pnr_values) > 0:
+                #     plt.text(jittered_x_values[-1] + 0.1, pnr_values[-1], f'{len(pnr_values)}', fontsize=8,
+                #              ha='left', va='bottom')
+
+            plt.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha=0.8)  # Add red dashed line at PNR=30
+            plt.xticks(range(len(model_names)), model_names, rotation=45)
+            plt.ylabel('PNR')
+            plt.ylim(10, y_max + 5)
+            plt.title(f'Motor unit PNR')
+            plt.tight_layout()
+
+            directory = f'pnr_plots/{path}/'
+            self._create_directory(directory)
+            filename = f'{directory}PNR_Results_{path}.pdf'
+            plt.savefig(filename, bbox_inches='tight', format='pdf')
+            plt.close()
+            print(f'Saving PNR plot to: {filename}')
+
+        # Plot combined figure with data from all paths
+        plt.figure(figsize=(self.page_width, self.page_height * 0.5))
+        for path, color in zip(paths, path_colors):
+            for model_name in model_names:
+                pnr_values = matlab_data[path][model_name].flatten()
+                x_values = model_names.index(model_name)
+                jittered_x_values = np.ones_like(pnr_values) * x_values + np.random.uniform(-0.1, 0.1,
+                                                                                            size=pnr_values.shape)
+                plt.scatter(jittered_x_values, pnr_values, color=color, edgecolor='none',
+                            alpha=0.8, marker='.', s=23)  # Small dots instead of circles
+
+        plt.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha = 0.8)  # Add red dashed line at PNR=30
+        plt.xticks(range(len(model_names)), model_names, rotation=45)
+        plt.ylabel('PNR')
+        plt.ylim(10, y_max + 5)
+        plt.title('Motor unit PNR')
+        # Adjust the legend to show only paths with their respective colors
+        subject_titles = ['subject 1.1', 'subject 1.2', 'subject 2.1', 'subject 2.2']
+        handles = [
+            plt.Line2D([0], [0], marker='.', color='w', markeredgecolor=color, markerfacecolor=color, markersize=8,
+                       label=title)
+            for title, color in zip(subject_titles, path_colors)]
+        plt.legend(handles=handles, loc='upper right')
+        plt.tight_layout()
+
+        directory = f'pnr_plots/combined/'
+        self._create_directory(directory)
+        filename = f'{directory}Combined_PNR_Results.pdf'
+        plt.savefig(filename, bbox_inches='tight', format='pdf')
+        plt.close()
+        print(f'Saving combined PNR plot to: {filename}')
 
     def plot_channel_3_2(self, path, model_name, original_data, filtered_data):
         start_idx = 36436
@@ -875,7 +1044,6 @@ class Visualizer:
         """
         print("Start plotting absolute difference grids")
 
-
         # Custom colors
         plot_color = (47 / 255, 88 / 255, 110 / 255)  # RGB (47, 88, 110)
         error_color = (199 / 255, 91 / 255, 76 / 255)
@@ -943,7 +1111,7 @@ class Visualizer:
                     plt.close(fig_large)
 
                 # Create a single figure for both positions with subplots for all models
-                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width*0.9, self.page_height*0.85))
+                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width * 0.9, self.page_height * 0.85))
                 axes = axes.flatten()
 
                 labels_list = []
@@ -963,7 +1131,8 @@ class Visualizer:
                     row1, col1 = 4, 2
                     ax1 = axes[2 * idx]  # Position in the first column
                     time_array1 = np.arange(diff.shape[2]) / 2048.0
-                    line1, = ax1.plot(time_array1, groundtruth[row1, col1], label='Real signal', color=plot_color, linewidth=0.5, alpha=0.5)
+                    line1, = ax1.plot(time_array1, groundtruth[row1, col1], label='Real signal', color=plot_color,
+                                      linewidth=0.5, alpha=0.5)
                     line2, = ax1.plot(time_array1, diff[row1, col1], label='Error', color=error_color, linewidth=0.5)
                     ax1.set_title(f'{title}')
                     ax1.set_ylim(global_min, global_max)
@@ -1426,7 +1595,8 @@ class Visualizer:
             plt.close(fig_overall_predicted)
 
         # Create a combined figure with 6 rows and 2 columns of subplots
-        combined_fig, combined_axes = plt.subplots(nrows=6, ncols=2, figsize=(self.page_width*0.9, self.page_height * 0.9))
+        combined_fig, combined_axes = plt.subplots(nrows=6, ncols=2,
+                                                   figsize=(self.page_width * 0.9, self.page_height * 0.9))
 
         for idx, title in enumerate(model_titles):
             x_axis = np.arange(len(model_given_differences[title]))
@@ -1436,7 +1606,7 @@ class Visualizer:
             ax_given.fill_between(x_axis, model_given_differences[title], where=(model_given_differences[title] >= 0),
                                   color='lightgreen', alpha=0.5)
             ax_given.fill_between(x_axis, model_given_differences[title], where=(model_given_differences[title] < 0),
-                                  color = 'lightcoral', alpha = 0.5)
+                                  color='lightcoral', alpha=0.5)
             ax_given.plot(x_axis, model_given_differences[title], color='black')
             ax_given.set_xlim(overall_x_min, overall_x_max)
             ax_given.set_ylim(-0.1, 0.05)
@@ -1510,7 +1680,7 @@ class Visualizer:
                 boxplot_data.append(odd_diffs)
                 labels.append(wrapper.fill(text=model))
 
-            fig, ax = plt.subplots(figsize=(self.page_width , self.page_height*0.4))
+            fig, ax = plt.subplots(figsize=(self.page_width, self.page_height * 0.4))
             positions = []
             for i in range(len(differences_all)):
                 base_position = i * (3 * box_width + group_spacing)
@@ -1538,7 +1708,7 @@ class Visualizer:
 
             # Manually set the y-axis limit if removing outliers
             if keep_outliers:
-                y_max = max([max(data) for data in boxplot_data if data]) * 1.04 # Increase by 6% for space
+                y_max = max([max(data) for data in boxplot_data if data]) * 1.04  # Increase by 6% for space
 
             else:
                 y_max = max(
@@ -1664,7 +1834,7 @@ class Visualizer:
             for path, datasets in data_dict.items():
                 # Create a figure with two subplots
                 fig, axs = plt.subplots(1, 2, figsize=(
-                self.page_width, self.page_height * 0.5))  # Increase width to 24 cm and height to 14 cm
+                    self.page_width, self.page_height * 0.5))  # Increase width to 24 cm and height to 14 cm
 
                 # Plot for the given channel in the first column
                 ax_given = axs[0]
@@ -2002,7 +2172,7 @@ class Visualizer:
                 print(f'Saving to: {filename}')
                 plt.close(fig)
 
-                #TODO: Separate plots for predicted and given
+                # TODO: Separate plots for predicted and given
                 # # Plot the spectra for the specific given channel (4, 2)
                 # fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(self.page_width * 1.5, self.page_height * 0.75))
                 # axes = axes.flatten()
@@ -2106,7 +2276,7 @@ class Visualizer:
                 # plt.close(fig)
 
                 # Create a single figure for both positions with subplots for all models
-                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width*0.85, self.page_height * 0.9))
+                fig, axes = plt.subplots(nrows=7, ncols=2, figsize=(self.page_width * 0.85, self.page_height * 0.9))
                 axes = axes.flatten()
 
                 # Initialize lists for handles and labels for the legend
@@ -2124,7 +2294,8 @@ class Visualizer:
                                      color=difference_color,
                                      linewidth=0.5)
                     ax.set_xlim(0, 600)  # Limiting the frequency range for better visualization
-                    ax.set_ylim(-100000, 1000000)  # Set global y-limits
+                    # ax.set_ylim(-100000, 1000000)  # Set global y-limits
+                    ax.set_yscale('log')
                     ax.set_title(f'{title}')
                     ax.grid(True, which='both')
 
@@ -2153,7 +2324,9 @@ class Visualizer:
                                      color=difference_color,
                                      linewidth=0.5)
                     ax.set_xlim(0, 600)  # Limiting the frequency range for better visualization
-                    ax.set_ylim(-100000, 1000000)  # Set global y-limits
+                    # ax.set_ylim(-100000, 1000000)  # Set global y-limits
+                    ax.set_yscale('log')
+
                     ax.set_title(f'{title}')
                     ax.grid(True, which='both')
 
@@ -2198,15 +2371,19 @@ class Visualizer:
 
 if __name__ == '__main__':
     file_path = '../results/'
-    visualize = Visualizer(file_path)
+    matlab_path = '../results_mat/'
+    visualize = Visualizer(file_path, matlab_path)
     # visualize.plot_emg_channels()
-    #visualize.plot_emg_channels_difference()
-    #visualize.plot_pearson_coefficient_grid()
-    #visualize.create_difference_plots()
+    visualize.plot_emg_channels_difference()
+    # visualize.plot_pearson_coefficient_grid()
+    # visualize.create_difference_plots()
     # visualize.propagation_plot()
-    visualize.plot_windowed_correlations()
-    #visualize.plot_specific_positions()
-    #visualize.create_box_plot()
-    #visualize.plot_frequency_spectrum_difference()
-    #visualize.plot_normalized_correlations()
-    #visualize.process_matlab_rms()
+    # visualize.plot_windowed_correlations()
+    # visualize.plot_specific_positions()
+    # visualize.create_box_plot()
+    # visualize.plot_normalized_correlations()
+    # visualize.process_matlab_rms()
+
+    # visualize.plot_frequency_spectrum_difference()
+
+    #visualize.plot_pnr_results()
