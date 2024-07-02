@@ -410,6 +410,10 @@ class Trainer:
         None
         """
 
+        val_lr_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
+        val_hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
+        val_sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
+
         # Log for channel [6][2]
         self.log_channel_metrics(val_lr_destandardized, val_hr_destandardized, val_sr_destandardized, phase, 6, 2)
 

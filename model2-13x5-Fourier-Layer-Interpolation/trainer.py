@@ -446,6 +446,10 @@ class Trainer:
         -------
         None
         """
+        val_lr_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
+        val_hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
+        val_sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
+
         # Log for channel [6][2] --> given channel
         self.log_channel_metrics(val_lr_destandardized, val_hr_destandardized, val_sr_destandardized, phase, 6, 2)
 
@@ -459,11 +463,11 @@ class Trainer:
 
         Parameters
         ----------
-        val_lr_destandardized: torch.Tensor
+        val_lr_destandardized: ndarray
             Destandardized low-resolution data
-        val_hr_destandardized: torch.Tensor
+        val_hr_destandardized: ndarray
             Destandardized high-resolution data
-        val_sr_destandardized: torch.Tensor
+        val_sr_destandardized: ndarray
             Destandardized super-resolution data
         phase: str
             The current phase (e.g., 'Validation' or 'Test')

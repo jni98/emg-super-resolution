@@ -4,7 +4,7 @@
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model2-13x5-Wavelet-Layer-Interpolation
+#SBATCH --job-name=model2-UNet
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
@@ -15,14 +15,14 @@ unset SLURM_EXPORT_ENV
 
 ############    paths    ###############
 
-SRC_DIR=$HOME/code/model2-13x5-Wavelet-Layer-Interpolation
-RESULTS_DIR=$HOME/model2-13x5-Wavelet-Layer-Interpolation-$SLURM_JOB_ID
+SRC_DIR=$HOME/code/model2-UNet
+RESULTS_DIR=$HOME/model2-UNet-$SLURM_JOB_ID
 DATA_ARCHIVE=$HPCVAULT/dataset.tar
-FAST_DATA_DIR=$TMPDIR/model2-13x5-Wavelet-Layer-Interpolation-$SLURM_JOB_ID
+FAST_DATA_DIR=$TMPDIR/model2-UNet-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=1200
+EPOCHS=1100
 
 ############    params   ###############
 

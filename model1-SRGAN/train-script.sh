@@ -1,10 +1,10 @@
 #!/bin/bash -l
 
-## Usage:  sbatch.tinygpu train-script3-1.sh
+## Usage:  sbatch.tinygpu train-script.sh
 
 ############    slurm    ###############
 
-#SBATCH --job-name=model1-13x5
+#SBATCH --job-name=model1-SRGAN
 #SBATCH --time=1:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:a100:1
@@ -15,10 +15,10 @@ unset SLURM_EXPORT_ENV
 
 ############    paths    ###############
 
-SRC_DIR=$HOME/code/model1-13x5
-RESULTS_DIR=$HOME/model1-13x5-$SLURM_JOB_ID
+SRC_DIR=$HOME/code/model1-SRGAN
+RESULTS_DIR=$HOME/model1-SRGAN-$SLURM_JOB_ID
 DATA_ARCHIVE=$HPCVAULT/dataset_512.tar
-FAST_DATA_DIR=$TMPDIR/model1-13x5-$SLURM_JOB_ID
+FAST_DATA_DIR=$TMPDIR/model1-SRGAN-$SLURM_JOB_ID
 
 ############    params   ###############
 
