@@ -41,11 +41,11 @@
   </ol>
 </details>
 
-
 ## About The Project
 
-This project contains four different GAN-based neural network models, each designed for specific tasks. The project is organized into separate folders for each model and includes scripts for training, data preparation, and visualization. The training can be performed both locally and on a cluster.
-
+This project contains four different GAN-based neural network models and two CNN-LSTM. The project is organized into
+separate folders for each model and includes scripts for training, data preparation, and visualization. The training can
+be performed both locally and on a cluster. Each model can be trained using only the files in that folder.
 
 ### Built With
 
@@ -53,43 +53,48 @@ This project contains four different GAN-based neural network models, each desig
 * [PyTorch](https://pytorch.org/)
 * [WandB](https://www.wandb.com/)
 
-
 <!-- CONTACT -->
+
 ### Contact
 
 Janina Kloos - janina.kloos@fau.de
 
 
 <!-- GETTING STARTED -->
+
 ## Getting Started
 
 ### Prerequisites
 
 - Install WandB
-- Ensure all dependencies are installed as per the `environment.yaml` or requirements file
+- Ensure all dependencies are installed as per the `environment.yaml`
 
 ### Installation
 
 1. Create environment using the enviroment.yaml file
-   
-   conda env create --name my_custom_env --file environment.yaml
 
-2. Activate the new environment 
+   ```conda env create --name my_custom_env --file environment.yaml```
 
-   conda activate my_custom_env
+2. Activate the new environment
+
+   ```conda activate my_custom_env```
 
 3. Clone the repository
-   
-   git clone https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git
+
+   ```git clone https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git```
 
 <!-- USAGE EXAMPLES -->
+
 ## Usage
 
-To run each model, submit a job to the cluster using the `train-script.sh` file located in each model's directory. To run the models locally, modify `train.py` by commenting and uncommenting the relevant blocks of code.
+To run each model, submit a job to the cluster using the `train-script.sh` file located in each model's directory. To
+run the models locally, modify `train.py` by commenting and uncommenting the relevant blocks of code in the main method.
+Directories for the train and test dataset have to be specified accordingly in the main or train-script.sh file.
 
 ### Project Structure
 
 The project is structured as follows:
+
 ```
 project_root/
 │
@@ -131,21 +136,26 @@ project_root/
 
 ### Data Preparation
 
-Run `data_extractor.py` to create the dataset files. Specify the file locations in the main method, which will create a directory containing the training and test data, a CSV file, and a tar file. Window length and file name can be defined in the function call.
+Run `data_extractor.py` to create the dataset files. Specify the file locations in the main method, which will create a
+directory containing the training and test data, a CSV file, and a tar file. Window length and file name can be defined
+in the function call.
 When running jobs on the cluster, ensure the tar file is present.
 
 ### Results and Visualization
 
 - Results generated on the cluster should be copied to a directory called `results`, with subdirectories for each model.
-- Run `numpy_mat.py` to generate MATLAB files with a reference signal for decomposition. Edit files in main method accordingly.
+- Run `numpy_mat.py` to generate MATLAB files with a reference signal for decomposition. Edit files in main method
+  accordingly.
 - Run `visualization.py` in the `Visualization` directory to create plots from the `results` folder.
 
 <!-- LICENSE -->
+
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <!-- ACKNOWLEDGMENTS -->
+
 ## Acknowledgments
 
 Resources and libraries used in this project:
@@ -159,10 +169,12 @@ Resources and libraries used in this project:
 * [Raul Simpetru for augmentation code]
 
 <!-- CONTACT -->
+
 ## Contact
 
 Janina Kloos - janina.kloos@fau.de
 
-Project Link: [https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git](https://github.com/github_username/repo_name)
+Project
+Link: [https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git](https://github.com/github_username/repo_name)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
