@@ -25,7 +25,7 @@ def setup_sweep():
                 'values': [12],  # Add the batch sizes you want to include
             },
             'learning_rate': {
-                'values': [0.00001]
+                'values': [0.0001]
             },
             'augment':{
                 'values': [True],
@@ -87,10 +87,10 @@ if __name__ == "__main__":
     results_directory = args.results
     num_epochs = args.epochs
 
-    # data_directory = '../dataset/train'
-    # test_data_directory ='../dataset/test'
+    # data_directory = '../dataset_512/train'
+    # test_data_directory ='../dataset_512/test'
     # results_directory = 'runs/'
-    # num_epochs = 50
+    # num_epochs = 1
 
     # Run the sweep
     wandb.agent(sweep_id,

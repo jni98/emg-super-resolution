@@ -167,7 +167,7 @@ class Trainer:
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
-        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
+        self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=0.000001, betas=self.betas)
 
         print("Successfully initialized the models")
 
@@ -272,7 +272,6 @@ class Trainer:
             # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
             # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
             sr_emg = self.generator(lr_emg).detach().to(self.device)
-            sr_emg = self._delete_row_column(sr_emg)
 
             # Create real and fake labels to train discriminator for both cases
             real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
@@ -298,7 +297,6 @@ class Trainer:
 
             # Generate SR data from LR data
             sr_emg = self.generator(lr_emg).to(self.device)
-            sr_emg = self._delete_row_column(sr_emg)
 
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
@@ -328,58 +326,6 @@ class Trainer:
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
 
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
-
-    def _delete_row_column(self, sr_emg: torch.tensor) -> torch.tensor:
-        """
-        Deletes the last row and column of the super-resolved data.
-
-        Parameters
-        ----------
-        sr_emg: torch tensor
-
-        Returns
-        -------
-        sr_emg_final: torch tensor
-                      Super-resolved data without the last row and column
-        """
-
-        sr_emg_shape = sr_emg.shape
-
-        new_channel_number = 65
-
-        # Switch last two axes to go from (batch, channel, 2048, 84) to (batch, channel, 84, 2048)
-        sr_emg_move_axis = sr_emg.permute(0, 1, 3, 2)
-
-        # Reshape to grid shape (batch, 1,6,14,2048)
-        sr_emg_reshaped = sr_emg_move_axis.view(sr_emg_shape[0], 1, 6, 14, sr_emg_shape[2])
-
-        # Create array for the new shape where the last row and column are deleted
-        sr_emg_final = torch.zeros(sr_emg_shape[0], 1, sr_emg_shape[2], 65, dtype=torch.float32,
-                                   device=self.device)
-
-        for i in range(sr_emg_shape[0]):
-            # pick a grid
-            grid = sr_emg_reshaped[i, 0, :, :, :]
-
-            # 2D to 3D
-            grid = grid.transpose(0, 1)
-            grid = torch.flip(grid, dims=[0])
-            grid[:, 1::2] = torch.flip(grid[:, 1::2], dims=[0])
-
-            # delete last row and last column
-            grid_small = grid[:-1, :-1, :]
-
-            # 3D to 2D
-            grid_new = grid_small
-            grid_new[:, 1::2, :] = torch.flip(grid_new[:, 1::2, :], dims=[0])
-            grid_new = torch.flip(grid_new, dims=[0])
-            grid_new = grid_new.permute(1, 0, 2)
-            grid_new = grid_new.reshape(65, sr_emg_shape[2])
-            grid_new = grid_new.permute(1, 0)
-
-            sr_emg_final[i][0][:][:] = grid_new
-
-        return sr_emg_final
 
     def _validate(self, epoch: int) -> tuple:
         """
@@ -415,9 +361,6 @@ class Trainer:
                 # Generate SR data from LR data using the generator
                 val_sr = self.generator(val_lr).to(self.device)
                 print("val hr shape", val_hr.shape)
-                print("val sr shape before deleting", val_sr.shape)
-                val_sr = self._delete_row_column(val_sr)
-                print("val sr shape after deleting", val_sr.shape)
 
                 # Calculate adversarial loss
                 real_labels = torch.ones(val_hr.size(0), 1).to(self.device)
@@ -449,11 +392,8 @@ class Trainer:
                     self.validation_plots_logging(val_lr_interpolated, val_hr_destandardized,
                                                   val_sr_destandardized, 'Validation')
 
-                # log absolute difference for one channel absolute difference
-                val_hr_destandardized = val_hr_destandardized.permute(0,1,3,2)
-                val_sr_destandardized = val_sr_destandardized.permute(0,1,3,2)
 
-                abs_diff = torch.abs(val_hr_destandardized[0][0][32] - val_sr_destandardized[0][0][32])
+                abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_destandardized[0][0][6][2])
                 abs_diff = abs_diff.squeeze().to('cpu')
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
@@ -507,21 +447,9 @@ class Trainer:
         sr_destandardized = np.asarray(val_sr_destandardized.to('cpu')).squeeze()
 
         if phase == 'Validation':
-            interpolated_destandardized = interpolated_destandardized[6]
-            hr_destandardized = hr_destandardized[6]
-            sr_destandardized = sr_destandardized[6]
-
-        # 2D to 3D
-        print("sr destandardized shape", sr_destandardized.shape)
-        sr_destandardized = sr_destandardized.reshape(5, 13, sr_destandardized.shape[0]).transpose(1, 0, 2)
-        sr_destandardized = np.flipud(sr_destandardized)
-        sr_destandardized[:, 1::2, :] = np.flipud(sr_destandardized[:, 1::2, :])
-
-        # 2D to 3D
-        print("hr destandardized shape", hr_destandardized.shape)
-        hr_destandardized = hr_destandardized.reshape(5, 13, hr_destandardized.shape[0]).transpose(1, 0, 2)
-        hr_destandardized = np.flipud(hr_destandardized)
-        hr_destandardized[:, 1::2, :] = np.flipud(hr_destandardized[:, 1::2, :])
+            interpolated_destandardized = interpolated_destandardized[self.batch_size//2]
+            hr_destandardized = hr_destandardized[self.batch_size//2]
+            sr_destandardized = sr_destandardized[self.batch_size//2]
 
         # Extract specific channels
         interpolated_channel = interpolated_destandardized[6][2]
@@ -530,9 +458,6 @@ class Trainer:
 
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
-
-        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
@@ -633,9 +558,6 @@ class Trainer:
 
         diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
         print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
-
-        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
 
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
@@ -849,8 +771,6 @@ class Trainer:
         del self.discriminator
         del self.optimizer_G
         del self.optimizer_D
-        del self.adversarial_loss
-        del self.mse
         del self.training
         del self.validation
         torch.cuda.empty_cache()
@@ -859,34 +779,62 @@ class Trainer:
         # load the final generator
         self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
+        total_test_loss = 0.0
 
-        with (torch.no_grad()):
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_interpolated) in enumerate(self.testing):
+        with torch.no_grad():
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
                 lr_emg = lr_emg.to(self.device)
+                hr_emg = hr_emg.to(self.device)
 
                 # Generate super-resolved data (SR) from LR data
                 lr_sr_emg = self.generator(lr_emg)
-                lr_sr_emg = self._delete_row_column(lr_sr_emg)
-                lr_sr_emg_shape = lr_sr_emg.shape
+
+                # Calculate content loss
+                test_content = self.mse(lr_sr_emg, hr_emg)
+
+                # Accumulate validation loss
+                total_test_loss += test_content.item()
 
                 lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
-                interpolated_destandardized = self.destandardize_data(lr_interpolated)
+                interpolated_destandardized = self.destandardize_data(lr_emg_interpolated)
                 hr_emg_destandardized = self.destandardize_data(hr_emg)
 
                 if batch_idx == 0:
                     self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,
                                                   lr_sr_emg_destandardized, 'Test')
 
-                # 2D to 3D
-                lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
-                lr_sr_emg_destandardized = lr_sr_emg_destandardized.reshape(5, 13, lr_sr_emg_shape[2]).transpose(1,0,2)
-                lr_sr_emg_destandardized = np.flipud(lr_sr_emg_destandardized)
-                lr_sr_emg_destandardized[:, 1::2, :] = np.flipud(lr_sr_emg_destandardized[:, 1::2, :])
-
                 # Save signal from lr to sr
+                lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
+
+        print("Successfully generated LR to SR data")
+
+        avg_test_content = total_test_loss / len(self.testing)
+        print("Logging test loss")
+        wandb.log({'test loss': avg_test_content})
+
+        torch.cuda.empty_cache()
+
+        with torch.no_grad():
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
+                hr_emg = hr_emg.to(self.device)
+
+                # Generate super-resolved data (SR) from LR data
+                hr_sr_emg = self.generator(hr_emg)
+
+                hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
+
+                # Save signal from lr to sr
+                hr_sr_emg_destandardized = hr_sr_emg_destandardized.to('cpu').numpy().squeeze()
+                model_path = self.run_folder + self.unique_folder + '/results/'
+                os.makedirs(model_path, exist_ok=True)
+                np.save(model_path + lr_emg_paths[0].replace('lr', 'hr'), hr_sr_emg_destandardized)
+
+        print("Successfully generated HR to SR data")
+
+        torch.cuda.empty_cache()
 
     def destandardize_data(self, standardized_data):
 

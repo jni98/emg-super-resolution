@@ -1,8 +1,8 @@
 """
 Author: Janina Kloos (janina.kloos@gmx.de)
 Date created: 02.02.2024
-File description: This file contains the class Interpolation, which performs cubic interpolation on the low resolution
-data to get high resolution data.
+File description: This file contains the class Interpolation, which performs bicubic spline and bilinear interpolation
+ the low resolution data to get high resolution data.
 
 You can run this code by creating an object of the class Interpolation and calling the interpolate method.
 """
@@ -21,24 +21,23 @@ class Interpolation:
     Class that performs cubic interpolation on the low resolution data to get high resolution data.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, dataset: str) -> None:
         """
         Constructs all the necessary attributes for the interpolation object.
         """
+
         # Load the JSON file with values for min max normalization into a Python dictionary
-        with open('../dataset/train/mean_std.json', 'r') as file:
+        with open(dataset + 'train/mean_std.json', 'r') as file:
             self.mean_std_dict = json.load(file)
 
         # Load data
-        data = pd.read_csv('../dataset/test/data.csv', sep=";")
+        data = pd.read_csv(dataset + 'test/data.csv', sep=";")
         self.testing = torch.utils.data.DataLoader(
-            Custom_Dataset(data, '../dataset/test', self.mean_std_dict['mean'], self.mean_std_dict['std']))
-
-        #TODO: Add linear and b-spline interpolation
+            Custom_Dataset(data, dataset + 'test', self.mean_std_dict['mean'], self.mean_std_dict['std']))
 
     def grid_interpolation(self, lr_emg: np.ndarray, hr_emg_shape: tuple, method: str) -> np.ndarray:
         """
-        Performs cubic interpolation on the low resolution data to get high resolution data.
+        Performs bilienar interpolation on the low resolution data to get high resolution data.
         Parameters
         ----------
         lr_emg: numpy.ndarray
@@ -73,50 +72,12 @@ class Interpolation:
         # Interpolate
         interpolated_signal = interpolator((mesh_x, mesh_y, mesh_z))
         print("Finished the interpolator")
+
         return interpolated_signal
-
-    def interpolate_8x8(self) -> None:
-        """
-        Performs cubic interpolation on the low resolution data to get high resolution data.
-
-        Returns
-        -------
-        interpolated_lr_hr: numpy.ndarray
-                High resolution emg data.
-        """
-        for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-            print(f'{batch_idx} of 157 batches')
-            # 2D to 3D: reshape back to grid shape
-            lr_emg = lr_emg.squeeze().numpy()
-            lr_emg = lr_emg.transpose()
-            lr_emg_reshaped = lr_emg.reshape(4, 4, lr_emg.shape[1])
-
-            # Transpose and flip to get to correct grid numbering
-            lr_emg_transposed = np.transpose(lr_emg_reshaped, axes=(1, 0, 2))
-            lr_emg_grid = np.flipud(lr_emg_transposed)
-            lr_emg_grid = self.destandardize_data(lr_emg_grid)
-
-            # Perform cubic interpolation
-            interpolated_lr_hr = self.grid_interpolation(lr_emg_grid, (7, 7, lr_emg.shape[1]), 'cubic')
-
-            # 3D to 2D: reshape back
-            interpolated_lr_hr = np.flipud(interpolated_lr_hr).transpose(1, 0, 2).reshape(-1, interpolated_lr_hr.shape[-1])
-
-            # flip rows and columns
-            interpolated_lr_hr = interpolated_lr_hr.transpose()
-
-            # Save cubic interpolated signal from lr to hr
-            last_slash_index_lr = lr_emg_paths[0].rfind("/")
-            cubic_path = lr_emg_paths[0][:last_slash_index_lr] + '/interpolated/cubic/8x8'
-
-            os.makedirs(cubic_path, exist_ok=True)
-            print("Saving")
-            np.save(cubic_path + (lr_emg_paths[0][last_slash_index_lr:]).replace('-lr.npy', '-lr-sr.npy'),
-                    interpolated_lr_hr)
 
     def interpolate_13x5(self) -> None:
         """
-        Performs cubic and linear interpolation on the low resolution data to get high resolution data,
+        Performs bicubic and bilinear interpolation on the low resolution data to get high resolution data,
         and calculates the mean squared error for each interpolation method. Saves the MSE to a file.
 
         Returns
@@ -124,8 +85,9 @@ class Interpolation:
         interpolated_lr_hr: numpy.ndarray
                 High resolution emg data.
         """
-        total_mse_linear = 0
-        total_mse_cubic = 0
+        # Create variables for test loss using mse
+        total_mse_bilinear = 0
+        total_mse_bicubic = 0
         total_batches = len(self.testing)
 
         # Load mean and std
@@ -138,7 +100,7 @@ class Interpolation:
             lr_emg = lr_emg.numpy().squeeze()
             hr_emg = hr_emg.numpy().squeeze()
 
-            # Perform linear interpolation using grid interpolation method
+            # Perform bilinear interpolation using grid interpolation method
             interpolated_lr_hr = self.grid_interpolation(lr_emg, (13, 5, lr_emg.shape[2]), 'linear')
 
             # Save linear interpolated signal from lr to hr
@@ -153,7 +115,7 @@ class Interpolation:
 
             # Calculate and accumulate the MSE for linear interpolation
             mse_linear = mean_squared_error(standardized_hr_emg.flatten(), standardized_interpolated_lr_hr.flatten())
-            total_mse_linear += mse_linear
+            total_mse_bilinear += mse_linear
 
             # Upsampling factors for the first two dimensions, keeping the third dimension the same
             zoom_factors = (13 / 7, 5 / 3, 1)
@@ -172,7 +134,7 @@ class Interpolation:
 
             # Calculate and accumulate the MSE for cubic interpolation
             mse_cubic = mean_squared_error(standardized_hr_emg.flatten(), standardized_interpolated_lr_hr.flatten())
-            total_mse_cubic += mse_cubic
+            total_mse_bicubic += mse_cubic
 
             # Perform linear interpolation using scipy.ndimage.zoom method
             interpolated_lr_hr = scipy.ndimage.zoom(lr_emg, zoom_factors, order=1)  # Using linear interpolation
@@ -184,8 +146,8 @@ class Interpolation:
             np.save(path + lr_emg_paths[0], interpolated_lr_hr)
 
         # Calculate average MSE
-        average_mse_linear = total_mse_linear / total_batches
-        average_mse_cubic = total_mse_cubic / total_batches
+        average_mse_linear = total_mse_bilinear / total_batches
+        average_mse_cubic = total_mse_bicubic / total_batches
 
         print(f'Average MSE for linear interpolation: {average_mse_linear}')
         print(f'Average MSE for cubic interpolation: {average_mse_cubic}')
@@ -195,23 +157,7 @@ class Interpolation:
             f.write(f'Average MSE for linear interpolation: {average_mse_linear}\n')
             f.write(f'Average MSE for cubic interpolation: {average_mse_cubic}\n')
 
-    def destandardize_data(self, standardized_data: np.ndarray) -> np.ndarray:
-        """
-        De-standardizes the data according to the mean and standard deviation of the training data.
-        Parameters
-        ----------
-        standardized_data: numpy.ndarray
-                Standardized data.
-
-        Returns
-        -------
-        destandardized_data: numpy.ndarray
-                De-standardized data.
-        """
-        return standardized_data * self.mean_std_dict['std'] + self.mean_std_dict['mean']
-
-
 if __name__ == '__main__':
-    interpolator = Interpolation()
-    #interpolator.interpolate_8x8()
+    dataset = '../dataset/'
+    interpolator = Interpolation(dataset)
     interpolator.interpolate_13x5()

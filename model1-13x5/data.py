@@ -81,10 +81,6 @@ class Custom_Dataset(Dataset):
         # Create lr file path
         lr_emg_path = hr_emg_path.replace("hr", "lr")
 
-        # reshape lr emg to 2D
-        lr_emg = self.reshape(lr_emg)
-        hr_emg = self.reshape(hr_emg)
-
         # standardize both
         lr_emg_standardized = self.standardization(lr_emg, self.mean, self.std)
         hr_emg_standardized = self.standardization(hr_emg, self.mean, self.std)

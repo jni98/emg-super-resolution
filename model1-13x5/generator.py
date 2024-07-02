@@ -103,7 +103,14 @@ class Generator(nn.Module):
         """
         print("Generator input", x.shape)
 
-        out = self.conv1(x)
+        # reshape to 2D
+        reshaped_input = x.reshape(x.shape[0], x.shape[1],x.shape[2] * x.shape[3], x.shape[4])
+
+        # transpose to have samples x channels
+        reshaped_input = reshaped_input.transpose(-1,-2)
+        print("Reshaped input shape", reshaped_input.shape)
+
+        out = self.conv1(reshaped_input)
         print("Generator conv1 output", out.shape)
 
         out = self.prelu(out)
@@ -128,4 +135,13 @@ class Generator(nn.Module):
         out = self.conv_output(out)
         print("Generator conv_output output", out.shape)
 
-        return out
+        # transpose for channels x samples
+        reshaped_output = out.transpose(-1,-2)
+
+        # reshape to have 14x6 instead of 84
+        reshaped_output = reshaped_output.reshape(reshaped_output.shape[0], reshaped_output.shape[1], x.shape[2] * 2, x.shape[3] *2, reshaped_output.shape[-1])
+
+        # delete last row and column
+        reshaped_output = reshaped_output[:,:,:-1,:-1, :]
+
+        return reshaped_output

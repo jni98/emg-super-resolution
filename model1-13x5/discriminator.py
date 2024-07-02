@@ -75,7 +75,15 @@ class Discriminator(nn.Module):
         out: torch.tensor
              Output tensor of the network.
         """
-        out = self.conv1(x)
+
+        # reshape to 2D
+        reshaped_input = x.reshape(x.shape[0], x.shape[1], x.shape[2] * x.shape[3], x.shape[4])
+        print("Reshaped input shape", reshaped_input.shape)
+
+        # transpose to have samples x channels
+        reshaped_input = reshaped_input.transpose(-1, -2)
+
+        out = self.conv1(reshaped_input)
         out = self.leaky_relu1(out)
 
         out = self.conv2(out)

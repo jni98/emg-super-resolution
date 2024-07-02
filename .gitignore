@@ -129,6 +129,7 @@ dataset
 dataset_512
 datatset_lstm_20480
 dataset_lstm_40960
+
 dataset_model
 files_to_plot
 
@@ -163,8 +164,8 @@ results_mat
 /dataset_lstm_40960.tar
 /model1-8x8/runs/
 /model1-13x5/runs/
-/model1-13x5-new/FINAL-BP400-model1-13x5-new-831835/
-/model1-13x5-new/FINAL-BP500-model1-13x5-new-832418/
+/model1-13x5/FINAL-BP400-model1-13x5-new-831835/
+/model1-13x5/FINAL-BP500-model1-13x5-new-832418/
 /model2-13x5-Fourier-Layer/results/
 /model2-13x5-Fourier-Layer-Interpolation/FINAL-BP400-allskip-model2-13x5-Fourier-Layer-Interpolation-834305/
 /model2-13x5-Fourier-Layer-Interpolation/FINAL-BP400-model2-13x5-Fourier-Layer-Interpolation-832719/
@@ -178,3 +179,8 @@ results_mat
 /model3-LSTM-basic/model3-LSTM-basic-817372/
 /Visualization-13x5grid/plot_specific_positions/
 /Visualization-13x5grid/plot_frequency_spectrum_difference/
+/Visualization-13x5grid/MU_firings/
+/Visualization-13x5grid/plot_channel_3_2/
+/Visualization-13x5grid/plot_frequency_spectrum_difference/
+/Visualization-13x5grid/pnr_plots/
+/model1-8x8/
