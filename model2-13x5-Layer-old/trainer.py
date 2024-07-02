@@ -14,7 +14,7 @@ import matplotlib
 import wandb
 from scipy.signal import butter, filtfilt
 
-matplotlib.use('Agg')  # Use the 'Agg' backend
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -28,9 +28,8 @@ from generator import Generator
 from discriminator import Discriminator
 from data import Custom_Dataset
 import plotly.graph_objects as go
-from torch.optim.lr_scheduler import LambdaLR  # Import LambdaLR
-
-
+from torch.optim.lr_scheduler import LambdaLR
+from utils import destandardize_data
 
 class Trainer:
     """
@@ -45,17 +44,17 @@ class Trainer:
         Parameters
         ----------
         data_directory: str
-                    Path to the directory where the training data is stored
+            Path to the directory where the training data is stored
         test_data_directory: str
-                    Path to the directory where the testing data is stored
+            Path to the directory where the testing data is stored
         results_directory: str
-                    Path to the directory where the results should be saved
+            Path to the directory where the results should be saved
         num_epochs: int
-                    Number of epochs to train the model
-        batch_size: int
-                    Batch size to use during training
-        learning_rate: float
-                    Learning rate to use during training
+            Number of epochs to train the model
+        config: object
+            Configuration object containing various hyperparameters
+        sweep_id: str
+            Identifier for the wandb sweep
         """
 
         self.data_directory = data_directory
@@ -89,50 +88,53 @@ class Trainer:
         # Define lambda function for the LR scheduler
         self.lr_lambda = lambda epoch: 0.5 ** (epoch // 500)
 
-        print("init done")
+        print("Initialization done")
 
     def prepare_data(self) -> None:
         """
-        Prepares the training, validation and testing set.
+        Prepares the training, validation, and testing datasets.
 
         Returns
         -------
         None
         """
 
-        # Load the JSON file with values for standardization into a Python dictionary
         with open(self.data_directory + '/mean_std.json', 'r') as file:
             self.mean_std_dict = json.load(file)
 
         data_train_val = pd.read_csv(self.data_directory + '/data.csv', sep=";")
         data_test = pd.read_csv(self.test_data_directory + '/data.csv', sep=";")
 
+        # Split the training and validation data
         train, val = train_test_split(data_train_val, train_size=0.8, test_size=0.2, random_state=42)
 
-        # Use Custom_Dataset with standardization
-        self.training = torch.utils.data.DataLoader(
+        # Prepare the DataLoader for training data
+        self.training = DataLoader(
             Custom_Dataset(train, self.data_directory, self.mean_std_dict['mean'],
                            self.mean_std_dict['std'], augment=self.config.augment, bandpass_upper=self.bandpass_upper),
             batch_size=self.batch_size, pin_memory=True
         )
 
-        self.validation = torch.utils.data.DataLoader(
+        # Prepare the DataLoader for validation data
+        self.validation = DataLoader(
             Custom_Dataset(val, self.data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], augment = False, bandpass_upper=self.bandpass_upper),
+                           self.mean_std_dict['std'], augment=False, bandpass_upper=self.bandpass_upper),
             batch_size=self.batch_size, pin_memory=True
         )
-        self.testing = torch.utils.data.DataLoader(
+
+        # Prepare the DataLoader for testing data
+        self.testing = DataLoader(
             Custom_Dataset(data_test, self.test_data_directory, self.mean_std_dict['mean'],
-                           self.mean_std_dict['std'], augment = False, bandpass_upper=self.bandpass_upper), pin_memory=True)
+                           self.mean_std_dict['std'], augment=False, bandpass_upper=self.bandpass_upper),
+            pin_memory=True
+        )
 
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
         self.hyperparameter["device"] = str(self.device)
 
-        # Ensure the directory exists
-        os.makedirs(self.run_folder +self.unique_folder, exist_ok=True)
+        os.makedirs(self.run_folder + self.unique_folder, exist_ok=True)
 
-        # Save the dictionary to a file
         with open(self.run_folder + self.unique_folder + '/hyperparameter.json', 'w') as file:
             json.dump(self.hyperparameter, file)
 
@@ -140,7 +142,7 @@ class Trainer:
 
     def initialize_models(self) -> None:
         """
-        Initializes the Generator, Discriminator, Optimizers and Loss functions.
+        Initializes the Generator, Discriminator, Optimizers, and Loss functions.
 
         Returns
         -------
@@ -149,22 +151,16 @@ class Trainer:
         self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
         self.discriminator = Discriminator()
 
-        # move to gpu in case it's possible
+        # Move models to the appropriate device
         self.generator.to(self.device)
-        # print("Generator summary")
-        # print(str(summary(self.generator, (1, 7,3,2048))))
-
         self.discriminator.to(self.device)
-        # print("Discriminator summary")
-        # print(str(summary(self.discriminator, (1, 13, 5, 2048))))
 
-        self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
-        self.mse = nn.MSELoss()  # Mean Squared error Loss
+        self.adversarial_loss = nn.BCELoss()
+        self.mse = nn.MSELoss()
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
 
-        # Initialize the LR schedulers
         self.scheduler_G = LambdaLR(self.optimizer_G, lr_lambda=self.lr_lambda)
         self.scheduler_D = LambdaLR(self.optimizer_D, lr_lambda=self.lr_lambda)
 
@@ -172,18 +168,11 @@ class Trainer:
 
     def train(self) -> tuple:
         """
-        Trains the complete model for a number of epochs.
+        Trains the model for a specified number of epochs.
 
         Returns
         -------
-        train_g_loss: list
-                    Generator loss over the epochs
-        train_d_loss: list
-                    Discriminator loss over the epochs
-        val_loss: list
-                    Validation loss over the epochs
-        psnr: list
-                    PSNR over the epochs
+        tuple: Contains lists of Generator and Discriminator losses, validation losses, and PSNR over epochs
         """
         train_d_loss = []
         train_d_loss_real = []
@@ -193,7 +182,7 @@ class Trainer:
         psnr = []
         best_val_loss = float('inf')
 
-        # Add wandb.watch() here to start tracking gradients and parameters
+        # Track gradients and parameters using wandb
         wandb.watch(self.generator, criterion='mse', log='all')
         wandb.watch(self.discriminator, criterion='mse', log='all')
 
@@ -217,21 +206,15 @@ class Trainer:
             # Save best model based on validation loss or other metrics
             if avg_val_loss < best_val_loss:
                 best_val_loss = avg_val_loss
-
-                # Save the final models when a new best model is found
                 self._save_final_models()
 
-            # self._save_checkpoint(epoch)
-            # Clear unnecessary variables to release memory
             del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
 
             # Step the LR schedulers
             self.scheduler_G.step()
             self.scheduler_D.step()
 
-            # Assuming self.scheduler_G.get_last_lr() returns a list of learning rates
-            last_lr_list = self.scheduler_G.get_last_lr()
-            last_lr = last_lr_list[-1]  # Get the last learning rate
+            last_lr = self.scheduler_G.get_last_lr()[-1]
             wandb.log({'lr_scheduler': last_lr})
 
             # Check GPU memory usage after training
@@ -253,14 +236,7 @@ class Trainer:
 
         Returns
         -------
-        avg_loss_g: float
-                    Average loss of the generator over the training set
-        avg_loss_d_real: float
-                    Average loss of the discriminator over the training set when receiving real data
-        avg_loss_d_fake: float
-                    Average loss of the discriminator over the training set when receiving fake data
-        avg_loss_d: float
-                    Average loss of the discriminator over the training set
+        tuple: Average losses for generator and discriminator over the training set
         """
         self.generator.train()
         self.discriminator.train()
@@ -272,35 +248,27 @@ class Trainer:
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.training):
             print("batch index", batch_idx)
 
-            with torch.no_grad():  # Disable gradient calculation within this block
-                # Move data to CUDA device during training or validation loops
-                lr_emg = lr_emg.to(self.device)
-                hr_emg = hr_emg.to(self.device)
+            lr_emg = lr_emg.to(self.device)
+            hr_emg = hr_emg.to(self.device)
 
             # Train Discriminator
             self.optimizer_D.zero_grad()
 
-            # Generate super-resolved data (SR) from LR data
-            # detaching sr_emg prevents gradients from flowing back through the generator network when computing
-            # the loss for the discriminator. --> ensure that during the optimization step for the discriminator,
-            # only the gradients with respect to the discriminator's parameters are computed and used to update those parameters.
             sr_emg = self.generator(lr_emg).detach().to(self.device)
 
             # Create real and fake labels to train discriminator for both cases
             real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
             fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
 
-            # calculate loss for discriminator receiving real data
+            # Calculate loss for discriminator receiving real data
             output_discriminator_real = self.discriminator(hr_emg).to(self.device)
             loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
 
-            # calculate loss for discriminator receiving fake data
+            # Calculate loss for discriminator receiving fake data
             output_discriminator_fake = self.discriminator(sr_emg)
             loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
-            # calculate total loss for discriminator
-            loss_discriminator = (loss_discriminator_real + loss_discriminator_fake)
-
+            loss_discriminator = loss_discriminator_real + loss_discriminator_fake
             loss_discriminator.backward()
 
             self.optimizer_D.step()
@@ -308,16 +276,13 @@ class Trainer:
             # Train Generator
             self.optimizer_G.zero_grad()
 
-            # Generate SR data from LR data
             sr_emg = self.generator(lr_emg).to(self.device)
 
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
+            loss_generator_content = self.mse(sr_emg, hr_emg)
 
-            loss_generator_content = self.mse(sr_emg, hr_emg)  # Content loss
-
-            loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content)
-
+            loss_generator = self.adv_loss_weight * loss_generator_adv + loss_generator_content
             loss_generator.backward()
 
             self.optimizer_G.step()
@@ -335,7 +300,6 @@ class Trainer:
         wandb.log({'epoch': epoch, 'avg_loss_g': avg_loss_g, 'avg_loss_d_real': avg_loss_d_real,
                    'avg_loss_d_fake': avg_loss_d_fake, 'avg_loss_d': avg_loss_d})
 
-        # Print progress per epoch
         print(f"Epoch [{epoch}/{self.num_epochs}] Average Loss D: {avg_loss_d}, Average Loss G: {avg_loss_g}")
 
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d
@@ -350,13 +314,10 @@ class Trainer:
 
         Returns
         -------
-        avg_validation_loss: float
-                             Average validation loss over the validation set
-        avg_psnr: float
-                    Average PSNR over the validation set
+        tuple: Average validation loss and PSNR over the validation set
         """
-        self.generator.eval()  # Set the generator to evaluation mode
-        self.discriminator.eval()  # Set the discriminator to evaluation mode if needed
+        self.generator.eval()
+        self.discriminator.eval()
 
         total_validation_loss = 0.0
         total_val_gen_adv = 0.0
@@ -365,7 +326,7 @@ class Trainer:
         total_abs_diff = 0.0
 
         with torch.no_grad():
-            for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path,  lr_emg_interpolated) in enumerate(self.validation):
+            for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path, lr_emg_interpolated) in enumerate(self.validation):
                 print("validation batch index", val_batch_idx)
 
                 val_lr = val_lr.to(self.device)
@@ -382,9 +343,7 @@ class Trainer:
                 # Calculate content loss
                 loss_generator_content = self.mse(val_sr, val_hr)
 
-                # Total loss for validation
-                val_loss = (self.adv_loss_weight * loss_generator_adv +
-                            loss_generator_content)
+                val_loss = self.adv_loss_weight * loss_generator_adv + loss_generator_content
 
                 # Accumulate validation loss
                 total_validation_loss += val_loss.item()
@@ -392,15 +351,12 @@ class Trainer:
                 total_val_gen_content += loss_generator_content.item()
 
                 psnr = 10 * torch.log10(1.0 / loss_generator_content)
-
                 total_psnr += psnr.item()
 
-                # destacndardize the data for the logged plots
-                val_hr_destandardized = self.destandardize_data(val_hr)
-                val_sr_destandardized = self.destandardize_data(val_sr)
-                val_lr_destandardized = self.destandardize_data(lr_emg_interpolated)
+                val_hr_destandardized = destandardize_data(val_hr)
+                val_sr_destandardized = destandardize_data(val_sr)
+                val_lr_destandardized = destandardize_data(lr_emg_interpolated)
 
-                # log absolute difference for one channel absolute difference
                 abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_destandardized[0][0][6][2])
                 abs_diff = abs_diff.squeeze().to('cpu')
                 abs_diff = np.asarray(abs_diff)
@@ -410,7 +366,6 @@ class Trainer:
                     self.validation_plots_logging(val_lr_destandardized, val_hr_destandardized,
                                                   val_sr_destandardized, 'Validation')
 
-            # log validation loss and psnr
             avg_validation_loss = total_validation_loss / len(self.validation)
             avg_val_content = total_val_gen_content / len(self.validation)
             avg_val_adv = total_val_gen_adv / len(self.validation)
@@ -419,7 +374,6 @@ class Trainer:
             wandb.log({'val_loss': avg_validation_loss, 'val_content': avg_val_content,
                        'val_adv': avg_val_adv, 'val_psnr': avg_psnr})
 
-            # log absolute difference for one channel absolute difference
             avg_abs_diff = total_abs_diff / len(self.validation)
             fig2, axs2 = plt.subplots(1, 1, figsize=(8, 10))
             axs2.plot(range(len(avg_abs_diff)), avg_abs_diff)
@@ -427,237 +381,200 @@ class Trainer:
             plt.tight_layout()
             wandb.log({"Average absolute difference": [wandb.Image(fig2)]})
             wandb.log({'Mean absolute difference': np.mean(avg_abs_diff)})
-
-            # Close the figure
             plt.close(fig2)
 
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
 
-        self.generator.train()  # Set the generator back to training mode
-        self.discriminator.train()  # Set the discriminator back to training mode if needed
+        self.generator.train()
+        self.discriminator.train()
 
         return avg_validation_loss, avg_psnr
 
     def validation_plots_logging(self, val_lr_destandardized, val_hr_destandardized, val_sr_destandardized,
                                  phase):
         """
+        Handles logging of validation plots.
 
         Parameters
         ----------
-        val_hr_destandardized
-        val_sr_destandardized
-        abs_diff
-
+        val_lr_destandardized: torch.Tensor
+            Destandardized low-resolution data
+        val_hr_destandardized: torch.Tensor
+            Destandardized high-resolution data
+        val_sr_destandardized: torch.Tensor
+            Destandardized super-resolution data
+        phase: str
+            The current phase (e.g., 'Validation' or 'Test')
         Returns
         -------
-
+        None
         """
         # Convert tensors to numpy arrays and move to CPU
         interpolated_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
         hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
         sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
 
-        # Extract specific channels
-        interpolated_channel = interpolated_destandardized[0][0][6][2]
-        hr_channel = hr_destandardized[0][0][6][2]
-        sr_channel = sr_destandardized[0][0][6][2]
+        # Log for channel [6][2]
+        self.log_channel_metrics(interpolated_destandardized, hr_destandardized, sr_destandardized, phase, 6, 2)
 
-        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
-        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
+        # Log for channel [6][1]
+        self.log_channel_metrics(interpolated_destandardized, hr_destandardized, sr_destandardized, phase, 6, 1)
 
-        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, self.bandpass_upper, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, self.bandpass_upper, 2048, order=2)
+    def log_channel_metrics(self, val_lr_destandardized, val_hr_destandardized, val_sr_destandardized, phase, row,
+                            column):
+        """
+        Logs all metrics for a specific channel and position.
 
-        # Calculate the difference between hr_channel and sr_channel
+        Parameters
+        ----------
+        val_lr_destandardized: ndarray
+            Destandardized low-resolution data
+        val_hr_destandardized: ndarray
+            Destandardized high-resolution data
+        val_sr_destandardized: ndarray
+            Destandardized super-resolution data
+        phase: str
+            The current phase (e.g., 'Validation' or 'Test')
+        channel: int
+            The channel index to log
+        position: int
+            The position index to log
+
+        Returns
+        -------
+        None
+        """
+        hr_channel = val_hr_destandardized[0][0][row][column]
+        sr_channel = val_sr_destandardized[0][0][row][column]
+        lr_channel = val_lr_destandardized[0][0][row][column]
+
         diff_channel = hr_channel - sr_channel
-        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
-        print("abs diff sum, filtered, given Channel: ", diff_filtered)
-        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
 
-        ############################## Log Plots given channel########################################
-        print("Logging plots for batch index 0 given channel")
+        self.log_cross_correlation_plot(hr_channel, sr_channel, phase, f'Channel [{row}][{column}]')
+        self.log_channel_comparison_plot(sr_channel, hr_channel, lr_channel, diff_channel, phase,
+                                         f'Channel [{row}][{column}]')
+        self.log_frequency_spectrum_plot(hr_channel, sr_channel, lr_channel, phase, f'Channel [{row}][{column}]')
 
-        plotly_fig0 = go.Figure()
+    def log_cross_correlation_plot(self, hr_channel, sr_channel, phase, channel_label):
+        """
+        Logs cross-correlation plots.
 
-        # log cross correlation
+        Parameters
+        ----------
+        hr_channel: np.ndarray
+            High-resolution channel data
+        sr_channel: np.ndarray
+            Super-resolution channel data
+        phase: str
+            The current phase (e.g., 'Validation' or 'Test')
+        channel_label: str
+            Label for the channel being logged
+
+        Returns
+        -------
+        None
+        """
         auto_correlation = np.correlate(hr_channel, hr_channel, mode='full')
         cross_correlation = (np.correlate(hr_channel, sr_channel, mode='full')) / np.max(auto_correlation)
         cross_correlation = cross_correlation.squeeze()
-        plotly_fig0.add_trace(go.Scatter(y=cross_correlation))
 
-        # Update layout
-        plotly_fig0.update_layout(
-            title='Cross Correlation - Predicted Channel',
+        plotly_fig = go.Figure()
+        plotly_fig.add_trace(go.Scatter(y=cross_correlation))
+
+        plotly_fig.update_layout(
+            title=f'Cross Correlation - {phase} {channel_label}',
             xaxis_title='Index',
             yaxis_title='Cross Correlation',
             template="plotly_white"
         )
 
-        # Log the Plotly figure to W&B
-        wandb.log({phase + " Cross correlation - Given Channel [6][2]": plotly_fig0})
+        wandb.log({f'{phase} Cross correlation - {channel_label}': plotly_fig})
 
-        # New figure for plots of channels
-        # Create Plotly figure
+    def log_channel_comparison_plot(self, sr_channel, hr_channel, lr_channel, diff_channel, phase, channel_label):
+        """
+        Logs channel comparison plots.
+
+        Parameters
+        ----------
+        sr_channel: np.ndarray
+            Super-resolution channel data
+        hr_channel: np.ndarray
+            High-resolution channel data
+        lr_channel: np.ndarray
+            Low-resolution channel data
+        diff_channel: np.ndarray
+            Difference between high-resolution and super-resolution data
+        phase: str
+            The current phase (e.g., 'Validation' or 'Test')
+        channel_label: str
+            Label for the channel being logged
+
+        Returns
+        -------
+        None
+        """
         plotly_fig = go.Figure()
-        # Add traces for all channels
-        plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution'))
+        plotly_fig.add_trace(go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution'))
         plotly_fig.add_trace(
             go.Scatter(x=np.arange(len(hr_channel)), y=hr_channel, name='High-resolution', opacity=0.5))
-        plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
-                       opacity=0.5))
-        # Add trace for the difference channel
-        plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(diff_channel)), y=diff_channel, name='HR - SR'))
-        # Update layout
-        plotly_fig.update_layout(title="Super-resolution vs Validation - Given Channel", showlegend=True,
-                                 xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
-        # Log the Plotly figure to W&B
-        wandb.log({phase + " - SR vs Val - Given Channel [6][2]": plotly_fig})
+        plotly_fig.add_trace(go.Scatter(x=np.arange(len(lr_channel)), y=lr_channel, name='Low-resolution', opacity=0.5))
+        plotly_fig.add_trace(go.Scatter(x=np.arange(len(diff_channel)), y=diff_channel, name='HR - SR'))
 
-        ############# Plot frequency histogram# #################
-        sampling_freq = 2048
-
-        # Compute FFT for val_channel
-        n = len(hr_channel)
-        k = np.arange(n)
-        T = n / sampling_freq
-        frq = k / T  # Two sides frequency range
-        frq = frq[range(n // 2)]  # One side frequency range
-        hr_Y = np.fft.fft(hr_channel) / n
-        hr_Y = hr_Y[range(n // 2)]
-
-        # Compute FFT for sr_channel
-        sr_Y = np.fft.fft(sr_channel) / n
-        sr_Y = sr_Y[range(n // 2)]
-
-        # Compute FFT for interpolated_channel
-        interpolated_Y = np.fft.fft(interpolated_channel) / n
-        interpolated_Y = interpolated_Y[range(n // 2)]
-
-        # Plot
-        freq_spec1 = go.Figure()
-
-        # Plot val_channel
-        freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(hr_Y), mode='lines', name='High-resolution', opacity=0.5))
-
-        # Plot interpolated_channel
-        freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(interpolated_Y), mode='lines', name='Interpolated', opacity=0.5))
-
-        # Plot sr channel
-        freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution', opacity=1))
-
-        freq_spec1.update_layout(title='Frequency Spectrum - Given channel',
-                                 xaxis_title='Frequency (Hz)',
-                                 yaxis_title='Magnitude')
-
-        wandb.log({phase + " - Frequency Spectrum - Scatter - Given channel [6][2]": freq_spec1})
-
-        ############################## Log Plots predicted channel########################################
-        print("Logging plots for batch index 0 predicted channel")
-
-        # Select channels
-        hr_channel = hr_destandardized[0][0][6][1]
-        sr_channel = sr_destandardized[0][0][6][1]
-        interpolated_channel = interpolated_destandardized[0][0][6][1]
-
-        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
-        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
-
-        #interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, self.bandpass_upper, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, self.bandpass_upper, 2048, order=2)
-
-        # Calculate the difference between hr_channel and sr_channel
-        diff_channel = hr_channel - sr_channel
-        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
-        print("abs diff sum, filtered, given Channel: ", diff_filtered)
-        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
-
-        plotly_fig1 = go.Figure()
-
-        # log cross correlation
-        auto_correlation = np.correlate(hr_channel, hr_channel, mode='full')
-        cross_correlation = (np.correlate(hr_channel, sr_channel, mode='full')) / np.max(auto_correlation)
-        cross_correlation = cross_correlation.squeeze()
-        plotly_fig1.add_trace(go.Scatter(y=cross_correlation))
-
-        # Update layout
-        plotly_fig1.update_layout(
-            title='Cross Correlation - Predicted Channel',
-            xaxis_title='Index',
-            yaxis_title='Cross Correlation',
-            template="plotly_white"
+        plotly_fig.update_layout(
+            title=f'Super-resolution vs {phase} - {channel_label}',
+            showlegend=True,
+            xaxis_title="Time in samples",
+            yaxis_title="Amplitude in µV"
         )
 
-        # Log the Plotly figure to W&B
-        wandb.log({phase + " Cross correlation - Predicted Channel  [6][1]": plotly_fig1})
+        wandb.log({f'{phase} - SR vs {phase} - {channel_label}': plotly_fig})
 
-        # New figure for plots of channels
-        # Create Plotly figure
-        plotly_fig = go.Figure()
-        # Add traces for all channels
-        plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(sr_channel)), y=sr_channel, name='Super-resolution'))
-        plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(hr_channel)), y=hr_channel, name='High-resolution', opacity=0.5))
-        plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(interpolated_channel)), y=interpolated_channel, name='Interpolated',
-                       opacity=0.5))
-        # Add trace for the difference channel
-        plotly_fig.add_trace(
-            go.Scatter(x=np.arange(len(diff_channel)), y=diff_channel, name='HR - SR'))
-        # Update layout
-        plotly_fig.update_layout(title="Super-resolution vs Validation - Predicted Channel", showlegend=True,
-                                 xaxis_title="Time in samples", yaxis_title="Amplitude in µV")
+    def log_frequency_spectrum_plot(self, hr_channel, sr_channel, lr_channel, phase, channel_label):
+        """
+        Logs frequency spectrum plots.
 
-        # Log the Plotly figure to W&B
-        wandb.log({phase + " - SR vs Val - Predicted Channel [6][1]": plotly_fig})
+        Parameters
+        ----------
+        hr_channel: np.ndarray
+            High-resolution channel data
+        sr_channel: np.ndarray
+            Super-resolution channel data
+        lr_channel: np.ndarray
+            Low-resolution channel data
+        phase: str
+            The current phase (e.g., 'Validation' or 'Test')
+        channel_label: str
+            Label for the channel being logged
 
-        ############# Plot frequency histogram# #################
-        # Generate sample data for demonstration purposes
+        Returns
+        -------
+        None
+        """
         sampling_freq = 2048
-
-        # Compute FFT for val_channel
         n = len(hr_channel)
         k = np.arange(n)
         T = n / sampling_freq
-        frq = k / T  # Two sides frequency range
-        frq = frq[range(n // 2)]  # One side frequency range
+        frq = k / T
+        frq = frq[range(n // 2)]
         hr_Y = np.fft.fft(hr_channel) / n
         hr_Y = hr_Y[range(n // 2)]
-
-        # Compute FFT for sr_channel
         sr_Y = np.fft.fft(sr_channel) / n
         sr_Y = sr_Y[range(n // 2)]
+        lr_Y = np.fft.fft(lr_channel) / n
+        lr_Y = lr_Y[range(n // 2)]
 
-        # Compute FFT for interpolated_channel
-        interpolated_Y = np.fft.fft(interpolated_channel) / n
-        interpolated_Y = interpolated_Y[range(n // 2)]
+        plotly_fig = go.Figure()
+        plotly_fig.add_trace(go.Scatter(x=frq, y=np.abs(hr_Y), mode='lines', name='High-resolution', opacity=0.5))
+        plotly_fig.add_trace(go.Scatter(x=frq, y=np.abs(lr_Y), mode='lines', name='Low-resolution', opacity=0.5))
+        plotly_fig.add_trace(go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution', opacity=1))
 
-        # Plot
-        freq_spec1 = go.Figure()
+        plotly_fig.update_layout(
+            title=f'Frequency Spectrum - {phase} {channel_label}',
+            xaxis_title='Frequency (Hz)',
+            yaxis_title='Magnitude'
+        )
 
-        # Plot val_channel
-        freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(hr_Y), mode='lines', name='High-resolution', opacity=0.5))
-
-        # Plot interpolated_channel
-        freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(interpolated_Y), mode='lines', name='Interpolated', opacity=0.5))
-
-        # Plot sr channel
-        freq_spec1.add_trace(
-            go.Scatter(x=frq, y=np.abs(sr_Y), mode='lines', name='Super-resolution', opacity=1))
-
-        freq_spec1.update_layout(title='Frequency Spectrum - Predicted channel',
-                                 xaxis_title='Frequency (Hz)',
-                                 yaxis_title='Magnitude')
-
-        wandb.log({phase + " - Frequency Spectrum - Scatter - Predicted channel [6][1]": freq_spec1})
+        wandb.log({f'{phase} - Frequency Spectrum - {channel_label}': plotly_fig})
 
     def _save_checkpoint(self, epoch: int) -> None:
         """
@@ -777,9 +694,9 @@ class Trainer:
 
         Returns
         -------
-
+        None
         """
-        # free memory
+        # Free memory
         del self.discriminator
         del self.optimizer_G
         del self.optimizer_D
@@ -788,46 +705,46 @@ class Trainer:
         torch.cuda.empty_cache()
 
         print("Starting to generate SR data")
-        # load the final generator
-        self.generator.load_state_dict(torch.load('/home/hpc/iwso/iwso124h/FINAL-BP500-model2-13x5-Layer-old-833790/20240607080437/final_generator.pt'))
-        self.generator.eval()  # Set the generator to evaluation mode
+        # Load the final generator
+        self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
+        self.generator.eval()
         total_test_loss = 0.0
 
-        # with torch.no_grad():
-        #     for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
-        #         lr_emg = lr_emg.to(self.device)
-        #         hr_emg = hr_emg.to(self.device)
-        #
-        #         # Generate super-resolved data (SR) from LR data
-        #         lr_sr_emg = self.generator(lr_emg)
-        #
-        #         # Calculate content loss
-        #         test_content = self.mse(lr_sr_emg, hr_emg)
-        #
-        #         # Accumulate validation loss
-        #         total_test_loss += test_content.item()
-        #
-        #         lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
-        #         interpolated_destandardized = self.destandardize_data(lr_emg_interpolated)
-        #         hr_emg_destandardized = self.destandardize_data(hr_emg)
-        #
-        #         if batch_idx == 0:
-        #             self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,
-        #                                           lr_sr_emg_destandardized, 'Test')
-        #
-        #         # Save signal from lr to sr
-        #         lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
-        #         model_path = self.run_folder + self.unique_folder + '/results/'
-        #         os.makedirs(model_path, exist_ok=True)
-        #         np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
-        #
-        # print("Successfully generated LR to SR data")
-        #
-        # avg_test_content = total_test_loss / len(self.testing)
-        # print("Logging test loss")
-        # wandb.log({'test loss': avg_test_content})
-        #
-        # torch.cuda.empty_cache()
+        with torch.no_grad():
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
+                lr_emg = lr_emg.to(self.device)
+                hr_emg = hr_emg.to(self.device)
+
+                # Generate super-resolved data (SR) from LR data
+                lr_sr_emg = self.generator(lr_emg)
+
+                # Calculate content loss
+                test_content = self.mse(lr_sr_emg, hr_emg)
+
+                # Accumulate validation loss
+                total_test_loss += test_content.item()
+
+                lr_sr_emg_destandardized = destandardize_data(lr_sr_emg)
+                interpolated_destandardized = destandardize_data(lr_emg_interpolated)
+                hr_emg_destandardized = destandardize_data(hr_emg)
+
+                if batch_idx == 0:
+                    self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,
+                                                  lr_sr_emg_destandardized, 'Test')
+
+                # Save signal from lr to sr
+                lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
+                model_path = self.run_folder + self.unique_folder + '/results/'
+                os.makedirs(model_path, exist_ok=True)
+                np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
+
+        print("Successfully generated LR to SR data")
+
+        avg_test_content = total_test_loss / len(self.testing)
+        print("Logging test loss")
+        wandb.log({'test loss': avg_test_content})
+
+        torch.cuda.empty_cache()
 
         with torch.no_grad():
             for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
@@ -836,58 +753,14 @@ class Trainer:
                 # Generate super-resolved data (SR) from LR data
                 hr_sr_emg = self.generator(hr_emg)
 
-                hr_sr_emg_destandardized = self.destandardize_data(hr_sr_emg)
+                hr_sr_emg_destandardized = destandardize_data(hr_sr_emg)
 
                 # Save signal from lr to sr
                 hr_sr_emg_destandardized = hr_sr_emg_destandardized.to('cpu').numpy().squeeze()
-                model_path = '/home/hpc/iwso/iwso124h/FINAL-BP500-model2-13x5-Layer-old-833790/20240607080437/results/'
+                model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0].replace('lr', 'hr'), hr_sr_emg_destandardized)
 
         print("Successfully generated HR to SR data")
 
         torch.cuda.empty_cache()
-
-    def destandardize_data(self, standardized_data: torch.tensor) -> torch.tensor:
-        """
-        De-standardizes the data with the mean and standard deviation from the training set.
-
-        Parameters
-        ----------
-        standardized_data: numpy array
-
-        Returns
-        -------
-        destandardized_data: numpy array
-        """
-
-        return standardized_data * self.mean_std_dict['std'] + self.mean_std_dict['mean']
-
-    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
-        """
-        Apply a bandpass_upper filter to the data
-        Parameters
-        ----------
-        data: np.array
-            Data to be filtered
-        lowcut: float
-            Lower cut-off frequency
-        highcut: float
-            Higher cut-off frequency
-        fs: int
-            Sampling frequency
-        order: int
-            Order of the filter
-
-        Returns
-        -------
-        y: np.array
-            Filtered data
-        """
-        nyq = 0.5 * fs
-        low = lowcut / nyq
-        high = highcut / nyq
-        b, a = butter(order, [low, high], btype='band')
-        filtered_signal = filtfilt(b, a, data)
-
-        return filtered_signal
