@@ -5,7 +5,7 @@
 ############    slurm    ###############
 
 #SBATCH --job-name=model2-13x5-Fourier-Layer-Interpolation
-#SBATCH --time=0:30:00
+#SBATCH --time=24:00:00
 #SBATCH --mail-user=janina.kloos@fau.de --mail-type=ALL
 #SBATCH --gres=gpu:v100:2
 #SBATCH --partition=v100

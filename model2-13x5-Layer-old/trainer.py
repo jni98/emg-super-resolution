@@ -353,9 +353,9 @@ class Trainer:
                 psnr = 10 * torch.log10(1.0 / loss_generator_content)
                 total_psnr += psnr.item()
 
-                val_hr_destandardized = destandardize_data(val_hr)
-                val_sr_destandardized = destandardize_data(val_sr)
-                val_lr_destandardized = destandardize_data(lr_emg_interpolated)
+                val_hr_destandardized = destandardize_data(val_hr, self.mean_std_dict['mean'], self.mean_std_dict['std'])
+                val_sr_destandardized = destandardize_data(val_sr, self.mean_std_dict['mean'], self.mean_std_dict['std'])
+                val_lr_destandardized = destandardize_data(lr_emg_interpolated, self.mean_std_dict['mean'], self.mean_std_dict['std'])
 
                 abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_destandardized[0][0][6][2])
                 abs_diff = abs_diff.squeeze().to('cpu')
@@ -409,16 +409,12 @@ class Trainer:
         -------
         None
         """
-        # Convert tensors to numpy arrays and move to CPU
-        interpolated_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
-        hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
-        sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
 
         # Log for channel [6][2]
-        self.log_channel_metrics(interpolated_destandardized, hr_destandardized, sr_destandardized, phase, 6, 2)
+        self.log_channel_metrics(val_lr_destandardized, val_hr_destandardized, val_sr_destandardized, phase, 6, 2)
 
         # Log for channel [6][1]
-        self.log_channel_metrics(interpolated_destandardized, hr_destandardized, sr_destandardized, phase, 6, 1)
+        self.log_channel_metrics(val_lr_destandardized, val_hr_destandardized, val_sr_destandardized, phase, 6, 1)
 
     def log_channel_metrics(self, val_lr_destandardized, val_hr_destandardized, val_sr_destandardized, phase, row,
                             column):
@@ -710,6 +706,7 @@ class Trainer:
         self.generator.eval()
         total_test_loss = 0.0
 
+        # Generate with LR input
         with torch.no_grad():
             for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
                 lr_emg = lr_emg.to(self.device)
@@ -724,9 +721,9 @@ class Trainer:
                 # Accumulate validation loss
                 total_test_loss += test_content.item()
 
-                lr_sr_emg_destandardized = destandardize_data(lr_sr_emg)
-                interpolated_destandardized = destandardize_data(lr_emg_interpolated)
-                hr_emg_destandardized = destandardize_data(hr_emg)
+                lr_sr_emg_destandardized = destandardize_data(lr_sr_emg, self.mean_std_dict['mean'], self.mean_std_dict['std'])
+                interpolated_destandardized = destandardize_data(lr_emg_interpolated, self.mean_std_dict['mean'], self.mean_std_dict['std'])
+                hr_emg_destandardized = destandardize_data(hr_emg, self.mean_std_dict['mean'], self.mean_std_dict['std'])
 
                 if batch_idx == 0:
                     self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,
@@ -746,21 +743,22 @@ class Trainer:
 
         torch.cuda.empty_cache()
 
-        with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
-                hr_emg = hr_emg.to(self.device)
-
-                # Generate super-resolved data (SR) from LR data
-                hr_sr_emg = self.generator(hr_emg)
-
-                hr_sr_emg_destandardized = destandardize_data(hr_sr_emg)
-
-                # Save signal from lr to sr
-                hr_sr_emg_destandardized = hr_sr_emg_destandardized.to('cpu').numpy().squeeze()
-                model_path = self.run_folder + self.unique_folder + '/results/'
-                os.makedirs(model_path, exist_ok=True)
-                np.save(model_path + lr_emg_paths[0].replace('lr', 'hr'), hr_sr_emg_destandardized)
-
-        print("Successfully generated HR to SR data")
-
-        torch.cuda.empty_cache()
+        # Generate with HR input
+        # with torch.no_grad():
+        #     for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.testing):
+        #         hr_emg = hr_emg.to(self.device)
+        #
+        #         # Generate super-resolved data (SR) from LR data
+        #         hr_sr_emg = self.generator(hr_emg)
+        #
+        #         hr_sr_emg_destandardized = destandardize_data(hr_sr_emg, self.mean_std_dict['mean'], self.mean_std_dict['std'])
+        #
+        #         # Save signal from lr to sr
+        #         hr_sr_emg_destandardized = hr_sr_emg_destandardized.to('cpu').numpy().squeeze()
+        #         model_path = self.run_folder + self.unique_folder + '/results/'
+        #         os.makedirs(model_path, exist_ok=True)
+        #         np.save(model_path + lr_emg_paths[0].replace('lr', 'hr'), hr_sr_emg_destandardized)
+        #
+        # print("Successfully generated HR to SR data")
+        #
+        # torch.cuda.empty_cache()

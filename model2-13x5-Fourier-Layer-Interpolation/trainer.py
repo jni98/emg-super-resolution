@@ -366,9 +366,12 @@ class Trainer:
                 psnr = 10 * torch.log10(1.0 / loss_generator_content)
                 total_psnr += psnr.item()
 
-                val_hr_destandardized = destandardize_data(val_hr)
-                val_sr_destandardized = destandardize_data(val_sr)
-                val_lr_destandardized = destandardize_data(val_lr)
+                val_hr_destandardized = destandardize_data(val_hr, self.mean_std_dict['mean'],
+                                                           self.mean_std_dict['std'])
+                val_sr_destandardized = destandardize_data(val_sr, self.mean_std_dict['mean'],
+                                                           self.mean_std_dict['std'])
+                val_lr_destandardized = destandardize_data(val_lr, self.mean_std_dict['mean'],
+                                                           self.mean_std_dict['std'])
                 abs_diff = torch.abs(val_hr_destandardized[0][0][6][2] - val_sr_destandardized[0][0][6][2])
                 abs_diff = abs_diff.squeeze().to('cpu').numpy()
                 total_abs_diff += abs_diff
@@ -730,9 +733,12 @@ class Trainer:
                 test_content = self.mse(lr_sr_emg, hr_emg)
                 total_test_loss += test_content.item()
 
-                lr_sr_emg_destandardized = destandardize_data(lr_sr_emg)
-                interpolated_destandardized = destandardize_data(lr_emg)
-                hr_emg_destandardized = destandardize_data(hr_emg)
+                lr_sr_emg_destandardized = destandardize_data(lr_sr_emg, self.mean_std_dict['mean'],
+                                                              self.mean_std_dict['std'])
+                interpolated_destandardized = destandardize_data(lr_emg, self.mean_std_dict['mean'],
+                                                                 self.mean_std_dict['std'])
+                hr_emg_destandardized = destandardize_data(hr_emg, self.mean_std_dict['mean'],
+                                                           self.mean_std_dict['std'])
 
                 if batch_idx == 0:
                     self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,
@@ -752,18 +758,19 @@ class Trainer:
         torch.cuda.empty_cache()
 
         # Generate data from HR input
-        with torch.no_grad():
-            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, hr_interpolated) in enumerate(self.testing):
-                hr_interpolated = hr_interpolated.to(self.device)
-
-                hr_sr_emg = self.generator(hr_interpolated)
-                hr_sr_emg_destandardized = destandardize_data(hr_sr_emg)
-
-                hr_sr_emg_destandardized = hr_sr_emg_destandardized.to('cpu').numpy().squeeze()
-                model_path = self.run_folder + self.unique_folder + '/results/'
-                os.makedirs(model_path, exist_ok=True)
-                np.save(model_path + lr_emg_paths[0].replace('lr', 'hr'), hr_sr_emg_destandardized)
-
-        print("Successfully generated HR to SR data")
-
-        torch.cuda.empty_cache()
+        # with torch.no_grad():
+        #     for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, hr_interpolated) in enumerate(self.testing):
+        #         hr_interpolated = hr_interpolated.to(self.device)
+        #
+        #         hr_sr_emg = self.generator(hr_interpolated)
+        #         hr_sr_emg_destandardized = destandardize_data(hr_sr_emg, self.mean_std_dict['mean'],
+        #                                                       self.mean_std_dict['std'])
+        #
+        #         hr_sr_emg_destandardized = hr_sr_emg_destandardized.to('cpu').numpy().squeeze()
+        #         model_path = self.run_folder + self.unique_folder + '/results/'
+        #         os.makedirs(model_path, exist_ok=True)
+        #         np.save(model_path + lr_emg_paths[0].replace('lr', 'hr'), hr_sr_emg_destandardized)
+        #
+        # print("Successfully generated HR to SR data")
+        #
+        # torch.cuda.empty_cache()
