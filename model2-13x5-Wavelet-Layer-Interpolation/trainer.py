@@ -835,46 +835,48 @@ class Trainer:
 
         print("Starting to generate SR data")
         # load the final generator
-        self.generator.load_state_dict(torch.load('/home/hpc/iwso/iwso124h/FINAL-BP500-allskip-model2-13x5-Wavelet-Layer-Interpolation-835761/20240609122016/final_generator.pt'))
+        self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
         self.generator.eval()  # Set the generator to evaluation mode
         total_test_loss = 0.0
 
-        # with torch.no_grad():
-        #     for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
-        #         lr_emg = lr_emg.to(self.device)
-        #         hr_emg = hr_emg.to(self.device)
-        #
-        #         # Generate super-resolved data (SR) from LR data
-        #         lr_sr_emg = self.generator(lr_emg)
-        #
-        #         # Calculate content loss
-        #         test_content = self.mse(lr_sr_emg, hr_emg)
-        #
-        #         # Accumulate validation loss
-        #         total_test_loss += test_content.item()
-        #
-        #         lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
-        #         interpolated_destandardized = self.destandardize_data(lr_emg)
-        #         hr_emg_destandardized = self.destandardize_data(hr_emg)
-        #
-        #         if batch_idx == 0:
-        #             self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,
-        #                                           lr_sr_emg_destandardized, 'Test')
-        #
-        #         # Save signal from lr to sr
-        #         lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
-        #         model_path = self.run_folder + self.unique_folder + '/results/'
-        #         os.makedirs(model_path, exist_ok=True)
-        #         np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
-        #
-        # print("Successfully generated LR to SR data")
-        #
-        # avg_test_content = total_test_loss / len(self.testing)
-        # print("Logging test loss")
-        # wandb.log({'test loss': avg_test_content})
-        #
-        # torch.cuda.empty_cache()
+        # Generate with LR input
+        with torch.no_grad():
+            for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+                lr_emg = lr_emg.to(self.device)
+                hr_emg = hr_emg.to(self.device)
 
+                # Generate super-resolved data (SR) from LR data
+                lr_sr_emg = self.generator(lr_emg)
+
+                # Calculate content loss
+                test_content = self.mse(lr_sr_emg, hr_emg)
+
+                # Accumulate validation loss
+                total_test_loss += test_content.item()
+
+                lr_sr_emg_destandardized = self.destandardize_data(lr_sr_emg)
+                interpolated_destandardized = self.destandardize_data(lr_emg)
+                hr_emg_destandardized = self.destandardize_data(hr_emg)
+
+                if batch_idx == 0:
+                    self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,
+                                                  lr_sr_emg_destandardized, 'Test')
+
+                # Save signal from lr to sr
+                lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
+                model_path = self.run_folder + self.unique_folder + '/results/'
+                os.makedirs(model_path, exist_ok=True)
+                np.save(model_path + lr_emg_paths[0], lr_sr_emg_destandardized)
+
+        print("Successfully generated LR to SR data")
+
+        avg_test_content = total_test_loss / len(self.testing)
+        print("Logging test loss")
+        wandb.log({'test loss': avg_test_content})
+
+        torch.cuda.empty_cache()
+
+        # Generate data with HR input
         with torch.no_grad():
             for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, hr_emg_interpolated) in enumerate(self.testing):
                 hr_emg_interpolated = hr_emg_interpolated.to(self.device)
@@ -886,7 +888,7 @@ class Trainer:
 
                 # Save signal from lr to sr
                 hr_sr_emg_destandardized = hr_sr_emg_destandardized.to('cpu').numpy().squeeze()
-                model_path = '/home/hpc/iwso/iwso124h/FINAL-BP500-allskip-model2-13x5-Wavelet-Layer-Interpolation-835761/20240609122016/results/'
+                model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
                 np.save(model_path + lr_emg_paths[0].replace('lr', 'hr'), hr_sr_emg_destandardized)
 

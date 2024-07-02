@@ -142,7 +142,7 @@ class Visualizer:
         models = ['groundtruth_hr', 'groundtruth_lr', 'linear_Interpolation', 'cubic_interpolation', 'model_1',
                   'model_2', 'model_2_Fourier',
                   'model_2_Wavelet', 'model_3_LSTM']
-        model_names = ['Original HD', 'Original LD', 'Bilinear', 'Bicubic spline', 'SRGAN', 'UNet', 'UNet Fourier',
+        model_names = ['Original HR', 'Original LR', 'Bilinear', 'Bicubic spline', 'SRGAN', 'UNet', 'UNet Fourier',
                        'UNet Wavelet',
                        'CNN-LSTM']
         matlab_data = {path: {model_name: None for model_name in model_names} for path in paths}
@@ -163,24 +163,23 @@ class Visualizer:
         Plot the PNR results for each path and model.
         """
         paths = ['path0', 'path1', 'path2', 'path3']
-        model_names = ['Original HD', 'Original LD', 'Bilinear', 'Bicubic spline', 'SRGAN', 'UNet', 'UNet Fourier',
+        model_names = ['Original HR', 'Original LR', 'Bilinear', 'Bicubic spline', 'SRGAN', 'UNet', 'UNet Fourier',
                        'UNet Wavelet', 'CNN-LSTM']
         path_colors = [
-            (127 / 255, 127 / 255, 127 / 255),
             (47 / 255, 88 / 255, 110 / 255),
             (0 / 255, 0 / 255, 255 / 255),
-            (135 / 255, 206 / 255, 250 / 255)
+            (93 / 255, 192 / 255, 138 / 255),
+            (255 / 255, 192 / 255, 0 / 255)
         ]
         model_colors = {
-            'Original HD': (32/255, 66/255, 81 / 255),  # Dark blue
-            'Original LD': (84/255, 156 / 255, 188 / 255) ,  # Medium blue
+            'Original HR': (32 / 255, 66 / 255, 81 / 255),  # Dark blue
+            'Original LR': (84 / 255, 156 / 255, 188 / 255),  # Medium blue
             'Bilinear': (127 / 255, 127 / 255, 127 / 255),  # Steel blue
-            'Bicubic spline': (32/255, 66/255, 81 / 255),  # Cornflower blue
-            'SRGAN': (84/255, 156 / 255, 188 / 255),  # Dodger blue
-
+            'Bicubic spline': (32 / 255, 66 / 255, 81 / 255),  # Cornflower blue
+            'SRGAN': (84 / 255, 156 / 255, 188 / 255),  # Dodger blue
             'UNet': (127 / 255, 127 / 255, 127 / 255),  # Deep sky blue
-            'UNet Fourier': (32/255, 66/255, 81 / 255),  # Light sky blue
-            'UNet Wavelet': (84/255, 156 / 255, 188 / 255),  # Light blue
+            'UNet Fourier': (32 / 255, 66 / 255, 81 / 255),  # Light sky blue
+            'UNet Wavelet': (84 / 255, 156 / 255, 188 / 255),  # Light blue
             'CNN-LSTM': (127 / 255, 127 / 255, 127 / 255)  # Light cyan
         }
         single_color = (47 / 255, 88 / 255, 110 / 255)  # Single color for individual plots
@@ -193,28 +192,49 @@ class Visualizer:
                 all_pnr_values.extend(matlab_data[path][model_name].flatten())
         y_min, y_max = min(all_pnr_values), max(all_pnr_values)
 
-        # Create a figure with 4 subplots for each path
-        fig, axes = plt.subplots(nrows=4, ncols=1, figsize=(self.page_width, self.page_height * 0.6), sharey=True)
+        # Create a figure with 5 subplots (one for boxplot and 4 for each path)
+        fig, axes = plt.subplots(nrows=5, ncols=1, figsize=(self.page_width, self.page_height * 0.75), sharey=True)
 
-        for i, (ax, path, color) in enumerate(zip(axes, paths, path_colors)):
+        # Plot the boxplot with median and mean values for each model in the first subplot
+        boxplot_data = []
+        for model_name in model_names:
+            model_pnr_values = []
+            for path in paths:
+                model_pnr_values.extend(matlab_data[path][model_name].flatten())
+            boxplot_data.append(model_pnr_values)
+
+        bp = axes[0].boxplot(boxplot_data, patch_artist=True, widths=0.35, showfliers=False)
+
+        for i, patch in enumerate(bp['boxes']):
+            patch.set_facecolor(model_colors[model_names[i]])
+
+        for median in bp['medians']:
+            median.set(color='orange', linewidth=0.5)
+        for mean in bp['means']:
+            mean.set(marker='x', color='black', markersize=5)
+
+        median_values = [item.get_ydata()[0] for item in bp['medians']]
+        axes[0].plot(range(1, len(model_names) + 1), median_values, color='black', linestyle='-', linewidth=1)
+
+        axes[0].set_ylabel('PNR')
+        axes[0].set_ylim(10, y_max + 5)
+        axes[0].set_title('PNR Distribution')
+        axes[0].set_xticklabels([])
+
+        # Plot the PNR results for each path in the remaining subplots
+        for i, (ax, path, color) in enumerate(zip(axes[1:], paths, path_colors)):
             for model_name in model_names:
                 pnr_values = matlab_data[path][model_name].flatten()
                 x_values = model_names.index(model_name)
-                jittered_x_values = np.ones_like(
-                    pnr_values) * x_values + np.random.uniform(-0.1, 0.1, size=pnr_values.shape)
-                ax.scatter(jittered_x_values, pnr_values, color=model_colors[model_name],
-                           edgecolor='none', marker='.', s=28, alpha=0.8)  # Small dots with model colors
+                jittered_x_values = np.ones_like(pnr_values) * x_values + np.random.uniform(-0.1, 0.1,
+                                                                                            size=pnr_values.shape)
+                ax.scatter(jittered_x_values, pnr_values, color=model_colors[model_name], edgecolor='none', marker='.',
+                           s=28, alpha=0.8)
 
-                # # Add the number of dots per model per path next to the last dot
-                # if len(pnr_values) > 0:
-                #     ax.text(jittered_x_values[-1] + 0.1, pnr_values[-1], f'{len(pnr_values)}', fontsize=8,
-                #             ha='left', va='bottom')
-
-            ax.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha = 0.5)  # Add red dashed line at PNR=30
+            ax.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha=0.5)
             ax.set_xticks(range(len(model_names)))
             ax.set_ylabel('PNR')
             ax.set_ylim(10, y_max + 5)
-
             ax.yaxis.set_major_locator(MultipleLocator(10))
 
             if i != len(paths) - 1:
@@ -222,16 +242,60 @@ class Visualizer:
             else:
                 ax.set_xticklabels(model_names, rotation=45)
 
-            if path == 'path0':
-                subj_title = 'subject 1.1'
-            elif path == 'path1':
-                subj_title = 'subject 1.2'
-            elif path == 'path2':
-                subj_title = 'subject 2.1'
-            else:
-                subj_title = 'subject 2.2'
+            subj_title = f'Subject {i // 2 + 1}.{i % 2 + 1}'
+            ax.set_title(f'Motor Unit PNR {subj_title}')
 
-            ax.set_title(f'Motor unit PNR {subj_title}')
+        plt.tight_layout()
+        directory = f'pnr_plots/combined_subplots/'
+        self._create_directory(directory)
+        filename = f'{directory}PNR_Results_Subplots_Boxplot.pdf'
+        plt.savefig(filename, bbox_inches='tight', format='pdf')
+        plt.close()
+        print(f'Saving combined subplots PNR plot to: {filename}')
+
+        # Create a figure with 5 subplots (one for mean values and 4 for each path)
+        fig, axes = plt.subplots(nrows=5, ncols=1, figsize=(self.page_width, self.page_height * 0.9), sharey=True)
+
+        # Plot the mean PNR values for each model in the first subplot
+        mean_pnr_values = []
+        for model_name in model_names:
+            model_pnr_values = []
+            for path in paths:
+                model_pnr_values.extend(matlab_data[path][model_name].flatten())
+            mean_pnr_values.append(np.mean(model_pnr_values))
+
+        axes[0].plot(range(len(model_names)), mean_pnr_values, marker='x', color=single_color, linestyle='-',
+                     linewidth=1,
+                     markersize=8)
+        axes[0].axhline(y=30, color='red', linestyle='--', linewidth=1, alpha=0.5)
+        axes[0].set_ylabel('Mean PNR in dB')
+        axes[0].set_ylim(10, y_max + 5)
+        axes[0].set_title('Mean PNR Across All Subjects')
+        axes[0].set_xticklabels([])
+
+        # Plot the PNR results for each path in the remaining subplots
+        for i, (ax, path, color) in enumerate(zip(axes[1:], paths, path_colors)):
+            for model_name in model_names:
+                pnr_values = matlab_data[path][model_name].flatten()
+                x_values = model_names.index(model_name)
+                jittered_x_values = np.ones_like(pnr_values) * x_values + np.random.uniform(-0.1, 0.1,
+                                                                                            size=pnr_values.shape)
+                ax.scatter(jittered_x_values, pnr_values, color=model_colors[model_name], edgecolor='none', marker='.',
+                           s=28, alpha=0.8)
+
+            ax.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha=0.5)
+            ax.set_xticks(range(len(model_names)))
+            ax.set_ylabel('PNR in dB')
+            ax.set_ylim(10, y_max + 5)
+            ax.yaxis.set_major_locator(MultipleLocator(10))
+
+            if i != len(paths) - 1:
+                ax.set_xticklabels([])  # Hide x labels for all but the last subplot
+            else:
+                ax.set_xticklabels(model_names, rotation=45)
+
+            subj_title = f'Subject {i // 2 + 1}.{i % 2 + 1}'
+            ax.set_title(f'Motor Unit PNR {subj_title}')
 
         plt.tight_layout()
         directory = f'pnr_plots/combined_subplots/'
@@ -241,23 +305,74 @@ class Visualizer:
         plt.close()
         print(f'Saving combined subplots PNR plot to: {filename}')
 
+        # Calculate mean and standard deviation for each model and save to CSV
+        mean_and_std_data = []
+
+        for model_name in model_names:
+            model_pnr_values = []
+            for path in paths:
+                model_pnr_values.extend(matlab_data[path][model_name].flatten())
+            mean_pnr = np.mean(model_pnr_values)
+            std_pnr = np.std(model_pnr_values)
+            mean_and_std_data.append({
+                'Model Name': model_name,
+                'Mean PNR': mean_pnr,
+                'Standard Deviation PNR': std_pnr
+            })
+
+        # Converting to DataFrame and saving as CSV
+        df = pd.DataFrame(mean_and_std_data)
+        csv_filename = directory + 'mean_std_pnr_values.csv'
+        df.to_csv(csv_filename, index=False)
+        print(f'Saving mean and standard deviation to: {csv_filename}')
+
+        # New figure with 4x1 subplots and mean PNR values per model
+        fig, axes = plt.subplots(nrows=4, ncols=1, figsize=(self.page_width, self.page_height * 0.6), sharey=True)
+
+        for i, (ax, path, color) in enumerate(zip(axes, paths, path_colors)):
+            for model_name in model_names:
+                pnr_values = matlab_data[path][model_name].flatten()
+                x_values = model_names.index(model_name)
+                jittered_x_values = np.ones_like(pnr_values) * x_values + np.random.uniform(-0.1, 0.1,
+                                                                                            size=pnr_values.shape)
+                mean_value = np.mean(pnr_values)
+                ax.plot([x_values - 0.2, x_values + 0.2], [mean_value, mean_value], 'k-', linewidth=0.8, alpha=0.3)
+
+                ax.scatter(jittered_x_values, pnr_values, color=color, edgecolor='none', marker='.', s=28, alpha=0.8)
+
+            ax.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha=0.5)
+            ax.set_xticks(range(len(model_names)))
+            ax.set_ylabel('PNR')
+            ax.set_ylim(10, y_max + 5)
+            ax.yaxis.set_major_locator(MultipleLocator(10))
+
+            if i != len(paths) - 1:
+                ax.set_xticklabels([])  # Hide x labels for all but the last subplot
+            else:
+                ax.set_xticklabels(model_names, rotation=45)
+
+            subj_title = f'Subject {i // 2 + 1}.{i % 2 + 1}'
+            ax.set_title(f'Motor Unit PNR {subj_title}')
+
+        plt.tight_layout()
+        directory = f'pnr_plots/mean_pnr_subplots/'
+        self._create_directory(directory)
+        filename = f'{directory}Mean_PNR_Subplots.pdf'
+        plt.savefig(filename, bbox_inches='tight', format='pdf')
+        plt.close()
+        print(f'Saving mean PNR subplots plot to: {filename}')
+
         # Plot individual figures for each path
         for path, color in zip(paths, path_colors):
             plt.figure(figsize=(self.page_width, self.page_height * 0.3))
             for model_name in model_names:
                 pnr_values = matlab_data[path][model_name].flatten()
                 x_values = model_names.index(model_name)
-                jittered_x_values = np.ones_like(
-                    pnr_values) * x_values  # + np.random.uniform(-0.2, 0.2, size=pnr_values.shape)
-                plt.scatter(jittered_x_values, pnr_values, color=single_color,
-                            edgecolor='none', alpha=0.8, marker='.', s=23)  # Small dots instead of circles
+                jittered_x_values = np.ones_like(pnr_values) * x_values
+                plt.scatter(jittered_x_values, pnr_values, color=single_color, edgecolor='none', alpha=0.8, marker='.',
+                            s=23)
 
-                # Add the number of dots per model per path next to the last dot
-                # if len(pnr_values) > 0:
-                #     plt.text(jittered_x_values[-1] + 0.1, pnr_values[-1], f'{len(pnr_values)}', fontsize=8,
-                #              ha='left', va='bottom')
-
-            plt.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha=0.8)  # Add red dashed line at PNR=30
+            plt.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha=0.8)
             plt.xticks(range(len(model_names)), model_names, rotation=45)
             plt.ylabel('PNR')
             plt.ylim(10, y_max + 5)
@@ -273,21 +388,30 @@ class Visualizer:
 
         # Plot combined figure with data from all paths
         plt.figure(figsize=(self.page_width, self.page_height * 0.5))
+        mean_pnr_values = {model_name: [] for model_name in model_names}
+
         for path, color in zip(paths, path_colors):
             for model_name in model_names:
                 pnr_values = matlab_data[path][model_name].flatten()
                 x_values = model_names.index(model_name)
-                jittered_x_values = np.ones_like(pnr_values) * x_values + np.random.uniform(-0.1, 0.1,
+                jittered_x_values = np.ones_like(pnr_values) * x_values + np.random.uniform(-0.15, 0.15,
                                                                                             size=pnr_values.shape)
-                plt.scatter(jittered_x_values, pnr_values, color=color, edgecolor='none',
-                            alpha=0.8, marker='.', s=23)  # Small dots instead of circles
+                plt.scatter(jittered_x_values, pnr_values, color=color, edgecolor='none', alpha=0.8, marker='.', s=23)
+                mean_pnr_values[model_name].append(np.mean(pnr_values))
 
-        plt.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha = 0.8)  # Add red dashed line at PNR=30
+        mean_values_list = []
+        for model_name in model_names:
+            mean_value = np.mean(mean_pnr_values[model_name])
+            mean_values_list.append(mean_value)
+            plt.plot(model_names.index(model_name), mean_value, marker='x', color='black', markersize=3, alpha=0.5)
+
+        plt.plot(range(len(model_names)), mean_values_list, linestyle='-', color='black', linewidth=1, alpha=0.5)
+
+        plt.axhline(y=30, color='red', linestyle='--', linewidth=1, alpha=0.8)
         plt.xticks(range(len(model_names)), model_names, rotation=45)
         plt.ylabel('PNR')
         plt.ylim(10, y_max + 5)
         plt.title('Motor unit PNR')
-        # Adjust the legend to show only paths with their respective colors
         subject_titles = ['subject 1.1', 'subject 1.2', 'subject 2.1', 'subject 2.2']
         handles = [
             plt.Line2D([0], [0], marker='.', color='w', markeredgecolor=color, markerfacecolor=color, markersize=8,
@@ -559,9 +683,13 @@ class Visualizer:
                     plt.close()
 
                     plt.figure()
-                    plt.imshow(mean_absolute_differences, cmap='viridis', origin='upper', vmin=0, vmax=60)
+                    plt.imshow(mean_absolute_differences, cmap='viridis', origin='upper', vmin=0, vmax=50)
                     plt.xticks(range(5), labels=range(1, 6))
                     plt.yticks(range(13), labels=range(13, 0, -1))
+
+                    # Add a white rectangle at row 13, column 1 (index [12, 0])
+                    plt.gca().add_patch(plt.Rectangle((-0.5, 11.5), 1, 1, fill=True, color='white', edgecolor='white'))
+
                     plt.title(f'Mean absolute error - {title}')
                     plt.colorbar()
 
@@ -576,13 +704,15 @@ class Visualizer:
                 fig_size = (self.page_width, self.page_height * 0.6)  # Conversion to inches
 
                 fig, axes = plt.subplots(2, 4, figsize=fig_size)  # Changed to 4x2 grid
-                fig.suptitle('Mean absolute error in µV')
+                fig.suptitle('Mean Absolute Error in µV')
                 axes = axes.flatten()
 
                 wrapper = textwrap.TextWrapper(width=15, break_long_words=False, break_on_hyphens=False)
                 for idx, title in enumerate(model_titles):
                     ax = axes[idx]
-                    im = ax.imshow(mean_diffs_dict[title], cmap='viridis', origin='upper', vmin=0, vmax=60)
+                    im = ax.imshow(mean_diffs_dict[title], cmap='viridis', origin='upper', vmin=0, vmax=50)
+                    # Add a white rectangle at row 13, column 1 (index [12, 0])
+                    ax.add_patch(plt.Rectangle((-0.5, 11.5), 1, 1, fill=True, color='white', edgecolor='white'))
                     wrapped_title = wrapper.fill(text=title)
                     ax.set_title(wrapped_title)
                     ax.set_xticks(range(5))
@@ -617,13 +747,15 @@ class Visualizer:
         fig_size = (self.page_width, self.page_height * 0.6)  # Conversion to inches
 
         fig, axes = plt.subplots(2, 4, figsize=fig_size)  # Changed to 4x2 grid
-        fig.suptitle('Mean absolute error')
+        fig.suptitle('Mean Absolute Error in µV')
         axes = axes.flatten()
 
         wrapper = textwrap.TextWrapper(width=15, break_long_words=False, break_on_hyphens=False)
         for idx, title in enumerate(model_titles):
             ax = axes[idx]
-            im = ax.imshow(overall_mean_diffs_dict[title], cmap='viridis', origin='upper', vmin=0, vmax=60)
+            im = ax.imshow(overall_mean_diffs_dict[title], cmap='viridis', origin='upper', vmin=0, vmax=50)
+            # Add a white rectangle at row 13, column 1 (index [12, 0])
+            ax.add_patch(plt.Rectangle((-0.5, 11.5), 1, 1, fill=True, color='white', edgecolor='white'))
             wrapped_title = wrapper.fill(text=title)
             ax.set_title(wrapped_title)
             ax.set_xticks(range(5))
@@ -699,7 +831,7 @@ class Visualizer:
                 fig_size = (self.page_width, self.page_height * 0.6)  # Conversion to inches
 
                 fig, axes = plt.subplots(2, 4, figsize=fig_size)  # Changed to 4x2 grid
-                fig.suptitle('Pearson coefficient')
+                fig.suptitle('Pearson Coefficient')
                 axes = axes.flatten()
 
                 wrapper = textwrap.TextWrapper(width=15, break_long_words=False, break_on_hyphens=False)
@@ -740,7 +872,7 @@ class Visualizer:
         fig_size = (self.page_width, self.page_height * 0.6)  # Conversion to inches
 
         fig, axes = plt.subplots(2, 4, figsize=fig_size)  # Changed to 4x2 grid
-        fig.suptitle('Pearson coefficient')
+        fig.suptitle('Pearson Coefficient')
         axes = axes.flatten()
 
         wrapper = textwrap.TextWrapper(width=15, break_long_words=False, break_on_hyphens=False)
@@ -908,7 +1040,7 @@ class Visualizer:
         for data_dict in self.emg_data_dicts:
             for path in data_dict.keys():
                 fig, axes = plt.subplots(3, 3, figsize=(self.page_width, self.page_height * 0.75))
-                fig.suptitle(f'Normalised cross-correlation')
+                fig.suptitle(f'Normalised Cross-Correlation')
                 axes = axes.flatten()
 
                 handles_list = []
@@ -969,7 +1101,7 @@ class Visualizer:
 
         # Plot overall mean and std deviation for all paths
         fig, axes = plt.subplots(3, 3, figsize=(self.page_width, self.page_height * 0.75))
-        fig.suptitle('Normalised cross-correlation')
+        fig.suptitle('Normalised Cross-Correlation')
         axes = axes.flatten()
 
         handles_list = []
@@ -1274,44 +1406,79 @@ class Visualizer:
 
     def propagation_plot(self) -> None:
         """
-        Creates a figure with 13 subplots for each element in the grids dictionary.
-        Each subplot shows the signal [y][2][start_idx:end_idx] for the third column of the array.
+        Creates a figure with 13x8 subplots for each path in the grids dictionary.
+        Each column corresponds to a model, and each subplot shows the signal [y][2][start_idx:end_idx]
+        for the third column of the array.
         """
         print("Start plotting propagation plots")
-
-        start_idx = 30050
-        end_idx = start_idx + 256
-
-        # Calculate the time array in milliseconds
-        time_array = (np.arange(start_idx, end_idx) - start_idx) / 2048.0 * 1000  # in milliseconds
 
         # Iterate over each dictionary in the list
         for data_dict in self.emg_data_dicts:
             # Unpack the path and its datasets from each dictionary
             for path, datasets in data_dict.items():
-                # Iterate over datasets
-                for title, array in datasets.items():
-                    fig, axes = plt.subplots(nrows=13, ncols=1, figsize=(self.page_width, self.page_height))
-                    fig.suptitle(f'Propagation Plot: {title}')
+                if path == 'path0':
+                    start_idx = 26172 -25
+                elif path == 'path1':
+                    start_idx = 30038-25
+                elif path == 'path2':
+                    start_idx = 30157-25
+                elif path == 'path3':
+                    start_idx = 30050-25
 
+                end_idx = start_idx + 25
+
+                # Calculate the time array in milliseconds
+                time_array = (np.arange(start_idx, end_idx) - start_idx) / 2048.0 * 1000  # in milliseconds
+
+                # Create a figure with 13x8 subplots
+                fig, axes = plt.subplots(nrows=13, ncols=8, figsize=(self.page_width*1.5, self.page_height))
+                fig.suptitle(f'Propagation Plots: {path}')
+
+                for col, (title, array) in enumerate(datasets.items()):
                     for y in range(13):
-                        ax = axes[y]
+                        ax = axes[y, col]
                         ax.plot(time_array, array[y, 2, start_idx:end_idx])  # Adjusted to plot from the third dimension
                         if y == 12:  # Only set x-axis labels on the last subplot
                             ax.set_xlabel('Time in ms')
                         else:
                             ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
                         ax.set_yticks([])
+                        if y == 0:  # Only set title on the top subplot
+                            ax.set_title(title, fontsize=10)
 
-                    plt.tight_layout()
-                    plt.subplots_adjust(top=0.95)
-                    directory = f'plot_propagation/{path}/'
-                    self._create_directory(directory)
-                    filename = f'{directory}Propagation_Plot_{title}.pdf'
-                    filename = filename.replace(' ', '_')
-                    plt.savefig(filename, format='pdf')
-                    print(f'Saving to: {directory}Propagation_Plot_{title}.pdf')
-                    plt.close()
+                plt.tight_layout(rect=[0, 0, 1, 0.96])
+                directory = f'plot_propagation/{path}/'
+                self._create_directory(directory)
+                filename = f'{directory}Propagation_Plots_given_{path}.pdf'
+                filename = filename.replace(' ', '_')
+                plt.savefig(filename, format='pdf')
+                print(f'Saving to: {filename}')
+                plt.close()
+
+                # Create a figure with 13x8 subplots
+                fig, axes = plt.subplots(nrows=13, ncols=8, figsize=(self.page_width * 1.5, self.page_height))
+                fig.suptitle(f'Propagation Plots: {path}')
+
+                for col, (title, array) in enumerate(datasets.items()):
+                    for y in range(13):
+                        ax = axes[y, col]
+                        ax.plot(time_array, array[y, 1, start_idx:end_idx])  # Adjusted to plot from the third dimension
+                        if y == 12:  # Only set x-axis labels on the last subplot
+                            ax.set_xlabel('Time in ms')
+                        else:
+                            ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+                        ax.set_yticks([])
+                        if y == 0:  # Only set title on the top subplot
+                            ax.set_title(title, fontsize=10)
+
+                plt.tight_layout(rect=[0, 0, 1, 0.96])
+                directory = f'plot_propagation/{path}/'
+                self._create_directory(directory)
+                filename = f'{directory}Propagation_Plots_predicted_{path}.pdf'
+                filename = filename.replace(' ', '_')
+                plt.savefig(filename, format='pdf')
+                print(f'Saving to: {filename}')
+                plt.close()
 
         print("Finished plotting propagation plots.")
 
@@ -1467,7 +1634,7 @@ class Visualizer:
                         # Save the large difference figure
                         fig_diff.tight_layout(rect=[0, 0, 1, 0.95])
                         fig_diff.suptitle(
-                            f'Difference in Windowed Pearson Correlation\nBilinear interpolation vs {title}', y=1.02)
+                            f'Difference in Windowed Pearson Correlation\nBilinear Interpolation vs {title}', y=1.02)
                         filename = f'{diff_directory}Combined_Difference_{title}.pdf'
                         filename = filename.replace(' ', '_')
                         fig_diff.savefig(filename)
@@ -1636,7 +1803,7 @@ class Visualizer:
 
         # Adjust layout and save the combined figure
         combined_fig.tight_layout(rect=[0, 0, 1, 0.93])
-        combined_fig.suptitle('Windowed Pearson correlation coefficient - Bilinear vs. other models')
+        combined_fig.suptitle('Windowed Pearson Correlation Coefficient - Bilinear vs. Other Models')
         combined_fig.text(0.34, 0.93, 'Given channel', ha='center', fontsize=12)
         combined_fig.text(0.77, 0.93, 'Predicted channel', ha='center', fontsize=12)
         combined_fig.savefig('plot_windowed_correlations/Combined_Overall_Positions.pdf')
@@ -1644,7 +1811,7 @@ class Visualizer:
         plt.close(combined_fig)
 
     def create_box_plot(self):
-        data_dicts = self._load_data()
+        data_dicts = self._load_py_data()
         self._create_directory('boxplots')
 
         def save_metrics(differences, filename):
@@ -1680,7 +1847,11 @@ class Visualizer:
                 boxplot_data.append(odd_diffs)
                 labels.append(wrapper.fill(text=model))
 
-            fig, ax = plt.subplots(figsize=(self.page_width, self.page_height * 0.4))
+            if keep_outliers == True:
+                height_factor = 0.7
+            else:
+                height_factor = 0.5
+            fig, ax = plt.subplots(figsize=(self.page_width, self.page_height * height_factor))
             positions = []
             for i in range(len(differences_all)):
                 base_position = i * (3 * box_width + group_spacing)
@@ -1723,7 +1894,7 @@ class Visualizer:
             plt.xlabel('Models')
             plt.ylabel('Absolute error in µV')
             ax.set_xticks([np.mean(positions[i * 3:(i + 1) * 3]) for i in range(len(differences_all))])
-            ax.set_xticklabels(labels, rotation=0, ha='center')
+            ax.set_xticklabels(labels, rotation=45, ha='center')
             plt.grid(True)
             plt.tight_layout()
 
@@ -1776,25 +1947,25 @@ class Visualizer:
 
                 # Plot grouped boxplot without outliers for each path
                 plot_grouped_boxplot(path_differences_all, path_differences_even, path_differences_odd,
-                                     f'Absolute error between real and synthetic data (Without outliers)',
+                                     f'Absolute Error Between Real and Synthetic Data (without outliers)',
                                      colors,
                                      f'boxplots/boxplot_grouped_data_no_outliers_{path}.png', keep_outliers=False)
 
                 # Plot grouped boxplot with outliers for each path
                 plot_grouped_boxplot(path_differences_all, path_differences_even, path_differences_odd,
-                                     f'Absolute error between real and synthetic data (With outliers)',
+                                     f'Absolute Error Between Real and Synthetic Data (with outliers)',
                                      colors,
                                      f'boxplots/boxplot_grouped_data_with_outliers_{path}.png', keep_outliers=True)
 
         # Plot grouped boxplot without outliers for all data
         plot_grouped_boxplot(differences_all, differences_even, differences_odd,
-                             'Absolute error between real and synthetic data (Without outliers)',
+                             'Absolute Error Between Real and Synthetic Data (without outliers)',
                              colors,
                              'boxplots/boxplot_grouped_data_no_outliers.png', keep_outliers=False)
 
         # Plot grouped boxplot with outliers for all data
         plot_grouped_boxplot(differences_all, differences_even, differences_odd,
-                             'Absolute error between real and synthetic data (With outliers)', colors,
+                             'Absolute Error Between Real and Synthetic Data (with outliers)', colors,
                              'boxplots/boxplot_grouped_data_with_outliers.png', keep_outliers=True)
 
         # Save metrics for all data
@@ -1853,7 +2024,7 @@ class Visualizer:
 
                 ax_given.set_xlabel('Time in ms')
                 ax_given.set_ylabel('Amplitude in µV')
-                ax_given.set_title('sEMG - Given channel')
+                ax_given.set_title('sEMG - Given Channel')
 
                 # Plot for the predicted channel in the second column
                 ax_predicted = axs[1]
@@ -1872,7 +2043,7 @@ class Visualizer:
 
                 ax_predicted.set_xlabel('Time in ms')
                 ax_predicted.set_ylabel('Amplitude in µV')
-                ax_predicted.set_title('sEMG - Predicted channel')
+                ax_predicted.set_title('sEMG - Predicted Channel')
 
                 # Add a single legend in the middle below the two subplots
                 handles, labels = axs[0].get_legend_handles_labels()
@@ -2089,19 +2260,19 @@ class Visualizer:
                     freq = np.fft.fftfreq(len(spectra_given[title][0]), d=1 / 2048.0)
                     line1, = ax.plot(freq, spectra_given[title][0], label='Real spectrum', color=spectrum_color,
                                      linewidth=0.5)
-                    line2, = ax.plot(freq, spectra_given[title][1], label='Spectrum error', color=difference_color,
+                    line2, = ax.plot(freq, spectra_given[title][1], label='Spectral error', color=difference_color,
                                      linewidth=0.5)
                     ax.set_xlim(0, 600)  # Limiting the frequency range for better visualization
                     ax.set_title(f'{title}')
                     ax.grid(True)
-                    ax.set_ylabel('Magnitude')
+                    ax.set_ylabel('Magnitude\nin µV')
                     ax.set_xlabel('Frequency in Hz')
 
                     if idx == 0:
                         handles_list.append(line1)
                         handles_list.append(line2)
                         labels_list.append('Real spectrum')
-                        labels_list.append('Spectrum error')
+                        labels_list.append('Spectral error')
 
                 legend_handles = [plt.Line2D([], [], color=handle.get_color(), linewidth=1.5) for handle in
                                   handles_list]
@@ -2113,7 +2284,7 @@ class Visualizer:
                 for i in range(idx + 1, 9):
                     axes[i].axis('off')
 
-                fig.suptitle(f'Error - Given channels')
+                fig.suptitle(f'Error - Given Channels')
                 fig.tight_layout()
 
                 directory = f'plot_frequency_spectrum_difference/{path}/'
@@ -2139,19 +2310,19 @@ class Visualizer:
                     freq = np.fft.fftfreq(len(spectra_predicted[title][0]), d=1 / 2048.0)
                     line1, = ax.plot(freq, spectra_predicted[title][0], label='Real spectrum', color=spectrum_color,
                                      linewidth=0.5)
-                    line2, = ax.plot(freq, spectra_predicted[title][1], label='Spectrum error', color=difference_color,
+                    line2, = ax.plot(freq, spectra_predicted[title][1], label='Spectral error', color=difference_color,
                                      linewidth=0.5)
                     ax.set_xlim(0, 600)  # Limiting the frequency range for better visualization
                     ax.set_title(f'{title}')
                     ax.grid(True)
-                    ax.set_ylabel('Magnitude')
+                    ax.set_ylabel('Magnitude\nin µV')
                     ax.set_xlabel('Frequency in Hz')
 
                     if idx == 0:
                         handles_list.append(line1)
                         handles_list.append(line2)
                         labels_list.append('Real spectrum')
-                        labels_list.append('Spectrum error')
+                        labels_list.append('Spectral error')
 
                 legend_handles = [plt.Line2D([], [], color=handle.get_color(), linewidth=1.5) for handle in
                                   handles_list]
@@ -2163,7 +2334,7 @@ class Visualizer:
                 for i in range(idx + 1, 9):
                     axes[i].axis('off')
 
-                fig.suptitle(f'Error - Predicted channels')
+                fig.suptitle(f'Error - Predicted Channels')
                 fig.tight_layout()
 
                 filename = f'{directory}Frequency_Spectrum_Comparison_predicted_channels.pdf'
@@ -2290,12 +2461,12 @@ class Visualizer:
                     line1, = ax.plot(freq, spectra_given_positions[title][0], label='Real spectrum',
                                      color=spectrum_color,
                                      linewidth=0.5)
-                    line2, = ax.plot(freq, spectra_given_positions[title][1], label='Spectrum error',
+                    line2, = ax.plot(freq, spectra_given_positions[title][1], label='Spectral error',
                                      color=difference_color,
                                      linewidth=0.5)
                     ax.set_xlim(0, 600)  # Limiting the frequency range for better visualization
-                    # ax.set_ylim(-100000, 1000000)  # Set global y-limits
-                    ax.set_yscale('log')
+                    ax.set_ylim(-100000, 1000000)  # Set global y-limits
+                    #ax.set_yscale('log')
                     ax.set_title(f'{title}')
                     ax.grid(True, which='both')
 
@@ -2306,12 +2477,12 @@ class Visualizer:
                         handles_list.append(line1)
                         handles_list.append(line2)
                         labels_list.append('Real spectrum')
-                        labels_list.append('Spectrum error')
+                        labels_list.append('Spectral error')
                     if idx == 6:  # Add x-axis label only to the bottom plots
                         ax.set_xlabel('Frequency in Hz')
                     else:
                         ax.set_xticklabels([])  # Remove x-axis tick labels for all but the bottom row
-                    ax.set_ylabel('Magnitude')
+                    ax.set_ylabel('Magnitude\nin µV')
 
                 # Plot the spectra for the specific predicted channel (3, 1)
                 for idx, title in enumerate(spectra_predicted_positions.keys()):
@@ -2320,12 +2491,12 @@ class Visualizer:
                     line1, = ax.plot(freq, spectra_predicted_positions[title][0], label='Real spectrum',
                                      color=spectrum_color,
                                      linewidth=0.5)
-                    line2, = ax.plot(freq, spectra_predicted_positions[title][1], label='Spectrum error',
+                    line2, = ax.plot(freq, spectra_predicted_positions[title][1], label='Spectral error',
                                      color=difference_color,
                                      linewidth=0.5)
                     ax.set_xlim(0, 600)  # Limiting the frequency range for better visualization
-                    # ax.set_ylim(-100000, 1000000)  # Set global y-limits
-                    ax.set_yscale('log')
+                    ax.set_ylim(-100000, 1000000)  # Set global y-limits
+                    #ax.set_yscale('log')
 
                     ax.set_title(f'{title}')
                     ax.grid(True, which='both')
@@ -2374,16 +2545,13 @@ if __name__ == '__main__':
     matlab_path = '../results_mat/'
     visualize = Visualizer(file_path, matlab_path)
     # visualize.plot_emg_channels()
-    visualize.plot_emg_channels_difference()
+    #visualize.plot_emg_channels_difference()
     # visualize.plot_pearson_coefficient_grid()
-    # visualize.create_difference_plots()
-    # visualize.propagation_plot()
+    #visualize.create_difference_plots()
+    #visualize.propagation_plot()
     # visualize.plot_windowed_correlations()
     # visualize.plot_specific_positions()
-    # visualize.create_box_plot()
+    #visualize.create_box_plot()
     # visualize.plot_normalized_correlations()
-    # visualize.process_matlab_rms()
-
-    # visualize.plot_frequency_spectrum_difference()
-
-    #visualize.plot_pnr_results()
+    #visualize.plot_frequency_spectrum_difference()
+    visualize.plot_pnr_results()
