@@ -4,7 +4,7 @@ Date created: 02.02.2024
 File description: This file is used to run the training of the GAN. It also calls the function to generate the super
 resolution data. The grid is of shape 13x5 and the data is processed in 3D (height x width x samples).
 
-You can run this file by running the main function.
+You can run this file by running the main function either loccaly or by submitting a cluster job.
 """
 # Import necessary libraries
 import argparse
@@ -80,13 +80,14 @@ def parse_args():
 if __name__ == "__main__":
     sweep_config, sweep_id = setup_sweep()  # Setting up the sweep configuration
 
-    #Parse arguments
+    # RUN ON CLUSTER
     args = parse_args()
     data_directory = args.data
     test_data_directory = args.testdata
     results_directory = args.results
     num_epochs = args.epochs
 
+    # RUN LOCALLY
     # data_directory = '../dataset_512/train'
     # test_data_directory ='../dataset_512/test'
     # results_directory = 'runs/'

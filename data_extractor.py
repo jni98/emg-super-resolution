@@ -2,9 +2,9 @@
 Author: Janina Kloos (janina.kloos@gmx.de)
 Date created: 02.02.2024
 File description: This file contains functions to open and plot EMG data and to create a dataset from
-                    the EMG data including a csv file with their directories. The dataset_creator_dominik function
-                    creates sets from a pickle file, the dataset_creator_alessandro function creates
-                    the same for a matlab EMG data file.
+                    the EMG data including a csv file with their directories. The dataset_creator_alessandro_13x5
+                    function creates a dataset from the EMG data with shape 13x5. It creates a folder for the training and
+                    test data and saves the data in the folder. It also creates a csv file with the directories of the data.
 
 You can run this code by defining the data paths of the raw data and calling the dataset_creator_dominik or
 dataset_creator_alessandro function with the data paths as an argument.
@@ -59,177 +59,25 @@ def plot_emg_data(emg_data: np.ndarray) -> None:
     plt.savefig('emg_signals.png')
     plt.close()
 
-
-def open_emg_data_dominik(file_path: str) -> np.ndarray:
+def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str], dataset_name: str, sequence_length: int) -> None:
     """
-    Opens the emg signal of from a pickle file in a given directory
+    This function creates a dataset from the EMG data with shape 13x5. It creates a folder for the training and test data
+    and saves the data in the folder. It also creates a csv file with the directories of the data.
+
     Parameters
     ----------
-    file_path: str
-                 directory of the pickle file
-    Returns
-    -------
-    emg_data: ndarray
-              EMG signal of 128 electrodes
-    """
-
-    with open(file_path, 'rb') as f:
-        data = pickle.load(f)
-
-    # Dominiks data:
-    emg_data = data['_input_signal']
-
-    return emg_data
-
-
-def dataset_creator_dominik(data_paths: list[str]) -> None:
-    """
-    Creates sets of low-resolution and high-resolution data as well as a csv file with their directories.
-    Parameters
-    ----------
-    data_paths: list of str
-                A list of multiple directories, each containing a pickle file
+    train_paths: list[str]
+                    list of paths to the training data
+    test_paths: list[str]
+                    list of paths to the test data
+    dataset_name: str
+                    name of the dataset
+    sequence_length: int
+                    target length of the sEMG sequence
 
     Returns
     -------
     None
-    """
-
-    # List of LR and HR filenames (replace this with your filenames)
-    lr_filenames = []
-    hr_filenames = []
-
-    min_value_dataset = np.inf
-    max_value_dataset = -np.inf
-
-    combined_data = []
-
-    for i in range(len(data_paths)):
-
-        # extract data path and pickle file name from list of paths
-        data_path = data_paths[i]
-
-        # create folder for the results
-        base_directory = data_path.replace("data/", "").rsplit("/", 1)[0]
-        dataset_path = 'dataset' + '/' + base_directory + '/'
-
-        # Create the folder if it doesn't exist
-        os.makedirs(dataset_path, exist_ok=True)
-
-        # get the emg data of that pickle file
-        emg_data_complete = open_emg_data_dominik(data_path)
-
-        plt.figure(i)
-
-        # Creating a histogram using numpy.histogram()
-        counts, bins = np.histogram(emg_data_complete, bins=20)  # Adjust bins as needed
-
-        # Plotting the histogram
-        plt.stairs(counts, bins)
-        plt.xlabel('Data')
-        plt.ylabel('Density')
-        plt.title('Histogram Data')
-        plt.savefig(dataset_path + f'Histogram-path-{i}-20bins.png')
-        plt.close(i)
-
-        for grid in range(1):
-            # only use first 64 channels, since data is from two grids
-            emg_data = emg_data_complete[grid * 64:(grid * 64) + 64, :]
-
-            # 2D to 3D:
-            # reshape back to grid shape
-            emg_data_reshaped = emg_data.reshape(8, 8, emg_data.shape[1])
-            # Transpose and flip to get to correct grid numbering
-            emg_data_transposed = np.transpose(emg_data_reshaped, axes=(1, 0, 2))
-            emg_data_grid = np.flipud(emg_data_transposed)
-
-            # window the signal to 512 samples
-            for window in range(0, 3000, 50):
-                emg_windowed = emg_data_grid[:, :, window:(window + 512)]
-
-                if emg_windowed.min() < min_value_dataset:
-                    min_value_dataset = emg_windowed.min()
-
-                if emg_windowed.max() > max_value_dataset:
-                    max_value_dataset = emg_windowed.max()
-
-                # range(2): uses full grid for generation of training data
-                for col in range(2):
-                    for row in range(2):
-                        emg_windowed_hr = emg_windowed[row:row + 7, col:col + 7, :]
-                        emg_windowed_lr = emg_windowed[row::2, col::2, :]
-
-                        # 3D to 2D array
-                        emg_windowed_lr_2D = np.flipud(emg_windowed_lr).transpose(1, 0, 2).reshape(16, 512)
-                        emg_windowed_hr_2D = np.flipud(emg_windowed_hr).transpose(1, 0, 2).reshape(49, 512)
-
-                        combined_data.append(emg_windowed_hr_2D)
-
-                        # transpose for samples x channels shape
-                        emg_windowed_lr_2D = emg_windowed_lr_2D.transpose()
-                        emg_windowed_hr_2D = emg_windowed_hr_2D.transpose()
-
-                        # save high resolution data and add file name to list
-                        np.save(dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-hr.npy', emg_windowed_hr_2D)
-                        hr_filenames.append('../' + dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-hr.npy')
-
-                        # save low resolution data and add file name to list
-                        np.save(dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-lr.npy', emg_windowed_lr_2D)
-                        lr_filenames.append('../' + dataset_path + f'grid-{grid}-window{window}-pos-{col}-{row}-lr.npy')
-
-    # Create a dictionary for the hyperparameters
-    min_max_dic = {
-        "min": min_value_dataset,
-        "max": max_value_dataset,
-    }
-
-    mean = np.mean(combined_data)
-    std = np.std(combined_data)
-
-    # Create a dictionary for the hyperparameters
-    mean_std_dic = {
-        "mean": mean,
-        "std": std,
-    }
-
-    with open('dataset' + '/min_max.json', 'w') as file:
-        json.dump(min_max_dic, file)
-
-    with open('dataset' + '/mean_std.json', 'w') as file:
-        json.dump(mean_std_dic, file)
-
-    # Combine LR and HR filenames row-wise
-    data = zip(lr_filenames, hr_filenames)
-
-    # File path for the CSV file
-    csv_file = 'data.csv'
-
-    # Open the CSV file in append mode and write the data
-    with open('dataset' + '/' + csv_file, mode='a', newline='') as file:
-        writer = csv.writer(file)
-
-        # Add a header if the file is empty
-        if file.tell() == 0:
-            writer.writerow(['lr_filename;hr_filename'])
-
-        # Add each LR/HR pair as a row in the CSV file
-        for lr_filename, hr_filename in data:
-            writer.writerow([lr_filename + ';' + hr_filename])
-
-
-def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str], dataset_name: str, sequence_length: int) -> None:
-    """
-
-    Parameters
-    ----------
-    train_paths
-    test_paths
-    dataset_name
-    sequence_length
-
-    Returns
-    -------
-
     """
 
     ######################## Training ########################
@@ -342,7 +190,7 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
         # convert from mV to µV
         emg_data = emg_data / EMGGainFactor
 
-        # create folder for the results in dataset/Alessandro_sEMG/AINN_DECOMP_PROX_35-50-70_FINISHED_TO/PRE
+        # create folder for the results
         dataset_path = dataset_name + '/test/'
         print(dataset_path)
 
@@ -361,9 +209,10 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
                     sub_array = emg_data[row][col]
                     emg_hr_reshaped[row, col] = sub_array
 
-        # In case that last dimension is not divisible by 6 delete samples so that generator works
-        if emg_hr_reshaped.shape[2] % 8 != 0:
-            emg_hr_reshaped = emg_hr_reshaped[:, :, :-(emg_hr_reshaped.shape[2] % 8)]
+        # In case that last dimension is not divisible by 64 delete samples so that skip connection between contracting
+        # and expanding path is possible
+        if emg_hr_reshaped.shape[2] % 64 != 0:
+            emg_hr_reshaped = emg_hr_reshaped[:, :, :-(emg_hr_reshaped.shape[2] % 64)]
 
         plt.figure()
         plt.plot(emg_hr_reshaped[0, 0])
@@ -392,7 +241,22 @@ def dataset_creator_alessandro_13x5(train_paths: list[str], test_paths: list[str
             writer.writerow([hr_filename_test])
 
 
-def create_tar_from_folder(folder_path, tar_filename):
+def create_tar_from_folder(folder_path: str) -> None:
+    """
+    This function creates a tar file from a folder.
+
+    Parameters
+    ----------
+    folder_path: str
+                    path to the folder
+
+    Returns
+    -------
+    None
+
+    """
+    tar_filename = folder_path + '.tar'
+
     with tarfile.open(tar_filename, 'w') as tar:
         # Walk through the folder and its subfolders
         for root, dirs, files in os.walk(folder_path):
@@ -402,14 +266,6 @@ def create_tar_from_folder(folder_path, tar_filename):
 
 
 if __name__ == '__main__':
-    # data_paths = ['data/Dominik/offline/20230720-085154/Ambra_20230720-085154_Follow Trajectory.pkl']
-    #               #'data/Dominik/offline/20230720-090835/Ambra_20230720-090835_Follow Trajectory.pkl',
-    #               #'data/Dominik/offline/20230720-091107/Ambra_20230720-091107_Follow Trajectory.pkl']
-    # # data_paths = ['data/Dominik/offline/20230720-091659/Ambra_20230720-091659_Follow Trajectory.pkl']
-    #
-    # movement_name = 'thumb_slow'
-    #
-    # dataset_creator_dominik(data_paths)
 
     # use 10 subjects for the dataset and 2 subjects for the testset
     train_paths = [
@@ -440,18 +296,29 @@ if __name__ == '__main__':
         'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/POST/400NuStRo171221103923 Rampa_35MVC_5MVCs_1a_TODECOMPOSE_offset0_length29.665_runs100_FINISHED.mat',
         'data/Alessandros Daten sEMG/Test/SNUC_DECOMP_PROX_35-50-70_FINISHED/PRE/400NuStRo171215104010 Rampa_35MVC_5MVCs_2a_TODECOMPOSE_offset0_length30_runs100_FINISHED.mat']
 
+    # Dataset UNet variants
     dataset_creator_alessandro_13x5(train_paths, test_paths, 'dataset', sequence_length=2048)
 
     #Define folder path and tar filename
     folder_path = 'dataset'
-    tar_filename = 'dataset.tar'
 
-    create_tar_from_folder(folder_path, tar_filename)
+    create_tar_from_folder(folder_path)
 
-    dataset_creator_alessandro_13x5(train_paths, test_paths, 'dataset_lstm', sequence_length=200)
+
+    # Dataset SRGAN
+    dataset_creator_alessandro_13x5(train_paths, test_paths, 'dataset_512', sequence_length=512)
 
     # Define folder path and tar filename
-    folder_path = 'dataset_lstm'
-    tar_filename = 'dataset_lstm.tar'
+    folder_path = 'dataset_512'
 
-    create_tar_from_folder(folder_path, tar_filename)
+    create_tar_from_folder(folder_path)
+
+    # Dataset LSTM
+    dataset_creator_alessandro_13x5(train_paths, test_paths, 'dataset_LSTM', sequence_length=40960)
+
+    # Define folder path and tar filename
+    folder_path = 'dataset_LSTM'
+
+    create_tar_from_folder(folder_path)
+
+

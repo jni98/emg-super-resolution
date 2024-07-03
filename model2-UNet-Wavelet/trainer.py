@@ -836,23 +836,3 @@ class Trainer:
         wandb.log({'test loss': avg_test_content})
 
         torch.cuda.empty_cache()
-
-        # Generate data with HR input
-        # with torch.no_grad():
-        #     for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, hr_emg_interpolated) in enumerate(self.testing):
-        #         hr_emg_interpolated = hr_emg_interpolated.to(self.device)
-        #
-        #         # Generate super-resolved data (SR) from LR data
-        #         hr_sr_emg = self.generator(hr_emg_interpolated)
-        #
-        #         hr_sr_emg_destandardized = destandardize_data(hr_sr_emg, self.mean_std_dict['mean'], self.mean_std_dict['std'])
-        #
-        #         # Save signal from lr to sr
-        #         hr_sr_emg_destandardized = hr_sr_emg_destandardized.to('cpu').numpy().squeeze()
-        #         model_path = self.run_folder + self.unique_folder + '/results/'
-        #         os.makedirs(model_path, exist_ok=True)
-        #         np.save(model_path + lr_emg_paths[0].replace('lr', 'hr'), hr_sr_emg_destandardized)
-        #
-        # print("Successfully generated HR to SR data")
-        #
-        # torch.cuda.empty_cache()
