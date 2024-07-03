@@ -7,9 +7,7 @@ import pandas as pd
 from scipy.interpolate import RegularGridInterpolator
 from scipy.signal import butter, filtfilt
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from torch.utils.data import Dataset, DataLoader
-from torchvision.transforms import transforms
 from emg_augmentations import GaussianNoise, WaveletDecomposition, MagnitudeWarping
 import random
 
@@ -71,11 +69,6 @@ class TimeseriesDataset(Dataset):
         lr_emg = torch.tensor(lr_emg.copy()).to(torch.float32)
         hr_emg = torch.tensor(hr_emg.copy()).to(torch.float32)
         lr_interpolated = torch.tensor(lr_interpolated.copy()).to(torch.float32)
-
-        # Transform
-        # if self.transform:
-        #     lr_emg = self.transform(lr_emg)
-        #     hr_emg = self.transform(hr_emg)
 
         # Convert input data to the same data type as the model parameters
         lr_emg = lr_emg.unsqueeze(0)

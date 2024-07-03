@@ -5,8 +5,6 @@ import os
 
 import pytorch_lightning as pl
 import torch
-from matplotlib import pyplot as plt
-from scipy.signal import butter, filtfilt
 from torch import nn
 import numpy as np
 import plotly.graph_objects as go
@@ -341,13 +339,12 @@ class LSTMRegressor(pl.LightningModule):
         if not os.path.exists(results_dir):
             os.makedirs(results_dir)
 
-        y_path = y_path[0].replace("hr", "sr")
+        y_path = y_path[0].replace("hr", "hr-sr")
         # File name with batch index
         file_path = os.path.join(results_dir, y_path)
 
         y_hat = self.destandardize(y_hat)
         y_hat = np.asarray(y_hat.to('cpu'))
-        y_hat = self.butter_bandpass_filter(y_hat, 20, 500, 2048, order=2)
 
         np.save(file_path, y_hat)  # Save as NumPy array
 
@@ -358,29 +355,15 @@ class LSTMRegressor(pl.LightningModule):
     def destandardize(self, prediction):
         return prediction * self.std + self.mean
 
-    def validation_plots(self, interpolated, y, y_hat, phase):
-
-        # Convert tensors to numpy arrays and move to CPU
-        interpolated_destandardized = np.asarray(interpolated.to('cpu'))
-        hr_destandardized = np.asarray(y.to('cpu'))
-        sr_destandardized = np.asarray(y_hat.to('cpu'))
+    def validation_plots(self, interpolated_destandardized, hr_destandardized, sr_destandardized, phase):
 
         # Extract specific channels
         interpolated_channel = interpolated_destandardized[0][0][6][2]
         hr_channel = hr_destandardized[0][0][6][2]
         sr_channel = sr_destandardized[0][0][6][2]
 
-        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
-        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
-
-        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
-
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
-        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
-        print("abs diff sum, filtered, given Channel: ", diff_filtered)
-        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
 
         ############################## Log Plots given channel########################################
         print("Logging plots for batch index 0 given channel")
@@ -473,17 +456,8 @@ class LSTMRegressor(pl.LightningModule):
         sr_channel = sr_destandardized[0][0][6][1]
         interpolated_channel = interpolated_destandardized[0][0][6][1]
 
-        diff_unfiltered = np.sum(np.abs(hr_channel - sr_channel))
-        print("abs diff sum, unfiltered, given Channel: ", diff_unfiltered)
-
-        interpolated_channel = self.butter_bandpass_filter(interpolated_channel, 20, 500, 2048, order=2)
-        sr_channel = self.butter_bandpass_filter(sr_channel, 20, 500, 2048, order=2)
-
         # Calculate the difference between hr_channel and sr_channel
         diff_channel = hr_channel - sr_channel
-        diff_filtered = np.sum(np.abs(hr_channel - sr_channel))
-        print("abs diff sum, filtered, given Channel: ", diff_filtered)
-        print("Difference filtered-unfiltered", diff_filtered - diff_unfiltered)
 
         plotly_fig1 = go.Figure()
 
@@ -566,32 +540,3 @@ class LSTMRegressor(pl.LightningModule):
                                  yaxis_title='Magnitude')
 
         wandb.log({phase + " - Frequency Spectrum - Scatter - Predicted channel [6][1]": freq_spec1})
-
-    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=2):
-        """
-        Apply a bandpass filter to the data
-        Parameters
-        ----------
-        data: np.array
-            Data to be filtered
-        lowcut: float
-            Lower cut-off frequency
-        highcut: float
-            Higher cut-off frequency
-        fs: int
-            Sampling frequency
-        order: int
-            Order of the filter
-
-        Returns
-        -------
-        y: np.array
-            Filtered data
-        """
-        nyq = 0.5 * fs
-        low = lowcut / nyq
-        high = highcut / nyq
-        b, a = butter(order, [low, high], btype='band')
-        filtered_signal = filtfilt(b, a, data)
-
-        return filtered_signal

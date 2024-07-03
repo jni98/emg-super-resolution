@@ -69,21 +69,23 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
 if __name__ == "__main__":
     # Parse arguments
-    # args = parse_args()
-    # data_directory = args.data
-    # test_data_directory = args.testdata
-    # results_directory = args.results
-    # num_epochs = args.epochs
-    # batch_size = args.batch_size
-    # learning_rate = args.lr
-    # checkpoint_directory = '/home/hpc/iwso/iwso124h/model3-LSTM-812094'
+    args = parse_args()
+    data_directory = args.data
+    test_data_directory = args.testdata
+    results_directory = args.results
+    num_epochs = args.epochs
+    batch_size = args.batch_size
+    learning_rate = args.lr
 
-    data_directory = '../dataset_lstm/train'
-    test_data_directory = '../dataset_lstm/test'
-    results_directory = 'model3-LSTM-816289'
-    num_epochs = 2
-    batch_size = 1
-    learning_rate = 0.00001
-    checkpoint_directory = 'model3-LSTM-816289'
+    # Add directory of best_model.ckpt file
+    checkpoint_directory = '/home/hpc/iwso/iwso124h/model3-LSTM-812094'
+
+    # data_directory = '../dataset_lstm_40960/train'
+    # test_data_directory = '../dataset_lstm_40960/test'
+    # results_directory = 'model3-LSTM-835361'
+    # num_epochs = 2
+    # batch_size = 1
+    # learning_rate = 0.00001
+    # checkpoint_directory = 'FINAL-BP500-model3-LSTM-838171'
 
     main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate, checkpoint_directory)
