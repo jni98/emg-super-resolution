@@ -289,8 +289,12 @@ class Trainer:
             # Generator loss based on adversarial loss, mse, and Fourier
             loss_generator_adv = self.adversarial_loss(output, real_labels)
             loss_generator_content = self.mse(sr_emg, hr_emg)
-            sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(sr_emg)
-            hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(hr_emg)
+
+            sr_emg_fourier = torch.fft.fftn(sr_emg, dim=-1)
+            hr_emg_fourier = torch.fft.fftn(hr_emg, dim=-1)
+            sr_emg_fourier_real, sr_emg_fourier_imag = sr_emg_fourier.real, sr_emg_fourier.imag
+            hr_emg_fourier_real, hr_emg_fourier_imag = hr_emg_fourier.real, hr_emg_fourier.imag
+
             loss_generator_fourier = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)
             loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
                               self.fourier_loss_weight * loss_generator_fourier)
