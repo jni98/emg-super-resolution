@@ -353,8 +353,12 @@ class Trainer:
                 # Generator loss based on adversarial, mse, and fourier loss
                 loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
                 loss_generator_content = self.mse(val_sr, val_hr)
-                sr_emg_fourier_real, sr_emg_fourier_imag = self.compute_fourier_transform(val_sr)
-                hr_emg_fourier_real, hr_emg_fourier_imag = self.compute_fourier_transform(val_hr)
+
+                val_sr_fourier = torch.fft.fftn(val_sr, dim=-1)
+                val_hr_fourier = torch.fft.fftn(val_hr, dim=-1)
+                sr_emg_fourier_real, sr_emg_fourier_imag = val_sr_fourier.real, val_sr_fourier.imag
+                hr_emg_fourier_real, hr_emg_fourier_imag = val_hr_fourier.real, val_hr_fourier.imag
+
                 loss_generator_fourier = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)
                 val_loss = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
                             self.fourier_loss_weight * loss_generator_fourier)
@@ -410,23 +414,6 @@ class Trainer:
         self.generator.train()
         self.discriminator.train()
         return avg_validation_loss, avg_psnr
-
-    def compute_fourier_transform(data):
-        """
-        Computes the Fourier transform along the time dimension.
-
-        Parameters
-        ----------
-        data: torch.Tensor
-            The input data
-
-        Returns
-        -------
-        tuple
-            Real and imaginary parts of the Fourier transformed data
-        """
-        fourier_transformed_data = torch.fft.fftn(data, dim=-1)
-        return fourier_transformed_data.real, fourier_transformed_data.imag
 
     def validation_plots_logging(self, val_lr_destandardized, val_hr_destandardized, val_sr_destandardized, phase):
         """
