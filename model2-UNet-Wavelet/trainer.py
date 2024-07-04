@@ -211,8 +211,8 @@ class Trainer:
             initial_allocated = torch.cuda.memory_allocated()
             initial_cached = torch.cuda.memory_cached()
 
-            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, epoch_wavelet_loss = self._train_epoch(epoch)
-            avg_val_loss, avg_psnr = self._validate(epoch)
+            epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, epoch_wavelet_loss = self.train_epoch(epoch)
+            avg_val_loss, avg_psnr = self.validate(epoch)
 
             train_g_loss.append(epoch_loss_g)
             train_d_loss.append(epoch_loss_d)
@@ -225,7 +225,7 @@ class Trainer:
             # Save best model based on validation loss
             if avg_val_loss < best_val_loss:
                 best_val_loss = avg_val_loss
-                self._save_final_models()  # Save the final models when a new best model is found
+                self.save_final_models()  # Save the final models when a new best model is found
 
             # Clear unnecessary variables to release memory
             del epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d, avg_val_loss, avg_psnr
