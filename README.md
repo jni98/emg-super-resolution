@@ -64,11 +64,6 @@ Janina Kloos - janina.kloos@fau.de
 
 ## Getting Started
 
-### Prerequisites
-
-- Install WandB
-- Ensure all dependencies are installed as per the `environment.yaml`
-
 ### Installation
 
 1. Create environment using the enviroment.yaml file
@@ -82,6 +77,12 @@ Janina Kloos - janina.kloos@fau.de
 3. Clone the repository
 
    ```git clone https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git```
+
+### Prerequisites
+
+- To use the wandb logging, create an account on [WandB](https://docs.wandb.ai/quickstart) and login using the command
+  `wandb login`.
+- Ensure all dependencies are installed as per the `environment.yaml`
 
 <!-- USAGE EXAMPLES -->
 
@@ -138,8 +139,7 @@ project_root/
 
 Run `data_extractor.py` to create the dataset files. Specify the file locations in the main method, which will create a
 directory containing the training and test data, a CSV file, and a tar file. Window length and file name can be defined
-in the function call.
-When running jobs on the cluster, ensure the tar file is present.
+in the function call. The tar file can be used when using the dataset on the HPC.
 
 ### Results and Visualization
 

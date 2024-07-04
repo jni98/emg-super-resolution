@@ -248,7 +248,7 @@ class Trainer:
 
         return train_g_loss, train_d_loss, train_d_loss_real, train_d_loss_fake, train_wavelet_loss, val_loss, psnr
 
-    def _train_epoch(self, epoch: int) -> tuple:
+    def train_epoch(self, epoch: int) -> tuple:
         """
         Trains the model for one epoch.
 
@@ -352,7 +352,7 @@ class Trainer:
 
         return avg_loss_g, avg_loss_d_real, avg_loss_d_fake, avg_loss_d, avg_wavelet_loss
 
-    def _validate(self, epoch: int) -> tuple:
+    def validate(self, epoch: int) -> tuple:
         """
         Validates the model by calculating the loss on the validation set.
 
@@ -682,7 +682,7 @@ class Trainer:
 
         return mse
 
-    def _save_final_models(self) -> None:
+    def save_final_models(self) -> None:
         """
         Saves the final Generator and Discriminator.
 
@@ -693,7 +693,7 @@ class Trainer:
         torch.save(self.generator.state_dict(), self.run_folder + self.unique_folder + '/final_generator.pt')
         torch.save(self.discriminator.state_dict(), self.run_folder + self.unique_folder + '/final_discriminator.pt')
 
-    def _plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list,
+    def plot_result_losses(self, train_g_loss: list, train_d_loss_real: list, train_d_loss_fake: list,
                             train_d_loss: list, train_wavelet_loss: list, val_loss: list, psnr: list) -> None:
         """
         Plots the Generator and Discriminator loss over the epochs and the validation loss and PSNR over the epochs.

@@ -22,7 +22,7 @@ FAST_DATA_DIR=$TMPDIR/model2-UNet-Wavelet-$SLURM_JOB_ID
 
 ############    params   ###############
 
-EPOCHS=1200
+EPOCHS=900
 
 ############    params   ###############
 
