@@ -1,3 +1,9 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 06.05.2024
+File description: This file can be used to run the model on the test data. It loads the best model from the provided
+checkpoint and runs it on the test data. The checkpoint path is provided as an argument to the main function.
+"""
 import argparse
 import json
 
@@ -21,11 +27,12 @@ def parse_args():
     return parser.parse_args()
 
 
-
-def main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate, checkpoint_directory):
+def main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate,
+         checkpoint_directory):
     config = get_config(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate)
 
-    wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=checkpoint_directory, config=config, mode='online', offline=False)
+    wandb_logger = WandbLogger(project="emg-super-resolution-LSTM", save_dir=checkpoint_directory, config=config,
+                               mode='online', offline=False)
 
     # Load the JSON file with values for standardization into a Python dictionary
     with open(data_directory + '/mean_std.json', 'r') as file:
@@ -89,4 +96,5 @@ if __name__ == "__main__":
     # learning_rate = 0.00001
     # checkpoint_directory = 'FINAL-BP500-model3-LSTM-838171'
 
-    main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate, checkpoint_directory)
+    main(data_directory, test_data_directory, results_directory, num_epochs, batch_size, learning_rate,
+         checkpoint_directory)

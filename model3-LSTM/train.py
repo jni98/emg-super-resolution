@@ -1,3 +1,11 @@
+"""
+Author: Janina Kloos
+Date created: 06.05.2024
+File description: This file contains the main function for training the model. It loads the data, the model, and the
+configuration, and trains the model. The training process is logged using Weights & Biases. The model is saved at the
+end of the training process. The test data is also loaded and the model is evaluated on the test data. The results are
+logged using Weights & Biases.
+"""
 import argparse
 import json
 

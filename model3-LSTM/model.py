@@ -1,5 +1,8 @@
 """
-Model used with sequence length 20480 compressed to sequence length 320 ( --> c = 64)
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 06.05.2024
+File description: Model of the CNN-LSTM. Model used with sequence length 20480 compressed to sequence length 320 ( --> c = 64).
+Can also be used with other sequence lengths. The model is called from the train.py script.
 """
 import os
 

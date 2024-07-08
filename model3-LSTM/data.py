@@ -1,3 +1,10 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 06.05.2024
+File description: This file contains the class Custom_Dataset, which is a custom dataset class for loading the data.
+
+The code is called from every file that is loading a dataset.
+"""
 import json
 
 import torch
@@ -182,6 +189,23 @@ class CustomDataModule(pl.LightningDataModule):
     '''
 
     def __init__(self, seq_len=1, batch_size=128, num_workers=2, data_directory: str = None, test_data_directory: str = None, augment: bool = False):
+        """
+        Initializes the CustomDataModule class.
+        Parameters
+        ----------
+        seq_len: int
+            sEMG signal length
+        batch_size: int
+            Batch size
+        num_workers: int
+            Number of workers
+        data_directory: str
+            Path to the training data directory
+        test_data_directory: str
+            Path to the test data directory
+        augment: bool
+            Whether to augment the data or not
+        """
         super().__init__()
         self.seq_len = seq_len
         self.batch_size = batch_size
@@ -198,6 +222,17 @@ class CustomDataModule(pl.LightningDataModule):
         pass
 
     def setup(self, stage=None):
+        """
+        Setup the data for training, validation, and testing
+        Parameters
+        ----------
+        stage: str
+            Stage of the data setup. Default is None
+
+        Returns
+        -------
+
+        """
 
         # Load the JSON file with values for standardization into a Python dictionary
         with open(self.data_directory + '/mean_std.json', 'r') as file:
@@ -209,6 +244,13 @@ class CustomDataModule(pl.LightningDataModule):
         self.X_train, self.X_val = train_test_split(data_train_val, train_size=0.8, test_size=0.2, shuffle = False)
 
     def train_dataloader(self):
+        """
+        Returns the training dataloader
+        Returns
+        -------
+        train_loader: DataLoader
+            Training dataloader
+        """
 
         # Define your transformations
         data_transform = False
@@ -225,7 +267,13 @@ class CustomDataModule(pl.LightningDataModule):
         return train_loader
 
     def val_dataloader(self):
-
+        """
+        Returns the validation dataloader.
+        Returns
+        -------
+        val_loader: DataLoader
+            Validation dataloader
+        """
         # Define your transformations
         data_transform = False
 
@@ -241,6 +289,13 @@ class CustomDataModule(pl.LightningDataModule):
         return val_loader
 
     def test_dataloader(self):
+        """
+        Returns the test dataloader.
+        Returns
+        -------
+        test_loader: DataLoader
+            Test dataloader
+        """
 
         # Define your transformations
         data_transform = False

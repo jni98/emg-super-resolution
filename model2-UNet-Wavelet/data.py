@@ -1,3 +1,11 @@
+"""
+Author: Janina Kloos (janina.kloos@gmx.de)
+Date created: 02.02.2024
+File description: This file contains the class Custom_Dataset, which is a custom dataset class for loading the data.
+
+The code is called from every file that is loading a dataset.
+"""
+
 import torch
 from torch.utils.data import Dataset
 import numpy as np

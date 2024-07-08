@@ -36,7 +36,7 @@
 
 ## About The Project
 
-This project contains four different Generative Adversarial Networks and two CNN-LSTM. The project is organized into
+This project contains four different Generative Adversarial Networks and a CNN-LSTM. The project is organized into
 separate folders for each model and includes scripts for training, data preparation, and visualization. The training can
 be performed both locally and on a high performance cluster (HPC). Each model can be trained using only the files in
 that folder.
@@ -116,9 +116,6 @@ project_root/
 │   ├── train-lstm.sh
 │   ├── train-lstm-continue.sh
 │   └── train.py
-│    
-├── model3-LSTM-basic/
-│   ├── ...
 │
 ├── data_extractor.py
 ├── numpy_to_mat.py
