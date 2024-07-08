@@ -62,7 +62,7 @@ cd "$SRC_DIR" || echo "could not cd into $SRC_DIR"
 echo "Using Repository Revision"
 git log --oneline -n 1
 
-srun python trainer.py --data "$FAST_DATA_DIR/dataset_lstm/train" \
+srun python train.py --data "$FAST_DATA_DIR/dataset_lstm/train" \
                   --testdata "$FAST_DATA_DIR/dataset_lstm/test" \
                   --results "$RESULTS_DIR" \
                   --epochs $EPOCHS --batch_size $BATCHSIZE --lr $LR
