@@ -1,20 +1,13 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
 
 <h3 align="center">GAN-Based Neural Networks Project</h3>
 
   <p align="center">
-    This project contains four different GAN-based neural network models and two CNN-LSTM to generate hig-resolution data from low-resolution input. The project is organized into separate folders for each model and includes scripts for training, data preparation, and visualization. The training can be performed both locally and on a cluster.
-    <br />
-    <a href="https://github.com/github_username/repo_name/-/wikis/home"><strong>Explore the docs »</strong></a>
+    This project contains four different GAN-based neural network models and two CNN-LSTM to generate high-resolution data from low-resolution input. The project is organized into separate folders for each model and includes scripts for training, data preparation, and visualization. The training can be performed both locally and on a cluster.
   </p>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
