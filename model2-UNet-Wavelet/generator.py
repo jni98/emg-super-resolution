@@ -6,11 +6,9 @@ generate high resolution data from low resolution data.
 
 The code is called from the trainer.py file which is started by the train.py.
 """
-import pywt
 import ptwt
 import torch.nn as nn
 import torch
-import numpy as np
 
 
 class ResidualBlock(nn.Module):
@@ -19,6 +17,13 @@ class ResidualBlock(nn.Module):
     """
 
     def __init__(self, in_channels) -> None:
+        """
+        Constructs all the necessary attributes for the residual block object.
+        Parameters
+        ----------
+        in_channels: int
+                        Number of channels of the input tensor.
+        """
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                       padding=(1, 1, 1))
@@ -48,6 +53,13 @@ class DownConvolutionBlock(nn.Module):
     """
 
     def __init__(self, wavelet) -> None:
+        """
+        Constructs all the necessary attributes for the down convolution block object.
+        Parameters
+        ----------
+        wavelet: str
+                    Name of the wavelet that is used for the wavelet transform.
+        """
         super(DownConvolutionBlock, self).__init__()
         self.wavelet = wavelet
 
@@ -68,6 +80,21 @@ class UpConvolutionBlock(nn.Module):
     """
 
     def __init__(self, wavelet, in_channels, kernel_size, stride, padding) -> None:
+        """
+        Constructs all the necessary attributes for the up convolution block object.
+        Parameters
+        ----------
+        wavelet: str
+                    Name of the wavelet that is used for the wavelet transform.
+        in_channels: int
+                        Number of channels of the input tensor.
+        kernel_size: int
+                        Size of the convolutional kernel.
+        stride: int
+                    Stride of the convolutional kernel.
+        padding: int
+                    Padding of the convolutional kernel.
+        """
         super(UpConvolutionBlock, self).__init__()
         self.wavelet = wavelet
 
@@ -108,51 +135,6 @@ class UpConvolutionBlock(nn.Module):
 
         return out
 
-class UpConvolutionBlockLast(nn.Module):
-    """
-    This class is used to create an up convolution block, which is used in the generator to upsample the data and also
-    add the skip connection.
-    """
-
-    def __init__(self, wavelet, in_channels, kernel_size, stride, padding) -> None:
-        super(UpConvolutionBlockLast, self).__init__()
-        self.wavelet = wavelet
-
-        self.conv = nn.Sequential(
-            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=kernel_size, stride=stride,
-                      padding=padding),
-            nn.BatchNorm3d(in_channels),
-            nn.PReLU(),
-            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3),
-                      stride=(1, 1, 1), padding=(1, 1, 1)),
-            nn.BatchNorm3d(in_channels),
-            nn.PReLU(),
-            nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3),
-                      stride=(1, 1, 1), padding=(1, 1, 1)),
-            nn.BatchNorm3d(in_channels),
-            nn.PReLU()
-        )
-
-    def forward(self, x: torch.tensor) -> torch.tensor:
-        # Calculate the midpoint along the second dimension
-        midpoint = x.shape[1] // 2
-
-        # Split the tensor into two parts at the midpoint
-        coeff1 = x[:, :midpoint]
-        coeff2 = x[:, midpoint:]
-
-        # Add the tensors to a list
-        coeff_list = [coeff1, coeff2]
-
-        # upsample
-        up = ptwt.waverec(coeff_list, self.wavelet)
-
-        # Make length of signal fit the skip connection
-        out = self.conv(up)
-
-        return out
-
-
 class Generator(nn.Module):
     """
     This class is used to create the generator, which is a convolutional neural network that is used to generate high
@@ -160,6 +142,19 @@ class Generator(nn.Module):
     """
 
     def __init__(self, num_res_blocks: int, num_res_blocks_last: int, wavelet, in_channels=1) -> None:
+        """
+        Constructs all the necessary attributes for the generator object.
+        Parameters
+        ----------
+        num_res_blocks: int
+            Number of residual blocks in the generator.
+        num_res_blocks_last: int
+            Number of residual blocks in the last part of the generator.
+        wavelet: str
+            Name of the wavelet that is used for the wavelet transform.
+        in_channels: int
+            Number of input channels
+        """
         super(Generator, self).__init__()
 
         # Define wavelet for dwt

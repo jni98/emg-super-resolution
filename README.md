@@ -82,7 +82,6 @@ Janina Kloos - janina.kloos@fau.de
 
 - To use the wandb logging, create an account on [WandB](https://docs.wandb.ai/quickstart) and login using the command
   `wandb login`.
-- Ensure all dependencies are installed as per the `environment.yaml`
 
 <!-- USAGE EXAMPLES -->
 
@@ -169,12 +168,5 @@ Resources and libraries used in this project:
 * [Raul Simpetru for augmentation code]
 
 <!-- CONTACT -->
-
-## Contact
-
-Janina Kloos - janina.kloos@fau.de
-
-Project
-Link: [https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git](https://github.com/github_username/repo_name)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

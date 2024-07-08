@@ -4,7 +4,7 @@ Date created: 02.02.2024
 File description: This file contains the class Trainer. It is used to train the GAN and to generate super resolution
 data.
 
-The code is called from the train.py file which is started by the main function.
+The code is called from the train.py file.
 """
 
 import json
@@ -84,13 +84,12 @@ class Trainer:
             "learning_rate": self.lr
         }
 
+        # Set the device to GPU if available, otherwise to CPU
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
 
+        # Initialize weights and biases
         wandb.init(project="GAN-Training", entity="masterthesis-sr")
-
-        # Define lambda function for the LR scheduler
-        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 100)
 
         print("Initialization done")
 
@@ -155,7 +154,7 @@ class Trainer:
         None
         """
         # Initialize Generator and Discriminator models
-        self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks, wavelet='db7', in_channels=1)
+        self.generator = Generator(self.config.num_res_blocks, in_channels=1)
         self.discriminator = Discriminator()
 
         # Use DataParallel if multiple GPUs are available
@@ -175,6 +174,9 @@ class Trainer:
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
 
+        # Define lambda function for the LR scheduler
+        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 100)
+
         # Initialize learning rate schedulers
         self.scheduler_G = LambdaLR(self.optimizer_G, lr_lambda=self.lr_lambda)
         self.scheduler_D = LambdaLR(self.optimizer_D, lr_lambda=self.lr_lambda)
@@ -187,8 +189,20 @@ class Trainer:
 
         Returns
         -------
-        tuple: Containing lists of generator loss, discriminator loss, real discriminator loss, fake discriminator loss,
-               fourier loss, validation loss, and PSNR over the epochs.
+        train_g_loss: list
+            List containing the generator loss for each epoch
+        train_d_loss: list
+            List containing the discriminator loss for each epoch
+        train_d_loss_real: list
+            List containing the discriminator loss on real data for each epoch
+        train_d_loss_fake: list
+            List containing the discriminator loss on fake data for each epoch
+        train_fourier_loss: list
+            List containing the fourier loss for each epoch
+        val_loss: list
+            List containing the validation loss for each epoch
+        psnr: list
+            List containing the PSNR for each epoch
         """
         train_d_loss, train_d_loss_real, train_d_loss_fake = [], [], []
         train_g_loss, train_fourier_loss, val_loss, psnr = [], [], [], []
@@ -253,8 +267,19 @@ class Trainer:
 
         Returns
         -------
-        tuple: Containing average losses for generator, real and fake discriminator, and fourier loss.
+        avg_loss_g: float
+            Average generator loss for the epoch
+        avg_loss_d_real: float
+            Average discriminator loss on real data for the epoch
+        avg_loss_d_fake: float
+            Average discriminator loss on fake data for the epoch
+        avg_loss_d: float
+            Average discriminator loss for the epoch
+        avg_fourier_loss: float
+            Average fourier loss for
+
         """
+        # Set models to training mode
         self.generator.train()
         self.discriminator.train()
 
@@ -262,6 +287,7 @@ class Trainer:
         total_loss_d, total_fourier_loss = 0.0, 0.0
 
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
+            # Move data to the appropriate device
             lr_emg, hr_emg = lr_emg.to(self.device), hr_emg.to(self.device)
 
             # Train Discriminator
@@ -275,6 +301,8 @@ class Trainer:
             loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
             output_discriminator_fake = self.discriminator(sr_emg)
             loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
+
+            # Total discriminator loss
             loss_discriminator = loss_discriminator_real + loss_discriminator_fake
 
             # Update discriminator
@@ -286,16 +314,18 @@ class Trainer:
             sr_emg = self.generator(lr_emg)
             output = self.discriminator(sr_emg)
 
-            # Generator loss based on adversarial loss, mse, and Fourier
+            # Generator adversarial and content loss
             loss_generator_adv = self.adversarial_loss(output, real_labels)
             loss_generator_content = self.mse(sr_emg, hr_emg)
 
+            # Fourier loss
             sr_emg_fourier = torch.fft.fftn(sr_emg, dim=-1)
             hr_emg_fourier = torch.fft.fftn(hr_emg, dim=-1)
             sr_emg_fourier_real, sr_emg_fourier_imag = sr_emg_fourier.real, sr_emg_fourier.imag
             hr_emg_fourier_real, hr_emg_fourier_imag = hr_emg_fourier.real, hr_emg_fourier.imag
-
             loss_generator_fourier = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)
+
+            # Generator total loss
             loss_generator = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
                               self.fourier_loss_weight * loss_generator_fourier)
 
@@ -337,8 +367,12 @@ class Trainer:
 
         Returns
         -------
-        tuple: Containing average validation loss and PSNR over the validation set.
+        avg_validation_loss: float
+            Average validation loss for the epoch
+        avg_psnr: float
+            Average PSNR for the epoch
         """
+        # Set models to evaluation mode
         self.generator.eval()
         self.discriminator.eval()
 
@@ -348,22 +382,25 @@ class Trainer:
 
         with torch.no_grad():
             for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
+                # Move data to the appropriate device
                 val_lr, val_hr = val_lr.to(self.device), val_hr.to(self.device)
                 val_sr = self.generator(val_lr)
 
                 real_labels = torch.ones(val_hr.size(0), 1).to(self.device)
                 output_disc = self.discriminator(val_sr)
 
-                # Generator loss based on adversarial, mse, and fourier loss
+                # Generator adversaial and content loss
                 loss_generator_adv = self.adversarial_loss(output_disc, real_labels)
                 loss_generator_content = self.mse(val_sr, val_hr)
 
+                # Generator fourier loss
                 val_sr_fourier = torch.fft.fftn(val_sr, dim=-1)
                 val_hr_fourier = torch.fft.fftn(val_hr, dim=-1)
                 sr_emg_fourier_real, sr_emg_fourier_imag = val_sr_fourier.real, val_sr_fourier.imag
                 hr_emg_fourier_real, hr_emg_fourier_imag = val_hr_fourier.real, val_hr_fourier.imag
-
                 loss_generator_fourier = self.mse(sr_emg_fourier_real, hr_emg_fourier_real)
+
+                # Generator total loss
                 val_loss = (self.adv_loss_weight * loss_generator_adv + loss_generator_content +
                             self.fourier_loss_weight * loss_generator_fourier)
 
@@ -374,6 +411,7 @@ class Trainer:
                 psnr = 10 * torch.log10(1.0 / loss_generator_content)
                 total_psnr += psnr.item()
 
+                # Destandardize to log current results
                 val_hr_destandardized = destandardize_data(val_hr, self.mean_std_dict['mean'],
                                                            self.mean_std_dict['std'])
                 val_sr_destandardized = destandardize_data(val_sr, self.mean_std_dict['mean'],
@@ -384,7 +422,7 @@ class Trainer:
                 abs_diff = abs_diff.squeeze().to('cpu').numpy()
                 total_abs_diff += abs_diff
 
-                # Log plots ones
+                # Log plots
                 if val_batch_idx == 0:
                     self.validation_plots_logging(val_lr_destandardized, val_hr_destandardized, val_sr_destandardized,
                                                   'Validation')
@@ -437,6 +475,7 @@ class Trainer:
         -------
         None
         """
+        # Convert tensors to numpy arrays and move to CPU
         val_lr_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
         val_hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
         val_sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
@@ -705,6 +744,7 @@ class Trainer:
         -------
         None
         """
+        # Delete unnecessary variables to release memory
         del self.discriminator
         del self.optimizer_G
         del self.optimizer_D
@@ -712,6 +752,7 @@ class Trainer:
         del self.validation
         torch.cuda.empty_cache()
 
+        # Load the final generator model
         print("Starting to generate SR data")
         self.generator.load_state_dict(torch.load(self.run_folder + self.unique_folder + '/final_generator.pt'))
 
@@ -721,13 +762,16 @@ class Trainer:
         # Generate data from LR input
         with torch.no_grad():
             for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.testing):
+                # Move data to the appropriate device
                 lr_emg = lr_emg.to(self.device)
                 hr_emg = hr_emg.to(self.device)
 
+                # Generate super-resolution data
                 lr_sr_emg = self.generator(lr_emg)
                 test_content = self.mse(lr_sr_emg, hr_emg)
                 total_test_loss += test_content.item()
 
+                # Destandardize for logging plots and saving results
                 lr_sr_emg_destandardized = destandardize_data(lr_sr_emg, self.mean_std_dict['mean'],
                                                               self.mean_std_dict['std'])
                 interpolated_destandardized = destandardize_data(lr_emg, self.mean_std_dict['mean'],
@@ -739,6 +783,7 @@ class Trainer:
                     self.validation_plots_logging(interpolated_destandardized, hr_emg_destandardized,
                                                   lr_sr_emg_destandardized, 'Test')
 
+                # Save the generated data
                 lr_sr_emg_destandardized = lr_sr_emg_destandardized.to('cpu').numpy().squeeze()
                 model_path = self.run_folder + self.unique_folder + '/results/'
                 os.makedirs(model_path, exist_ok=True)
@@ -746,6 +791,7 @@ class Trainer:
 
         print("Successfully generated LR to SR data")
 
+        # Calculate average test loss and log it
         avg_test_content = total_test_loss / len(self.testing)
         print("Logging test loss")
         wandb.log({'test loss': avg_test_content})

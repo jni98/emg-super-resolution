@@ -83,13 +83,12 @@ class Trainer:
             "learning_rate_gen": self.lr
         }
 
+        # Set the device to GPU if available, otherwise to CPU
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
 
+        # Initialize wandb
         wandb.init(project="GAN-Training", entity="masterthesis-sr")
-
-        # Define lambda function for the LR scheduler
-        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 500)
 
         print("init done")
 
@@ -127,6 +126,7 @@ class Trainer:
                            self.mean_std_dict['std'], augment=False, bandpass_upper=self.bandpass_upper),
             pin_memory=True)
 
+        # Add the number of samples and the standardization to the hyperparameter dictionary
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
         self.hyperparameter["device"] = str(self.device)
@@ -150,6 +150,7 @@ class Trainer:
         -------
         None
         """
+        # Initialize the Generator and Discriminator
         self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks, wavelet='db7',
                                    in_channels=1)
         self.discriminator = Discriminator()
@@ -167,8 +168,12 @@ class Trainer:
         self.adversarial_loss = nn.BCELoss()  # Binary Cross-Entropy Loss
         self.mse = nn.MSELoss()  # Mean Squared error Loss
 
+        # Initialize the optimizers
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr * 0.1, betas=self.betas)
+
+        # Define lambda function for the LR scheduler
+        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 500)
 
         # Initialize the LR schedulers
         self.scheduler_G = LambdaLR(self.optimizer_G, lr_lambda=self.lr_lambda)
@@ -267,8 +272,10 @@ class Trainer:
         avg_loss_d: float
                     Average loss of the discriminator over the training set
         """
+        # Set the models to training mode
         self.generator.train()
         self.discriminator.train()
+
         total_loss_g = 0.0
         total_loss_d_real = 0.0
         total_loss_d_fake = 0.0
@@ -279,6 +286,7 @@ class Trainer:
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths) in enumerate(self.training):
             print("batch index", batch_idx)
 
+            # Move the data to the device
             lr_emg = lr_emg.to(self.device)
             hr_emg = hr_emg.to(self.device)
 
@@ -381,6 +389,7 @@ class Trainer:
             for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path) in enumerate(self.validation):
                 print("validation batch index", val_batch_idx)
 
+                # Move the data to the device
                 val_lr = val_lr.to(self.device)
                 val_hr = val_hr.to(self.device)
 
@@ -423,6 +432,7 @@ class Trainer:
                 abs_diff = np.asarray(abs_diff)
                 total_abs_diff += abs_diff
 
+                # Log the validation plots once
                 if val_batch_idx == 0:
                     self.validation_plots_logging(val_lr_destandardized, val_hr_destandardized,
                                                   val_sr_destandardized, 'Validation')
@@ -476,7 +486,6 @@ class Trainer:
         -------
         None
         """
-
         val_lr_destandardized = np.asarray(val_lr_destandardized.to('cpu'))
         val_hr_destandardized = np.asarray(val_hr_destandardized.to('cpu'))
         val_sr_destandardized = np.asarray(val_sr_destandardized.to('cpu'))
@@ -815,6 +824,7 @@ class Trainer:
                 # Accumulate validation loss
                 total_test_loss += test_content.item()
 
+                # Destandardize the data for the logged plots and save the data
                 lr_sr_emg_destandardized = destandardize_data(lr_sr_emg, self.mean_std_dict['mean'], self.mean_std_dict['std'])
                 interpolated_destandardized = destandardize_data(lr_emg, self.mean_std_dict['mean'], self.mean_std_dict['std'])
                 hr_emg_destandardized = destandardize_data(hr_emg, self.mean_std_dict['mean'], self.mean_std_dict['std'])
@@ -831,6 +841,7 @@ class Trainer:
 
         print("Successfully generated LR to SR data")
 
+        # Calculate average test loss
         avg_test_content = total_test_loss / len(self.testing)
         print("Logging test loss")
         wandb.log({'test loss': avg_test_content})

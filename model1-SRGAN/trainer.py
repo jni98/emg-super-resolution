@@ -71,6 +71,7 @@ class Trainer:
             "learning_rate": self.lr
         }
 
+        # Set the device to GPU if available
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
 
@@ -135,6 +136,7 @@ class Trainer:
         -------
         None
         """
+        # Initialize the Generator and Discriminator
         self.generator = Generator(in_channels=1)
         self.discriminator = Discriminator()
 
@@ -250,6 +252,7 @@ class Trainer:
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_interpolated) in enumerate(self.training):
             print("batch index", batch_idx)
 
+            # Move data to the appropriate device
             lr_emg = lr_emg.to(self.device)
             hr_emg = hr_emg.to(self.device)
 
@@ -263,10 +266,11 @@ class Trainer:
             real_labels = torch.ones(hr_emg.size(0), 1).to(self.device)
             fake_labels = torch.zeros(hr_emg.size(0), 1).to(self.device)
 
-            # Calculate discriminator losses
+            # Calculate discriminator losses on real data
             output_discriminator_real = self.discriminator(hr_emg).to(self.device)
             loss_discriminator_real = self.adversarial_loss(output_discriminator_real, real_labels)
 
+            # Calculate discriminator losses on fake data
             output_discriminator_fake = self.discriminator(sr_emg)
             loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
@@ -340,6 +344,7 @@ class Trainer:
                     self.validation):
                 print("validation batch index", val_batch_idx)
 
+                # Move data to the appropriate device
                 val_lr = val_lr.to(self.device)
                 val_hr = val_hr.to(self.device)
 
@@ -378,7 +383,7 @@ class Trainer:
                     val_lr_interpolated, self.mean_std_dict['mean'], self.mean_std_dict['std']
                 )
 
-                # Log validation plots
+                # Log validation plots once
                 if val_batch_idx == 6:
                     self.validation_plots_logging(
                         val_lr_interpolated, val_hr_destandardized,
@@ -443,11 +448,13 @@ class Trainer:
         -------
         None
         """
+        # Convert tensors to numpy arrays and squeeze the dimensions for plotting
         interpolated_destandardized = np.asarray(val_lr_destandardized.to('cpu')).squeeze()
         hr_destandardized = np.asarray(val_hr_destandardized.to('cpu')).squeeze()
         sr_destandardized = np.asarray(val_sr_destandardized.to('cpu')).squeeze()
 
         if phase == 'Validation':
+            # Log a batch in the middle of the validation set
             interpolated_destandardized = interpolated_destandardized[self.batch_size // 2]
             hr_destandardized = hr_destandardized[self.batch_size // 2]
             sr_destandardized = sr_destandardized[self.batch_size // 2]
@@ -633,28 +640,6 @@ class Trainer:
 
         return hr_Y, sr_Y, interpolated_Y, frq
 
-    def save_checkpoint(self, epoch: int) -> None:
-        """
-        Saves the Generator and Discriminator at a given epoch.
-
-        Parameters
-        ----------
-        epoch: int
-
-        Returns
-        -------
-        None
-        """
-        if epoch % 10 == 0:
-            torch.save(
-                self.generator.state_dict(),
-                self.run_folder + f'/generator_epoch_{epoch}.pt'
-            )
-            torch.save(
-                self.discriminator.state_dict(),
-                self.run_folder + f'/discriminator_epoch_{epoch}.pt'
-            )
-
     def save_final_models(self) -> None:
         """
         Saves the final Generator and Discriminator.
@@ -765,7 +750,7 @@ class Trainer:
         -------
         None
         """
-        # Free memory
+        # Free memory due to cuda problems
         del self.discriminator
         del self.optimizer_G
         del self.optimizer_D
@@ -821,6 +806,7 @@ class Trainer:
 
         print("Successfully generated LR to SR data")
 
+        # Calculate average test loss
         avg_test_content = total_test_loss / len(self.testing)
         print("Logging test loss")
         wandb.log({'test loss': avg_test_content})

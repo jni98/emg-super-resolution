@@ -4,11 +4,10 @@ Date created: 02.02.2024
 File description: This file is used to run the training of the GAN. It also calls the function to generate the super
 resolution data. The grid is of shape 13x5 and the data is processed in 3D (height x width x samples).
 
-You can run this file by running the main function.
+You can run this file by running the main function either locally or on the cluster.
 """
-# Import necessary libraries
 import argparse
-import wandb  # Import wandb library
+import wandb
 
 from trainer import Trainer
 

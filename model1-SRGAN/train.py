@@ -6,7 +6,6 @@ resolution data. The grid is of shape 13x5 and the data is processed in 3D (heig
 
 You can run this file by running the main function either loccaly or by submitting a cluster job.
 """
-# Import necessary libraries
 import argparse
 
 import torch

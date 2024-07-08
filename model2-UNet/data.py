@@ -12,6 +12,23 @@ class Custom_Dataset(Dataset):
     """
 
     def __init__(self, data, directory, mean: float, std: float, augment: bool, bandpass_upper:int) -> None:
+        """
+        Constructs all the necessary attributes for the Custom_Dataset object.
+        Parameters
+        ----------
+        data: pandas.DataFrame
+            Dataframe containing the data
+        directory: str
+            Directory where the data is stored
+        mean: float
+            Mean used for standardization
+        std: float
+            Standard deviation used for standardization
+        augment: bool
+            Boolean indicating whether to augment the data
+        bandpass_upper: int
+            Upper bound of the bandpass filter
+        """
         super().__init__()
         self.data = data
         self.directory = directory
@@ -27,6 +44,23 @@ class Custom_Dataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index: int) -> tuple:
+        """
+        Returns the data at the given index
+        Parameters
+        ----------
+        index: int
+
+        Returns
+        -------
+        lr_emg_standardized: torch.tensor
+            Low resolution EMG data standardized
+        hr_emg_standardized: torch.tensor
+            High resolution EMG data standardized
+        lr_emg_path: str
+            Path to the low resolution EMG data
+        hr_emg_path: str
+            Path to the high resolution EMG data
+        """
         if torch.is_tensor(index):
             index = index.tolist()
 

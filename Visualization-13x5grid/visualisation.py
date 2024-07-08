@@ -925,6 +925,19 @@ class Visualizer:
         mean_color = (47 / 255, 88 / 255, 110 / 255)  # RGB (47, 88, 110)
         std_color = (84 / 255, 156 / 255, 188 / 255)  # RGB (198, 222, 233)
 
+        models = [
+            'Bilinear', 'Bicubic spline', 'SRGAN',
+            'UNet', 'UNet Fourier', 'UNet Wavelet', 'CNN-LSTM', 'Original'
+        ]
+
+        # Define colors matching the order of the models
+        colors = [
+            (127 / 255, 127 / 255, 127 / 255), (47 / 255, 88 / 255, 110 / 255),
+            (255 / 255, 192 / 255, 0 / 255), (239 / 255, 167 / 255, 141 / 255),
+            (0 / 255, 176 / 255, 240 / 255), (112 / 255, 48 / 255, 160 / 255),
+            (0 / 255, 128 / 255, 0 / 255), (148 / 255, 11 / 255, 45 / 255)
+        ]
+
         # Iterate over each dictionary in the list
         for data_dict in self.emg_data_dicts:
             # Unpack the path and its datasets from each dictionary
@@ -1157,6 +1170,31 @@ class Visualizer:
         filename = filename.replace(' ', '_')
         fig.savefig(filename, format='pdf')
         print(f'Saving combined summary plot to: {filename}')
+        plt.close(fig)
+
+        # New figure with each model having a separate label
+        fig, ax = plt.subplots(figsize=(self.page_width*0.8, self.page_height*0.5))
+        for title, color in zip(models, colors):
+            if title in overall_mean_corr:
+                mean_corr = overall_mean_corr[title]
+                shifts = np.arange(-len(mean_corr) // 2 + 1, len(mean_corr) // 2 + 1) / 2048.0
+                ax.plot(shifts, mean_corr, label=f'{title}', color=color)
+
+        ax.set_title('Mean Normalised Cross-Correlation')
+        ax.set_xlabel('Shift in s')
+        ax.set_ylabel('Normalised cross-correlation')
+        ax.grid(True)
+        ax.set_ylim(-0.4, 1.1)
+        ax.set_xlim(-35, 35)
+        ax.legend(loc='best')
+        plt.tight_layout()
+
+        directory = f'plot_normalized_correlations/summary/'
+        self._create_directory(directory)
+        filename = f'{directory}Overall_Normalized_Correlations_All_Models.pdf'
+        filename = filename.replace(' ', '_')
+        fig.savefig(filename, format='pdf')
+        print(f'Saving overall summary plot to: {filename}')
         plt.close(fig)
 
         # Save the results to a CSV file
@@ -2063,121 +2101,6 @@ class Visualizer:
 
         print("Finished plotting specific positions.")
 
-    # def plot_frequency_spectrum_difference(self):
-    #     """
-    #     Plot the differences in the frequency spectrum between the groundtruth signal and other signals.
-    #     """
-    #     print("Start plotting frequency spectrum differences")
-    #
-    #     # Function to compute the Fourier Transform and frequency spectrum
-    #     def compute_frequency_spectrum(signal, fs=2048):
-    #         n = len(signal)
-    #         freq = np.fft.fftfreq(n, d=1 / fs)
-    #         spectrum = np.fft.fft(signal)
-    #         return freq, np.abs(spectrum)
-    #
-    #     positions = [(3, 1), (4, 2)]  # Only these two positions
-    #
-    #     # Custom colors
-    #     spectrum_color = (47 / 255, 88 / 255, 110 / 255)  # RGB (47, 88, 110)
-    #     difference_color = (199 / 255, 91 / 255, 76 / 255)
-    #
-    #     # Storage for overall mean and std correlations
-    #     overall_spectrum_gt = {}
-    #     overall_spectrum_diff = {}
-    #     path_count = 0
-    #
-    #     # Iterate over each dictionary in the list
-    #     for data_dict in self.emg_data_dicts:
-    #         path_count += 1
-    #         # Unpack the path and its datasets from each dictionary
-    #         for path, datasets in data_dict.items():
-    #             groundtruth = datasets['Original']
-    #
-    #             for pos_idx, pos in enumerate(positions):
-    #                 row, col = pos
-    #                 fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(self.page_width * 1.5, self.page_height * 0.75))
-    #                 axes = axes.flatten()
-    #
-    #                 # Variables to collect handles and labels for the combined legend
-    #                 handles_list = []
-    #                 labels_list = []
-    #
-    #                 min_length = float('inf')
-    #
-    #                 for idx, (title, emg_data) in enumerate(
-    #                         {k: v for k, v in datasets.items() if k != 'Original'}.items()):
-    #                     if idx >= 7:
-    #                         break  # Ensure we don't create more than 7 subplots
-    #
-    #                     ax = axes[idx]
-    #                     groundtruth_sig = groundtruth[row, col, :]
-    #                     signal2 = emg_data[row, col, :]
-    #
-    #                     freq_gt, spectrum_gt = compute_frequency_spectrum(groundtruth_sig)
-    #                     freq_sig, spectrum_sig = compute_frequency_spectrum(signal2)
-    #
-    #                     spectrum_diff = spectrum_gt - spectrum_sig
-    #
-    #                     # Find the minimum length of the spectra
-    #                     min_length = min(min_length, len(spectrum_gt), len(spectrum_diff))
-    #
-    #                     # Update overall spectrum data
-    #                     if title not in overall_spectrum_gt:
-    #                         overall_spectrum_gt[title] = []
-    #                         overall_spectrum_diff[title] = []
-    #
-    #                     overall_spectrum_gt[title].append(spectrum_gt)
-    #                     overall_spectrum_diff[title].append(spectrum_diff)
-    #
-    #                     line1, = ax.plot(freq_gt, spectrum_gt, label='Original spectrum', color=spectrum_color, linewidth=0.5)
-    #                     line2, = ax.plot(freq_gt, spectrum_diff, label='Spectrum error', color=difference_color, linewidth=0.5)
-    #                     ax.set_xlim(0, 600)  # Limiting the frequency range for better visualization
-    #                     ax.set_title(f'{title}')
-    #                     ax.grid(True)
-    #                     ax.set_ylabel('Magnitude')
-    #                     ax.set_xlabel('Frequency in Hz')
-    #
-    #                     # Collect handles and labels only once
-    #                     if idx == 0:
-    #                         handles_list.append(line1)
-    #                         handles_list.append(line2)
-    #                         labels_list.append('Original spectrum')
-    #                         labels_list.append('Spectrum error')
-    #
-    #                 # Truncate all spectra to the minimum length found
-    #                 for title in overall_spectrum_gt.keys():
-    #                     overall_spectrum_gt[title] = [spectrum[:min_length] for spectrum in overall_spectrum_gt[title]]
-    #                     overall_spectrum_diff[title] = [spectrum[:min_length] for spectrum in
-    #                                                     overall_spectrum_diff[title]]
-    #
-    #                 # Create custom legend handles with different line widths
-    #                 legend_handles = [plt.Line2D([], [], color=handle.get_color(), linewidth=1.5) for handle in
-    #                                   handles_list]
-    #
-    #                 # Add legend to the last subplot if it's empty
-    #                 legend_ax = axes[8]
-    #                 legend_ax.axis('off')
-    #                 legend_ax.legend(handles=legend_handles, labels=labels_list, loc='center')
-    #
-    #                 # Hide any remaining empty subplots
-    #                 for i in range(idx + 1, 9):
-    #                     axes[i].axis('off')
-    #
-    #                 # Set title for the figure
-    #                 channel_type = "predicted" if pos_idx == 0 else "given"
-    #                 fig.suptitle(f'Error {channel_type} channel')
-    #                 fig.tight_layout()
-    #
-    #                 # Save the figure for each position
-    #                 directory = f'plot_frequency_spectrum_difference/{path}/'
-    #                 self._create_directory(directory)
-    #                 filename = f'{directory}Frequency_Spectrum_Comparison_{channel_type}_channel.pdf'
-    #                 filename = filename.replace(' ', '_')
-    #                 plt.savefig(filename, bbox_inches='tight', format='pdf')
-    #                 print(f'Saving to: {filename}')
-    #                 plt.close(fig)
-
     def plot_frequency_spectrum_difference(self):
         """
         Plot the differences in the frequency spectrum between the groundtruth signal and other signals.
@@ -2552,6 +2475,6 @@ if __name__ == '__main__':
     # visualize.plot_windowed_correlations()
     # visualize.plot_specific_positions()
     #visualize.create_box_plot()
-    # visualize.plot_normalized_correlations()
+    visualize.plot_normalized_correlations()
     #visualize.plot_frequency_spectrum_difference()
-    visualize.plot_pnr_results()
+    #visualize.plot_pnr_results()

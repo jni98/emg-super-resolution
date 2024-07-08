@@ -2,7 +2,7 @@
 Author: Janina Kloos (janina.kloos@gmx.de)
 Date created: 02.02.2024
 File description: This file contains the class Interpolation, which performs bicubic spline and bilinear interpolation
- the low resolution data to get high resolution data.
+ on the low resolution data to get high resolution data.
 
 You can run this code by creating an object of the class Interpolation and calling the interpolate method.
 """
@@ -18,7 +18,7 @@ from sklearn.metrics import mean_squared_error
 
 class Interpolation:
     """
-    Class that performs cubic interpolation on the low resolution data to get high resolution data.
+    Class that performs bilinear and bicubic spline interpolation on the low resolution data to get high resolution data.
     """
 
     def __init__(self, dataset: str) -> None:
@@ -77,20 +77,15 @@ class Interpolation:
 
     def interpolate_13x5(self) -> None:
         """
-        Performs bicubic and bilinear interpolation on the low resolution data to get high resolution data,
+        Performs bicubic spline and bilinear interpolation on the low resolution data to get high resolution data,
         and calculates the mean squared error for each interpolation method. Saves the MSE to a file.
-
-        Returns
-        -------
-        interpolated_lr_hr: numpy.ndarray
-                High resolution emg data.
         """
         # Create variables for test loss using mse
         total_mse_bilinear = 0
         total_mse_bicubic = 0
         total_batches = len(self.testing)
 
-        # Load mean and std
+        # Load mean and std for standardization before calculating test loss
         mean = self.mean_std_dict['mean']
         std = self.mean_std_dict['std']
 
@@ -113,14 +108,14 @@ class Interpolation:
             standardized_hr_emg = (hr_emg - mean) / std
             standardized_interpolated_lr_hr = (interpolated_lr_hr - mean) / std
 
-            # Calculate and accumulate the MSE for linear interpolation
-            mse_linear = mean_squared_error(standardized_hr_emg.flatten(), standardized_interpolated_lr_hr.flatten())
-            total_mse_bilinear += mse_linear
+            # Calculate and accumulate the MSE for bilinear interpolation
+            mse_bilinear = mean_squared_error(standardized_hr_emg.flatten(), standardized_interpolated_lr_hr.flatten())
+            total_mse_bilinear += mse_bilinear
 
             # Upsampling factors for the first two dimensions, keeping the third dimension the same
             zoom_factors = (13 / 7, 5 / 3, 1)
 
-            # Perform cubic interpolation
+            # Perform bicubic spline interpolation
             interpolated_lr_hr = scipy.ndimage.zoom(lr_emg, zoom_factors, order=3)  # Using cubic interpolation
 
             # Save cubic interpolated signal from lr to hr
@@ -133,11 +128,8 @@ class Interpolation:
             standardized_interpolated_lr_hr = (interpolated_lr_hr - mean) / std
 
             # Calculate and accumulate the MSE for cubic interpolation
-            mse_cubic = mean_squared_error(standardized_hr_emg.flatten(), standardized_interpolated_lr_hr.flatten())
-            total_mse_bicubic += mse_cubic
-
-            # Perform linear interpolation using scipy.ndimage.zoom method
-            interpolated_lr_hr = scipy.ndimage.zoom(lr_emg, zoom_factors, order=1)  # Using linear interpolation
+            mse_bicubic = mean_squared_error(standardized_hr_emg.flatten(), standardized_interpolated_lr_hr.flatten())
+            total_mse_bicubic += mse_bicubic
 
             # Save linear interpolated signal from lr to hr
             path = '../results/linear_zoom_interpolation/'
@@ -146,16 +138,16 @@ class Interpolation:
             np.save(path + lr_emg_paths[0], interpolated_lr_hr)
 
         # Calculate average MSE
-        average_mse_linear = total_mse_bilinear / total_batches
-        average_mse_cubic = total_mse_bicubic / total_batches
+        average_mse_bilinear = total_mse_bilinear / total_batches
+        average_mse_bicubic = total_mse_bicubic / total_batches
 
-        print(f'Average MSE for linear interpolation: {average_mse_linear}')
-        print(f'Average MSE for cubic interpolation: {average_mse_cubic}')
+        print(f'Average MSE for linear interpolation: {average_mse_bilinear}')
+        print(f'Average MSE for cubic interpolation: {average_mse_bicubic}')
 
         # Save the test loss to a file
         with open('test_loss.txt', 'w') as f:
-            f.write(f'Average MSE for linear interpolation: {average_mse_linear}\n')
-            f.write(f'Average MSE for cubic interpolation: {average_mse_cubic}\n')
+            f.write(f'Average MSE for bilinear interpolation: {average_mse_bilinear}\n')
+            f.write(f'Average MSE for bicubic interpolation: {average_mse_bicubic}\n')
 
 if __name__ == '__main__':
     dataset = '../dataset/'

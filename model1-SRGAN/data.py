@@ -20,6 +20,21 @@ class Custom_Dataset(Dataset):
     """
 
     def __init__(self, data, directory, mean: float, std: float, augment: bool) -> None:
+        """
+        Constructs all the necessary attributes for the Custom_Dataset object.
+        Parameters
+        ----------
+        data: pandas.DataFrame
+            Dataframe containing the data
+        directory: str
+            Directory where the data is stored
+        mean: float
+            Mean used for standardization
+        std: float
+            Standard deviation used for standardization
+        augment: bool
+            Boolean indicating whether to augment the data
+        """
         super().__init__()
         self.data = data
         self.directory = directory

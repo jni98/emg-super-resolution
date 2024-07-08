@@ -17,6 +17,13 @@ class ResidualBlock(nn.Module):
     """
 
     def __init__(self, in_channels) -> None:
+        """
+        Constructs all the necessary attributes for the residual block object.
+        Parameters
+        ----------
+        in_channels: int
+                        Number of channels of the input tensor.
+        """
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                       padding=(1, 1, 1))
@@ -28,6 +35,18 @@ class ResidualBlock(nn.Module):
         self.bn2 = nn.BatchNorm3d(in_channels)
 
     def forward(self, x: torch.tensor) -> torch.tensor:
+        """
+        Forwards the input tensor through all the layers.
+        Parameters
+        ----------
+        x: torch.tensor
+            Tensor that is given to the network.
+
+        Returns
+        -------
+        out: torch.tensor
+            Output tensor of the network.
+        """
         residual = x
         out = self.conv1(x)
         out = self.bn1(out)
@@ -46,6 +65,15 @@ class DownConvolutionBlock(nn.Module):
     """
 
     def __init__(self, in_channels, out_channels) -> None:
+        """
+        Constructs all the necessary attributes for the down convolution block object.
+        Parameters
+        ----------
+        in_channels: int
+                    Number of input channels
+        out_channels: int
+                    Number of output channels
+        """
         super(DownConvolutionBlock, self).__init__()
         self.downConv = nn.Conv3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                                   stride=(1, 1, 2), padding=(1, 1, 1))
@@ -65,6 +93,17 @@ class UpConvolutionBlock(nn.Module):
     add the skip connection.
     """
     def __init__(self, in_channels, out_channels, stride) -> None:
+        """
+        Constructs all the necessary attributes for the up convolution block object.
+        Parameters
+        ----------
+        in_channels: int
+            Number of input channels
+        out_channels: int
+            Number of output channels
+        stride: tuple
+            Stride for the up convolution
+        """
         super(UpConvolutionBlock, self).__init__()
         self.upConv = nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                                          stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1))
@@ -100,6 +139,17 @@ class Generator(nn.Module):
     """
 
     def __init__(self,num_res_blocks: int, num_res_blocks_last:int, in_channels=1) -> None:
+        """
+        Constructs all the necessary attributes for the generator object.
+        Parameters
+        ----------
+        num_res_blocks: int
+            Number of residual blocks in the first three residual blocks
+        num_res_blocks_last: int
+            Number of residual blocks in the last residual block
+        in_channels: int
+            Number of channels the emg data has. On default set to 1.
+        """
 
         super(Generator, self).__init__()
 

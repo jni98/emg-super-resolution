@@ -12,6 +12,23 @@ class Custom_Dataset(Dataset):
     """
 
     def __init__(self, data, directory, mean: float, std: float, augment: bool, bandpass_upper:int) -> None:
+        """
+        Constructs all the necessary attributes for the custom dataset object.
+        Parameters
+        ----------
+        data: pandas.DataFrame
+                Dataframe containing the file paths of the data.
+        directory: str
+                Directory where the data is stored.
+        mean: float
+                Mean of the data.
+        std: float
+                Standard deviation of the data.
+        augment: bool
+                Whether to augment the data or not.
+        bandpass_upper: int
+                Upper bandpass frequency.
+        """
         super().__init__()
         self.data = data
         self.directory = directory

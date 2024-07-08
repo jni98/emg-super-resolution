@@ -1,9 +1,9 @@
 """
 Author: Janina Kloos (janina.kloos@gmx.de)
 Date created: 02.02.2024
-File description: This file contains the class Trainer. It is used to train the GAN and to generate super resolution data.
+File description: This file contains the class Trainer. It is used to train the UNet GAN and to generate super resolution data.
 
-The code is called from the train.py file which is started by the main function.
+The code is called from the train.py file.
 """
 
 import json
@@ -12,7 +12,6 @@ from datetime import datetime
 
 import matplotlib
 import wandb
-from scipy.signal import butter, filtfilt
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -80,13 +79,12 @@ class Trainer:
             "learning_rate": self.lr
         }
 
+        # Check if GPU is available and set the device
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(self.device)
 
+        # Initialize wandb
         wandb.init(project="GAN-Training", entity="masterthesis-sr")
-
-        # Define lambda function for the LR scheduler
-        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 500)
 
         print("Initialization done")
 
@@ -129,6 +127,7 @@ class Trainer:
             pin_memory=True
         )
 
+        # Add the number of samples and the standardized flag to the hyperparameter dictionary
         self.hyperparameter["num_samples"] = data_train_val.shape[0]
         self.hyperparameter["standardized"] = 'True'
         self.hyperparameter["device"] = str(self.device)
@@ -148,6 +147,7 @@ class Trainer:
         -------
         None
         """
+        # Initialize the Generator and Discriminator
         self.generator = Generator(self.config.num_res_blocks, self.config.num_res_blocks_last, in_channels=1)
         self.discriminator = Discriminator()
 
@@ -155,12 +155,17 @@ class Trainer:
         self.generator.to(self.device)
         self.discriminator.to(self.device)
 
+        # Initialize the loss functions and optimizers
         self.adversarial_loss = nn.BCELoss()
         self.mse = nn.MSELoss()
 
         self.optimizer_G = optim.Adam(self.generator.parameters(), lr=self.lr, betas=self.betas)
         self.optimizer_D = optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=self.betas)
 
+        # Define lambda function for the LR scheduler
+        self.lr_lambda = lambda epoch: 0.5 ** (epoch // 500)
+
+        # Initialize the LR schedulers
         self.scheduler_G = LambdaLR(self.optimizer_G, lr_lambda=self.lr_lambda)
         self.scheduler_D = LambdaLR(self.optimizer_D, lr_lambda=self.lr_lambda)
 
@@ -172,7 +177,18 @@ class Trainer:
 
         Returns
         -------
-        tuple: Contains lists of Generator and Discriminator losses, validation losses, and PSNR over epochs
+        train_g_loss: list
+            Generator loss over the epochs
+        train_d_loss: list
+            Discriminator loss over the epochs
+        train_d_loss_real: list
+            Discriminator loss for real data over the epochs
+        train_d_loss_fake: list
+            Discriminator loss for fake data over the epochs
+        val_loss: list
+            Validation loss over the epochs
+        psnr: list
+            PSNR over the epochs
         """
         train_d_loss = []
         train_d_loss_real = []
@@ -193,9 +209,11 @@ class Trainer:
             initial_allocated = torch.cuda.memory_allocated()
             initial_cached = torch.cuda.memory_cached()
 
+            # Train the model for one epoch
             epoch_loss_g, epoch_loss_d_real, epoch_loss_d_fake, epoch_loss_d = self._train_epoch(epoch)
             avg_val_loss, avg_psnr = self._validate(epoch)
 
+            # Save the model performance at the current epoch
             train_g_loss.append(epoch_loss_g)
             train_d_loss.append(epoch_loss_d)
             train_d_loss_real.append(epoch_loss_d_real)
@@ -214,6 +232,7 @@ class Trainer:
             self.scheduler_G.step()
             self.scheduler_D.step()
 
+            # Log the learning rate
             last_lr = self.scheduler_G.get_last_lr()[-1]
             wandb.log({'lr_scheduler': last_lr})
 
@@ -236,10 +255,19 @@ class Trainer:
 
         Returns
         -------
-        tuple: Average losses for generator and discriminator over the training set
+        avg_loss_g: float
+            Average generator loss over the epoch
+        avg_loss_d_real: float
+            Average discriminator loss for real data over the epoch
+        avg_loss_d_fake: float
+            Average discriminator loss for fake data over the epoch
+        avg_loss_d: float
+            Average discriminator loss over the epoch
         """
+        # Set generator and discriminator to training mode
         self.generator.train()
         self.discriminator.train()
+
         total_loss_g = 0.0
         total_loss_d_real = 0.0
         total_loss_d_fake = 0.0
@@ -248,6 +276,7 @@ class Trainer:
         for batch_idx, (lr_emg, hr_emg, lr_emg_paths, hr_emg_paths, lr_emg_interpolated) in enumerate(self.training):
             print("batch index", batch_idx)
 
+            # Move data to the appropriate device
             lr_emg = lr_emg.to(self.device)
             hr_emg = hr_emg.to(self.device)
 
@@ -268,9 +297,11 @@ class Trainer:
             output_discriminator_fake = self.discriminator(sr_emg)
             loss_discriminator_fake = self.adversarial_loss(output_discriminator_fake, fake_labels)
 
+            # Calculate total loss for discriminator
             loss_discriminator = loss_discriminator_real + loss_discriminator_fake
             loss_discriminator.backward()
 
+            # Update discriminator parameters
             self.optimizer_D.step()
 
             # Train Generator
@@ -278,13 +309,16 @@ class Trainer:
 
             sr_emg = self.generator(lr_emg).to(self.device)
 
+            # Calculate loss for discriminator receiving fake data
             output = self.discriminator(sr_emg)
             loss_generator_adv = self.adversarial_loss(output, real_labels)
+
+            # Calculate content loss
             loss_generator_content = self.mse(sr_emg, hr_emg)
 
+            # Calculate total loss for generator
             loss_generator = self.adv_loss_weight * loss_generator_adv + loss_generator_content
             loss_generator.backward()
-
             self.optimizer_G.step()
 
             total_loss_g += loss_generator.item()
@@ -314,8 +348,12 @@ class Trainer:
 
         Returns
         -------
-        tuple: Average validation loss and PSNR over the validation set
+        avg_validation_loss: float
+            Average validation loss over the epoch
+        avg_psnr: float
+            Average PSNR over the epoch
         """
+        # Generator and discriminator to evaluation mode
         self.generator.eval()
         self.discriminator.eval()
 
@@ -329,6 +367,7 @@ class Trainer:
             for val_batch_idx, (val_lr, val_hr, val_lr_path, val_hr_path, lr_emg_interpolated) in enumerate(self.validation):
                 print("validation batch index", val_batch_idx)
 
+                # Move data to the appropriate device
                 val_lr = val_lr.to(self.device)
                 val_hr = val_hr.to(self.device)
 
@@ -343,6 +382,7 @@ class Trainer:
                 # Calculate content loss
                 loss_generator_content = self.mse(val_sr, val_hr)
 
+                # Calculate total generator loss
                 val_loss = self.adv_loss_weight * loss_generator_adv + loss_generator_content
 
                 # Accumulate validation loss
@@ -353,6 +393,7 @@ class Trainer:
                 psnr = 10 * torch.log10(1.0 / loss_generator_content)
                 total_psnr += psnr.item()
 
+                # destandardize for logging the plots
                 val_hr_destandardized = destandardize_data(val_hr, self.mean_std_dict['mean'], self.mean_std_dict['std'])
                 val_sr_destandardized = destandardize_data(val_sr, self.mean_std_dict['mean'], self.mean_std_dict['std'])
                 val_lr_destandardized = destandardize_data(lr_emg_interpolated, self.mean_std_dict['mean'], self.mean_std_dict['std'])
@@ -385,6 +426,7 @@ class Trainer:
 
             print(f"Epoch [{epoch}/{self.num_epochs}] Validation Loss: {avg_validation_loss}")
 
+        # Generator and discriminator to training mode
         self.generator.train()
         self.discriminator.train()
 
@@ -576,24 +618,6 @@ class Trainer:
 
         wandb.log({f'{phase} - Frequency Spectrum - {channel_label}': plotly_fig})
 
-    def save_checkpoint(self, epoch: int) -> None:
-        """
-        Saves the Generator and Discriminator at a given epoch.
-
-        Parameters
-        ----------
-        epoch: int
-
-        Returns
-        -------
-        None
-        """
-        if epoch % 10 == 0:
-            torch.save(self.generator.state_dict(),
-                       self.run_folder + f'/generator_epoch_{epoch}.pt')
-            torch.save(self.discriminator.state_dict(),
-                       self.run_folder + f'/discriminator_epoch_{epoch}.pt')
-
     def save_final_models(self) -> None:
         """
         Saves the final Generator and Discriminator.
@@ -696,7 +720,7 @@ class Trainer:
         -------
         None
         """
-        # Free memory
+        # Free memory due to cuda problems
         del self.discriminator
         del self.optimizer_G
         del self.optimizer_D
@@ -725,6 +749,7 @@ class Trainer:
                 # Accumulate validation loss
                 total_test_loss += test_content.item()
 
+                # destandardize for plotting and saving
                 lr_sr_emg_destandardized = destandardize_data(lr_sr_emg, self.mean_std_dict['mean'], self.mean_std_dict['std'])
                 interpolated_destandardized = destandardize_data(lr_emg_interpolated, self.mean_std_dict['mean'], self.mean_std_dict['std'])
                 hr_emg_destandardized = destandardize_data(hr_emg, self.mean_std_dict['mean'], self.mean_std_dict['std'])
@@ -741,6 +766,7 @@ class Trainer:
 
         print("Successfully generated LR to SR data")
 
+        # Calculate average test loss
         avg_test_content = total_test_loss / len(self.testing)
         print("Logging test loss")
         wandb.log({'test loss': avg_test_content})

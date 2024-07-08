@@ -19,6 +19,13 @@ class ResidualBlock(nn.Module):
     """
 
     def __init__(self, in_channels) -> None:
+        """
+        Constructs all the necessary attributes for the residual block object.
+        Parameters
+        ----------
+        in_channels: int
+                        Number of channels of the input tensor.
+        """
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv3d(in_channels=in_channels, out_channels=in_channels, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                       padding=(1, 1, 1))
@@ -49,6 +56,15 @@ class DownConvolutionBlock(nn.Module):
     """
 
     def __init__(self, in_channels, out_channels) -> None:
+        """
+        Constructs all the necessary attributes for the down convolution block object.
+        Parameters
+        ----------
+        in_channels: int
+                        Number of channels of the input tensor.
+        out_channels: int
+                        Number of channels of the output tensor.
+        """
         super(DownConvolutionBlock, self).__init__()
         self.downConv = nn.Conv3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
                                   stride=(1, 1, 2), padding=(1, 1, 1))
@@ -69,6 +85,17 @@ class UpConvolutionBlock(nn.Module):
     """
 
     def __init__(self, in_channels, out_channels, stride) -> None:
+        """
+        Constructs all the necessary attributes for the up convolution block object.
+        Parameters
+        ----------
+        in_channels: int
+            Number of input channels
+        out_channels: int
+            Number of output channels
+        stride: tuple
+            Stride for the transposed convolution
+        """
         super(UpConvolutionBlock, self).__init__()
         self.upConv = nn.Sequential(
             nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
@@ -98,45 +125,22 @@ class UpConvolutionBlock(nn.Module):
 
         return out
 
-class UpConvolutionBlockLast(nn.Module):
-    """
-    This class is used to create an up convolution block, which is used in the generator to upsample the data and also
-    add the skip connection.
-    """
-
-    def __init__(self, in_channels, out_channels, stride) -> None:
-        super(UpConvolutionBlockLast, self).__init__()
-        self.upConv = nn.Sequential(
-            nn.ConvTranspose3d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
-                                         stride=stride, padding=(1, 1, 1), output_padding=(0, 0, 1)),
-            nn.BatchNorm3d(out_channels),
-            nn.PReLU(),
-            nn.Conv3d(in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
-                      stride=(1, 1, 1), padding=(1, 1, 1)),
-            nn.BatchNorm3d(out_channels),
-            nn.PReLU(),
-            nn.Conv3d(in_channels=out_channels, out_channels=out_channels, kernel_size=(3, 3, 3),
-                      stride=(1, 1, 1), padding=(1, 1, 1)),
-            nn.BatchNorm3d(out_channels),
-            nn.PReLU()
-        )
-
-
-
-    def forward(self, x: torch.tensor) -> torch.tensor:
-        # upsample
-        out = self.upConv(x)
-
-        return out
-
-
 class Generator(nn.Module):
     """
     This class is used to create the generator, which is a convolutional neural network that is used to generate high
     resolution data from low resolution data.
     """
 
-    def __init__(self, num_res_blocks: int, num_res_blocks_last: int, wavelet, in_channels=1) -> None:
+    def __init__(self, num_res_blocks: int, in_channels=1) -> None:
+        """
+        Constructs all the necessary attributes for the generator object.
+        Parameters
+        ----------
+        num_res_blocks: int
+            Number of residual blocks in the generator.
+        in_channels:
+            Number of input channels.
+        """
         super(Generator, self).__init__()
 
         # Convolution
@@ -184,32 +188,45 @@ class Generator(nn.Module):
         # Upsampling 3
         self.upConv3 = UpConvolutionBlock(128, 64, stride=(1, 1, 2))
 
-        # Finale Convolution für Channel 1
+        # Final convolution
         self.finalConv = nn.Conv3d(in_channels=64, out_channels=1, kernel_size=(3, 3, 3), stride=(1, 1, 1),
                                    padding=(1, 1, 1))
 
     def fft(self, x: torch.tensor) -> torch.tensor:
+        """
+        This function is used to perform a Fast Fourier Transform on the input tensor.
+        Parameters
+        ----------
+        x: torch.tensor
+            Input tensor to perform the FFT on.
+
+        Returns
+        -------
+        real_part: torch.tensor
+            Real part of the FFT
+        """
         # Calculate FFT of the signal
         fft_signal = torch.fft.fft(x, dim=-1)
 
         # Extract real and imaginary parts
         real_part = torch.real(fft_signal)
-        # imaginary_part = torch.imag(fft_signal)
-        #
-        # # Concatenate real and imaginary parts along the channel axis
-        # down1_fft = torch.cat([real_part, imaginary_part], dim=1)
 
         # Only use real part of the signal
         return real_part
 
     def ifft(self, x: torch.tensor) -> torch.tensor:
-        # Split the concatenated tensor into real and imaginary parts
-        #num_channels = x.shape[1] // 2
-        #real_part = x[:, :num_channels, :, :]
-        #imaginary_part = x[:, num_channels:, :, :]
+        """
+        This function is used to perform an Inverse Fast Fourier Transform on the input tensor.
+        Parameters
+        ----------
+        x: torch.tensor
+            Input tensor to perform the iFFT on.
 
-        # Combine real and imaginary parts to form a complex tensor
-        #complex_signal = torch.complex(real_part, imaginary_part)
+        Returns
+        -------
+        real_part: torch.tensor
+            Real part of the iFFT
+        """
 
         # Perform inverse FFT
         ifft_signal = torch.fft.ifftn(x, dim=-1)
@@ -217,11 +234,6 @@ class Generator(nn.Module):
 
         # Extract real and imaginary parts
         real_part = torch.real(ifft_signal)
-        # imaginary_part = torch.imag(ifft_signal)
-        #
-        # # Concatenate real and imaginary parts along the channel axis
-        # up2_ifft = torch.cat([real_part, imaginary_part], dim=1)
-        # print("Generator output after iFFT", up2_ifft.shape)
 
         # Only return real part
         return real_part

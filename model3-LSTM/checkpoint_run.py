@@ -68,7 +68,7 @@ def main(data_directory, test_data_directory, results_directory, num_epochs, bat
 
 
 if __name__ == "__main__":
-    # Parse arguments
+    # RUN ON CLUSTER
     args = parse_args()
     data_directory = args.data
     test_data_directory = args.testdata
@@ -80,6 +80,7 @@ if __name__ == "__main__":
     # Add directory of best_model.ckpt file
     checkpoint_directory = '/home/hpc/iwso/iwso124h/model3-LSTM-812094'
 
+    # RUN LOCALLY
     # data_directory = '../dataset_lstm_40960/train'
     # test_data_directory = '../dataset_lstm_40960/test'
     # results_directory = 'model3-LSTM-835361'
