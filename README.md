@@ -178,15 +178,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 ## Acknowledgments
 
-Resources and libraries used in this project:
-
-* [Python](https://www.python.org/)
-* [PyTorch](https://pytorch.org/)
-* [WandB](https://www.wandb.com/)
-* [Scikit-Learn](https://scikit-learn.org/)
-* [Matplotlib](https://matplotlib.org/)
-* [Plotly](https://plotly.com/)
-* Raul Simpetru for augmentation code
+* Augmentation code provided by Raul Simpetru
 
 <!-- CONTACT -->
 
