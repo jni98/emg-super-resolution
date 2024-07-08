@@ -126,7 +126,18 @@ project_root/
 │   ├── submit-jobs.sh
 │   ├── train-lstm.sh
 │   ├── train-lstm-continue.sh
-    └── trainer.py
+│   └── trainer.py
+│    
+├── model3-LSTM-basic/
+│   ├── checkpoint_run.py
+│   ├── config.py
+│   ├── data.py
+│   ├── emg_augmentations.py
+│   ├── model_basic.py
+│   ├── submit-jobs.sh
+│   ├── train-lstm.sh
+│   ├── train-lstm-continue.sh
+│   └── trainer.py
 │
 ├── data_extractor.py
 ├── numpy_to_mat.py
