@@ -5,7 +5,7 @@
 <h3 align="center">From Low- to High-Density: Generation of Electromyography Signals Using Super-Resolution</h3>
 
   <p align="center">
-    This project contains four different GAN-based neural network models and two CNN-LSTM to generate high-resolution sEMG data from low-resolution input.
+    This project contains four different GAN-based neural network models and a CNN-LSTM to generate high-resolution sEMG data from low-resolution input.
   </p>
 </div>
 
