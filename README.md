@@ -1,20 +1,13 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">From Low- to High-Density: Generation of Electromyography Signals Using Super-Resolution</h3>
 
   <p align="center">
-    project_description
-    <br />
-    <a href="https://github.com/github_username/repo_name/-/wikis/home"><strong>Explore the docs »</strong></a>
+    This project contains four different GAN-based neural network models and a CNN-LSTM to generate high-resolution sEMG data from low-resolution input.
   </p>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -34,93 +27,156 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#project-structure">Project Structure</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
-
 ## About The Project
 
-Give a brief introduction into the project.
-
-
+This project contains four different Generative Adversarial Networks and a CNN-LSTM. The project is organized into
+separate folders for each model and includes scripts for training, data preparation, and visualization. The training can
+be performed both locally and on a high performance cluster (HPC). Each model can be trained using only the files in
+that folder.
 
 ### Built With
 
-* []
-* []
-* []
+* [Python](https://www.python.org/)
+* [PyTorch](https://pytorch.org/)
+* [WandB](https://www.wandb.com/)
 
 <!-- CONTACT -->
+
 ### Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
+Janina Kloos - janina.kloos@fau.de
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project
+Link - [https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git](https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git)
 
 
 <!-- GETTING STARTED -->
+
 ## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
-
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+1. Clone the repository
 
-<!-- USAGE EXAMPLES -->
+   ```git clone https://gitos.rrze.fau.de/n-squared-lab/students/master-theses/janina-kloos/code.git```
+
+2. Create environment using the enviroment.yaml file
+
+   ```conda env create --name my_custom_env --file environment.yaml```
+
+3. Activate the new environment
+
+   ```conda activate my_custom_env```
+
+### Prerequisites
+
+- To use the wandb logging, create an account on [WandB](https://docs.wandb.ai/quickstart) and login using the command
+  `wandb login`.
+
 ## Project Structure
-Give a brief overview of the project's structure by visualising the (sub-)folder structure and how files interact with each other. 
 
+The project is structured as follows:
 
+```
+project_root/
+│
+├── model1-SRGAN/
+│   ├── data.py
+│   ├── discriminator.py
+│   ├── emg_augmentations.py
+│   ├── generator.py
+│   ├── train.py
+│   ├── train-script.sh
+│   ├── trainer.py
+│   └── utils.py
+│
+├── model2-UNet/
+│   ├── ...
+│
+├── model2-UNet-Fourier/
+│   ├── ...
+│
+├── model2-UNet-Wavelet/
+│   ├── ...
+│
+├── model3-LSTM/
+│   ├── checkpoint_run.py
+│   ├── config.py
+│   ├── data.py
+│   ├── emg_augmentations.py
+│   ├── model.py
+│   ├── submit-jobs.sh
+│   ├── train-lstm.sh
+│   ├── train-lstm-continue.sh
+│   └── train.py
+│
+├── data_extractor.py
+├── numpy_to_mat.py
+└── Visualization/
+    └── visualization.py
+```
 
 <!-- USAGE EXAMPLES -->
+
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+### Data Preparation
 
-_For more examples, please refer to the [Documentation](https://github.com/github_username/repo_name/-/wikis/)_
+Run `data_extractor.py` to create the dataset files. Specify the file locations in the main method, which will create a
+directory containing the training and test data, a CSV file, and a tar file. Window length and file name can be defined
+in the function call. The tar file can be used when using the dataset on the HPC.
 
+### Training on HPC
 
+#### GAN-based Models
+
+To run each model, submit a job to the HPC using the `train-script.sh` file located in each model's directory. Define
+the correct paths to the data and the output directory in the script. The dataset should be on the cluster as `.tar`
+file. The script will create a directory for the model in the output directory and log the training process using wandb.
+The script will also save the model and the training results in the output directory. The script can be submitted to the
+cluster using the command `sbatch.tinygpu train-script.sh`.
+
+#### LSTM Models
+
+To run the LSTM models, submit a job to the HPC using the `submit-jobs.sh` file located in the model's directory. Define
+the correct paths to the data and the output directory in the script. The dataset should be on the cluster as .tar file.
+This file can be generated by generating the dataset using `data_extractor.py`. The script will create a directory for
+the model in the output directory and log the training process using wandb. The script will also save the model and the
+training results in the output directory. The script can be submitted to the cluster using the
+command `sbatch.tinygpu submit-jobs.sh`.
+
+### Train locally
+
+To run the models locally, modify `train.py` by commenting and uncommenting the relevant blocks of code in the main
+method. Directories for the train and test dataset have to be specified accordingly in the main of the `train.py` file.
+
+### Results and Visualization
+
+- Results generated on the cluster should be copied to a directory called `results`, with subdirectories for each model.
+- Run `numpy_mat.py` to generate MATLAB files with a reference signal for decomposition. Edit files in main method
+  accordingly.
+- Run `visualization.py` in the `Visualization` directory to create plots from the `results` folder. The plots are saved
+  in the `Visualization` directory with subfolders for each plot type.
 
 <!-- LICENSE -->
+
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
-
-
-
-
 <!-- ACKNOWLEDGMENTS -->
+
 ## Acknowledgments
-Use this space to list resources you find helpful and would like to give credit to.
-* []()
-* []()
-* []()
+
+* Augmentation code provided by Raul Simpetru
+
+<!-- CONTACT -->
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
